@@ -1,7 +1,6 @@
 (function() {
   (function($) {
     var MAX_ASSETS, assetGroupsShownCount, bindAssetGroups, init, showAssets;
-    console.log("edit bot says hi");
     init = function() {
       bindAssetGroups();
     };

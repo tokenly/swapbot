@@ -1,5 +1,4 @@
 do ($=jQuery)->
-    console.log "edit bot says hi"
 
     init = ()->
         bindAssetGroups()
