@@ -1,0 +1,5 @@
+suites:
+    main:
+        namespace: Swapbot
+        psr4_prefix: Swapbot
+        src_path: app
