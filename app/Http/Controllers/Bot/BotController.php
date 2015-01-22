@@ -2,86 +2,123 @@
 
 namespace Swapbot\Http\Controllers\Bot;
 
-use Swapbot\Http\Requests;
+use Exception;
+use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\Response;
 use Swapbot\Http\Controllers\Controller;
-
-use Illuminate\Http\Request;
+use Swapbot\Http\Requests\Bot\EditBotRequest;
+use Swapbot\Repositories\BotRepository;
 
 class BotController extends Controller {
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return Response
-	 */
-	public function getIndex()
-	{
-		//
-		return 'List of Bots!';
-	}
+    public function __construct()
+    {
+        // auth required
+        $this->middleware('auth');
+    }
 
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return Response
-	 */
-	public function getNew()
-	{
-		return view('bot.edit');
-	}
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Response
+     */
+    public function getIndex()
+    {
+        //
+        return 'List of Bots!';
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @return Response
-	 */
-	public function store()
-	{
-		//
-	}
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return Response
+     */
+    public function getEdit()
+    {
+        return view('bot.edit');
+    }
 
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function show($id)
-	{
-		//
-	}
+    public function postEdit(EditBotRequest $request, BotRepository $repository, Guard $auth)
+    {
+        // get user
+        $user = $auth->getUser();
+        if (!$user) { throw new Exception("User not found", 1); }
 
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function edit($id)
-	{
-		//
-	}
+        // create the bot
+        $new_vars = $repository->compactAssetAttributes($request->getFilteredData());
+        $new_vars['user_id'] = $user['id'];
+        $new_model = $repository->create($new_vars);
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function update($id)
-	{
-		//
-	}
+        // redirect
+        return redirect('/bot/show/'.$new_model['uuid']);
+    }
 
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function destroy($id)
-	{
-		//
-	}
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return Response
+     */
+    public function store()
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $uuid
+     * @return Response
+     */
+    public function getShow($uuid, BotRepository $repository, Guard $auth)
+    {
+        // get user
+        $user = $auth->getUser();
+        if (!$user) { throw new Exception("User not found", 1); }
+
+        // get the bot
+        $bot = $repository->findByUUID($uuid);
+        if (!$bot) { throw new Exception("Bot not found", 1); }
+
+        // make sure the bot belongs to the user
+        if ($bot['user_id'] != $user['id']) {
+            return new Response('Access denied', 403);
+        }
+        
+
+        return $bot->serializeForAPI();
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $uuid
+     * @return Response
+     */
+    public function edit($uuid)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $uuid
+     * @return Response
+     */
+    public function update($uuid)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $uuid
+     * @return Response
+     */
+    public function destroy($uuid)
+    {
+        //
+    }
 
 }

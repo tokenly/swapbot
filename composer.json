@@ -5,10 +5,12 @@
 	"license": "MIT",
 	"type": "project",
 	"require": {
-		"laravel/framework": "~5.0"
+		"laravel/framework": "~5.0",
+        "rhumsaa/uuid": "~2."
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",
+        "satooshi/php-coveralls": "dev-master",
 		"phpspec/phpspec": "~2.1"
 	},
 	"autoload": {
@@ -21,6 +23,7 @@
 	},
 	"autoload-dev": {
 		"classmap": [
+            "tests/testlib/",
 			"tests/TestCase.php"
 		]
 	},

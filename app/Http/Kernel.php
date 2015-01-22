@@ -15,7 +15,9 @@ class Kernel extends HttpKernel {
 		'Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse',
 		'Illuminate\Session\Middleware\StartSession',
 		'Illuminate\View\Middleware\ShareErrorsFromSession',
-		'Illuminate\Foundation\Http\Middleware\VerifyCsrfToken',
+
+		// allow testing environment to ignore csrf middleware
+		'Swapbot\Http\Middleware\TestingSafeVerifyCsrfToken',
 	];
 
 	/**
@@ -24,9 +26,9 @@ class Kernel extends HttpKernel {
 	 * @var array
 	 */
 	protected $routeMiddleware = [
-		'auth' => 'Swapbot\Http\Middleware\Authenticate',
+		'auth'       => 'Swapbot\Http\Middleware\Authenticate',
 		'auth.basic' => 'Illuminate\Auth\Middleware\AuthenticateWithBasicAuth',
-		'guest' => 'Swapbot\Http\Middleware\RedirectIfAuthenticated',
+		'guest'      => 'Swapbot\Http\Middleware\RedirectIfAuthenticated',
 	];
 
 }
