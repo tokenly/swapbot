@@ -52,14 +52,16 @@ abstract class APIRepository implements APIResourceRepositoryContract
     public function updateByUuid($uuid, $attributes) {
         $model = $this->findByUuid($uuid);
         if (!$model) { throw new Exception("Unable to find model for uuid $uuid", 1); }
-        return $this->update($model, $attributes);
+        $this->update($model, $attributes);
+        return $model;
     }
 
     public function deleteByUuid($uuid) {
         $model = $this->findByUuid($uuid);
         if (!$model) { throw new Exception("Unable to find model for uuid $uuid", 1); }
 
-        return self::delete($model);
+        $this->delete($model);
+        return $model;
     }
 
 }

@@ -20,7 +20,7 @@ class BotHelper  {
     }
 
     public function newSampleBot($user=null) {
-        $vars = $this->bot_repository->compactAssetAttributes($this->sampleBotVars());
+        $vars = $this->bot_repository->compactSwapAttributes($this->sampleBotVars());
         if ($user == null) {
             $user = app()->make('UserHelper')->getSampleUser();
         }

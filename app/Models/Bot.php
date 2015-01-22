@@ -6,28 +6,30 @@ use Swapbot\Models\Base\APIModel;
 
 class Bot extends APIModel {
 
-    public function setAssetsAttribute($assets) { $this->attributes['assets'] = json_encode($this->serializeAssets($assets)); }
-    public function getAssetsAttribute() { return $this->deSerializeAssets(json_decode($this->attributes['assets'], true)); }
+    protected $api_attributes = ['id', 'name', 'description', 'swaps'];
+
+    public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
+    public function getSwapsAttribute() { return $this->deSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
 
 
-    public function serializeAssets($assets) {
-        $serialized_assets = [];
-        foreach($assets as $asset) {
-            $serialized_assets[] = [$asset['in'], $asset['out'], $asset['rate']];
+    public function serializeSwaps($swaps) {
+        $serialized_swaps = [];
+        foreach($swaps as $asset) {
+            $serialized_swaps[] = [$asset['in'], $asset['out'], $asset['rate']];
         }
-        return $serialized_assets;
+        return $serialized_swaps;
     }
 
-    public function deSerializeAssets($serialized_assets) {
-        $deserialized_assets = [];
-        foreach($serialized_assets as $asset) {
-            $deserialized_assets[] = [
+    public function deSerializeSwaps($serialized_swaps) {
+        $deserialized_swaps = [];
+        foreach($serialized_swaps as $asset) {
+            $deserialized_swaps[] = [
                 'in'   => $asset[0],
                 'out'  => $asset[1],
                 'rate' => $asset[2],
             ];
         }
-        return $deserialized_assets;
+        return $deserialized_swaps;
     }
 
 }

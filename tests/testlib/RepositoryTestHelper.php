@@ -67,7 +67,7 @@ class RepositoryTestHelper  {
         $created_model = $this->newModel();
 
         // delete by uuid
-        PHPUnit::assertTrue($this->repository->deleteByUuid($created_model['uuid']));
+        $this->repository->deleteByUuid($created_model['uuid']);
 
         // load from repo
         $loaded_model = $this->repository->findByUuid($created_model['uuid']);

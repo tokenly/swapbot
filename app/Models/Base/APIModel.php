@@ -13,7 +13,7 @@ class APIModel extends Model
 
     protected static $unguarded = true;
 
-    protected $api_attributes = [];
+    protected $api_attributes = ['id'];
 
     public function serializeForAPI() {
         $out = $this->attributesToArray();

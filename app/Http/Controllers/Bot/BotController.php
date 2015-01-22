@@ -4,9 +4,11 @@ namespace Swapbot\Http\Controllers\Bot;
 
 use Exception;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\Response;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests\Bot\EditBotRequest;
+use Swapbot\Models\Bot;
 use Swapbot\Repositories\BotRepository;
 
 class BotController extends Controller {
@@ -33,24 +35,35 @@ class BotController extends Controller {
      *
      * @return Response
      */
-    public function getEdit()
+    public function getEdit($uuid, BotRepository $repository, Guard $auth)
     {
-        return view('bot.edit');
+        if ($uuid === 'new') {
+            $bot = new Bot();
+        } else {
+            $bot = $this->getBotForUser($uuid, $repository, $auth);
+            $bot_vars = $repository->expandSwapAttributes($bot);
+        }
+        return view('bot.edit', ['bot' => $bot]);
     }
 
-    public function postEdit(EditBotRequest $request, BotRepository $repository, Guard $auth)
+    public function postEdit($uuid, EditBotRequest $request, BotRepository $repository, Guard $auth)
     {
         // get user
         $user = $auth->getUser();
         if (!$user) { throw new Exception("User not found", 1); }
 
+        $bot_vars = $repository->compactSwapAttributes($request->getFilteredData());
+        $bot_vars['user_id'] = $user['id'];
+
         // create the bot
-        $new_vars = $repository->compactAssetAttributes($request->getFilteredData());
-        $new_vars['user_id'] = $user['id'];
-        $new_model = $repository->create($new_vars);
+        if ($uuid == 'new') {
+            $bot_model = $repository->create($bot_vars);
+        } else {
+            $bot_model = $repository->updateByUuid($uuid, $bot_vars);
+        }
 
         // redirect
-        return redirect('/bot/show/'.$new_model['uuid']);
+        return redirect('/bot/show/'.$bot_model['uuid']);
     }
 
     /**
@@ -71,21 +84,9 @@ class BotController extends Controller {
      */
     public function getShow($uuid, BotRepository $repository, Guard $auth)
     {
-        // get user
-        $user = $auth->getUser();
-        if (!$user) { throw new Exception("User not found", 1); }
+        $bot = $this->getBotForUser($uuid, $repository, $auth);
 
-        // get the bot
-        $bot = $repository->findByUUID($uuid);
-        if (!$bot) { throw new Exception("Bot not found", 1); }
-
-        // make sure the bot belongs to the user
-        if ($bot['user_id'] != $user['id']) {
-            return new Response('Access denied', 403);
-        }
-        
-
-        return $bot->serializeForAPI();
+        return view('bot.show', ['bot' => $bot->serializeForAPI()]);
     }
 
     /**
@@ -119,6 +120,24 @@ class BotController extends Controller {
     public function destroy($uuid)
     {
         //
+    }
+
+
+    protected function getBotForUser($uuid, $repository, $auth) {
+        // get user
+        $user = $auth->getUser();
+        if (!$user) { throw new Exception("User not found", 1); }
+
+        // get the bot
+        $bot = $repository->findByUUID($uuid);
+        if (!$bot) { throw new Exception("Bot not found", 1); }
+
+        // make sure the bot belongs to the user
+        if ($bot['user_id'] != $user['id']) {
+            throw new HttpResponseException(new Response('Forbidden', 403));
+        }
+        
+        return $bot;
     }
 
 }

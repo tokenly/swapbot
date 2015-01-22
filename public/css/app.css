@@ -6231,3 +6231,6 @@ label,
 .checkbox label {
   font-weight: 300;
 }
+.inactive {
+  color: #900;
+}

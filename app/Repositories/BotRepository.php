@@ -15,7 +15,15 @@ class BotRepository extends APIRepository implements APIResourceRepositoryContra
 
     protected $model_type = 'Swapbot\Models\Bot';
 
-    public function compactAssetAttributes($vars) {
+
+
+    public function findByUserID($user_id) {
+        return call_user_func([$this->model_type, 'where'], 'user_id', $user_id);
+    }
+
+
+
+    public function compactSwapAttributes($vars) {
         $vars_out = $vars;
         $serialized_asset_value = [];
 
@@ -42,7 +50,25 @@ class BotRepository extends APIRepository implements APIResourceRepositoryContra
             }
         }
 
-        $vars_out['assets'] = $serialized_asset_value;
+        $vars_out['swaps'] = $serialized_asset_value;
+
+        return $vars_out;
+    }
+
+    public function expandSwapAttributes($vars) {
+        $vars_out = $vars;
+
+        foreach($vars['swaps'] as $offset => $swap) {
+            $i = $offset + 1;
+
+            $in_field_name              = 'asset_in_'.$i;
+            $out_field_name             = 'asset_out_'.$i;
+            $rate_field_name            = 'vend_rate_'.$i;
+
+            $vars_out[$in_field_name]   = $swap['in'];
+            $vars_out[$out_field_name]  = $swap['out'];
+            $vars_out[$rate_field_name] = $swap['rate'];
+        }
 
         return $vars_out;
     }

@@ -18,7 +18,7 @@ class CreateBotsTable extends Migration {
             $table->char('uuid', 36)->unique();
 			$table->string('name');
 			$table->text('description');
-			$table->text('assets');
+			$table->text('swaps');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
 			$table->timestamps();

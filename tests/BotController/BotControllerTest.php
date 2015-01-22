@@ -17,7 +17,7 @@ class BotControllerTest extends TestCase {
         $user = new User(array('name' => 'Joe'));
         $this->be($user);
 
-        $response = $this->call('GET', '/bot/edit');
+        $response = $this->call('GET', '/bot/edit/new');
         PHPUnit::assertEquals(200, $response->getStatusCode());
         PHPUnit::assertContains('Edit your Swapbot', $response->getContent());
     }
@@ -80,12 +80,12 @@ class BotControllerTest extends TestCase {
         ];
 
         // set previous location
-        $response = $this->call('GET', '/bot/edit');
+        $response = $this->call('GET', '/bot/edit/new');
 
         // run all tests
         foreach($test_specs as $test_spec_offset => $test_spec) {
             // echo "\$test_spec['vars']:\n".json_encode($test_spec['vars'], 192)."\n";
-            $response = $this->call('POST', '/bot/edit', $test_spec['vars']);
+            $response = $this->call('POST', '/bot/edit/new', $test_spec['vars']);
             
             // get errors
             $errors_string = null;

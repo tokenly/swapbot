@@ -22,20 +22,20 @@
                     </div>
                     @endif
 
-                    <form class="form-horizontal" role="form" method="POST" action="/bot/edit">
+                    <form class="form-horizontal" role="form" method="POST" action="/bot/edit/{{$bot['uuid'] === null ? 'new' : $bot['uuid']}}">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                         <div class="form-group">
                             <label class="col-md-4 control-label">Bot Name</label>
                             <div class="col-md-6">
-                                <input type="text" class="form-control" name="name" value="{{ old('name') }}">
+                                <input type="text" class="form-control" name="name" value="{{ old('name') !== null ? old('name') : $bot['name'] }}">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-md-4 control-label">Bot Description</label>
                             <div class="col-md-6">
-                                <textarea class="form-control" name="description" rows="6">{{ old('description') }}</textarea>
+                                <textarea class="form-control" name="description" rows="6">{{ old('description') !== null ? old('description') : $bot['description'] }}</textarea>
                             </div>
                         </div>
 
@@ -49,21 +49,21 @@
                             <div class="form-group">
                                 <label class="col-md-4 control-label">Receives Asset</label>
                                 <div class="col-md-6">
-                                    <input placeholder="BTC" type="text" class="form-control" name="asset_in_{{$asset_number}}" value="{{ old('asset_in_'.$asset_number) }}">
+                                    <input placeholder="BTC" type="text" class="form-control" name="asset_in_{{$asset_number}}" value="{{ old('asset_in_'.$asset_number) !== null ? old('asset_in_'.$asset_number) : $bot['asset_in_'.$asset_number] }}">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="col-md-4 control-label">Sends Asset</label>
                                 <div class="col-md-6">
-                                    <input placeholder="LTBCOIN" type="text" class="form-control" name="asset_out_{{$asset_number}}" value="{{ old('asset_out_'.$asset_number) }}">
+                                    <input placeholder="LTBCOIN" type="text" class="form-control" name="asset_out_{{$asset_number}}" value="{{ old('asset_out_'.$asset_number) !== null ? old('asset_out_'.$asset_number) : $bot['asset_out_'.$asset_number] }}">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="col-md-4 control-label">Rate</label>
                                 <div class="col-md-6">
-                                    <input placeholder="0.99" type="number" step="any" min="0" class="form-control" name="vend_rate_{{$asset_number}}" value="{{ old('vend_rate_'.$asset_number) }}">
+                                    <input placeholder="0.99" type="number" step="any" min="0" class="form-control" name="vend_rate_{{$asset_number}}" value="{{ old('vend_rate_'.$asset_number) !== null ? old('vend_rate_'.$asset_number) : $bot['vend_rate_'.$asset_number] }}">
                                 </div>
                             </div>
                         </div>
@@ -82,7 +82,11 @@
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Create
+                                    @if ($bot['id'])
+                                        Save Changes
+                                    @else
+                                        Create Bot
+                                    @endif
                                 </button>
                             </div>
                         </div>

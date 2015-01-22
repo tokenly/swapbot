@@ -1,5 +1,8 @@
 <?php namespace Swapbot\Http\Controllers;
 
+use Illuminate\Contracts\Auth\Guard;
+use Swapbot\Repositories\BotRepository;
+
 class HomeController extends Controller {
 
 	/*
@@ -28,9 +31,12 @@ class HomeController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function index()
+	public function index(BotRepository $repository, Guard $auth)
 	{
-		return view('home');
+
+		$user = $auth->getUser();
+		$bots = $repository->findByUserID($user['id']);
+		return view('home', ['bots' => $bots->get()]);
 	}
 
 }
