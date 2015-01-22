@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "08212cea30514f3888d004fe1c8335a0",
+    "hash": "3f42424c701a1c10bbeb5ea5846fa4a6",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -874,6 +874,60 @@
                 "uuid"
             ],
             "time": "2015-01-07 14:46:10"
+        },
+        {
+            "name": "satooshi/php-coveralls",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/satooshi/php-coveralls.git",
+                "reference": "5f1ad0589aa263178412871a5400d467c7709871"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/satooshi/php-coveralls/zipball/5f1ad0589aa263178412871a5400d467c7709871",
+                "reference": "5f1ad0589aa263178412871a5400d467c7709871",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.17"
+            },
+            "require-dev": {
+                "pdepend/pdepend": "dev-master",
+                "phpmd/phpmd": "dev-master",
+                "phpunit/php-invoker": ">=1.1.0,<1.2.0",
+                "phpunit/phpunit": "3.7.*@dev",
+                "squizlabs/php_codesniffer": "1.4.*"
+            },
+            "bin": [
+                "composer/bin/coveralls.php"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Contrib\\Component": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kitamura Satoshi",
+                    "email": "with.no.parachute@gmail.com",
+                    "homepage": "https://www.facebook.com/satooshi.jp"
+                }
+            ],
+            "description": "PHP Coveralls",
+            "homepage": "https://github.com/satooshi/php-coveralls",
+            "keywords": [
+                "ci",
+                "coverage",
+                "github",
+                "test"
+            ],
+            "time": "2013-04-15 16:37:51"
         },
         {
             "name": "swiftmailer/swiftmailer",

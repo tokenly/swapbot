@@ -6,11 +6,11 @@
 	"type": "project",
 	"require": {
 		"laravel/framework": "~5.0",
-        "rhumsaa/uuid": "~2."
+        "rhumsaa/uuid": "~2.",
+		"satooshi/php-coveralls": "~0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",
-        "satooshi/php-coveralls": "dev-master",
 		"phpspec/phpspec": "~2.1"
 	},
 	"autoload": {
