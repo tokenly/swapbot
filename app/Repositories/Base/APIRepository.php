@@ -38,6 +38,8 @@ abstract class APIRepository implements APIResourceRepositoryContract
     public function create($attributes) {
         if (!isset($attributes['uuid'])) { $attributes['uuid'] = Uuid::uuid4()->toString(); }
 
+        $attributes = $this->modifyAttributesBeforeCreate($attributes);
+
         return call_user_func([$this->model_type, 'create'], $attributes);
     }
 
@@ -62,6 +64,14 @@ abstract class APIRepository implements APIResourceRepositoryContract
 
         $this->delete($model);
         return $model;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Modify
+    
+    protected function modifyAttributesBeforeCreate($attributes) {
+        return $attributes;
     }
 
 }

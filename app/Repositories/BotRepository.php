@@ -73,4 +73,10 @@ class BotRepository extends APIRepository implements APIResourceRepositoryContra
         return $vars_out;
     }
 
+
+    protected function modifyAttributesBeforeCreate($attributes) {
+        if (!isset($attributes['active'])) { $attributes['active'] = false; }
+        return $attributes;
+    }
+
 }

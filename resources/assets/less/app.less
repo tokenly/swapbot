@@ -11,6 +11,50 @@ body, label, .checkbox label {
 
 // show
 
+.active {
+    color: #060;
+}
 .inactive {
     color: #900;
+}
+
+span.active-status-badge {
+    margin-left: 1.6rem;
+}
+
+li.botlink {
+    list-style-type: 0;
+    margin: 0.8rem 0;
+    padding: none;
+
+    height: 3rem;
+    line-height: 3rem;
+
+
+    a {
+        display: block;
+        background-color: #337AB7;
+        color: white;
+        border-radius: 4px;
+        width: 90%;
+
+        text-decoration: none;
+
+        position: relative;
+        padding-left: 0.8rem;
+
+        span.glyphicon {
+            position: absolute;
+            right: 0.8rem;
+            font-size: 2.0rem;
+            line-height: 3rem;
+            opacity: 0.22;
+        }
+        // color: inherit;
+
+        &:hover {
+            background-color: #286090;
+        }
+    }
+
 }

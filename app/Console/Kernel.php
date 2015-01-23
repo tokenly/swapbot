@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel {
 	 */
 	protected $commands = [
 		'Swapbot\Console\Commands\Inspire',
+		'Swapbot\Console\Commands\Development\TestConfigCommand',
 	];
 
 	/**

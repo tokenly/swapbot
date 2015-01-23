@@ -145,6 +145,11 @@ return [
 		'Swapbot\Providers\EventServiceProvider',
 		'Swapbot\Providers\RouteServiceProvider',
 
+		/*
+		 * Vender Service Providers...
+		 */
+		'Tokenly\XChainClient\Provider\XChainServiceProvider',
+
 	],
 
 	/*

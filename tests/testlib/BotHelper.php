@@ -16,6 +16,7 @@ class BotHelper  {
             'asset_in_1'  => 'BTC',
             'asset_out_1' => 'LTBCOIN',
             'vend_rate_1' => 0.00000150,
+            'active'      => false,
         ];
     }
 

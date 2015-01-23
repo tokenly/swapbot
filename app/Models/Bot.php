@@ -6,10 +6,13 @@ use Swapbot\Models\Base\APIModel;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps'];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'active', ];
 
     public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
     public function getSwapsAttribute() { return $this->deSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
+
+    public function setActiveAttribute($active) { $this->attributes['active'] = $active ? 1 : 0; }
+    public function getActiveAttribute() { return !!$this->attributes['active']; }
 
 
     public function serializeSwaps($swaps) {

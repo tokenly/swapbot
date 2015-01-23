@@ -11,9 +11,18 @@
                     <h3>My Swapbots</h3>
 
                     @if (count($bots))
-                    <ul>
+                    <ul class="list-unstyled">
                         @foreach ($bots as $bot)
-                            <li><a href="/bot/edit/{{$bot['uuid']}}" class="">Bot {{$bot['name']}}</a></li>
+                        <li class="botlink">
+                            {{-- {{$bot['active'] ? 'active' : 'inactive'}} --}}
+                            <div>
+
+                                <a href="/bot/show/{{$bot['uuid']}}">
+                                    <span class="glyphicon {{$bot['active'] ? ' glyphicon-ok' : 'glyphicon-warning-sign'}}"></span>
+                                    {{$bot['name'] ?: 'Bot '.$bot['uuid'] }}
+                                </a>
+                            </div>
+                        </li>
                         @endforeach
                     </ul>
                     @else

@@ -19,13 +19,26 @@
                         <dd>@include('bot.includes.swapslist', ['swaps' => $bot['swaps']])</dd>
 
                         <dt>Status</dt>
-                        <dd><span class="inactive">Inactive</span></dd>
+                        <dd>
+                            @if ($bot['active'])
+                            <span class="active"><span class="glyphicon glyphicon-ok"></span> Active</span>
+                            @else
+                            <span class="inactive"><span class="glyphicon glyphicon-warning-sign"></span> Inactive</span>
+                            @endif
+                        </dd>
                     </dl>
                 </div>
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
 
-    <a href="/bot/edit/{{ $bot['id'] }}" class="button btn btn-primary">Edit This Bot</a>
+            <a href="/bot/edit/{{ $bot['id'] }}" class="button btn btn-primary">Edit This Bot</a>
+            @if (!$bot['active'])
+            <a href="/bot/activate/{{ $bot['id'] }}" class="button btn btn-success">Activate This Bot</a>
+            @endif
+        </div>
+    </div>
 </div>
 @endsection
