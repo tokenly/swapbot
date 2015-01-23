@@ -1839,12 +1839,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "c35f7e422b2e03b89df3ff6a0c369383b6dda863"
+                "reference": "3b10831594009756d8a58fcdf172e3f170e30189"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/c35f7e422b2e03b89df3ff6a0c369383b6dda863",
-                "reference": "c35f7e422b2e03b89df3ff6a0c369383b6dda863",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/3b10831594009756d8a58fcdf172e3f170e30189",
+                "reference": "3b10831594009756d8a58fcdf172e3f170e30189",
                 "shasum": ""
             },
             "require": {
@@ -1873,7 +1873,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-01-16 12:44:26"
+            "time": "2015-01-23 13:36:37"
         },
         {
             "name": "vlucas/phpdotenv",
