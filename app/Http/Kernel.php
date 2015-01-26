@@ -29,6 +29,10 @@ class Kernel extends HttpKernel {
 		'auth'       => 'Swapbot\Http\Middleware\Authenticate',
 		'auth.basic' => 'Illuminate\Auth\Middleware\AuthenticateWithBasicAuth',
 		'guest'      => 'Swapbot\Http\Middleware\RedirectIfAuthenticated',
+
+		// custom middleware
+		'hmacauth'   => 'Swapbot\Http\Middleware\AuthenticateAPI',
+		'apierrors'  => 'Swapbot\Http\Middleware\HandleAPIErrors',
 	];
 
 }

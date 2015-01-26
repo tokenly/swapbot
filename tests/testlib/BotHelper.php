@@ -1,9 +1,14 @@
 <?php
 
+use Illuminate\Contracts\Validation\ValidationException;
+use Illuminate\Foundation\Bus\DispatchesCommands;
+use Rhumsaa\Uuid\Uuid;
+use Swapbot\Commands\CreateBot;
 use Swapbot\Repositories\BotRepository;
 
-
 class BotHelper  {
+
+    use DispatchesCommands;
 
     function __construct(BotRepository $bot_repository) {
         $this->bot_repository = $bot_repository;
@@ -13,20 +18,34 @@ class BotHelper  {
         return [
             'name'        => 'Sample Bot One',
             'description' => 'The bot description goes here.',
-            'asset_in_1'  => 'BTC',
-            'asset_out_1' => 'LTBCOIN',
-            'vend_rate_1' => 0.00000150,
+            'swaps' => [
+                [
+                    'in'   => 'BTC',
+                    'out'  => 'LTBCOIN',
+                    'rate' => 0.00000150,
+                ],
+            ],
             'active'      => false,
         ];
     }
 
     public function newSampleBot($user=null) {
-        $vars = $this->bot_repository->compactSwapAttributes($this->sampleBotVars());
+        $attributes = $this->sampleBotVars();
         if ($user == null) {
             $user = app()->make('UserHelper')->getSampleUser();
         }
-        $vars['user_id'] = $user['id'];
-        return $this->bot_repository->create($vars);
+        $attributes['user_id'] = $user['id'];
+
+        try {
+            $uuid = Uuid::uuid4()->toString();
+            $attributes['uuid'] = $uuid;
+            $this->dispatch(new CreateBot(['attributes' => $attributes]));
+
+            // now load the model
+            return $this->bot_repository->findByUuid($uuid);
+        } catch (ValidationException $e) {
+            throw new Exception("ValidationException: ".json_encode($e->errors()->all(), 192), $e->getCode());
+        }
     }
 
 }

@@ -8,7 +8,8 @@
 		"laravel/framework": "~5.0",
         "rhumsaa/uuid": "~2.",
 		"satooshi/php-coveralls": "~0",
-		"tokenly/xchain-client": "dev-master"
+		"tokenly/xchain-client": "dev-master",
+		"tokenly/token-generator": "dev-master"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",

@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests\Bot\ActivateBotRequest;
 use Swapbot\Http\Requests\Bot\EditBotRequest;
@@ -25,10 +26,9 @@ class BotController extends Controller {
      *
      * @return Response
      */
-    public function getIndex()
+    public function index()
     {
-        //
-        return 'List of Bots!';
+        Log::debug('index');
     }
 
     /**

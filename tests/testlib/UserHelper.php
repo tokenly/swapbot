@@ -30,6 +30,9 @@ class UserHelper
             'name'     => 'Sample User',
             'email'    => 'sample@tokenly.co',
             'password' => 'foopass',
+
+            'apitoken'         => 'TESTAPITOKEN',
+            'apisecretkey'     => 'TESTAPISECRET',
         ], $override_vars);
     }
 

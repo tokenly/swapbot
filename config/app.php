@@ -145,6 +145,8 @@ return [
 		'Swapbot\Providers\EventServiceProvider',
 		'Swapbot\Providers\RouteServiceProvider',
 
+		'Swapbot\Providers\EventLog\EventLogServiceProvider',
+
 		/*
 		 * Vender Service Providers...
 		 */

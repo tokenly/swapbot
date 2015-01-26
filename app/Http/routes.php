@@ -20,3 +20,10 @@ Route::controllers([
     'password' => 'Auth\PasswordController',
     'bot'      => 'Bot\BotController',
 ]);
+
+
+
+// Bot API
+
+$router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);
+

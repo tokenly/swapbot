@@ -4,6 +4,7 @@ namespace Swapbot\Console\Commands\Development;
 
 use Exception;
 use Illuminate\Console\Command;
+use Swapbot\Providers\EventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -45,6 +46,9 @@ EOF
      */
     public function fire()
     {
+
+        // event log test
+        EventLog::log('test.config', []);
 
         // test XChain Provider
         $this->comment('checking xchain client');
