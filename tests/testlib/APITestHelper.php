@@ -3,10 +3,13 @@
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Swapbot\Models\User;
 use Tokenly\HmacAuth\Generator;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
 class APITestHelper  {
+
+    protected $override_user = null;
 
     function __construct(Application $app) {
         $this->app = $app;
@@ -46,23 +49,37 @@ class APITestHelper  {
         return $this;
     }
 
+    public function testRequiresUser() {
+        $this->cleanup();
+
+        // create a model
+        $created_model = $this->newModel();
+
+        // call the API without a user
+        $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
+        $request = $this->createAPIRequest('GET', $url);
+        $response = $this->sendRequest($request);
+        PHPUnit::assertEquals(403, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+    }
+
     public function testCreate($create_vars) {
         $this->cleanup();
 
         // call the API
-        $response = $this->callAPIWithAuthentication('POST', $this->extendURL($this->url_base, null), $create_vars);
-        PHPUnit::assertEquals(200, $response->getStatusCode(), "Response was: ".$response->getContent()."\n\nfor POST ".$this->extendURL($this->url_base, null));
-        $response_from_api = json_decode($response->getContent(), true);
-        PHPUnit::assertNotEmpty($response_from_api);
+        $url = $this->extendURL($this->url_base, null);
+        $response = $this->callAPIWithAuthentication('POST', $url, $create_vars);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor POST ".$url);
+        $actual_response_from_api = json_decode($response->getContent(), true);
+        PHPUnit::assertNotEmpty($actual_response_from_api);
 
 
         // load from repository
-        $loaded_resource_model = $this->repository->findByUuid($response_from_api['id']);
+        $loaded_resource_model = $this->repository->findByUuid($actual_response_from_api['id']);
         PHPUnit::assertNotEmpty($loaded_resource_model);
 
-        // make sure everything returned from the api matches what is in the repository
+        // build expected response from API
         $expected_response_from_api = ['id' => $loaded_resource_model['uuid']];
-        PHPUnit::assertEquals($expected_response_from_api, $response_from_api);
+        PHPUnit::assertEquals($expected_response_from_api, $actual_response_from_api);
 
         return $loaded_resource_model;
     }
@@ -77,88 +94,94 @@ class APITestHelper  {
         
 
         // now call the API
-        $response = $this->callAPIWithAuthentication('GET', $this->extendURL($this->url_base, null));
-        PHPUnit::assertEquals(200, $response->getStatusCode(), "Response was: ".$response->getContent()."\n\nfor GET ".$this->extendURL($this->url_base, null));
-        $response_from_api = json_decode($response->getContent(), true);
-        PHPUnit::assertNotEmpty($response_from_api);
+        $url = $this->extendURL($this->url_base, null);
+        $response = $this->callAPIWithAuthentication('GET', $url);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        $actual_response_from_api = json_decode($response->getContent(), true);
+        PHPUnit::assertNotEmpty($actual_response_from_api);
 
         // populate the $expected_created_resource
         $expected_api_response = [$created_models[0]->serializeForAPI(), $created_models[1]->serializeForAPI()];
-        $expected_created_resource = $this->normalizeExpectedAPIResponse($expected_api_response, $response_from_api);
+        $expected_created_resource = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
 
         // check response
-        PHPUnit::assertEquals($expected_created_resource, $response_from_api);
+        PHPUnit::assertEquals($expected_created_resource, $actual_response_from_api);
 
         // return the models
         return $created_models;
     }
 
-    public function testLoad() {
+    public function testShow() {
+        $this->cleanup();
+
+        // create a model
         $created_model = $this->newModel();
-        $loaded_model = $this->repository->findByID($created_model['id']);
-        PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals((array)$created_model, (array)$loaded_model);
+
+        // call the API
+        $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
+        $response = $this->callAPIWithAuthentication('GET', $url);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        $actual_response_from_api = json_decode($response->getContent(), true);
+        PHPUnit::assertNotEmpty($actual_response_from_api);
+
+        // populate the $expected_created_resource
+        $expected_api_response = $created_model->serializeForAPI();
+        $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
+
+        // check response
+        PHPUnit::assertEquals($expected_api_response, $actual_response_from_api);
+
+        // return the model
+        return $created_model;
     }
 
     public function testUpdate($update_attributes) {
+        $this->cleanup();
+
+        // create a model
         $created_model = $this->newModel();
 
-        // update by ID
-        $this->repository->update($created_model, $update_attributes);
+        // call the API
+        $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
+        $response = $this->callAPIWithAuthentication('PUT', $url, $update_attributes);
+        PHPUnit::assertEquals(204, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
 
-        // load from repo again and test
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
-        PHPUnit::assertNotEmpty($loaded_model);
-        foreach($update_attributes as $k => $v) {
-            PHPUnit::assertEquals($v, $loaded_model[$k]);
-        }
+        // load the model and make sure it was updated
+        $reloaded_model = $this->repository->findByUuid($created_model['uuid']);
 
-        // update by UUID
-        $this->repository->updateByUuid($created_model['uuid'], $update_attributes);
 
-        // load from repo again
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
-        PHPUnit::assertNotEmpty($loaded_model);
-        foreach($update_attributes as $k => $v) {
-            PHPUnit::assertEquals($v, $loaded_model[$k]);
-        }
+        // only check the updated attributes
+        $expected_model_vars = $update_attributes;
+        $actual_model_vars = [];
+        foreach(array_keys($update_attributes) as $k) { $actual_model_vars[$k] = $reloaded_model[$k]; }
+        PHPUnit::assertEquals($expected_model_vars, $actual_model_vars);
 
-        // clean up
-        
+        // return the model
+        return $reloaded_model;
     }
 
     public function testDelete() {
+        $this->cleanup();
+
+        // create a model
         $created_model = $this->newModel();
 
-        // delete by ID
-        PHPUnit::assertTrue($this->repository->delete($created_model));
+        // call the API
+        $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
+        $response = $this->callAPIWithAuthentication('DELETE', $url);
+        PHPUnit::assertEquals(204, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
 
-        // load from repo
-        $loaded_model = $this->repository->findByID($created_model['id']);
-        PHPUnit::assertEmpty($loaded_model);
+        // make sure the model was deleted
+        $reloaded_model = $this->repository->findByUuid($created_model['uuid']);
+        PHPUnit::assertEmpty($reloaded_model);
 
-
-        // create another one
-        $created_model = $this->newModel();
-
-        // delete by uuid
-        $this->repository->deleteByUuid($created_model['uuid']);
-
-        // load from repo
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
-        PHPUnit::assertEmpty($loaded_model);
-
+        // return the delete model
+        return $created_model;
     }
 
 
-    public function testFindAll() {
-        $created_model = $this->newModel();
-        $created_model_2 = $this->newModel();
-        $loaded_models = array_values(iterator_to_array($this->repository->findAll()));
-        PHPUnit::assertNotEmpty($loaded_models);
-        PHPUnit::assertCount(2, $loaded_models);
-        PHPUnit::assertEquals((array)$created_model, (array)$loaded_models[0]);
-        PHPUnit::assertEquals((array)$created_model_2, (array)$loaded_models[1]);
+    public function be(User $new_user) {
+        $this->override_user = $new_user;
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -167,15 +190,16 @@ class APITestHelper  {
     public function callAPIWithAuthentication($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
         $request = $this->createAPIRequest($method, $uri, $parameters, $cookies, $files, $server, $content);
         $generator = new Generator();
-        $api_token = 'TESTAPITOKEN';
-        $secret    = 'TESTAPISECRET';
+        $user = $this->getUser();
+        $api_token = $user['apitoken'];
+        $secret    = $user['apisecretkey'];
         $generator->addSignatureToSymfonyRequest($request, $api_token, $secret);
-        return $this->app->make('Illuminate\Contracts\Http\Kernel')->handle($request);
+        return $this->sendRequest($request);
     }
 
     protected function createAPIRequest($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
         // convert a POST to json
-        if ($parameters AND $method == 'POST') {
+        if ($parameters AND in_array($method, ['POST', 'PUT', 'PATCH'])) {
             $content = json_encode($parameters);
             $server['CONTENT_TYPE'] = 'application/json';
             $parameters = [];
@@ -184,12 +208,16 @@ class APITestHelper  {
         return Request::create($uri, $method, $parameters, $cookies, $files, $server, $content);
     }
 
+    protected function sendRequest($request) {
+        return $this->app->make('Illuminate\Contracts\Http\Kernel')->handle($request);
+    }
+
     protected function extendURL($base_url, $url_extension) {
         if (!strlen($url_extension)) { return $base_url; }
         return $base_url.(strlen($url_extension) ? '/'.ltrim($url_extension, '/') : '');
     }
 
-    protected function normalizeExpectedAPIResponse($expected_api_response, $response_from_api) {
+    protected function normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api) {
         return $expected_api_response;
     }
 
@@ -206,6 +234,7 @@ class APITestHelper  {
     }
 
     protected function getUser() {
+        if (isset($this->override_user)) { return $this->override_user; }
         return $this->user_helper->getSampleUser();
     }
 

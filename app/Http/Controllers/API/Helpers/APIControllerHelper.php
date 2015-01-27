@@ -2,6 +2,8 @@
 
 namespace Swapbot\Http\Controllers\API\Helpers;
 
+use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +30,11 @@ class APIControllerHelper {
         return json_encode($out);
     }
 
+    public function transformResourceForOutput($resource)
+    {
+        return json_encode($resource->serializeForAPI());
+    }
+
     public function getAttributesFromRequest(Request $request) {
         $attributes = [];
         $allowed_vars = array_keys($request->rules());
@@ -39,6 +46,22 @@ class APIControllerHelper {
         }
         return $attributes;
     }
+
+    public function requireResourceOwnedByUser($uuid, $user, APIResourceRepositoryContract $repository) {
+        // lookup the resource
+        $resource = $repository->findByUuid($uuid);
+
+        // handle resource not found
+        if (!$resource) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource not found.']], 404)); }
+
+        // validate that the resource belongs to the user
+        if (!$user OR $resource['user_id'] != $user['id']) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource unauthorized.']], 403)); }
+
+        return $resource;
+        // $this->transformResourceForOutput($resource);
+    }
+
+
 
     // /**
     //  * Store a newly created resource in storage.

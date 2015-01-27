@@ -1,6 +1,5 @@
 <?php namespace Swapbot\Handlers\Commands;
 
-use Illuminate\Queue\InteractsWithQueue;
 use Swapbot\Commands\CreateBot;
 use Swapbot\Http\Requests\Bot\Transformers\BotTransformer;
 use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
@@ -28,7 +27,7 @@ class CreateBotHandler {
 	 */
 	public function handle(CreateBot $command)
 	{
-		$create_vars = $command->params['attributes'];
+		$create_vars = $command->attributes;
 
 		// transform
 		$create_vars = $this->transformer->santizeAttributes($create_vars, $this->validator->getRules());

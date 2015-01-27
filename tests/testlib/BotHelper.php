@@ -39,7 +39,7 @@ class BotHelper  {
         try {
             $uuid = Uuid::uuid4()->toString();
             $attributes['uuid'] = $uuid;
-            $this->dispatch(new CreateBot(['attributes' => $attributes]));
+            $this->dispatch(new CreateBot($attributes));
 
             // now load the model
             return $this->bot_repository->findByUuid($uuid);

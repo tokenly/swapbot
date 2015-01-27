@@ -11,7 +11,9 @@ class BotTransformer {
         }
 
         // santize swaps
-        $out['swaps'] = $this->sanitizeSwaps(isset($attributes['swaps']) ? $attributes['swaps'] : []);
+        if (isset($attributes['swaps'])) {
+            $out['swaps'] = $this->sanitizeSwaps($attributes['swaps']);
+        }
 
         return $out;
     }

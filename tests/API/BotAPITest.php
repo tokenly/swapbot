@@ -8,16 +8,47 @@ class BotAPITest extends TestCase {
 
     protected $use_database = true;
 
-    public function testAPIGetBotControllerRequiresUser()
-    {
-        $this->markTestIncomplete();
-        // $response = $this->call('GET', '/bot/edit');
-        // PHPUnit::assertEquals(302, $response->getStatusCode());
-    }
-
     public function testBotAPI()
     {
+        $tester = $this->setupAPITester();
 
+        // require user
+        $tester->testRequiresUser();
+        
+        // index
+        $tester->testIndex();
+        
+        // test create
+        $bot_helper = $this->app->make('BotHelper');
+        $tester->testCreate($bot_helper->sampleBotVars());
+
+        // test show
+        $tester->testShow();
+
+        // test update
+        $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description']);
+
+        // test delete
+        $tester->testDelete();
+    }
+
+    public function testBotBelongsToUser() {
+        // create a sample bot with the standard user
+        $new_bot = $this->app->make('BotHelper')->newSampleBot();
+
+        // now create a separate user
+        $another_user = $this->app->make('UserHelper')->getSampleUser('user2@tokenly.co');
+
+        // now call the show method as the other user
+        $tester = $this->setupAPITester();
+        $tester->be($another_user);
+        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/bots/'.$new_bot['uuid']);
+
+        // should be unauthorized
+        PHPUnit::assertEquals(403, $response->getStatusCode());
+    }
+
+    public function setupAPITester() {
         $bot_helper = $this->app->make('BotHelper');
         $tester = $this->app->make('APITestHelper');
         $tester
@@ -28,29 +59,7 @@ class BotAPITest extends TestCase {
                 return $bot_helper->newSampleBot($user);
             });
 
-        // index
-        $tester->testIndex();
-        
-        // test create
-        $tester->testCreate($bot_helper->sampleBotVars());
-    }
-
-    public function testBotBelongsToUser() {
-        $this->markTestIncomplete();
-        $this->setUpDb();
-
-        // create a sample bot with the standard user
-        $new_bot = $this->app->make('BotHelper')->newSampleBot();
-
-        // now create a separate user
-        $another_user = $this->app->make('UserHelper')->getSampleUser('user2@tokenly.co');
-
-        $this->be($another_user);
-        $response = $this->call('GET', '/bot/show/'.$new_bot['uuid']);
-
-        // should be unauthorized
-        PHPUnit::assertEquals(403, $response->getStatusCode());
-
+        return $tester;
     }
 
 }

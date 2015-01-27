@@ -4,16 +4,16 @@ use Swapbot\Commands\Command;
 
 class CreateBot extends Command {
 
-    var $params;
+    var $attributes;
 
 	/**
 	 * Create a new command instance.
 	 *
 	 * @return void
 	 */
-	public function __construct($params)
+	public function __construct($attributes)
 	{
-		$this->params = $params;
+		$this->attributes = $attributes;
 	}
 
 }

@@ -7,7 +7,7 @@ use \PHPUnit_Framework_Assert as PHPUnit;
 
 class BotValidatorTest extends TestCase {
 
-    public function testBotValidator()
+    public function testBotCreateValidator()
     {
         // most be a user
         $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
@@ -62,7 +62,44 @@ class BotValidatorTest extends TestCase {
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
 
+        $this->runTests($test_specs, $validator);
+    }
 
+
+    public function testBotUpdateValidator() {
+        $test_specs = [
+            [
+                'vars' => ['name' => 'Updated name'],
+                'error' => null,
+            ],
+            [
+                'vars' => ['name' => ''],
+                'error' => 'The name field is required.',
+            ],
+            [
+                'vars' => ['description' => ''],
+                'error' => 'The description field is required.',
+            ],
+            [
+                'vars' => ['swaps' => []],
+                'error' => 'at least one swap',
+            ],
+            [
+                'vars' => ['swaps' => [0 => ['in' => '', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,]]],
+                'error' => 'specify an asset to receive for swap #1',
+            ],
+        ];
+
+        $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\UpdateBotValidator');
+
+        $this->runTests($test_specs, $validator);
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    
+    
+
+    protected function runTests($test_specs, $validator) {
         // run all tests
         foreach($test_specs as $test_spec_offset => $test_spec) {
             $was_valid = null;
@@ -86,6 +123,5 @@ class BotValidatorTest extends TestCase {
             }
         }
     }
-
 
 }

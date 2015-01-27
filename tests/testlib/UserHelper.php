@@ -13,10 +13,11 @@ class UserHelper
         $this->user_repository = $user_repository;
     }
 
-    public function getSampleUser($email='sample@tokenly.co') {
+    public function getSampleUser($email='sample@tokenly.co', $token=null) {
         $user = $this->user_repository->findByEmail($email);
         if (!$user) {
-            $user = $this->createSampleUser(['email' => $email]);
+            if ($token === null) { $token = $this->testingTokenFromEmail($email); }
+            $user = $this->createSampleUser(['email' => $email, 'apitoken' => $token]);
         }
         return $user;
     }
@@ -34,6 +35,16 @@ class UserHelper
             'apitoken'         => 'TESTAPITOKEN',
             'apisecretkey'     => 'TESTAPISECRET',
         ], $override_vars);
+    }
+
+    public function testingTokenFromEmail($email) {
+        switch ($email) {
+            case 'sample@tokenly.co': return 'TESTAPITOKEN';
+            default:
+                // user2@tokenly.co => TESTUSER2TOKENLYCO
+                return substr('TEST'.strtoupper(preg_replace('!^[^a-z0-9]$!i', '', $email)), 0, 16);
+        }
+        // code
     }
 
 
