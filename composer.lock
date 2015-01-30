@@ -1919,12 +1919,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "3b10831594009756d8a58fcdf172e3f170e30189"
+                "reference": "fa1afa17daef0ae26a7b75bb0fb26db55d1d2296"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/3b10831594009756d8a58fcdf172e3f170e30189",
-                "reference": "3b10831594009756d8a58fcdf172e3f170e30189",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/fa1afa17daef0ae26a7b75bb0fb26db55d1d2296",
+                "reference": "fa1afa17daef0ae26a7b75bb0fb26db55d1d2296",
                 "shasum": ""
             },
             "require": {
@@ -1933,7 +1933,8 @@
                 "tokenly/hmac-auth": "dev-master"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4"
+                "phpunit/phpunit": "~4",
+                "tokenly/bitcoin-currency-lib": "dev-master"
             },
             "type": "library",
             "autoload": {
@@ -1953,7 +1954,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-01-23 13:36:37"
+            "time": "2015-01-30 03:09:28"
         },
         {
             "name": "vlucas/phpdotenv",
