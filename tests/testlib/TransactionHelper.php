@@ -13,7 +13,7 @@ class TransactionHelper  {
             'txid'           => 'transactionid0000000000001',
             'confirmations'  => '0',
             'processed'      => '0',
-            'processed_txid' => null,
+            'swap_receipts'  => null,
         ];
     }
 

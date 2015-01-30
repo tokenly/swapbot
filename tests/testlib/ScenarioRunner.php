@@ -67,12 +67,21 @@ class ScenarioRunner
         // echo "\$bots:\n".json_encode($bots, 192)."\n";
 
         // process notifications
-        foreach ($scenario_data['notifications'] as $raw_notification) {
+        foreach ($scenario_data['xchainNotifications'] as $raw_notification) {
             $notification = $raw_notification;
+            $meta = $raw_notification['meta'];
             unset($notification['meta']);
 
             $notification = array_replace_recursive($this->loadBaseFilename($raw_notification, "notifications"), $notification);
             // echo "\$notification:\n".json_encode($notification, 192)."\n";
+
+            // look for exceptions trigger
+            if (isset($meta['xchainFailAfterRequests'])) {
+                $this->mock_builder->beginThrowingExceptionsAfterCount($meta['xchainFailAfterRequests']);
+            } else {
+                // stop throwing exceptions
+                $this->mock_builder->stopThrowingExceptions();
+            }
 
             // process the notification
             $this->dispatch(new ReceiveWebhook($notification));
@@ -81,9 +90,9 @@ class ScenarioRunner
     }
 
     public function validateScenario($scenario_data) {
-        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
         if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls']); }
-        // if (isset($scenario_data['transaction_rows'])) { $this->validateTransactionRows($scenario_data['transaction_rows']); }
+        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
+        if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
     }
 
 
@@ -143,7 +152,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['txid',];
+        $optional_fields = ['txid','file','line',];
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_event[$field])) { $normalized_expected_bot_event[$field] = $expected_bot_event[$field]; }
                 else if (isset($actual_bot_event[$field])) { $normalized_expected_bot_event[$field] = $actual_bot_event[$field]; }
@@ -177,8 +186,9 @@ class ScenarioRunner
             return;
         }
 
+        $actual_xchain_calls = $this->xchain_mock_recorder->calls;
         foreach ($expected_xchain_calls as $offset => $raw_expected_xchain_call) {
-            $actual_xchain_call = isset($this->xchain_mock_recorder->calls[$offset]) ? $this->xchain_mock_recorder->calls[$offset] : null;
+            $actual_xchain_call = isset($actual_xchain_calls[$offset]) ? $actual_xchain_calls[$offset] : null;
 
             $expected_xchain_call = $raw_expected_xchain_call;
             unset($expected_xchain_call['meta']);
@@ -188,6 +198,10 @@ class ScenarioRunner
             
             $this->validateExpectedXChainCall($expected_xchain_call, $actual_xchain_call);
         }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_xchain_calls), $actual_xchain_calls, "Did not find the current number of XChain calls");
+
     }
 
     protected function validateExpectedXChainCall($expected_xchain_call, $actual_xchain_call) {
@@ -233,6 +247,87 @@ class ScenarioRunner
 
 
         return $normalized_expected_xchain_call;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // ExpectedTransactionModels
+
+    protected function validateExpectedTransactionModels($expected_transaction_models) {
+        if ($expected_transaction_models === 'none') {
+            PHPUnit::assertEmpty($this->xchain_mock_recorder->calls);
+            return;
+        }
+
+        $actual_transaction_models = [];
+        foreach ($this->transaction_repository->findAll() as $transaction_model) {
+            $actual_transaction_models[] = $transaction_model->toArray();
+        }
+
+        foreach ($expected_transaction_models as $offset => $raw_expected_transaction_model) {
+            $actual_transaction_model = isset($actual_transaction_models[$offset]) ? $actual_transaction_models[$offset] : null;
+
+            $expected_transaction_model = $raw_expected_transaction_model;
+            unset($expected_transaction_model['meta']);
+            $expected_transaction_model = array_replace_recursive($this->loadBaseFilename($raw_expected_transaction_model, "transaction_models"), $expected_transaction_model);
+
+            $expected_transaction_model = $this->normalizeExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model);
+            
+            $this->validateExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_transaction_models), $actual_transaction_models, "Did not find the current number of XChain calls");
+
+    }
+
+    protected function validateExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model) {
+        PHPUnit::assertNotEmpty($actual_transaction_model, "Missing xchain call ".json_encode($expected_transaction_model, 192));
+        PHPUnit::assertEquals($expected_transaction_model, $actual_transaction_model, "ExpectedTransactionRecord mismatch");
+    }
+
+
+
+
+    protected function normalizeExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model) {
+        $normalized_expected_transaction_model = [];
+
+        // placeholder
+        $normalized_expected_transaction_model = $expected_transaction_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $expected_transaction_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = ['id','bot_id','updated_at','created_at',];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $expected_transaction_model[$field]; }
+                else if (isset($actual_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $actual_transaction_model[$field]; }
+        }
+        ///////////////////
+
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_transaction_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_transaction_model['quantity']);
+        // // blockhash
+        // if (isset($expected_transaction_model['blockhash'])) {
+        //     $normalized_expected_transaction_model['bitcoinTx']['blockhash'] = $expected_transaction_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_transaction_model;
     }
 
 

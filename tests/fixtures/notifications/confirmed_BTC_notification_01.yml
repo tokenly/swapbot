@@ -1,7 +1,7 @@
-# a simple XCP notification
+# a simple BTC notification
 
-txid: 00000000000000000000000000000000000000000000000000000xcptx111111
-network: counterparty
+txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
+network: bitcoin
 event: receive
 notifiedAddress: RECIPIENT01
 notifiedAddressId: MONITOR_ID_01
@@ -9,6 +9,6 @@ sources: [SENDER01]
 destinations: [RECIPIENT01]
 confirmed: true
 confirmations: 1
-asset: LTBCOIN
-quantity: 500
+asset: BTC
+quantity: 0.001
 blockId: 300000

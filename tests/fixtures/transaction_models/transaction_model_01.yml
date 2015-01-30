@@ -1,0 +1,7 @@
+txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
+confirmations: '1'
+processed: '1'
+swap_receipts: 
+    "LTBCOIN:BTC":
+        txid: "0000000000000000000000000000001111"
+        confirmations: 1

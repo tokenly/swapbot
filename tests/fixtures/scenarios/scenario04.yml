@@ -1,0 +1,32 @@
+# inactive bots don't vend tokens, but transactions are marked as processed
+
+############################
+# setup bots
+bots:
+  - 
+    meta: { baseFilename: bot01.yml }
+    active: false
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_LTBCOIN_notification_01.yml }
+  -
+    meta: { baseFilename: confirmed_LTBCOIN_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls: none
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: bot.inactive.yml }
+  - 
+    meta: { baseFilename: swap.previous.yml }
+

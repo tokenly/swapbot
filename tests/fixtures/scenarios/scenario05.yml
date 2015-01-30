@@ -1,0 +1,38 @@
+# receive BTC and vend LTBCOIN
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_BTC_notification_01.yml }
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.found.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 1000 LTBCOIN to SENDER01.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 1000
+    outAsset: LTBCOIN
+  - 
+    meta: { baseFilename: swap.sent.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 1000 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 1000
+    outAsset: LTBCOIN

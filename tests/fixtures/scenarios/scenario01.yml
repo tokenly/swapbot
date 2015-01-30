@@ -1,11 +1,19 @@
 # simple mempool transaction received
 
+############################
+# setup bots
 bots:
   - meta: { baseFilename: bot01.yml }
 
-notifications:
-  - meta: { baseFilename: mempool_ltbcoin_notification_01.yml }
 
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_notification_01.yml }
+
+
+############################
+# validate the expected results
 expectedXChainCalls: none
 
 expectedBotEvents:

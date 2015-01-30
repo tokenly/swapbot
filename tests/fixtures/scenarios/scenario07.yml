@@ -1,0 +1,112 @@
+# bot vends 2 tokens
+#   failing to vend the second token will succeed after a second attempt
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    swaps:
+      -
+        in: BTC
+        out: LTBCOIN
+        rate: 1000000
+      -
+        in: BTC
+        out: SOUP
+        rate: 5000000
+      -
+        in: LTBCOIN
+        out: BTC
+        rate: 0.000001
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta:
+        baseFilename: confirmed_BTC_notification_01.yml
+        xchainFailAfterRequests: 1
+  -
+    meta:
+        baseFilename: confirmed_BTC_notification_01.yml
+        confirmations: 2
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+    data:
+        quantity: 5000
+        asset: SOUP
+
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.found.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 1000 LTBCOIN to SENDER01.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 1000
+    outAsset: LTBCOIN
+  - 
+    meta: { baseFilename: swap.sent.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 1000 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 1000
+    outAsset: LTBCOIN
+  - 
+    meta: { baseFilename: swap.found.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 5000
+    outAsset: SOUP
+
+  - 
+    meta: { baseFilename: swap.failed.yml }
+    msg: Failed to swap asset. Test Exception Triggered
+
+  - 
+    meta: { baseFilename: swap.processed.yml }
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 1000
+    outAsset: LTBCOIN
+
+  - 
+    meta: { baseFilename: swap.found.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 5000
+    outAsset: SOUP
+  - 
+    meta: { baseFilename: swap.sent.yml }
+    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 5000 SOUP to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    inQty: 0.001
+    inAsset: BTC
+    outQty: 5000
+    outAsset: SOUP
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_EMPTY.yml }
+    txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
+    confirmations: '1'
+    processed: '1'
+    swap_receipts: 
+        "BTC:LTBCOIN":
+            txid: "0000000000000000000000000000001111"
+            confirmations: 1
+        "BTC:SOUP":
+            txid: "0000000000000000000000000000001111"
+            confirmations: 1
+
