@@ -16,8 +16,13 @@ class BotHelper  {
 
     public function sampleBotVars() {
         return [
-            'name'        => 'Sample Bot One',
-            'description' => 'The bot description goes here.',
+            'name'               => 'Sample Bot One',
+            'description'        => 'The bot description goes here.',
+            'active'             => false,
+            'address'            => null,
+            'payment_address_id' => null,
+            'monitor_id'         => null,
+
             'swaps' => [
                 [
                     'in'   => 'BTC',
@@ -25,12 +30,37 @@ class BotHelper  {
                     'rate' => 0.00000150,
                 ],
             ],
-            'active'      => false,
         ];
     }
 
-    public function newSampleBot($user=null) {
-        $attributes = $this->sampleBotVars();
+
+    // creates a bot
+    //   directly in the repository (no validation)
+    public function newSampleBot($user=null, $bot_vars=[]) {
+        $attributes = array_replace_recursive($this->sampleBotVars(), $bot_vars);
+        if ($user == null) {
+            $user = app()->make('UserHelper')->getSampleUser();
+        }
+        $attributes['user_id'] = $user['id'];
+
+        try {
+            if (!isset($attributes['uuid'])) {
+                $uuid = Uuid::uuid4()->toString();
+                $attributes['uuid'] = $uuid;
+            }
+
+            $bot_model = $this->bot_repository->create($attributes);
+            return $bot_model;
+        } catch (ValidationException $e) {
+            throw new Exception("ValidationException: ".json_encode($e->errors()->all(), 192), $e->getCode());
+        }
+    }
+
+
+
+    // uses a command to validate and sanitize the input
+    public function newSampleBotWothCommand($user=null, $bot_vars=[]) {
+        $attributes = array_replace_recursive($this->sampleBotVars(), $bot_vars);
         if ($user == null) {
             $user = app()->make('UserHelper')->getSampleUser();
         }

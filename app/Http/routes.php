@@ -12,18 +12,25 @@
 */
 
 Route::get('/', 'WelcomeController@index');
+Route::get('/admin', 'AdminController@index');
 
-Route::get('home', 'HomeController@index');
-
-Route::controllers([
-    'auth'     => 'Auth\AuthController',
-    'password' => 'Auth\PasswordController',
-    'bot'      => 'Bot\BotController',
-]);
+// Route::get('home', 'HomeController@index');
+// Route::controllers([
+//     'auth'     => 'Auth\AuthController',
+//     'password' => 'Auth\PasswordController',
+//     'bot'      => 'Bot\BotController',
+// ]);
 
 
 
 // Bot API
-
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);
 
+// User API
+// $router->resource('api/v1/users', 'API\User\UserController', ['except' => ['create','edit']]);
+$router->resource('api/v1/users', 'API\User\UserController', ['only' => ['show',]]);
+
+
+// webhook notifications
+
+Route::get('/_xchain_client_receive', 'WebhookController@receive');

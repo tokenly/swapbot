@@ -5,6 +5,8 @@ use \PHPUnit_Framework_Assert as PHPUnit;
 
 class RepositoryTestHelper  {
 
+    var $use_uuid = true;
+
     function __construct($create_model_fn, $repository) {
         $this->create_model_fn = $create_model_fn;
         $this->repository = $repository;
@@ -22,7 +24,7 @@ class RepositoryTestHelper  {
         $created_model = $this->newModel();
         $loaded_model = $this->repository->findByID($created_model['id']);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals((array)$created_model, (array)$loaded_model);
+        PHPUnit::assertEquals($created_model->toArray(), $loaded_model->toArray());
     }
 
     public function testUpdate($update_attributes) {
@@ -32,24 +34,38 @@ class RepositoryTestHelper  {
         $this->repository->update($created_model, $update_attributes);
 
         // load from repo again and test
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        if ($this->use_uuid) {
+            $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        } else {
+            $loaded_model = $this->repository->findByID($created_model['id']);
+        }
+
         PHPUnit::assertNotEmpty($loaded_model);
         foreach($update_attributes as $k => $v) {
             PHPUnit::assertEquals($v, $loaded_model[$k]);
         }
 
         // update by UUID
-        $this->repository->updateByUuid($created_model['uuid'], $update_attributes);
+        if ($this->use_uuid) {
+            $this->repository->updateByUuid($created_model['uuid'], $update_attributes);
+        } else {
+            $this->repository->update($created_model, $update_attributes);
+        }
 
         // load from repo again
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        if ($this->use_uuid) {
+            $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        } else {
+            $loaded_model = $this->repository->findByID($created_model['id']);
+        }
+
         PHPUnit::assertNotEmpty($loaded_model);
         foreach($update_attributes as $k => $v) {
             PHPUnit::assertEquals($v, $loaded_model[$k]);
         }
 
         // clean up
-        
+        return $created_model;
     }
 
     public function testDelete() {
@@ -67,10 +83,18 @@ class RepositoryTestHelper  {
         $created_model = $this->newModel();
 
         // delete by uuid
-        $this->repository->deleteByUuid($created_model['uuid']);
+        if ($this->use_uuid) {
+            $this->repository->deleteByUuid($created_model['uuid']);
+        } else {
+            $this->repository->delete($created_model);
+        }
 
         // load from repo
-        $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        if ($this->use_uuid) {
+            $loaded_model = $this->repository->findByUuid($created_model['uuid']);
+        } else {
+            $loaded_model = $this->repository->findByID($created_model['id']);
+        }
         PHPUnit::assertEmpty($loaded_model);
 
     }
@@ -87,7 +111,7 @@ class RepositoryTestHelper  {
     }
 
 
-    protected function newModel() {
+    public function newModel() {
         return call_user_func($this->create_model_fn);
     }
 

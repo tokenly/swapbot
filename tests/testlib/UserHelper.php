@@ -13,16 +13,16 @@ class UserHelper
         $this->user_repository = $user_repository;
     }
 
-    public function getSampleUser($email='sample@tokenly.co', $token=null) {
+    public function getSampleUser($email='sample@tokenly.co', $token=null, $owner_user_id=null) {
         $user = $this->user_repository->findByEmail($email);
         if (!$user) {
             if ($token === null) { $token = $this->testingTokenFromEmail($email); }
-            $user = $this->createSampleUser(['email' => $email, 'apitoken' => $token]);
+            $user = $this->newSampleUser(['email' => $email, 'apitoken' => $token, 'user_id' => $owner_user_id]);
         }
         return $user;
     }
 
-    public function createSampleUser($override_vars=[]) {
+    public function newSampleUser($override_vars=[]) {
         return $this->user_repository->create(array_merge($this->sampleVars(), $override_vars));
     }
 

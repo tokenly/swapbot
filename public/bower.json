@@ -1,0 +1,21 @@
+{
+  "name": "swapbot",
+  "version": "0.0.0",
+  "homepage": "https://github.com/tokenly/swapbot",
+  "authors": [
+    "devon@tokenly.co"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "mithril": "0.1.29",
+    "cryptojslib": "3.1.2"
+  }
+}

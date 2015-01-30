@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c23818545995126c2e103c2535274fd9",
+    "hash": "4d65457d373ba4659a3a7596c17a541e",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1792,17 +1792,57 @@
             "time": "2015-01-21 17:40:20"
         },
         {
+            "name": "tokenly/bitcoin-currency-lib",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/bitcoin-currency-lib.git",
+                "reference": "cb26b91d9c37ed73a086b7046f45ff596fac42c5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/bitcoin-currency-lib/zipball/cb26b91d9c37ed73a086b7046f45ff596fac42c5",
+                "reference": "cb26b91d9c37ed73a086b7046f45ff596fac42c5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Tokenly\\CurrencyLib": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "dweller@devonweller.com",
+                    "homepage": "http://devonweller.com"
+                }
+            ],
+            "description": "A simple bitcoin currency library",
+            "time": "2014-11-20 14:15:04"
+        },
+        {
             "name": "tokenly/hmac-auth",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/hmac-auth.git",
-                "reference": "c817437536562741ccf6ceb8955033a45f847f5f"
+                "reference": "5548928adcc25eb0ac5b6809c84a20f18206ea6d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/c817437536562741ccf6ceb8955033a45f847f5f",
-                "reference": "c817437536562741ccf6ceb8955033a45f847f5f",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/5548928adcc25eb0ac5b6809c84a20f18206ea6d",
+                "reference": "5548928adcc25eb0ac5b6809c84a20f18206ea6d",
                 "shasum": ""
             },
             "require": {
@@ -1831,7 +1871,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-01-03 17:51:09"
+            "time": "2015-01-30 03:08:31"
         },
         {
             "name": "tokenly/token-generator",
@@ -2982,6 +3022,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "tokenly/xchain-client": 20,
+        "tokenly/bitcoin-currency-lib": 20,
         "tokenly/token-generator": 20
     },
     "prefer-stable": false,

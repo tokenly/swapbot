@@ -20,6 +20,9 @@ class CreateUsersTable extends Migration {
 			$table->string('email')->unique();
 			$table->string('password', 60);
 
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
+
 			$table->string('apitoken', 16)->unique();
 			$table->string('apisecretkey', 40);
 

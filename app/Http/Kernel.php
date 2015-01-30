@@ -17,7 +17,7 @@ class Kernel extends HttpKernel {
 		'Illuminate\View\Middleware\ShareErrorsFromSession',
 
 		// allow testing environment to ignore csrf middleware
-		'Swapbot\Http\Middleware\TestingSafeVerifyCsrfToken',
+		// 'Swapbot\Http\Middleware\TestingSafeVerifyCsrfToken',
 	];
 
 	/**

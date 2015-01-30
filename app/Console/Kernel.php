@@ -11,7 +11,9 @@ class Kernel extends ConsoleKernel {
 	 * @var array
 	 */
 	protected $commands = [
-		'Swapbot\Console\Commands\Inspire',
+		// 'Swapbot\Console\Commands\Inspire',
+		'Swapbot\Console\Commands\APIUser\APINewUserCommand',
+		'Swapbot\Console\Commands\APIUser\APIListUsersCommand',
 		'Swapbot\Console\Commands\Development\TestConfigCommand',
 	];
 

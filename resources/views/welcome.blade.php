@@ -64,20 +64,10 @@
                 <div class="quote">Where are your token exchange dreams come true</div>
             </div>
         </div>
-        <div class="row">
-            <div class="content info-content">
-                <h4>Featured Swapbots</h4>
-                <ul>
-                    <li><a href="#swapbot">The FOOCOIN swapbot</a></li>
-                    <li><a href="#swapbot">The BARCOIN swapbot</a></li>
-                    <li><a href="#swapbot">The swapbot for Devon's Time</a></li>
-                </ul>
-            </div>
-        </div>
+
         <div class="row">
             <div class="content info-content footer-content">
-                <a href="/auth/register">Register to Create a Swapbot</a>
-                <a href="/auth/login">Login to your existing account</a>
+                <a href="/admin">Swapbot Administration</a>
             </div>
         </div>
     </div>

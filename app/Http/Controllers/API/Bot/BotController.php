@@ -9,7 +9,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Rhumsaa\Uuid\Uuid;
+use Swapbot\Commands\ActivateBot;
 use Swapbot\Commands\CreateBot;
 use Swapbot\Commands\DeleteBot;
 use Swapbot\Commands\UpdateBot;
@@ -47,7 +49,7 @@ class BotController extends APIController {
      * @param  Guard               $auth
      * @return Response
      */
-    public function store(Request $request, Guard $auth)
+    public function store(Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
         $attributes = $request->all();
 
@@ -60,14 +62,28 @@ class BotController extends APIController {
 
         // issue a create bot command
         try {
+            // create a bot
             $this->dispatch(new CreateBot($attributes));
+
+            // activate the bot
+            $bot = $repository->findByUuid($uuid);
+            $this->dispatch(new ActivateBot($bot));
+            
+            // reload the bot again
+            $bot = $repository->findByUuid($uuid);
+
+
         } catch (ValidationException $e) {
             // handle validation errors
-            throw new HttpResponseException(new JsonResponse(['errors' => $e->errors()->all()], 422));
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));
+
+        } catch (InvalidArgumentException $e) {
+            // handle invalid argument errors
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->getMessage(), 422));
         }
 
         // return the model id
-        return ['id' => $uuid];
+        return $api_helper->transformResourceForOutput($bot);
     }
 
 
@@ -108,7 +124,7 @@ class BotController extends APIController {
             $this->dispatch(new UpdateBot($resource, $attributes));
         } catch (ValidationException $e) {
             // handle validation errors
-            throw new HttpResponseException(new JsonResponse(['errors' => $e->errors()->all()], 422));
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));
         }
 
         // return a 204 response

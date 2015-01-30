@@ -3,10 +3,69 @@
 @btn-font-weight: 300;
 @font-family-sans-serif: "Roboto", Helvetica, Arial, sans-serif;
 
-body, label, .checkbox label {
+body {
 	font-weight: 300;
 }
 
+
+
+// spacers
+@spacerHeight: 14px;
+
+.spacer1 { height: @spacerHeight * 1; }
+.spacer2 { height: @spacerHeight * 2; }
+.spacer3 { height: @spacerHeight * 3; }
+.spacer4 { height: @spacerHeight * 4; }
+.spacer5 { height: @spacerHeight * 5; }
+.spacer6 { height: @spacerHeight * 6; }
+.spacer7 { height: @spacerHeight * 7; }
+.spacer8 { height: @spacerHeight * 8; }
+
+
+
+
+
+// dashboard
+// 
+
+.dashboard-edit-link {
+    margin-left: 18px;
+    .glyphicon {
+        font-size: 1.2rem;
+    }
+}
+ul.striped-list {
+    li {
+        border-bottom: 1px dashed #ccc;
+        padding: 2px 6px;
+    }
+
+    li:nth-child(even) {
+        background-color: #f6f6f6;
+    }
+}
+
+
+// bot view
+
+.yes {
+    color: @brand-success;
+}
+.no {
+    color: @brand-danger;
+}
+
+// bot form
+.remove-link {
+    margin-top: 29px;
+    display: block;
+    font-size: 2.4rem;
+    color: @brand-danger;
+
+    &:hover {
+        color: darken(@brand-danger, 10%);
+    }
+}
 
 
 // show

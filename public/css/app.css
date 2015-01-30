@@ -6226,10 +6226,60 @@ button.close {
     display: none !important;
   }
 }
-body,
-label,
-.checkbox label {
+body {
   font-weight: 300;
+}
+.spacer1 {
+  height: 14px;
+}
+.spacer2 {
+  height: 28px;
+}
+.spacer3 {
+  height: 42px;
+}
+.spacer4 {
+  height: 56px;
+}
+.spacer5 {
+  height: 70px;
+}
+.spacer6 {
+  height: 84px;
+}
+.spacer7 {
+  height: 98px;
+}
+.spacer8 {
+  height: 112px;
+}
+.dashboard-edit-link {
+  margin-left: 18px;
+}
+.dashboard-edit-link .glyphicon {
+  font-size: 1.2rem;
+}
+ul.striped-list li {
+  border-bottom: 1px dashed #ccc;
+  padding: 2px 6px;
+}
+ul.striped-list li:nth-child(even) {
+  background-color: #f6f6f6;
+}
+.yes {
+  color: #5cb85c;
+}
+.no {
+  color: #d9534f;
+}
+.remove-link {
+  margin-top: 29px;
+  display: block;
+  font-size: 2.4rem;
+  color: #d9534f;
+}
+.remove-link:hover {
+  color: #c9302c;
 }
 .active {
   color: #060;

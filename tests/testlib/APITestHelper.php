@@ -78,7 +78,7 @@ class APITestHelper  {
         PHPUnit::assertNotEmpty($loaded_resource_model);
 
         // build expected response from API
-        $expected_response_from_api = ['id' => $loaded_resource_model['uuid']];
+        $expected_response_from_api = $loaded_resource_model->serializeForAPI();
         PHPUnit::assertEquals($expected_response_from_api, $actual_response_from_api);
 
         return $loaded_resource_model;
@@ -184,6 +184,11 @@ class APITestHelper  {
         $this->override_user = $new_user;
     }
 
+    public function getUser() {
+        if (isset($this->override_user)) { return $this->override_user; }
+        return $this->user_helper->getSampleUser();
+    }
+
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
@@ -233,10 +238,6 @@ class APITestHelper  {
         return $model;
     }
 
-    protected function getUser() {
-        if (isset($this->override_user)) { return $this->override_user; }
-        return $this->user_helper->getSampleUser();
-    }
 
 
 }

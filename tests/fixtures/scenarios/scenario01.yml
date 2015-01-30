@@ -1,0 +1,15 @@
+# simple mempool transaction received
+
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+notifications:
+  - meta: { baseFilename: mempool_ltbcoin_notification_01.yml }
+
+expectedXChainCalls: none
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: unconfirmed.tx.yml }
+
+

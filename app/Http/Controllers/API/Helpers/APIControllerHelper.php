@@ -61,6 +61,24 @@ class APIControllerHelper {
         // $this->transformResourceForOutput($resource);
     }
 
+    // this is to find users that belong to the current user
+    //   but also allows the user to find themselves
+    public function requireResourceIsUserOrIsOwnedByUser($uuid, $user, APIResourceRepositoryContract $repository) {
+        if (strlen($uuid) AND $user['uuid'] == $uuid) { return $user; }
+
+        return $this->requireResourceOwnedByUser($uuid, $user, $repository);
+    }
+
+    public function newJsonResponseWithErrors($errors, $code=500) {
+        if (is_array($errors)) {
+            $message = implode(" ", $errors);
+        } else {
+            $message = $errors;
+            $errors = [$errors];
+        }
+        return new JsonResponse(['message' => $message, 'errors' => $errors], $code);
+    }
+
 
 
     // /**

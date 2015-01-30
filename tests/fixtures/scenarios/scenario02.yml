@@ -1,0 +1,18 @@
+# simple live transaction received
+
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+notifications:
+  - meta: { baseFilename: confirmed_ltbcoin_notification_01.yml }
+
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send.yml }
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.found.yml }
+  - 
+    meta: { baseFilename: swap.sent.yml }
+

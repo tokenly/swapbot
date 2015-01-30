@@ -21,6 +21,11 @@ class CreateBotsTable extends Migration {
 			$table->text('swaps');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
+
+            $table->string('address', 35)->unique()->nullable();
+            $table->string('payment_address_id', 36)->unique()->nullable();
+            $table->string('monitor_id', 36)->unique()->nullable();
+
             $table->boolean('active')->default(0);
 			$table->timestamps();
 		});
