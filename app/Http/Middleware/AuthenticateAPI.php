@@ -85,8 +85,6 @@ class AuthenticateAPI implements Middleware {
             return $response;
         }
 
-        Log::debug('auth is ok');
-
         return $next($request);
     }
 

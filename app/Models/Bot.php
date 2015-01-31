@@ -6,7 +6,7 @@ use Swapbot\Models\Base\APIModel;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'address', 'active', ];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'balances', 'address', 'active', ];
 
 
     public function buildSwapID($swap) {
@@ -18,6 +18,9 @@ class Bot extends APIModel {
 
     public function setActiveAttribute($active) { $this->attributes['active'] = $active ? 1 : 0; }
     public function getActiveAttribute() { return !!$this->attributes['active']; }
+
+    public function setBalancesAttribute($balances) { $this->attributes['balances'] = json_encode($balances); }
+    public function getBalancesAttribute() { return isset($this->attributes['balances']) ? json_decode($this->attributes['balances'], true) : []; }
 
 
     public function serializeSwaps($swaps) {

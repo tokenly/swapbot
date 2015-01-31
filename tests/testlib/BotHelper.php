@@ -22,6 +22,7 @@ class BotHelper  {
             'address'            => null,
             'payment_address_id' => null,
             'monitor_id'         => null,
+            'balances'           => null,
 
             'swaps' => [
                 [

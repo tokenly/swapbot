@@ -26,6 +26,8 @@ class CreateBotsTable extends Migration {
             $table->string('payment_address_id', 36)->unique()->nullable();
             $table->string('monitor_id', 36)->unique()->nullable();
 
+            $table->text('balances')->nullable();
+
             $table->boolean('active')->default(0);
 			$table->timestamps();
 		});

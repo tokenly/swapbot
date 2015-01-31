@@ -32,7 +32,6 @@ class HandleAPIErrors implements Middleware {
     public function handle($request, Closure $next)
     {
         try {
-            Log::debug('handle');
             return $next($request);
         } catch (HttpResponseException $e) {
             // HttpResponseException can pass through
