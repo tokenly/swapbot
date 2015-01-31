@@ -58,6 +58,10 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC',]]]),
                 'error' => 'Please specify a valid rate for swap #',
             ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['blacklist_addresses' => ['abadaddress1']]),
+                'error' => 'not a valid bitcoin address.',
+            ],
         ];
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');

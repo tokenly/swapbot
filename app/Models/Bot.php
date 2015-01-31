@@ -6,7 +6,7 @@ use Swapbot\Models\Base\APIModel;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'balances', 'address', 'active', ];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'active', ];
 
 
     public function buildSwapID($swap) {
@@ -22,6 +22,8 @@ class Bot extends APIModel {
     public function setBalancesAttribute($balances) { $this->attributes['balances'] = json_encode($balances); }
     public function getBalancesAttribute() { return isset($this->attributes['balances']) ? json_decode($this->attributes['balances'], true) : []; }
 
+    public function setBlacklistAddressesAttribute($blacklist_addresses) { $this->attributes['blacklist_addresses'] = json_encode($this->serializeBlacklistAddresses($blacklist_addresses)); }
+    public function getBlacklistAddressesAttribute() { return $this->deSerializeBlacklistAddresses(json_decode($this->attributes['blacklist_addresses'], true)); }
 
     public function serializeSwaps($swaps) {
         $serialized_swaps = [];
@@ -43,4 +45,20 @@ class Bot extends APIModel {
         return $deserialized_swaps;
     }
 
+    public function serializeBlacklistAddresses($blacklist_addresses) {
+        $serialized_blacklist_addresses = [];
+        if (is_array($blacklist_addresses)) {
+            foreach($blacklist_addresses as $address) {
+                if (strlen($address)) {
+                    $serialized_blacklist_addresses[] = $address;
+                }
+            }
+        }
+        return $serialized_blacklist_addresses;
+    }
+
+    public function deSerializeBlacklistAddresses($serialized_blacklist_addresses) {
+        if (!is_array($serialized_blacklist_addresses)) { return []; }
+        return $serialized_blacklist_addresses;
+    }
 }

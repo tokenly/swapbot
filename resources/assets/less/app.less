@@ -55,6 +55,44 @@ ul.striped-list {
     color: @brand-danger;
 }
 
+ul.event-list {
+    max-height: 420px;
+    overflow-y: scroll;
+
+    li.event {
+        padding: 0px 6px 4px 6px;
+        border-bottom: 1px dashed #e6e6e6;
+
+        .labelWrapper {
+            display: inline-block;
+            min-width: 70px;
+            .label {
+            }
+        }
+
+        .date {
+            display: inline-block;
+            min-width: 70px;
+            color: #bbb;
+            font-size: 0.9rem;
+
+            position: relative;
+            top: 4px;
+        }
+
+        .msg {
+            color: #333;
+
+            font-size: 1.3rem;
+            position: relative;
+            top: 4px;
+        }
+    }
+    li:nth-child(even) {
+        background-color: #f6f6f6;
+    }
+}
+
 // bot form
 .remove-link {
     margin-top: 29px;
@@ -65,6 +103,10 @@ ul.striped-list {
     &:hover {
         color: darken(@brand-danger, 10%);
     }
+}
+
+.remove-link-compact {
+    margin-top: 4px;
 }
 
 

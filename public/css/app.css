@@ -6272,6 +6272,35 @@ ul.striped-list li:nth-child(even) {
 .no {
   color: #d9534f;
 }
+ul.event-list {
+  max-height: 420px;
+  overflow-y: scroll;
+}
+ul.event-list li.event {
+  padding: 0px 6px 4px 6px;
+  border-bottom: 1px dashed #e6e6e6;
+}
+ul.event-list li.event .labelWrapper {
+  display: inline-block;
+  min-width: 70px;
+}
+ul.event-list li.event .date {
+  display: inline-block;
+  min-width: 70px;
+  color: #bbb;
+  font-size: 0.9rem;
+  position: relative;
+  top: 4px;
+}
+ul.event-list li.event .msg {
+  color: #333;
+  font-size: 1.3rem;
+  position: relative;
+  top: 4px;
+}
+ul.event-list li:nth-child(even) {
+  background-color: #f6f6f6;
+}
 .remove-link {
   margin-top: 29px;
   display: block;
@@ -6280,6 +6309,9 @@ ul.striped-list li:nth-child(even) {
 }
 .remove-link:hover {
   color: #c9302c;
+}
+.remove-link-compact {
+  margin-top: 4px;
 }
 .active {
   color: #060;

@@ -1,4 +1,4 @@
-name: swap.processed
+name: swap.processed.previous
 msg: Received a transaction of 0.001 BTC from SENDER01.  Did not vend LTBCOIN to SENDER01 because this swap has already been sent.
 source: SENDER01
 inQty: 500

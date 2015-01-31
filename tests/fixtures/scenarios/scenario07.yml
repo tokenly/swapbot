@@ -45,6 +45,8 @@ expectedXChainCalls:
     data:
         quantity: 5000
         asset: SOUP
+  - 
+    meta: { baseFilename: get_balances.yml }
 
 
 expectedBotEvents:
@@ -72,10 +74,12 @@ expectedBotEvents:
 
   - 
     meta: { baseFilename: swap.failed.yml }
-    msg: Failed to swap asset. Test Exception Triggered
 
   - 
-    meta: { baseFilename: swap.processed.yml }
+    meta: { baseFilename: balanceupdate.failed.yml }
+
+  - 
+    meta: { baseFilename: swap.processed.previous.yml }
     inQty: 0.001
     inAsset: BTC
     outQty: 1000

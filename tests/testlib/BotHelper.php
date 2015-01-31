@@ -16,13 +16,14 @@ class BotHelper  {
 
     public function sampleBotVars() {
         return [
-            'name'               => 'Sample Bot One',
-            'description'        => 'The bot description goes here.',
-            'active'             => false,
-            'address'            => null,
-            'payment_address_id' => null,
-            'monitor_id'         => null,
-            'balances'           => null,
+            'name'                => 'Sample Bot One',
+            'description'         => 'The bot description goes here.',
+            'active'              => false,
+            'address'             => null,
+            'payment_address_id'  => null,
+            'monitor_id'          => null,
+            'balances'            => null,
+            'blacklist_addresses' => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
 
             'swaps' => [
                 [

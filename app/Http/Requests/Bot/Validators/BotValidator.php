@@ -5,6 +5,8 @@ namespace Swapbot\Http\Requests\Bot\Validators;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\Validator;
+use LinusU\Bitcoin\AddressValidator;
+
 
 class BotValidator {
 
@@ -32,8 +34,10 @@ class BotValidator {
     protected function buildValidator($posted_data) {
         $validator = $this->validator_factory->make($posted_data, $this->rules, $messages=[], $customAttributes=[]);
         $validator->after(function ($validator) use ($posted_data) {
-            // validate address
+            // validate swaps
             $this->validateSwaps(isset($posted_data['swaps']) ? $posted_data['swaps'] : null, $validator);
+            // validate blacklist addresses
+            $this->validateBlacklistAddresses(isset($posted_data['blacklist_addresses']) ? $posted_data['blacklist_addresses'] : null, $validator);
         });
         return $validator;
     }
@@ -120,9 +124,18 @@ class BotValidator {
         $rate = floatval($rate);
         if ($rate <= 0) { return false; }
 
-
-
         return true;
+    }
+
+
+    protected function validateBlacklistAddresses($blacklist_addresses, $validator) {
+        if ($blacklist_addresses) {
+            foreach(array_values($blacklist_addresses) as $offset => $blacklist_address) {
+                if (strlen($blacklist_address) AND !AddressValidator::isValid($blacklist_address)) {
+                    $validator->errors()->add('blacklist_addresses', "Blacklist address {$blacklist_address} was not a valid bitcoin address.");
+                }
+            }
+        }
     }
 
 }

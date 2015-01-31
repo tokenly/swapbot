@@ -1,0 +1,33 @@
+# live transaction ignored because of blacklisted address
+
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    blacklist_addresses: [SENDER01]
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.ignored.blacklist.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_EMPTY.yml }
+    txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
+    confirmations: '1'
+    processed: '1'
+    swap_receipts: {}

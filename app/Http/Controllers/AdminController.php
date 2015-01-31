@@ -23,7 +23,7 @@ class AdminController extends Controller {
         $admin_scripts = ['admin-combined.js'];
 
         return view('admin.index', [
-            'pusherUrl'     => Config::get('pusher.url'),
+            'pusherUrl'     => Config::get('tokenlyPusher.serverUrl'),
             'admin_scripts' => $admin_scripts,
         ]);
     }

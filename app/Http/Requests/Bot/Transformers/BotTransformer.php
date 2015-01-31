@@ -2,9 +2,13 @@
 
 namespace Swapbot\Http\Requests\Bot\Transformers;
 
+use Illuminate\Support\Facades\Log;
+
 class BotTransformer {
 
     public function santizeAttributes($attributes, $rules) {
+        Log::debug('$attributes'.json_encode($attributes, 192));
+
         $out = [];
         foreach (array_keys($rules) as $field_name) {
             $out[$field_name] = isset($attributes[$field_name]) ? $attributes[$field_name] : null;
@@ -13,6 +17,11 @@ class BotTransformer {
         // santize swaps
         if (isset($attributes['swaps'])) {
             $out['swaps'] = $this->sanitizeSwaps($attributes['swaps']);
+        }
+
+        // santize blacklistAddresses
+        if (isset($attributes['blacklistAddresses'])) {
+            $out['blacklist_addresses'] = $this->sanitizeBlacklistAddresses($attributes['blacklistAddresses']);
         }
 
         return $out;
@@ -39,4 +48,21 @@ class BotTransformer {
         ];
 
     }
+
+
+    protected function sanitizeBlacklistAddresses($blacklist_addresses) {
+        $blacklist_addresses_out = [];
+
+        if ($blacklist_addresses) {
+            foreach(array_values($blacklist_addresses) as $offset => $blacklist_address) {
+                if (strlen($blacklist_address)) {
+                    $blacklist_addresses_out[] = $blacklist_address;
+                }
+            }
+        }
+
+        return $blacklist_addresses_out;
+    }
+
+
 }

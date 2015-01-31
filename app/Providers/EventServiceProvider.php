@@ -17,6 +17,16 @@ class EventServiceProvider extends ServiceProvider {
 	];
 
 	/**
+	 * The subscriber classes to register.
+	 *
+	 * @var array
+	 */
+	protected $subscribe = [
+		'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler',
+	];
+
+
+	/**
 	 * Register any other events for your application.
 	 *
 	 * @param  \Illuminate\Contracts\Events\Dispatcher  $events

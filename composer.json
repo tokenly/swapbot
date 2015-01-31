@@ -10,7 +10,9 @@
 		"satooshi/php-coveralls": "~0",
 		"tokenly/xchain-client": "dev-master",
         "tokenly/bitcoin-currency-lib": "dev-master",
-		"tokenly/token-generator": "dev-master"
+		"tokenly/token-generator": "dev-master",
+		"tokenly/pusher-client": "dev-master",
+		"linusu/bitcoin-address-validator": "~0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",

@@ -57,18 +57,32 @@
     api.getBot = function(id) {
       return api.send('GET', "bots/" + id);
     };
-    api.send = function(method, apiPathSuffix, params) {
-      var path;
+    api.getBotEvents = function(id, additionalOpts) {
+      if (additionalOpts == null) {
+        additionalOpts = {};
+      }
+      return api.send('GET', "botevents/" + id, null, additionalOpts);
+    };
+    api.send = function(method, apiPathSuffix, params, additionalOpts) {
+      var k, opts, path, v;
       if (params == null) {
         params = null;
       }
+      if (additionalOpts == null) {
+        additionalOpts = {};
+      }
       path = '/api/v1/' + apiPathSuffix;
-      return m.request({
+      opts = {
         method: method,
         url: path,
         data: params,
         config: signRequest
-      });
+      };
+      for (k in additionalOpts) {
+        v = additionalOpts[k];
+        opts[k] = v;
+      }
+      return m.request(opts);
     };
     return api;
   })();
@@ -139,10 +153,21 @@
       ]);
     };
     form.mFormField = function(label, attributes, prop) {
-      var id, inputEl, inputProps, name;
+      var inputEl;
+      inputEl = form.mInputEl(attributes, prop);
+      return m("div", {
+        "class": "form-group"
+      }, [
+        m("label", {
+          "for": attributes.id,
+          "class": 'control-label'
+        }, label), inputEl
+      ]);
+    };
+    form.mInputEl = function(attributes, prop) {
+      var inputEl, inputProps, name;
       inputProps = sbAdmin.utils.clone(attributes);
-      id = inputProps.id;
-      name = inputProps.name || id;
+      name = inputProps.name || inputProps.id;
       inputProps.onchange = m.withAttr("value", prop);
       inputProps.value = prop();
       if (inputProps["class"] == null) {
@@ -158,14 +183,7 @@
       } else {
         inputEl = m("input", inputProps);
       }
-      return m("div", {
-        "class": "form-group"
-      }, [
-        m("label", {
-          "for": id,
-          "class": 'control-label'
-        }, label), inputEl
-      ]);
+      return inputEl;
     };
     form.mSubmitBtn = function(label) {
       return m("button", {
@@ -261,7 +279,7 @@
   })();
 
   (function() {
-    var serializeSwaps, swapGroup, vm;
+    var swapGroup, vm;
     sbAdmin.ctrl.botForm = {};
     swapGroup = function(number, swapProp) {
       return m("div", {
@@ -314,20 +332,17 @@
         ])
       ]);
     };
-    serializeSwaps = function(swap) {
-      var out;
-      out = [];
-      out.push(swap);
-      return out;
-    };
     vm = sbAdmin.ctrl.botForm.vm = (function() {
-      var buildSwapsPropValue, newSwapProp;
+      var buildBlacklistAddressesPropValue, buildSwapsPropValue, newSwapProp;
       buildSwapsPropValue = function(swaps) {
         var out, swap, _i, _len;
         out = [];
         for (_i = 0, _len = swaps.length; _i < _len; _i++) {
           swap = swaps[_i];
           out.push(newSwapProp(swap));
+        }
+        if (!out.length) {
+          out.push(newSwapProp());
         }
         return out;
       };
@@ -341,6 +356,18 @@
           rate: m.prop(swap.rate || '')
         });
       };
+      buildBlacklistAddressesPropValue = function(addresses) {
+        var address, out, _i, _len;
+        out = [];
+        for (_i = 0, _len = addresses.length; _i < _len; _i++) {
+          address = addresses[_i];
+          out.push(m.prop(address));
+        }
+        if (!out.length) {
+          out.push(m.prop(''));
+        }
+        return out;
+      };
       vm = {};
       vm.init = function() {
         var id;
@@ -350,6 +377,7 @@
         vm.name = m.prop('');
         vm.description = m.prop('');
         vm.swaps = m.prop([newSwapProp()]);
+        vm.blacklistAddresses = m.prop([m.prop('')]);
         id = m.route.param('id');
         if (id !== 'new') {
           sbAdmin.api.getBot(id).then(function(botData) {
@@ -357,6 +385,7 @@
             vm.name(botData.name);
             vm.description(botData.description);
             vm.swaps(buildSwapsPropValue(botData.swaps));
+            vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses));
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -375,12 +404,27 @@
             vm.swaps(newSwaps);
           };
         };
+        vm.addBlacklistAddress = function(e) {
+          e.preventDefault();
+          vm.blacklistAddresses().push(m.prop(''));
+        };
+        vm.buildRemoveBlacklistAddress = function(number) {
+          return function(e) {
+            var newBlacklistAddresses;
+            e.preventDefault();
+            newBlacklistAddresses = vm.blacklistAddresses().filter(function(blacklistAddress, index) {
+              return index !== number - 1;
+            });
+            vm.blacklistAddresses(newBlacklistAddresses);
+          };
+        };
         vm.save = function(e) {
           var apiArgs, apiCall, attributes;
           e.preventDefault();
           attributes = {
             name: vm.name(),
             description: vm.description(),
+            blacklistAddresses: vm.blacklistAddresses(),
             swaps: vm.swaps()
           };
           if (vm.resourceId().length > 0) {
@@ -426,7 +470,54 @@
                 id: 'description',
                 'placeholder': "Bot Description",
                 required: true
-              }, vm.description), m("hr"), vm.swaps().map(function(swap, offset) {
+              }, vm.description), m("hr"), m("h4", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddresses().map(function(address, offset) {
+                var number;
+                number = offset + 1;
+                return m("div", {
+                  "class": "form-group"
+                }, [
+                  m("div", {
+                    "class": "row"
+                  }, [
+                    m("div", {
+                      "class": "col-md-5"
+                    }, [
+                      sbAdmin.form.mInputEl({
+                        id: "blacklist_address_" + number,
+                        'placeholder': "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                      }, address)
+                    ]), m("div", {
+                      "class": "col-md-1"
+                    }, [
+                      m("a", {
+                        "class": "remove-link remove-link-compact",
+                        href: '#remove',
+                        onclick: vm.buildRemoveBlacklistAddress(number),
+                        style: number === 1 ? {
+                          display: 'none'
+                        } : ""
+                      }, [
+                        m("span", {
+                          "class": "glyphicon glyphicon-remove-circle",
+                          title: "Remove Address " + number
+                        }, '')
+                      ])
+                    ])
+                  ])
+                ]);
+              }), m("div", {
+                "class": "form-group"
+              }, [
+                m("a", {
+                  "class": "",
+                  href: '#add-address',
+                  onclick: vm.addBlacklistAddress
+                }, [
+                  m("span", {
+                    "class": "glyphicon glyphicon-plus"
+                  }, ''), m("span", {}, ' Add Another Blacklist Address')
+                ])
+              ]), m("hr"), vm.swaps().map(function(swap, offset) {
                 return swapGroup(offset + 1, swap);
               }), m("div", {
                 "class": "form-group"
@@ -445,7 +536,7 @@
               }), sbAdmin.form.mSubmitBtn("Save Bot"), m("a[href='/dashboard']", {
                 "class": "btn btn-default pull-right",
                 config: m.route
-              }, "Cancel")
+              }, "Return without Saving")
             ])
           ])
         ])
@@ -454,7 +545,7 @@
   })();
 
   (function() {
-    var closePusherChannel, handlePusherMessage, serializeSwaps, subscribeToPusherChannel, swapGroup, vm;
+    var buildBalancesMElement, buildMLevel, closePusherChannel, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, subscribeToPusherChannel, swapGroup, vm;
     sbAdmin.ctrl.botView = {};
     swapGroup = function(number, swapProp) {
       return m("div", {
@@ -505,13 +596,92 @@
     closePusherChannel = function(client) {
       client.disconnect();
     };
-    handlePusherMessage = function(data) {
-      console.log("pusher says:", data);
-      vm.botEvents().unshift(data);
-      m.redraw(true);
+    handleBotEventMessage = function(data) {
+      var _ref, _ref1;
+      console.log("pusher received:", data);
+      console.log("msg:", data != null ? (_ref = data.event) != null ? _ref.msg : void 0 : void 0);
+      if (data != null ? (_ref1 = data.event) != null ? _ref1.msg : void 0 : void 0) {
+        vm.botEvents().unshift(data);
+        m.redraw(true);
+      }
+    };
+    handleBotBalancesMessage = function(data) {
+      console.log("bot balances:", data);
+      if (data != null) {
+        vm.updateBalances(data);
+        m.redraw(true);
+      }
+    };
+    buildMLevel = function(levelNumber) {
+      switch (levelNumber) {
+        case 100:
+          return m('span', {
+            "class": "label label-default debug"
+          }, "Debug");
+        case 200:
+          return m('span', {
+            "class": "label label-info info"
+          }, "Info");
+        case 250:
+          return m('span', {
+            "class": "label label-primary primary"
+          }, "Notice");
+        case 300:
+          return m('span', {
+            "class": "label label-warning warning"
+          }, "Warning");
+        case 400:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Error");
+        case 500:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Critical");
+        case 550:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Alert");
+        case 600:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Emergency");
+      }
+      return m('span', {
+        "class": "label label-danger danger"
+      }, "Code " + levelNumber);
+    };
+    buildBalancesMElement = function(balances) {
+      if (vm.balances().length > 0) {
+        return m("table", {
+          "class": "table table-condensed table-striped"
+        }, [
+          m("thead", {}, [
+            m("tr", {}, [
+              m('th', {
+                style: {
+                  width: '40%'
+                }
+              }, 'Asset'), m('th', {
+                style: {
+                  width: '60%'
+                }
+              }, 'Balance')
+            ])
+          ]), m("tbody", {}, [
+            vm.balances().map(function(balance, index) {
+              return m("tr", {}, [m('td', balance.asset), m('td', balance.val)]);
+            })
+          ])
+        ]);
+      } else {
+        return m("div", {
+          "class": "form-group"
+        }, "No Balances Found");
+      }
     };
     vm = sbAdmin.ctrl.botView.vm = (function() {
-      var buildSwapsPropValue, newSwapProp;
+      var buildBalancesPropValue, buildSwapsPropValue, newSwapProp;
       buildSwapsPropValue = function(swaps) {
         var out, swap, _i, _len;
         out = [];
@@ -531,7 +701,23 @@
           rate: m.prop(swap.rate || '')
         });
       };
+      buildBalancesPropValue = function(balances) {
+        var asset, out, val;
+        out = [];
+        for (asset in balances) {
+          val = balances[asset];
+          out.push({
+            asset: asset,
+            val: val
+          });
+        }
+        console.log("buildBalancesPropValue out=", out);
+        return out;
+      };
       vm = {};
+      vm.updateBalances = function(newBalances) {
+        vm.balances(buildBalancesPropValue(newBalances));
+      };
       vm.init = function() {
         var id;
         vm.errorMessages = m.prop([]);
@@ -544,6 +730,7 @@
         vm.address = m.prop('');
         vm.active = m.prop('');
         vm.swaps = m.prop(buildSwapsPropValue([]));
+        vm.balances = m.prop(buildBalancesPropValue([]));
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           console.log("botData", botData);
@@ -553,10 +740,17 @@
           vm.active(botData.active);
           vm.description(botData.description);
           vm.swaps(buildSwapsPropValue(botData.swaps));
+          vm.balances(buildBalancesPropValue(botData.balances));
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
-        vm.pusherClient(subscribeToPusherChannel("swapbot_" + id, handlePusherMessage));
+        sbAdmin.api.getBotEvents(id).then(function(apiResponse) {
+          vm.botEvents(apiResponse);
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+        vm.pusherClient(subscribeToPusherChannel("swapbot_events_" + id, handleBotEventMessage));
+        vm.pusherClient(subscribeToPusherChannel("swapbot_balances_" + id, handleBotBalancesMessage));
         console.log("vm.pusherClient=", vm.pusherClient());
       };
       return vm;
@@ -569,19 +763,20 @@
       vm.init();
     };
     sbAdmin.ctrl.botView.view = function() {
+      console.log("vm.balances()=", vm.balances());
       return m("div", [
-        m("div", {
-          "class": "row"
+        m("h2", "SwapBot " + (vm.name())), m("div", {
+          "class": "spacer1"
+        }), m("div", {
+          "class": "bot-view"
         }, [
-          m("div", {
-            "class": "col-md-12"
+          sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+            "class": "row"
           }, [
-            m("h2", "SwapBot " + (vm.name())), m("div", {
-              "class": "spacer1"
-            }), m("div", {
-              "class": "bot-view"
+            m("div", {
+              "class": "col-md-8"
             }, [
-              sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+              m("div", {
                 "class": "row"
               }, [
                 m("div", {
@@ -591,7 +786,7 @@
                     id: 'name'
                   }, vm.name())
                 ]), m("div", {
-                  "class": "col-md-6"
+                  "class": "col-md-5"
                 }, [
                   sbAdmin.form.mValueDisplay("Address", {
                     id: 'address'
@@ -599,7 +794,7 @@
                     "class": 'no'
                   }, "[ none ]"))
                 ]), m("div", {
-                  "class": "col-md-2"
+                  "class": "col-md-3"
                 }, [
                   sbAdmin.form.mValueDisplay("Status", {
                     id: 'status'
@@ -609,29 +804,58 @@
                     "class": 'no'
                   }, "Inactive"))
                 ])
-              ]), sbAdmin.form.mValueDisplay("Bot Description", {
-                id: 'description'
-              }, vm.description()), m("hr"), vm.swaps().map(function(swap, offset) {
-                return swapGroup(offset + 1, swap);
-              }), m("hr"), m("div", {
-                "class": "bot-events"
-              }, [
-                m("h3", "Events"), vm.botEvents().map(function(event) {
-                  return m("div", {
-                    "class": "event"
-                  }, event);
-                })
               ]), m("div", {
-                "class": "spacer2"
-              }), m("a[href='/edit/bot/" + (vm.resourceId()) + "']", {
-                "class": "btn btn-success",
-                config: m.route
-              }, "Edit This Bot"), m("a[href='/dashboard']", {
-                "class": "btn btn-default pull-right",
-                config: m.route
-              }, "Back to Dashboard")
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  sbAdmin.form.mValueDisplay("Bot Description", {
+                    id: 'description'
+                  }, vm.description())
+                ])
+              ])
+            ]), m("div", {
+              "class": "col-md-4"
+            }, [
+              sbAdmin.form.mValueDisplay("Balances", {
+                id: 'balances'
+              }, buildBalancesMElement(vm.balances()))
             ])
-          ])
+          ]), m("hr"), vm.swaps().map(function(swap, offset) {
+            return swapGroup(offset + 1, swap);
+          }), m("hr"), m("div", {
+            "class": "bot-events"
+          }, [
+            m("h3", "Events"), m("ul", {
+              "class": "list-unstyled striped-list event-list"
+            }, [
+              vm.botEvents().map(function(botEventObj) {
+                var dateObj, _ref;
+                dateObj = window.moment(botEventObj.createdAt);
+                return m("li", {
+                  "class": "event"
+                }, [
+                  m("div", {
+                    "class": "labelWrapper"
+                  }, buildMLevel(botEventObj.level)), m("span", {
+                    "class": "date",
+                    title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
+                  }, dateObj.format('MMM D h:mm a')), m("span", {
+                    "class": "msg"
+                  }, (_ref = botEventObj.event) != null ? _ref.msg : void 0)
+                ]);
+              })
+            ])
+          ]), m("div", {
+            "class": "spacer2"
+          }), m("a[href='/edit/bot/" + (vm.resourceId()) + "']", {
+            "class": "btn btn-success",
+            config: m.route
+          }, "Edit This Bot"), m("a[href='/dashboard']", {
+            "class": "btn btn-default pull-right",
+            config: m.route
+          }, "Back to Dashboard")
         ])
       ]);
     };

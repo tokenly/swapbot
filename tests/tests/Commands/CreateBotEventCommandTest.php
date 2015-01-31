@@ -26,9 +26,10 @@ class CreateBotEventCommandTest extends TestCase {
         $loaded_events = $repository->findByBotId($bot['id']);
         PHPUnit::assertCount(1, $loaded_events);
         $expected_event = [
-            'id'    => $loaded_events[0]['uuid'],
-            'level' => $level,
-            'event' => $event_data,
+            'id'        => $loaded_events[0]['uuid'],
+            'level'     => $level,
+            'event'     => $event_data,
+            'createdAt' => $loaded_events[0]['created_at']->toIso8601String(),
         ];
         PHPUnit::assertEquals($expected_event, $loaded_events[0]->serializeForAPI());
     }

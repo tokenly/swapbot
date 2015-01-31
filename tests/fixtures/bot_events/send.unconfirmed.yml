@@ -1,0 +1,6 @@
+name: send.unconfirmed
+msg: Saw unconfirmed send of 500 LTBCOIN to SENDER01 with transaction ID 00000000000000000000000000000000000000000000000000000xcptx111111.
+source: SWAPBOTADDR01
+outQty: 500
+outAsset: LTBCOIN
+destination: SENDER01

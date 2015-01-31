@@ -20,6 +20,8 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_LTBCOIN.yml }
+  - 
+    meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
   - 

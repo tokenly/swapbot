@@ -1,0 +1,30 @@
+# unconfirmed send logs events
+
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_SEND_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls: none
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: send.unconfirmed.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_EMPTY.yml }
+    txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
+    confirmations: '0'
+    processed: '0'
+    swap_receipts: {}

@@ -22,7 +22,9 @@ xchainNotifications:
 
 ############################
 # validate the expected results
-expectedXChainCalls: none
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
   - 

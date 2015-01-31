@@ -28,6 +28,8 @@ class CreateBotsTable extends Migration {
 
             $table->text('balances')->nullable();
 
+            $table->text('blacklist_addresses')->nullable();
+
             $table->boolean('active')->default(0);
 			$table->timestamps();
 		});

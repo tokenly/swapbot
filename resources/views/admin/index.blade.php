@@ -26,9 +26,9 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="/bower_components/mithril/mithril.js"></script>
 
-    <div class="container" style="margin-top:24px;">
+    <div class="container" style="margin-top:0px; margin-bottom: 24px;">
         <div class="row">
-            <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-12 col-lg-10 col-lg-offset-1">
                 <div id="admin"></div>
             </div>
         </div>
@@ -38,6 +38,7 @@
     <script src="/bower_components/cryptojslib/rollups/sha1.js"></script>
     <script src="/bower_components/cryptojslib/rollups/hmac-sha256.js"></script>
     <script src="/bower_components/cryptojslib/components/enc-base64-min.js"></script>
+    <script src="/bower_components/moment/min/moment.min.js"></script>
 
     <!-- pusher -->
     <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>

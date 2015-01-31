@@ -1,0 +1,41 @@
+# unconfirmed send followed by confirmed send logs events
+
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_SEND_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: send.unconfirmed.yml }
+  - 
+    meta: { baseFilename: send.confirmed.yml }
+  - 
+    meta: { baseFilename: send.previous.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_EMPTY.yml }
+    txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
+    confirmations: '1'
+    processed: '1'
+    swap_receipts: {}

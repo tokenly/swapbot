@@ -17,7 +17,7 @@ class BotEventRepository extends APIRepository implements APIResourceRepositoryC
     protected $model_type = 'Swapbot\Models\BotEvent';
 
     public function findByBotId($bot_id) {
-        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)->get();
+        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)->latest()->get();
     }
 
 

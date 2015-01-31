@@ -38,6 +38,8 @@ expectedXChainCalls:
     data:
         quantity: 5000
         asset: SOUP
+  - 
+    meta: { baseFilename: get_balances.yml }
 
 
 expectedBotEvents:

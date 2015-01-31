@@ -14,9 +14,16 @@ sbAdmin.form = do ()->
         ])
 
     form.mFormField = (label, attributes, prop)->
+        inputEl = form.mInputEl(attributes, prop)
+
+        return m("div", {class: "form-group"}, [
+            m("label", {for: attributes.id, class: 'control-label'}, label),
+            inputEl,
+        ])
+
+    form.mInputEl = (attributes, prop)->
         inputProps = sbAdmin.utils.clone(attributes)
-        id = inputProps.id
-        name = inputProps.name or id
+        name = inputProps.name or inputProps.id
 
         inputProps.onchange = m.withAttr("value", prop)
         inputProps.value = prop()
@@ -33,10 +40,8 @@ sbAdmin.form = do ()->
             inputEl = m("input", inputProps)
 
 
-        return m("div", {class: "form-group"}, [
-            m("label", {for: id, class: 'control-label'}, label),
-            inputEl,
-        ])
+        return inputEl;
+
 
     form.mSubmitBtn = (label)->
         return m("button", {type: 'submit', class: 'btn btn-primary'}, label)

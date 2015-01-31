@@ -21,7 +21,7 @@ class CreateBotEventsTable extends Migration {
             $table->integer('bot_id')->unsigned();
             $table->foreign('bot_id')->references('id')->on('bots');
 
-            $table->tinyInteger('level')->unsigned();
+            $table->mediumInteger('level')->unsigned();
             $table->longText('event');
 
 			$table->timestamp('created_at');

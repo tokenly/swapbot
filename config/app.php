@@ -151,6 +151,7 @@ return [
 		 * Vender Service Providers...
 		 */
 		'Tokenly\XChainClient\XChainServiceProvider',
+		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
 
 	],
 

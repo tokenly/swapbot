@@ -64,9 +64,12 @@ sbAdmin.api = do ()->
     api.getBot = (id)->
         return api.send('GET', "bots/#{id}")
 
+    api.getBotEvents = (id, additionalOpts={})->
+        return api.send('GET', "botevents/#{id}", null, additionalOpts)
 
 
-    api.send = (method, apiPathSuffix, params=null)->
+
+    api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
         path = '/api/v1/'+apiPathSuffix
 
         # console.log "FAKE request"
@@ -76,12 +79,17 @@ sbAdmin.api = do ()->
         # , 2500
         # return dfd.promise
 
-        return m.request({
+        opts = {
             method: method,
             url: path,
             data: params,
             config: signRequest,
             # background: true,
-        })
+        }
+
+        # merge additionalOpts
+        opts[k] = v for k, v of additionalOpts
+
+        return m.request(opts)
 
     return api

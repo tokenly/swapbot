@@ -25,10 +25,10 @@ do ()->
             ]),
         ])
 
-    serializeSwaps = (swap)->
-        out = []
-        out.push(swap)
-        return out
+    # serializeSwaps = (swap)->
+    #     out = []
+    #     out.push(swap)
+    #     return out
 
     # ################################################
 
@@ -37,6 +37,11 @@ do ()->
             out = []
             for swap in swaps
                 out.push(newSwapProp(swap))
+
+            # always have at least one
+            if not out.length
+                out.push(newSwapProp())
+
             return out
 
         newSwapProp = (swap={})->
@@ -45,6 +50,17 @@ do ()->
                 out: m.prop(swap.out or '')
                 rate: m.prop(swap.rate or '')
             })
+
+        buildBlacklistAddressesPropValue = (addresses)->
+            out = []
+            for address in addresses
+                out.push(m.prop(address))
+
+            # always have at least one
+            if not out.length
+                out.push(m.prop(''))
+
+            return out
 
         vm = {}
         vm.init = ()->
@@ -57,6 +73,7 @@ do ()->
             vm.name = m.prop('')
             vm.description = m.prop('')
             vm.swaps = m.prop([newSwapProp()])
+            vm.blacklistAddresses = m.prop([m.prop('')])
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -69,6 +86,7 @@ do ()->
                         vm.name(botData.name)
                         vm.description(botData.description)
                         vm.swaps(buildSwapsPropValue(botData.swaps))
+                        vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses))
 
                         return
                     , (errorResponse)->
@@ -91,12 +109,28 @@ do ()->
                     vm.swaps(newSwaps)
                     return
 
+            vm.addBlacklistAddress = (e)->
+                e.preventDefault()
+                vm.blacklistAddresses().push(m.prop(''))
+                return
+
+            vm.buildRemoveBlacklistAddress = (number)->
+                return (e)->
+                    e.preventDefault()
+
+                    # filter newBlacklistAddresses
+                    newBlacklistAddresses = vm.blacklistAddresses().filter (blacklistAddress, index)->
+                        return (index != number - 1)
+                    vm.blacklistAddresses(newBlacklistAddresses)
+                    return
+
             vm.save = (e)->
                 e.preventDefault()
 
                 attributes = {
                     name: vm.name()
                     description: vm.description()
+                    blacklistAddresses: vm.blacklistAddresses()
                     swaps: vm.swaps()
                 }
 
@@ -141,8 +175,39 @@ do ()->
 
                         m("hr"),
 
-                        vm.swaps().map (swap, offset)->
+                        m("h4", "Blacklisted Addresses"),
+                        m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]),
+                        vm.blacklistAddresses().map((address, offset)->
+                            number = offset+1
+                            return m("div", {class: "form-group"}, [
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-5"}, [
+                                        sbAdmin.form.mInputEl({id: "blacklist_address_#{number}", 'placeholder': "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", }, address),
+                                    ]),
+                                    m("div", {class: "col-md-1"}, [
+                                        m("a", {class: "remove-link remove-link-compact", href: '#remove', onclick: vm.buildRemoveBlacklistAddress(number), style: if number == 1 then {display: 'none'} else ""}, [
+                                            m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Address #{number}"}, ''),
+                                        ]),
+                                    ]),
+                                ]),
+                            ])
+                        ),
+
+                        # add blacklist address
+                        m("div", {class: "form-group"}, [
+                                m("a", {class: "", href: '#add-address', onclick: vm.addBlacklistAddress}, [
+                                    m("span", {class: "glyphicon glyphicon-plus"}, ''),
+                                    m("span", {}, ' Add Another Blacklist Address'),
+                                ]),
+                        ]),
+
+
+
+                        m("hr"),
+
+                        vm.swaps().map((swap, offset)->
                             return swapGroup(offset+1, swap)
+                        ),
 
                         # add asset
                         m("div", {class: "form-group"}, [
@@ -156,7 +221,7 @@ do ()->
                         m("div", {class: "spacer1"}),
 
                         sbAdmin.form.mSubmitBtn("Save Bot"),
-                        m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Cancel"),
+                        m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
                         
 
                     ]),

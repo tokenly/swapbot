@@ -84,7 +84,7 @@ class APITestHelper  {
         return $loaded_resource_model;
     }
 
-    public function testIndex() {
+    public function testIndex($url_extension=null) {
         $this->cleanup();
 
         // create 2 models
@@ -94,7 +94,7 @@ class APITestHelper  {
         
 
         // now call the API
-        $url = $this->extendURL($this->url_base, null);
+        $url = $this->extendURL($this->url_base, $url_extension);
         $response = $this->callAPIWithAuthentication('GET', $url);
         PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
         $actual_response_from_api = json_decode($response->getContent(), true);

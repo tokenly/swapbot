@@ -125,7 +125,7 @@ class ScenarioRunner
         }
 
         // make sure the counts are the same
-        PHPUnit::assertCount(count($expected_bot_events), $actual_bot_events, "Did not find the current number of Bot Events");
+        PHPUnit::assertCount(count($expected_bot_events), $actual_bot_events, "Did not find the correct number of Bot Events");
     }
 
     protected function validateExpectedBotEvent($expected_bot_event, $actual_bot_event) {
@@ -182,7 +182,8 @@ class ScenarioRunner
 
     protected function validateExpectedXChainCalls($expected_xchain_calls) {
         if ($expected_xchain_calls === 'none') {
-            PHPUnit::assertEmpty($this->xchain_mock_recorder->calls);
+            $count = count($this->xchain_mock_recorder->calls);
+            PHPUnit::assertEmpty($this->xchain_mock_recorder->calls, "Found ".$count." unexpected XChain call".($count==1?'':'s')."");
             return;
         }
 
@@ -200,7 +201,7 @@ class ScenarioRunner
         }
 
         // make sure the counts are the same
-        PHPUnit::assertCount(count($expected_xchain_calls), $actual_xchain_calls, "Did not find the current number of XChain calls");
+        PHPUnit::assertCount(count($expected_xchain_calls), $actual_xchain_calls, "Did not find the correct number of XChain calls");
 
     }
 
@@ -277,7 +278,7 @@ class ScenarioRunner
         }
 
         // make sure the counts are the same
-        PHPUnit::assertCount(count($expected_transaction_models), $actual_transaction_models, "Did not find the current number of XChain calls");
+        PHPUnit::assertCount(count($expected_transaction_models), $actual_transaction_models, "Did not find the correct number of Transaction models");
 
     }
 

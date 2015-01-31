@@ -38,13 +38,55 @@ do ()->
 
 
 
-    handlePusherMessage = (data)->
-        console.log "pusher says:", data
-        vm.botEvents().unshift(data)
-        # this is outside of mithril, so we must force a redraw
-        m.redraw(true)
+    handleBotEventMessage = (data)->
+        console.log "pusher received:", data
+        console.log "msg:", data?.event?.msg
+        if data?.event?.msg
+            vm.botEvents().unshift(data)
+            # this is outside of mithril, so we must force a redraw
+            m.redraw(true)
         return
 
+    handleBotBalancesMessage = (data)->
+        console.log "bot balances:",data
+        if data?
+            vm.updateBalances(data)
+            # this is outside of mithril, so we must force a redraw
+            m.redraw(true)
+        return
+
+
+    buildMLevel = (levelNumber)->
+        switch levelNumber
+            when 100 then return m('span', {class: "label label-default debug"}, "Debug")
+            when 200 then return m('span', {class: "label label-info info"}, "Info")
+            when 250 then return m('span', {class: "label label-primary primary"}, "Notice")
+            when 300 then return m('span', {class: "label label-warning warning"}, "Warning")
+            when 400 then return m('span', {class: "label label-danger danger"}, "Error")
+            when 500 then return m('span', {class: "label label-danger danger"}, "Critical")
+            when 550 then return m('span', {class: "label label-danger danger"}, "Alert")
+            when 600 then return m('span', {class: "label label-danger danger"}, "Emergency")
+        return m('span', {class: "label label-danger danger"}, "Code #{levelNumber}")
+
+    buildBalancesMElement = (balances)->
+        if vm.balances().length > 0
+            return m("table", {class: "table table-condensed table-striped"}, [
+                m("thead", {}, [
+                    m("tr", {}, [
+                        m('th', {style: {width:'40%'}}, 'Asset'),
+                        m('th', {style: {width:'60%'}}, 'Balance'),
+                    ]),
+                ]),
+                m("tbody", {}, [
+                    vm.balances().map (balance, index)->
+                        return m("tr", {}, [
+                            m('td', balance.asset),
+                            m('td', balance.val),
+                        ])
+                ]),
+            ])
+        else
+            return m("div", {class: "form-group"}, "No Balances Found")
 
     # ################################################
 
@@ -62,7 +104,23 @@ do ()->
                 rate: m.prop(swap.rate or '')
             })
 
+
+        buildBalancesPropValue = (balances)->
+            out = []
+            for asset, val of balances
+                out.push({
+                    asset: asset
+                    val: val
+                })
+            console.log "buildBalancesPropValue out=",out
+            return out
+
         vm = {}
+
+        vm.updateBalances = (newBalances)->
+            vm.balances(buildBalancesPropValue(newBalances))
+            return
+
         vm.init = ()->
             # view status
             vm.errorMessages = m.prop([])
@@ -77,6 +135,7 @@ do ()->
             vm.address = m.prop('')
             vm.active = m.prop('')
             vm.swaps = m.prop(buildSwapsPropValue([]))
+            vm.balances = m.prop(buildBalancesPropValue([]))
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -91,6 +150,7 @@ do ()->
                     vm.active(botData.active)
                     vm.description(botData.description)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
+                    vm.balances(buildBalancesPropValue(botData.balances))
 
                     return
                 , (errorResponse)->
@@ -98,7 +158,18 @@ do ()->
                     return
             )
 
-            vm.pusherClient(subscribeToPusherChannel("swapbot_#{id}", handlePusherMessage))
+            # also get the bot events
+            sbAdmin.api.getBotEvents(id).then(
+                (apiResponse)->
+                    vm.botEvents(apiResponse)
+                    return
+                , (errorResponse)->
+                    vm.errorMessages(errorResponse.errors)
+                    return
+            )
+
+            vm.pusherClient(subscribeToPusherChannel("swapbot_events_#{id}", handleBotEventMessage))
+            vm.pusherClient(subscribeToPusherChannel("swapbot_balances_#{id}", handleBotBalancesMessage))
             console.log "vm.pusherClient=",vm.pusherClient()
 
             return
@@ -116,9 +187,10 @@ do ()->
 
 
     sbAdmin.ctrl.botView.view = ()->
+
+        console.log "vm.balances()=",vm.balances()
+
         return m("div", [
-            m("div", { class: "row"}, [
-                m("div", {class: "col-md-12"}, [
                     m("h2", "SwapBot #{vm.name()}"),
 
                     m("div", {class: "spacer1"}),
@@ -126,20 +198,37 @@ do ()->
                     m("div", {class: "bot-view"}, [
                         sbAdmin.form.mAlerts(vm.errorMessages),
 
-
                         m("div", { class: "row"}, [
+
+                            m("div", {class: "col-md-8"}, [
+
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-4"}, [
+                                        sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
+                                    ]),
+                                    m("div", {class: "col-md-5"}, [
+                                        sbAdmin.form.mValueDisplay("Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
+                                    ]),
+                                    m("div", {class: "col-md-3"}, [
+                                        sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, if vm.active() then m("span", {class: 'yes'}, "Active") else m("span", {class: 'no'}, "Inactive")),
+                                    ]),
+                                ]),
+
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-12"}, [
+                                        sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
+                                    ]),
+
+
+                                ]),
+                            ]),
+
+                            # #### Balances
                             m("div", {class: "col-md-4"}, [
-                                sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
-                            ]),
-                            m("div", {class: "col-md-6"}, [
-                                sbAdmin.form.mValueDisplay("Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
-                            ]),
-                            m("div", {class: "col-md-2"}, [
-                                sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, if vm.active() then m("span", {class: 'yes'}, "Active") else m("span", {class: 'no'}, "Inactive")),
+                                sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, buildBalancesMElement(vm.balances())),
                             ]),
                         ]),
 
-                        sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
 
                         m("hr"),
 
@@ -151,8 +240,15 @@ do ()->
 
                         m("div", {class: "bot-events"}, [
                             m("h3", "Events"),
-                            vm.botEvents().map (event)->
-                                return m("div", {class: "event"}, event)
+                            m("ul", {class: "list-unstyled striped-list event-list"}, [
+                                vm.botEvents().map (botEventObj)->
+                                    dateObj = window.moment(botEventObj.createdAt)
+                                    return m("li", {class: "event"}, [
+                                        m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
+                                        m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
+                                        m("span", {class: "msg"}, botEventObj.event?.msg),
+                                    ])
+                            ]),
                         ]),
 
 
@@ -163,10 +259,6 @@ do ()->
                         
 
                     ]),
-
-                ]),
-            ]),
-
 
 
         ])

@@ -2,6 +2,7 @@
 
 namespace Swapbot\Models\Base;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use \Exception;
 
@@ -23,11 +24,17 @@ class APIModel extends Model
             if ($api_attribute == 'id' AND isset($this['uuid'])) {
                 $out['id'] = $this['uuid'];
             } else {
-                $out[camel_case($api_attribute)] = $this[$api_attribute];
+                $value = $this[$api_attribute];
+                if ($value instanceof Carbon) {
+                    $value = $value->toIso8601String();
+                }
+
+                $out[camel_case($api_attribute)] = $value;
             }
         }
 
         return $out;
     }
+
 
 }

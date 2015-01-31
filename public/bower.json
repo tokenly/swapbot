@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "mithril": "0.1.29",
-    "cryptojslib": "3.1.2"
+    "cryptojslib": "3.1.2",
+    "moment": "~2.9.0"
   }
 }
