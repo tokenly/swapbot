@@ -11,7 +11,7 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  - meta: { baseFilename: confirmed_LTBCOIN_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
 
 
 ############################

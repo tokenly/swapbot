@@ -23,7 +23,7 @@ bots:
 # receive notifications from xchain
 xchainNotifications:
   -
-    meta: { baseFilename: confirmed_BTC_notification_01.yml }
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
 
 
 

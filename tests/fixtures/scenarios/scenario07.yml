@@ -25,11 +25,11 @@ bots:
 xchainNotifications:
   -
     meta:
-        baseFilename: confirmed_BTC_notification_01.yml
+        baseFilename: confirmed_BTC_RECEIVE_notification_01.yml
         xchainFailAfterRequests: 1
   -
     meta:
-        baseFilename: confirmed_BTC_notification_01.yml
+        baseFilename: confirmed_BTC_RECEIVE_notification_01.yml
         confirmations: 2
 
 
