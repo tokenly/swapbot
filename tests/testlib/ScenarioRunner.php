@@ -360,7 +360,11 @@ class ScenarioRunner
             $base_filename = $entry['meta']['baseFilename'];
         } else { throw new Exception("No base filename", 1); }
 
-        $text = file_get_contents(base_path().'/tests/fixtures/'.trim($fixtures_folder, '/').'/'.$base_filename);
+        $directory = base_path().'/tests/fixtures/'.trim($fixtures_folder, '/');
+        $filepath = $directory.'/'.$base_filename;
+        PHPUnit::assertTrue(file_exists($filepath), "Filepath did not exist: {$filepath}.  Files were: ".json_encode(scandir($directory), 192));
+
+        $text = file_get_contents($filepath);
         if (substr($base_filename, -5) == '.json') {
             return json_decode($text, true);
         }
@@ -369,9 +373,5 @@ class ScenarioRunner
         }
         throw new Exception("Unknown filename $filename", 1);
     }
-
-
-
-
 
 }
