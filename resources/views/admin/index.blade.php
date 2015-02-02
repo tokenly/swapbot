@@ -24,7 +24,7 @@
     <!-- Scripts -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <script src="/bower_components/mithril/mithril.js"></script>
+    <script src="/bower_components/mithril/mithril.min.js"></script>
 
     <div class="container" style="margin-top:0px; margin-bottom: 24px;">
         <div class="row">
