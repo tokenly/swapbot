@@ -26,8 +26,12 @@ class BotRepository extends APIRepository implements APIResourceRepositoryContra
         return call_user_func([$this->model_type, 'where'], 'user_id', $user_id)->get();
     }
 
-    public function findByMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'monitor_id', $monitor_id)->first();
+    public function findByReceiveMonitorID($monitor_id) {
+        return call_user_func([$this->model_type, 'where'], 'receive_monitor_id', $monitor_id)->first();
+    }
+
+    public function findBySendMonitorID($monitor_id) {
+        return call_user_func([$this->model_type, 'where'], 'send_monitor_id', $monitor_id)->first();
     }
 
 

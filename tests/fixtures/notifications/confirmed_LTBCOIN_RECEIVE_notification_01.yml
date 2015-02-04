@@ -4,7 +4,7 @@ txid: 00000000000000000000000000000000000000000000000000000xcptx111111
 network: counterparty
 event: receive
 notifiedAddress: SWAPBOTADDR01
-notifiedAddressId: MONITOR_ID_01
+notifiedAddressId: RECEIVE_MONITOR_ID_01
 sources: [SENDER01]
 destinations: [SWAPBOTADDR01]
 confirmed: true

@@ -4,7 +4,8 @@ active: true
 
 address: botaddress000000000000000000000001
 payment_address_id: PAYMENT_ADDRESS_ID_01
-monitor_id: MONITOR_ID_01
+send_monitor_id: SEND_MONITOR_ID_01
+receive_monitor_id: RECEIVE_MONITOR_ID_01
 
 swaps:
   -

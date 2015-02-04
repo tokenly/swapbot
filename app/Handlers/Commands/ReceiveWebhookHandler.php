@@ -66,7 +66,7 @@ class ReceiveWebhookHandler {
 
     protected function handleReceive($xchain_notification) {
         // find the bot related to this notification
-        $bot = $this->bot_repository->findByMonitorID($xchain_notification['notifiedAddressId']);
+        $bot = $this->bot_repository->findByReceiveMonitorID($xchain_notification['notifiedAddressId']);
         if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
@@ -228,7 +228,7 @@ class ReceiveWebhookHandler {
 
     protected function handleSend($xchain_notification) {
         // find the bot related to this notification
-        $bot = $this->bot_repository->findByMonitorID($xchain_notification['notifiedAddressId']);
+        $bot = $this->bot_repository->findBySendMonitorID($xchain_notification['notifiedAddressId']);
         if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction

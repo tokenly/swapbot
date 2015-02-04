@@ -21,7 +21,8 @@ class BotHelper  {
             'active'              => false,
             'address'             => null,
             'payment_address_id'  => null,
-            'monitor_id'          => null,
+            'receive_monitor_id'  => null,
+            'send_monitor_id'     => null,
             'balances'            => null,
             'blacklist_addresses' => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
 
