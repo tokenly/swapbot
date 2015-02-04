@@ -46,18 +46,23 @@ class ActivateBotHandler {
             $update_vars['payment_address_id'] = $payment_address['id'];
             $update_vars['address'] = $payment_address['address'];
             EventLog::log('bot.paymentAddressCreated', ['id' => $bot['id'], 'payment_address_id' => $payment_address['id'], 'address' => $payment_address['address']]);
+
+            $address = $payment_address['address'];
+        } else {
+
+            $address = $bot['address'];
         }
 
         // monitor it for receives
         if (!$bot['receive_monitor_id']) {
-            $monitor = $this->xchain_client->newAddressMonitor($payment_address['address'], Config::get('swapbot.webhook_url'), 'receive', true);
+            $monitor = $this->xchain_client->newAddressMonitor($address, Config::get('swapbot.webhook_url'), 'receive', true);
             $update_vars['receive_monitor_id'] = $monitor['id'];
             EventLog::log('bot.receiveMonitorCreated', ['id' => $bot['id'], 'receive_monitor_id' => $monitor['id']]);
         }
 
         // and monitor for sends
         if (!$bot['send_monitor_id']) {
-            $monitor = $this->xchain_client->newAddressMonitor($payment_address['address'], Config::get('swapbot.webhook_url'), 'send', true);
+            $monitor = $this->xchain_client->newAddressMonitor($address, Config::get('swapbot.webhook_url'), 'send', true);
             $update_vars['send_monitor_id'] = $monitor['id'];
             EventLog::log('bot.sendMonitorCreated', ['id' => $bot['id'], 'send_monitor_id' => $monitor['id']]);
         }
