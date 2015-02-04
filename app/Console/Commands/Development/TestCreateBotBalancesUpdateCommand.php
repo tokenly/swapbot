@@ -68,7 +68,7 @@ EOF
         }
 
         $this->info("Creating balances for bot ".$bot['name']." ({$bot['uuid']})");
-        Event::fire(new BotBalancesUpdated($bot, $balances));
+        Event::fire(new BotBalancesUpdated($bot, [], $balances));
         $this->info("done");
     }
 

@@ -34,20 +34,22 @@ class UpdateBotBalancesHandler {
     {
         $bot = $command->bot;
 
+        $old_balances = $bot['balances'];
+
         $update_vars = [];
 
         // get balances
         if (!$bot['address']) { throw new Exception("This bot does not have an address yet", 1); }
-        $balances = $this->xchain_client->getBalances($bot['address']);
-        $update_vars['balances'] = $balances;
+        $new_balances = $this->xchain_client->getBalances($bot['address']);
+        $update_vars['balances'] = $new_balances;
 
         // update the bot
         $this->repository->update($bot, $update_vars);
 
         // fire an event
-        $balances_were_updated = (json_encode($balances) != json_encode($bot['balances']));
+        $balances_were_updated = (json_encode($old_balances) != json_encode($new_balances));
         if ($balances_were_updated) {
-            Event::fire(new BotBalancesUpdated($bot, $balances));
+            Event::fire(new BotBalancesUpdated($bot, $old_balances, $new_balances));
         }
 
     }

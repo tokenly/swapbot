@@ -22,7 +22,7 @@ class BotUpdatesForDisplayHandler {
 
     public function sendBalanceUpdateToPusher(Event $event) {
         $bot   = $event->bot;
-        $balances = $event->balances;
+        $balances = $event->new_balances;
 
         $this->pusher_client->send('/swapbot_balances_'.$bot['uuid'], $balances);
     }
