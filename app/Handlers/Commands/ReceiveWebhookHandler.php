@@ -375,7 +375,7 @@ class ReceiveWebhookHandler {
     }
 
     protected function logUnconfirmedTx($bot, $xchain_notification, $destination, $quantity, $asset) {
-        $this->logToBotEvents($bot, 'unconfirmed.tx', BotEvent::LEVEL_DEBUG, [
+        $this->logToBotEvents($bot, 'unconfirmed.tx', BotEvent::LEVEL_INFO, [
             'msg'         => "Received an unconfirmed transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Will vend {$quantity} {$asset} to {$destination} when it confirms.",
             'txid'        => $xchain_notification['txid'],
             'source'      => $xchain_notification['sources'][0],
