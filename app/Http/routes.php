@@ -36,4 +36,4 @@ $router->resource('api/v1/users', 'API\User\UserController', ['only' => ['show',
 
 // webhook notifications
 
-Route::get('/_xchain_client_receive', 'WebhookController@receive');
+Route::post('/_xchain_client_receive', 'WebhookController@receive');
