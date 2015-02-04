@@ -35,6 +35,15 @@ class BotHelper  {
         ];
     }
 
+    public function getSampleBot($user) {
+        $bots = $this->bot_repository->findByUser($user)->toArray();
+        $bot = $bots ? $bots[0] : null;
+        if (!$bot) {
+            $bot = $this->newSampleBot($user);
+        }
+        return $bot;
+    }
+
 
     // creates a bot
     //   directly in the repository (no validation)
