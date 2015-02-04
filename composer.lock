@@ -1929,12 +1929,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/hmac-auth.git",
-                "reference": "5548928adcc25eb0ac5b6809c84a20f18206ea6d"
+                "reference": "454bcebeb3e52bb89f6ff434b3a7226dd1dc4af9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/5548928adcc25eb0ac5b6809c84a20f18206ea6d",
-                "reference": "5548928adcc25eb0ac5b6809c84a20f18206ea6d",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/454bcebeb3e52bb89f6ff434b3a7226dd1dc4af9",
+                "reference": "454bcebeb3e52bb89f6ff434b3a7226dd1dc4af9",
                 "shasum": ""
             },
             "require": {
@@ -1963,7 +1963,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-01-30 03:08:31"
+            "time": "2015-02-03 13:48:17"
         },
         {
             "name": "tokenly/pusher-client",
