@@ -48,11 +48,13 @@ class ReceiveWebhookHandler {
 
             case 'receive':
                 // new receive event
+                EventLog::log('event.receive', $payload);
                 $bot = $this->handleReceive($payload);
                 break;
 
             case 'send':
                 // new send event
+                EventLog::log('event.send', $payload);
                 $bot = $this->handleSend($payload);
                 break;
 

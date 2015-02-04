@@ -44,7 +44,7 @@ class ActivateBotHandler {
         $update_vars['payment_address_id'] = $payment_address['id'];
         $update_vars['address'] = $payment_address['address'];
 
-        // and monitor it
+        // monitor it for receives
         $monitor = $this->xchain_client->newAddressMonitor($payment_address['address'], Config::get('swapbot.webhook_url'), 'receive', true);
         $update_vars['monitor_id'] = $monitor['id'];
 
