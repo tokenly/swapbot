@@ -827,7 +827,21 @@
           }), m("hr"), m("div", {
             "class": "bot-events"
           }, [
-            m("h3", "Events"), m("ul", {
+            m("div", {
+              "class": "pulse-spinner pull-right"
+            }, [
+              m("div", {
+                "class": "rect1"
+              }), m("div", {
+                "class": "rect2"
+              }), m("div", {
+                "class": "rect3"
+              }), m("div", {
+                "class": "rect4"
+              }), m("div", {
+                "class": "rect5"
+              })
+            ]), m("h3", "Events"), m("ul", {
               "class": "list-unstyled striped-list event-list"
             }, [
               vm.botEvents().map(function(botEventObj) {
