@@ -14,6 +14,10 @@ class Kernel extends ConsoleKernel {
 		// 'Swapbot\Console\Commands\Inspire',
 		'Swapbot\Console\Commands\APIUser\APINewUserCommand',
 		'Swapbot\Console\Commands\APIUser\APIListUsersCommand',
+
+		'Swapbot\Console\Commands\Bot\UpdateBotBalancesCommand',
+		'Swapbot\Console\Commands\Bot\ListAllBotsCommand',
+
 		'Swapbot\Console\Commands\Development\TestCreateBotEventCommand',
 		'Swapbot\Console\Commands\Development\TestCreateBotBalancesUpdateCommand',
 		'Swapbot\Console\Commands\Development\TestConfigCommand',
