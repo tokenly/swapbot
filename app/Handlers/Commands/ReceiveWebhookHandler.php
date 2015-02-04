@@ -98,7 +98,7 @@ class ReceiveWebhookHandler {
 
 
         // check for blacklisted sources (for confirmed transactions)
-        if ($should_process AND $is_confirmed AND !$transaction_model['processed']) {
+        if ($should_process AND !$transaction_model['processed']) {
             $blacklist_addresses = $bot['blacklist_addresses'];
 
             // never send to self
@@ -106,7 +106,7 @@ class ReceiveWebhookHandler {
             
             if (in_array($xchain_notification['sources'][0], $blacklist_addresses)) {
                 // blacklisted
-                $this->logSendFromBlacklistedAddress($bot, $xchain_notification);
+                $this->logSendFromBlacklistedAddress($bot, $xchain_notification, $is_confirmed);
 
                 $should_process = false;
                 $should_update_transaction = true;
@@ -394,9 +394,9 @@ class ReceiveWebhookHandler {
         ]);
     }
 
-    protected function logSendFromBlacklistedAddress($bot, $xchain_notification) {
+    protected function logSendFromBlacklistedAddress($bot, $xchain_notification, $is_confirmed) {
         $this->logToBotEvents($bot, 'swap.ignored.blacklist', BotEvent::LEVEL_INFO, [
-            'msg'         => "Ignored transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} because sender address was blacklisted.",
+            'msg'         => "Ignored ".($is_confirmed?'':'unconfirmed ')."transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} because sender address was blacklisted.",
             'txid'        => $xchain_notification['txid'],
             'source'      => $xchain_notification['sources'][0],
             'inQty'       => $xchain_notification['quantity'],
