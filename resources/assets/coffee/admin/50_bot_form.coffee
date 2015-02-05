@@ -15,7 +15,7 @@ do ()->
                     sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swapProp().out),
                 ]),
                 m("div", {class: "col-md-3"}, [
-                    sbAdmin.form.mFormField("Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.99", }, swapProp().rate),
+                    sbAdmin.form.mFormField("At Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swapProp().rate),
                 ]),
                 m("div", {class: "col-md-1"}, [
                     m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [

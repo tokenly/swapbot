@@ -440,12 +440,12 @@
           ]), m("div", {
             "class": "col-md-3"
           }, [
-            sbAdmin.form.mFormField("Rate", {
+            sbAdmin.form.mFormField("At Rate", {
               type: "number",
               step: "any",
               min: "0",
               id: "swap_rate_" + number,
-              'placeholder': "0.99"
+              'placeholder': "0.000001"
             }, swapProp().rate)
           ]), m("div", {
             "class": "col-md-1"
