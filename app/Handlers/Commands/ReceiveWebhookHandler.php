@@ -89,16 +89,18 @@ class ReceiveWebhookHandler {
             $should_process            = true;
             $any_processing_errors     = false;
             $should_update_transaction = false;
-            $should_update_bot_balance = false;
+            $should_update_bot_balance = ($is_confirmed ? true : false);
+            $any_notification_given    = false;
 
 
             // previously processed
             if ($should_process AND $transaction_model['processed']) {
-                $this->logToBotEvents($bot, 'swap.previous', BotEvent::LEVEL_DEBUG, [
+                $this->logToBotEvents($bot, 'tx.previous', BotEvent::LEVEL_DEBUG, [
                     'msg'  => "Transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
                     'txid' => $xchain_notification['txid']
                 ]);
                 $should_process = false;
+                $any_notification_given = true;
             }
 
 
@@ -115,17 +117,21 @@ class ReceiveWebhookHandler {
 
                     $should_process = false;
                     $should_update_transaction = true;
-                    $should_update_bot_balance = true;
+                    $any_notification_given    = true;
+
                 }
             }
 
 
             // process all relevant swaps for transactions that have not been processed yet
             if ($should_process AND !$transaction_model['processed']) {
+                $any_swap_processed = false;
 
                 foreach ($bot['swaps'] as $swap) {
                     if ($xchain_notification['asset'] == $swap['in']) {
                         try {
+                            $any_swap_processed = true;
+
                             // we recieved an asset - exchange 'in' for 'out'
 
                             // determine the swap ID
@@ -143,6 +149,7 @@ class ReceiveWebhookHandler {
                             if (!$is_confirmed) {
                                 $should_process_swap = false;
                                 $this->logUnconfirmedTx($bot, $xchain_notification, $destination, $quantity, $asset);
+                                $any_notification_given = true;
                             }
 
                             // is the bot active?
@@ -152,10 +159,10 @@ class ReceiveWebhookHandler {
                                 // mark the transaction as processed
                                 //   even though the bot was inactive
                                 $should_update_transaction = true;
-                                $should_update_bot_balance = true;
 
                                 // log the inactive bot status
                                 $this->logInactiveBot($bot, $xchain_notification);
+                                $any_notification_given = true;
                             }
 
 
@@ -165,6 +172,7 @@ class ReceiveWebhookHandler {
 
                                 // this swap receipt already exists
                                 $this->logPreviouslyProcessedSwap($bot, $xchain_notification, $destination, $quantity, $asset);
+                                $any_notification_given = true;
                             }
 
 
@@ -188,9 +196,9 @@ class ReceiveWebhookHandler {
 
                                 // mark any processed
                                 $should_update_transaction = true;
-                                $should_update_bot_balance = true;
 
                                 $this->logSendResult($bot, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations);
+                                $any_notification_given = true;
                             }
 
 
@@ -198,8 +206,19 @@ class ReceiveWebhookHandler {
                             // log any failure
                             EventLog::logError('swap.failed', $e);
                             $this->logSwapFailed($bot, $xchain_notification, $e);
+                            $any_notification_given = true;
                         }
                     }
+                } // done processing swaps
+
+                if (!$any_swap_processed) {
+                    // we received an asset, but no swap was processed
+                    $this->logUnknownReceiveTransaction($bot, $xchain_notification);
+                    $any_notification_given = true;
+
+                    // mark the transaction as processed
+                    //   this is probably an attempt to fill up the bot
+                    $should_update_transaction = true;
                 }
             }
 
@@ -220,6 +239,12 @@ class ReceiveWebhookHandler {
                 $this->updateBotBalance($bot);
             }
 
+            if (!$any_notification_given) {
+                // no feedback was given to the user
+                //   this should never happen
+                $this->logUnhandledTransaction($bot, $xchain_notification);
+            }
+
             return $bot;
 
         });
@@ -238,10 +263,12 @@ class ReceiveWebhookHandler {
             $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
+            $is_confirmed = $xchain_notification['confirmed'];
+
             // setup variables
             $should_process            = true;
             $should_update_transaction = false;
-            $should_update_bot_balance = false;
+            $should_update_bot_balance = ($is_confirmed ? true : false);
 
 
             // previously processed
@@ -258,7 +285,6 @@ class ReceiveWebhookHandler {
             if ($should_process) {
                 // determine the number of confirmations
                 $confirmations = $xchain_notification['confirmations'];
-                $is_confirmed = $xchain_notification['confirmed'];
                 $quantity = $xchain_notification['quantity'];
                 $asset = $xchain_notification['asset'];
                 $destination = $xchain_notification['destinations'][0];
@@ -266,7 +292,6 @@ class ReceiveWebhookHandler {
                 if ($is_confirmed AND !$transaction_model['processed']) {
                     $this->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
                     $should_update_transaction = true;
-                    $should_update_bot_balance = true;
                 } else {
                     $this->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
                 }
@@ -437,6 +462,29 @@ class ReceiveWebhookHandler {
             'outQty'        => $quantity,
             'outAsset'      => $asset,
             'destination'   => $destination,
+        ]);
+    }
+
+    protected function logUnknownReceiveTransaction($bot, $xchain_notification) {
+        $confirmations = $xchain_notification['confirmations'];
+        $is_confirmed = ($confirmations > 0);
+        $quantity = $xchain_notification['quantity'];
+        $asset = $xchain_notification['asset'];
+
+        $this->logToBotEvents($bot, 'receive.unknown', BotEvent::LEVEL_INFO, [
+            'msg'           => "Received {$quantity} {$asset} with transaction ID {$xchain_notification['txid']}.  This transaction did not trigger any swaps.",
+            'txid'          => $xchain_notification['txid'],
+            'confirmations' => $confirmations,
+            'source'        => $xchain_notification['sources'][0],
+            'inQty'         => $quantity,
+            'inAsset'       => $asset,
+        ]);
+    }
+
+    protected function logUnhandledTransaction($bot, $xchain_notification) {
+        $this->logToBotEvents($bot, 'tx.unhandled', BotEvent::LEVEL_WARNING, [
+            'msg'           => "Transaction ID {$xchain_notification['txid']} was not handled by this swapbot.",
+            'txid'          => $xchain_notification['txid'],
         ]);
     }
 

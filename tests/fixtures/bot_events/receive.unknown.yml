@@ -1,0 +1,6 @@
+name: receive.unknown
+msg: Received 1000 FOOBAR with transaction ID 00000000000000000000000000000000000000000000000000000xcptx111111.  This transaction did not trigger any swaps.
+source: SENDER01
+inQty: 1000
+inAsset: FOOBAR
+confirmations: 1

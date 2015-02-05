@@ -25,10 +25,12 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: get_balances.yml }
+  - 
+    meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
   - 
     meta: { baseFilename: bot.inactive.yml }
   - 
-    meta: { baseFilename: swap.previous.yml }
+    meta: { baseFilename: tx.previous.yml }
 

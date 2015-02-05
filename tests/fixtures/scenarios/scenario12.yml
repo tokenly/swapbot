@@ -1,4 +1,4 @@
-# a second confirmation does not send another swap
+# handle an unexpected receive (only once)
 
 ############################
 # setup bots
@@ -9,11 +9,14 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  -
+  - 
+    meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+    asset: FOOBAR
+    quantity: 1000
+  - 
     meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
-  -
-    meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
-    confirmations: 2
+    asset: FOOBAR
+    quantity: 1000
     blockId: 300001
 
 
@@ -23,17 +26,11 @@ xchainNotifications:
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_BTC.yml }
-  - 
-    meta: { baseFilename: get_balances.yml }
-  - 
     meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
   - 
-    meta: { baseFilename: swap.found.yml }
-  - 
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: receive.unknown.yml }
+    confirmations: 0
   - 
     meta: { baseFilename: tx.previous.yml }
-
