@@ -49,9 +49,9 @@ do ()->
                         vm.bots().map((bot)->
                             return m("li", {}, [
                                 m("div", {}, [
-                                    m("a[href='/view/bot/#{bot.id}']", {class: "", config: m.route}, "#{bot.name}"),
+                                    m("a[href='/admin/view/bot/#{bot.id}']", {class: "", config: m.route}, "#{bot.name}"),
                                     " ",
-                                    m("a[href='/edit/bot/#{bot.id}']", {class: "dashboard-edit-link pull-right", config: m.route}, [
+                                    m("a[href='/admin/edit/bot/#{bot.id}']", {class: "dashboard-edit-link pull-right", config: m.route}, [
                                         m("span", {class: "glyphicon glyphicon-edit", title: "Edit Swapbot #{bot.name}"}, ''),
                                         " Edit",
                                     ]),
@@ -65,7 +65,7 @@ do ()->
 
             m("div", {class: "spacer1"}),
 
-            m("a[href='/edit/bot/new']", {class: "btn btn-primary", config: m.route}, "Create a new Swapbot"),
+            m("a[href='/admin/edit/bot/new']", {class: "btn btn-primary", config: m.route}, "Create a new Swapbot"),
             
         ])
         return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]

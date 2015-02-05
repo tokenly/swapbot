@@ -4,7 +4,7 @@ sbAdmin.auth = do ()->
 
     auth.redirectIfNotLoggedIn = ()->
         if not auth.isLoggedIn()
-            m.route('/login')
+            m.route('/admin/login')
         return
     
     auth.isLoggedIn = ()->

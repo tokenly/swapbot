@@ -21,7 +21,7 @@ do ()->
 
                     m("div", {class: "spacer1"}),
 
-                    m("a[href='/login']", {config: m.route}, "Return to Login"),
+                    m("a[href='/admin/login']", {config: m.route}, "Return to Login"),
                 ]),
             ]),
 

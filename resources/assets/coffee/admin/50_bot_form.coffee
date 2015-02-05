@@ -146,7 +146,7 @@ do ()->
                 sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(()->
                     console.log "submit complete - routing to dashboard"
                     # back to dashboard
-                    m.route('dashboard')
+                    m.route('/admin/dashboard')
                     return
                 )
 
@@ -224,7 +224,7 @@ do ()->
                         m("div", {class: "spacer1"}),
 
                         sbAdmin.form.mSubmitBtn("Save Bot"),
-                        m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
+                        m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
                         
 
                     ]),

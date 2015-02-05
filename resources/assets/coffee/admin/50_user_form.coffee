@@ -72,7 +72,7 @@ do ()->
 
                 sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(()->
                     # back to users
-                    m.route('/users')
+                    m.route('/admin/users')
                     return
                 )
 
@@ -130,7 +130,7 @@ do ()->
                         m("div", {class: "spacer1"}),
 
                         sbAdmin.form.mSubmitBtn("Save User"),
-                        m("a[href='/users']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
+                        m("a[href='/admin/users']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
                         
 
                     ]),

@@ -258,8 +258,8 @@ do ()->
 
                     m("div", {class: "spacer2"}),
 
-                    m("a[href='/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
-                    m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
+                    m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
+                    m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
                     
 
                 ]),

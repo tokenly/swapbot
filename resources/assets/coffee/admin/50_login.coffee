@@ -20,7 +20,7 @@ do ()->
                 # try login
                 sbAdmin.auth.login(vm.apiToken(), vm.apiSecretKey()).then ()->
                     # success - redirect to the dashboard
-                    m.route('/dashboard')
+                    m.route('/admin/dashboard')
                 , (error)->
                     # an error occurred
                     vm.errorMessage(error.message)

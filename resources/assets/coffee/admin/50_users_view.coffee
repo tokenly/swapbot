@@ -43,9 +43,9 @@ do ()->
                         vm.users().map((user)->
                             return m("li", {}, [
                                 m("div", {}, [
-                                    m("a[href='/edit/user/#{user.id}']", {class: "", config: m.route}, "#{user.name}"),
+                                    m("a[href='/admin/edit/user/#{user.id}']", {class: "", config: m.route}, "#{user.name}"),
                                     " ",
-                                    m("a[href='/edit/user/#{user.id}']", {class: "usersView-edit-link pull-right", config: m.route}, [
+                                    m("a[href='/admin/edit/user/#{user.id}']", {class: "usersView-edit-link pull-right", config: m.route}, [
                                         m("span", {class: "glyphicon glyphicon-edit", title: "Edit User #{user.name}"}, ''),
                                         " Edit",
                                     ]),
@@ -59,7 +59,7 @@ do ()->
 
             m("div", {class: "spacer1"}),
 
-            m("a[href='/edit/user/new']", {class: "btn btn-primary", config: m.route}, "Create a new user"),
+            m("a[href='/admin/edit/user/new']", {class: "btn btn-primary", config: m.route}, "Create a new user"),
             
         ])
         return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]

@@ -104,7 +104,7 @@
     auth = {};
     auth.redirectIfNotLoggedIn = function() {
       if (!auth.isLoggedIn()) {
-        m.route('/login');
+        m.route('/admin/login');
       }
     };
     auth.isLoggedIn = function() {
@@ -282,7 +282,7 @@
               m("li", {
                 "class": ""
               }, [
-                m("a[href='/logout']", {
+                m("a[href='/admin/logout']", {
                   "class": "",
                   config: m.route
                 }, "Logout")
@@ -297,7 +297,7 @@
           m("li", {
             "class": ""
           }, [
-            m("a[href='/login']", {
+            m("a[href='/admin/login']", {
               "class": "",
               config: m.route
             }, "Login")
@@ -310,7 +310,7 @@
         return m("li", {
           "class": ""
         }, [
-          m("a[href='/users']", {
+          m("a[href='/admin/users']", {
             "class": "",
             config: m.route
           }, "Users")
@@ -330,7 +330,7 @@
           m("div", {
             "class": "navbar-header"
           }, [
-            m("a[href='/dashboard']", {
+            m("a[href='/admin/dashboard']", {
               "class": "navbar-brand",
               config: m.route
             }, "Swapbot Admin")
@@ -340,14 +340,14 @@
             m("li", {
               "class": ""
             }, [
-              m("a[href='/dashboard']", {
+              m("a[href='/admin/dashboard']", {
                 "class": "",
                 config: m.route
               }, "Dashboard")
             ]), m("li", {
               "class": ""
             }, [
-              m("a[href='/edit/bot/new']", {
+              m("a[href='/admin/edit/bot/new']", {
                 "class": "",
                 config: m.route
               }, "New Bot")
@@ -571,7 +571,7 @@
           }
           return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
             console.log("submit complete - routing to dashboard");
-            m.route('dashboard');
+            m.route('/admin/dashboard');
           });
         };
       };
@@ -670,7 +670,7 @@
                 ])
               ]), m("div", {
                 "class": "spacer1"
-              }), sbAdmin.form.mSubmitBtn("Save Bot"), m("a[href='/dashboard']", {
+              }), sbAdmin.form.mSubmitBtn("Save Bot"), m("a[href='/admin/dashboard']", {
                 "class": "btn btn-default pull-right",
                 config: m.route
               }, "Return without Saving")
@@ -1003,10 +1003,10 @@
             ])
           ]), m("div", {
             "class": "spacer2"
-          }), m("a[href='/edit/bot/" + (vm.resourceId()) + "']", {
+          }), m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
             "class": "btn btn-success",
             config: m.route
-          }, "Edit This Bot"), m("a[href='/dashboard']", {
+          }, "Edit This Bot"), m("a[href='/admin/dashboard']", {
             "class": "btn btn-default pull-right",
             config: m.route
           }, "Back to Dashboard")
@@ -1057,10 +1057,10 @@
               vm.bots().map(function(bot) {
                 return m("li", {}, [
                   m("div", {}, [
-                    m("a[href='/view/bot/" + bot.id + "']", {
+                    m("a[href='/admin/view/bot/" + bot.id + "']", {
                       "class": "",
                       config: m.route
-                    }, "" + bot.name), " ", m("a[href='/edit/bot/" + bot.id + "']", {
+                    }, "" + bot.name), " ", m("a[href='/admin/edit/bot/" + bot.id + "']", {
                       "class": "dashboard-edit-link pull-right",
                       config: m.route
                     }, [
@@ -1076,7 +1076,7 @@
           ])
         ]), m("div", {
           "class": "spacer1"
-        }), m("a[href='/edit/bot/new']", {
+        }), m("a[href='/admin/edit/bot/new']", {
           "class": "btn btn-primary",
           config: m.route
         }, "Create a new Swapbot")
@@ -1098,7 +1098,7 @@
           e.preventDefault();
           vm.errorMessage('');
           sbAdmin.auth.login(vm.apiToken(), vm.apiSecretKey()).then(function() {
-            return m.route('/dashboard');
+            return m.route('/admin/dashboard');
           }, function(error) {
             vm.errorMessage(error.message);
           });
@@ -1189,7 +1189,7 @@
           }, [
             m("h2", "Logged Out"), m("p", "The API credentials have been cleared from your browser."), m("div", {
               "class": "spacer1"
-            }), m("a[href='/login']", {
+            }), m("a[href='/admin/login']", {
               config: m.route
             }, "Return to Login")
           ])
@@ -1258,7 +1258,7 @@
             apiArgs = [attributes];
           }
           return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
-            m.route('/users');
+            m.route('/admin/users');
           });
         };
       };
@@ -1334,7 +1334,7 @@
                 ])
               ]), m("div", {
                 "class": "spacer1"
-              }), sbAdmin.form.mSubmitBtn("Save User"), m("a[href='/users']", {
+              }), sbAdmin.form.mSubmitBtn("Save User"), m("a[href='/admin/users']", {
                 "class": "btn btn-default pull-right",
                 config: m.route
               }, "Return without Saving")
@@ -1380,10 +1380,10 @@
               vm.users().map(function(user) {
                 return m("li", {}, [
                   m("div", {}, [
-                    m("a[href='/edit/user/" + user.id + "']", {
+                    m("a[href='/admin/edit/user/" + user.id + "']", {
                       "class": "",
                       config: m.route
-                    }, "" + user.name), " ", m("a[href='/edit/user/" + user.id + "']", {
+                    }, "" + user.name), " ", m("a[href='/admin/edit/user/" + user.id + "']", {
                       "class": "usersView-edit-link pull-right",
                       config: m.route
                     }, [
@@ -1399,7 +1399,7 @@
           ])
         ]), m("div", {
           "class": "spacer1"
-        }), m("a[href='/edit/user/new']", {
+        }), m("a[href='/admin/edit/user/new']", {
           "class": "btn btn-primary",
           config: m.route
         }, "Create a new user")
@@ -1408,16 +1408,16 @@
     };
   })();
 
-  m.route.mode = "hash";
+  m.route.mode = "pathname";
 
-  m.route(document.getElementById('admin'), "/dashboard", {
-    "/login": sbAdmin.ctrl.login,
-    "/logout": sbAdmin.ctrl.logout,
-    "/dashboard": sbAdmin.ctrl.dashboard,
-    "/edit/bot/:id": sbAdmin.ctrl.botForm,
-    "/view/bot/:id": sbAdmin.ctrl.botView,
-    "/users": sbAdmin.ctrl.usersView,
-    "/edit/user/:id": sbAdmin.ctrl.userForm
+  m.route(document.getElementById('admin'), "/admin/dashboard", {
+    "/admin/login": sbAdmin.ctrl.login,
+    "/admin/logout": sbAdmin.ctrl.logout,
+    "/admin/dashboard": sbAdmin.ctrl.dashboard,
+    "/admin/edit/bot/:id": sbAdmin.ctrl.botForm,
+    "/admin/view/bot/:id": sbAdmin.ctrl.botView,
+    "/admin/users": sbAdmin.ctrl.usersView,
+    "/admin/edit/user/:id": sbAdmin.ctrl.userForm
   });
 
 }).call(this);

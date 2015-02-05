@@ -12,7 +12,7 @@
 */
 
 Route::get('/', 'WelcomeController@index');
-Route::get('/admin', 'AdminController@index');
+Route::get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 
 // Route::get('home', 'HomeController@index');
 // Route::controllers([

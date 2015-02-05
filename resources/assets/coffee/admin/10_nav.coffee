@@ -13,7 +13,7 @@ sbAdmin.nav = do ()->
                         ]),
                         m("ul", { class: "dropdown-menu", role: "menu"}, [
                             m("li", { class: ""}, [
-                                m("a[href='/logout']", {class: "", config: m.route}, "Logout"),
+                                m("a[href='/admin/logout']", {class: "", config: m.route}, "Logout"),
                             ]),
                         ]),
                     ]),
@@ -21,14 +21,14 @@ sbAdmin.nav = do ()->
         else
             return m("ul", { class: "nav navbar-nav navbar-right"}, [
                     m("li", { class: ""}, [
-                        m("a[href='/login']", {class: "", config: m.route}, "Login"),
+                        m("a[href='/admin/login']", {class: "", config: m.route}, "Login"),
                     ]),
                 ])
 
     buildUsersNavLink = (user)->
         if user.privileges
             return m("li", { class: ""}, [
-                m("a[href='/users']", {class: "", config: m.route}, "Users"),
+                m("a[href='/admin/users']", {class: "", config: m.route}, "Users"),
             ])
         return null
 
@@ -40,14 +40,14 @@ sbAdmin.nav = do ()->
             # m("div", { class: "navbar navbar-default"}, []),
             m("div", { class: "container-fluid"}, [
                 m("div", { class: "navbar-header"}, [
-                    m("a[href='/dashboard']", {class: "navbar-brand", config: m.route}, "Swapbot Admin"),
+                    m("a[href='/admin/dashboard']", {class: "navbar-brand", config: m.route}, "Swapbot Admin"),
                 ]),
                 m("ul", { class: "nav navbar-nav"}, [
                     m("li", { class: ""}, [
-                        m("a[href='/dashboard']", {class: "", config: m.route}, "Dashboard"),
+                        m("a[href='/admin/dashboard']", {class: "", config: m.route}, "Dashboard"),
                     ]),
                     m("li", { class: ""}, [
-                        m("a[href='/edit/bot/new']", {class: "", config: m.route}, "New Bot"),
+                        m("a[href='/admin/edit/bot/new']", {class: "", config: m.route}, "New Bot"),
                     ]),
                     buildUsersNavLink(user),
                 ]),
@@ -70,25 +70,3 @@ sbAdmin.nav = do ()->
 
 
     return nav
-
-
-# <nav class="navbar navbar-default">
-#   <div class="container-fluid">
-#     <div class="navbar-header">
-#       <a class="navbar-brand" href="/admin">Swapbot Admin</a>
-#     </div>
-#       <ul class="nav navbar-nav">
-#         <li class="active"><a href="#">Link</a></li>
-#         <li><a href="#">Link</a></li>
-#       </ul>
-#       <ul class="nav navbar-nav navbar-right">
-#         <li class="dropdown">
-#           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Username <span class="caret"></span></a>
-#           <ul class="dropdown-menu" role="menu">
-#             <li><a href="#">Logout</a></li>
-#           </ul>
-#         </li>
-#       </ul>
-#   </div>
-# </nav>
-

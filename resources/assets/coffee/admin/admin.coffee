@@ -14,18 +14,18 @@
 # ########################################################################################################################
 
 # routes
-m.route.mode = "hash"
+m.route.mode = "pathname"
 m.route(
     document.getElementById('admin'),
-    "/dashboard",
+    "/admin/dashboard",
     {
-        "/login"     : sbAdmin.ctrl.login,
-        "/logout"    : sbAdmin.ctrl.logout,
-        "/dashboard" : sbAdmin.ctrl.dashboard,
-        "/edit/bot/:id"   : sbAdmin.ctrl.botForm,
-        "/view/bot/:id"   : sbAdmin.ctrl.botView,
-        "/users" : sbAdmin.ctrl.usersView,
-        "/edit/user/:id"   : sbAdmin.ctrl.userForm,
+        "/admin/login"     : sbAdmin.ctrl.login,
+        "/admin/logout"    : sbAdmin.ctrl.logout,
+        "/admin/dashboard" : sbAdmin.ctrl.dashboard,
+        "/admin/edit/bot/:id"   : sbAdmin.ctrl.botForm,
+        "/admin/view/bot/:id"   : sbAdmin.ctrl.botView,
+        "/admin/users" : sbAdmin.ctrl.usersView,
+        "/admin/edit/user/:id"   : sbAdmin.ctrl.userForm,
     }
 )
 # m.module(document.getElementById('admin'), {controller: sbAdmin.ctrl.dashboard.controller, view: sbAdmin.ctrl.dashboard.view})
