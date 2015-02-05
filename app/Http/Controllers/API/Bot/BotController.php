@@ -32,8 +32,6 @@ class BotController extends APIController {
      */
     public function index(Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
-        Log::debug('index');
-
         // all bots for this user
         $resources = $repository->findByUser($auth->getUser());
         // Log::debug('$resources='.json_encode(iterator_to_array($resources), 192));

@@ -26,6 +26,8 @@ class CreateUsersTable extends Migration {
 			$table->string('apitoken', 16)->unique();
 			$table->string('apisecretkey', 40);
 
+            $table->text('privileges')->nullable();
+
 			$table->rememberToken();
 			$table->timestamps();
 		});

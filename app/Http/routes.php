@@ -30,8 +30,8 @@ $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create'
 $router->get('api/v1/botevents/{botuuid}', 'API\BotEvents\BotEventsController@index', ['only' => ['index']]);
 
 // User API
-// $router->resource('api/v1/users', 'API\User\UserController', ['except' => ['create','edit']]);
-$router->resource('api/v1/users', 'API\User\UserController', ['only' => ['show',]]);
+$router->resource('api/v1/users', 'API\User\UserController', ['except' => ['create','edit']]);
+// $router->resource('api/v1/users', 'API\User\UserController', ['only' => ['show',]]);
 
 
 // webhook notifications

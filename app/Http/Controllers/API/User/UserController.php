@@ -22,69 +22,67 @@ use Swapbot\Repositories\UserRepository;
 
 class UserController extends APIController {
 
-    // /**
-    //  * Display a listing of the resource.
-    //  *
-    //  * @param  Guard               $auth
-    //  * @param  UserRepository       $repository
-    //  * @param  APIControllerHelper $api_helper
-    //  * @return Response
-    //  */
-    // public function index(Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
-    // {
-    //     // all bots for this user
-    //     $resources = $repository->findByUser($auth->getUser());
-    //     // Log::debug('$resources='.json_encode(iterator_to_array($resources), 192));
 
-    //     // format for API
-    //     return $api_helper->transformResourcesForOutput($resources);
-    // }
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  Guard               $auth
+     * @param  UserRepository       $repository
+     * @param  APIControllerHelper $api_helper
+     * @return Response
+     */
+    public function index(Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
+    {
+        // all users for this user
+        $resources = $repository->findByUser($auth->getUser());
 
-    // /**
-    //  * create a new resource.
-    //  *
-    //  * @param  Request             $request
-    //  * @param  Guard               $auth
-    //  * @return Response
-    //  */
-    // public function store(Request $request, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
-    // {
-    //     $attributes = $request->all();
+        // format for API
+        return $api_helper->transformResourcesForOutput($resources);
+    }
 
-    //     // create a UUID
-    //     $uuid = Uuid::uuid4()->toString();
-    //     $attributes['uuid'] = $uuid;
+    /**
+     * create a new resource.
+     *
+     * @param  Request             $request
+     * @param  Guard               $auth
+     * @return Response
+     */
+    public function store(Request $request, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
+    {
+        $auth_user = $auth->getUser();
+        if (!$auth_user->hasPermission('createUser')) {
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to create users", 403));
+        }
 
-    //     // add the user
-    //     $attributes['user_id'] = $auth->getUser()['id'];
+        $attributes = $request->all();
 
-    //     // issue a create bot command
-    //     try {
-    //         // create a bot
-    //         $this->dispatch(new CreateUser($attributes));
+        // create a UUID
+        $uuid = Uuid::uuid4()->toString();
+        $attributes['uuid'] = $uuid;
 
-    //         // activate the bot
-    //         $bot = $repository->findByUuid($uuid);
-    //         $this->dispatch(new ActivateUser($bot));
-            
-    //         // reload the bot again
-    //         $bot = $repository->findByUuid($uuid);
+        // add the user that owns this user
+        $attributes['user_id'] = $auth_user['id'];
 
+        // issue a create user command
+        try {
+            // create a user
+            $this->dispatch(new CreateUser($attributes));
 
-    //     } catch (ValidationException $e) {
-    //         // handle validation errors
-    //         USE newJsonResponseWithErrors
-    //         throw new HttpResponseException(new JsonResponse(['errors' => $e->errors()->all()], 422));
+            // reload the user again
+            $user = $repository->findByUuid($uuid);
 
-    //     } catch (InvalidArgumentException $e) {
-    //         // handle invalid argument errors
-    //         USE newJsonResponseWithErrors
-    //         throw new HttpResponseException(new JsonResponse(['errors' => $e->getMessage()], 422));
-    //     }
+        } catch (ValidationException $e) {
+            // handle validation errors
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));
 
-    //     // return the model id
-    //     return $api_helper->transformResourceForOutput($bot);
-    // }
+        } catch (InvalidArgumentException $e) {
+            // handle invalid argument errors
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->getMessage(), 422));
+        }
+
+        // return the model id
+        return $api_helper->transformResourceForOutput($user);
+    }
 
 
     /**
@@ -109,54 +107,55 @@ class UserController extends APIController {
         return $api_helper->transformResourceForOutput($resource);
     }
 
-    // /**
-    //  * Update the specified resource in storage.
-    //  *
-    //  * @param  int  $id
-    //  * @param  Request             $request
-    //  * @param  Guard               $auth
-    //  * @param  UserRepository       $repository
-    //  * @param  APIControllerHelper $api_helper
-    //  * @return Response
-    //  */
-    // public function update($id, Request $request, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
-    // {
-    //     $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
 
-    //     // get the update attributes
-    //     $attributes = $request->all();
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @param  Request             $request
+     * @param  Guard               $auth
+     * @param  UserRepository       $repository
+     * @param  APIControllerHelper $api_helper
+     * @return Response
+     */
+    public function update($id, Request $request, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
+    {
+        $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
 
-    //     // issue an update bot command
-    //     try {
-    //         $this->dispatch(new UpdateUser($resource, $attributes));
-    //     } catch (ValidationException $e) {
-    //         // handle validation errors
-    //          USE newJsonResponseWithErrors
-    //         throw new HttpResponseException(new JsonResponse(['errors' => $e->errors()->all()], 422));
-    //     }
+        // get the update attributes
+        $attributes = $request->all();
 
-    //     // return a 204 response
-    //     return new Response('', 204);
-    // }
+        // issue an update user command
+        try {
+            $this->dispatch(new UpdateUser($resource, $attributes));
+        } catch (ValidationException $e) {
+            // handle validation errors
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));
+        }
 
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  int  $id
-    //  * @param  Guard               $auth
-    //  * @param  UserRepository       $repository
-    //  * @param  APIControllerHelper $api_helper
-    //  * @return Response
-    //  */
-    // public function destroy($id, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
-    // {
-    //     $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
+        // return a 204 response
+        return new Response('', 204);
+    }
 
-    //     // issue a delete bot command
-    //     $this->dispatch(new DeleteUser($resource));
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @param  Guard               $auth
+     * @param  UserRepository       $repository
+     * @param  APIControllerHelper $api_helper
+     * @return Response
+     */
+    public function destroy($id, Guard $auth, UserRepository $repository, APIControllerHelper $api_helper)
+    {
+        $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
 
-    //     // return a 204 response
-    //     return new Response('', 204);
-    // }
+        // issue a delete user command
+        $this->dispatch(new DeleteUser($resource));
+
+        // return a 204 response
+        return new Response('', 204);
+    }
+
 
 }

@@ -11,7 +11,10 @@ class BotTransformer {
 
         $out = [];
         foreach (array_keys($rules) as $field_name) {
-            $out[$field_name] = isset($attributes[$field_name]) ? $attributes[$field_name] : null;
+            // $out[$field_name] = isset($attributes[$field_name]) ? $attributes[$field_name] : null;
+            if (isset($attributes[$field_name])) {
+                $out[$field_name] = $attributes[$field_name];
+            }
         }
 
         // santize swaps

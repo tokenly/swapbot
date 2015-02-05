@@ -33,6 +33,11 @@ class APITestHelper  {
         return $this;
     }
 
+    public function useCleanupFunction($cleanup_fn) {
+        $this->cleanup_fn = $cleanup_fn;
+        return $this;
+    }
+
     public function setURLBase($url_base) {
         $this->url_base = $url_base;
         return $this;
@@ -43,8 +48,12 @@ class APITestHelper  {
     
 
     public function cleanup() {
-        foreach($this->repository->findAll() as $model) {
-            $this->repository->delete($model);
+        if (isset($this->cleanup_fn) AND is_callable($this->cleanup_fn)) {
+            call_user_func($this->cleanup_fn, $this->repository);
+        } else {
+            foreach($this->repository->findAll() as $model) {
+                $this->repository->delete($model);
+            }
         }
         return $this;
     }
@@ -182,6 +191,7 @@ class APITestHelper  {
 
     public function be(User $new_user) {
         $this->override_user = $new_user;
+        return $this;
     }
 
     public function getUser() {

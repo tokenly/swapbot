@@ -20,6 +20,15 @@ class UserRepository extends APIRepository implements APIResourceRepositoryContr
     protected $model_type = 'Swapbot\Models\User';
 
 
+    public function findByUser(User $user) {
+        return $this->findByUserID($user['id']);
+    }
+
+    public function findByUserID($user_id) {
+        return call_user_func([$this->model_type, 'where'], 'user_id', $user_id)->get();
+    }
+
+
     public function findByEmail($email) {
         return User::where('email', $email)->first();
     }

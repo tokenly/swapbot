@@ -16,21 +16,21 @@ class UserAPITest extends TestCase {
         // require user
         $tester->testRequiresUser();
         
-        // // index
-        // $tester->testIndex();
+        // index
+        $tester->testIndex();
         
-        // // test create
-        // $user_helper = $this->app->make('UserHelper');
-        // $tester->testCreate($user_helper->sampleUserVars());
+        // test create
+        $user_helper = $this->app->make('UserHelper');
+        $tester->testCreate($user_helper->sampleVars(['email' => $user_helper->randomEmail()]));
 
         // test show
         $tester->testShow();
 
-        // // test update
-        // $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description']);
+        // test update
+        $tester->testUpdate(['name' => 'Updated Name',]);
 
-        // // test delete
-        // $tester->testDelete();
+        // test delete
+        $tester->testDelete();
 
 
     }
@@ -48,16 +48,34 @@ class UserAPITest extends TestCase {
     }
 
     public function testUserBelongsToUser() {
+        // setup user first
+        $tester = $this->setupAPITester();
+
         // create a sample user with the standard user
-        $new_user = $this->app->make('UserHelper')->getSampleUser();
+        $standard_sample_user = $this->app->make('UserHelper')->getSampleUser();
 
         // now create a separate user
         $another_user = $this->app->make('UserHelper')->getSampleUser('user2@tokenly.co');
 
         // now call the show method as the other user
-        $tester = $this->setupAPITester();
         $tester->be($another_user);
-        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/users/'.$new_user['uuid']);
+        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/users/'.$standard_sample_user['uuid']);
+
+        // should be unauthorized
+        PHPUnit::assertEquals(403, $response->getStatusCode());
+    }
+
+    public function testNormalUsersCantCreateOtherUsers() {
+        $tester = $this->setupAPITester();
+        $user_helper = $this->app->make('UserHelper');
+
+        // create a sample user with the standard vars
+        $unprivileged_user = $user_helper->getSampleUser('unprivileged@tokenly.co');
+
+        // now try to create another user
+        $tester->be($unprivileged_user);
+        $create_vars = $user_helper->sampleVars(['email' => $user_helper->randomEmail()]);
+        $response = $tester->callAPIWithAuthentication('POST', '/api/v1/users', $create_vars);
 
         // should be unauthorized
         PHPUnit::assertEquals(403, $response->getStatusCode());
@@ -66,13 +84,42 @@ class UserAPITest extends TestCase {
     public function setupAPITester() {
         $user_helper = $this->app->make('UserHelper');
         $tester = $this->app->make('APITestHelper');
+
+
+        // create a master user with createUser privileges
+        $email = 'sample@tokenly.co';
+        $api_token = $user_helper->testingTokenFromEmail($email);
+        $master_user = $user_helper->newSampleUser([
+            'email'      => $email,
+            'apitoken'   => $api_token,
+            'user_id'    => null,
+            'privileges' => ['createUser' => true],
+        ]);
+
+
+        // use the master user with create user privileges
+        $tester->be($master_user);
+
         $tester
             ->setURLBase('/api/v1/users')
-            ->useUserHelper($this->app->make('UserHelper'))
             ->useRepository($this->app->make('Swapbot\Repositories\UserRepository'))
             ->createModelWith(function($user) use ($user_helper) {
-                $email = 'u'.md5(uniqid('', true)).'@tokenly.co';
-                return $user_helper->getSampleUser($email, null, $user['id']);
+                $email = $user_helper->randomEmail();
+                $api_token = $user_helper->testingTokenFromEmail($email);
+                return $user_helper->newSampleUser([
+                    'email'      => $email,
+                    'apitoken'   => $api_token,
+                    'user_id'    => $user['id'],
+                    'privileges' => []
+                ]);
+            })
+            ->useCleanupFunction(function($user_repository) use ($master_user) {
+                foreach($user_repository->findAll() as $model) {
+                    if ($model['id'] != $master_user['id']) {
+                        $user_repository->delete($model);
+                    }
+                }
+
             });
 
         return $tester;

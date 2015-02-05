@@ -47,5 +47,9 @@ class UserHelper
         // code
     }
 
+    public function randomEmail() {
+        return 'u'.substr(md5(uniqid('', true)), 0, 6).'@tokenly.co';
+    }
+
 
 }
