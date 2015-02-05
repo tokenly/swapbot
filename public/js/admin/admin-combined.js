@@ -306,7 +306,8 @@
       }
     };
     buildUsersNavLink = function(user) {
-      if (user.privileges) {
+      var _ref;
+      if ((_ref = user.privileges) != null ? _ref.createUser : void 0) {
         return m("li", {
           "class": ""
         }, [

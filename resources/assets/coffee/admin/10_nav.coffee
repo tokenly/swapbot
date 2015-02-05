@@ -26,7 +26,7 @@ sbAdmin.nav = do ()->
                 ])
 
     buildUsersNavLink = (user)->
-        if user.privileges
+        if user.privileges?.createUser
             return m("li", { class: ""}, [
                 m("a[href='/admin/users']", {class: "", config: m.route}, "Users"),
             ])
