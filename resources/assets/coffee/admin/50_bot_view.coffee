@@ -39,8 +39,8 @@ do ()->
 
 
     handleBotEventMessage = (data)->
-        console.log "pusher received:", data
-        console.log "msg:", data?.event?.msg
+        # console.log "pusher received:", data
+        # console.log "msg:", data?.event?.msg
         if data?.event?.msg
             vm.botEvents().unshift(data)
             # this is outside of mithril, so we must force a redraw
@@ -48,7 +48,7 @@ do ()->
         return
 
     handleBotBalancesMessage = (data)->
-        console.log "bot balances:",data
+        # console.log "bot balances:",data
         if data?
             vm.updateBalances(data)
             # this is outside of mithril, so we must force a redraw
@@ -112,7 +112,7 @@ do ()->
                     asset: asset
                     val: val
                 })
-            console.log "buildBalancesPropValue out=",out
+            # console.log "buildBalancesPropValue out=",out
             return out
 
         vm = {}
@@ -142,7 +142,7 @@ do ()->
             # load the bot info from the api
             sbAdmin.api.getBot(id).then(
                 (botData)->
-                    console.log "botData", botData
+                    # console.log "botData", botData
                     vm.resourceId(botData.id)
 
                     vm.name(botData.name)
@@ -170,7 +170,16 @@ do ()->
 
             vm.pusherClient(subscribeToPusherChannel("swapbot_events_#{id}", handleBotEventMessage))
             vm.pusherClient(subscribeToPusherChannel("swapbot_balances_#{id}", handleBotBalancesMessage))
-            console.log "vm.pusherClient=",vm.pusherClient()
+            # console.log "vm.pusherClient=",vm.pusherClient()
+
+            # and send a balance refresh on each reload
+            sbAdmin.api.refreshBalances(id).then(
+                (apiResponse)->
+                    return
+                , (errorResponse)->
+                    console.log "ERROR: "+errorResponse.msg
+                    return
+            )
 
             return
         return vm
@@ -181,7 +190,7 @@ do ()->
 
         # bind unload event
         this.onunload = (e)->
-            console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
+            # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
             closePusherChannel(vm.pusherClient())
             return
 
@@ -191,7 +200,7 @@ do ()->
 
     sbAdmin.ctrl.botView.view = ()->
 
-        console.log "vm.balances()=",vm.balances()
+        # console.log "vm.balances()=",vm.balances()
 
         mEl = m("div", [
                 m("h2", "SwapBot #{vm.name()}"),

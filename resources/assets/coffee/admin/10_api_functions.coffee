@@ -5,18 +5,15 @@ sbAdmin.api = do ()->
     # ###################################################
     # Internal Functions
 
-    errorHandler = (error)->
-        console.log "an error occurred", error
-        return
-
     signRequest = (xhr, xhrOptions)->
         # console.log "xhr=", xhr
         # console.log "xhrOptions=", xhrOptions
+        # console.log "xhrOptions.data=", xhrOptions.data
         credentials = sbAdmin.auth.getCredentials()
         return if not credentials.apiToken?.length
 
         nonce = newNonce()
-        if xhrOptions.data?
+        if xhrOptions.data? and xhrOptions.data != 'null'
             if typeof xhrOptions.data == 'object'
                 paramsBody = window.JSON.stringify(xhrOptions.data)
             else
@@ -66,6 +63,11 @@ sbAdmin.api = do ()->
 
     api.getBotEvents = (id, additionalOpts={})->
         return api.send('GET', "botevents/#{id}", null, additionalOpts)
+
+
+    api.refreshBalances = (id)->
+        # always does this in the background
+        return api.send('POST', "balancerefresh/#{id}", null, {background: true})
 
 
     api.newUser = (userAttributes)->

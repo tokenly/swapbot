@@ -6,11 +6,8 @@
   };
 
   sbAdmin.api = (function() {
-    var api, errorHandler, newNonce, signRequest, signURLParameters;
+    var api, newNonce, signRequest, signURLParameters;
     api = {};
-    errorHandler = function(error) {
-      console.log("an error occurred", error);
-    };
     signRequest = function(xhr, xhrOptions) {
       var credentials, nonce, paramsBody, signature, url, _ref;
       credentials = sbAdmin.auth.getCredentials();
@@ -18,7 +15,7 @@
         return;
       }
       nonce = newNonce();
-      if (xhrOptions.data != null) {
+      if ((xhrOptions.data != null) && xhrOptions.data !== 'null') {
         if (typeof xhrOptions.data === 'object') {
           paramsBody = window.JSON.stringify(xhrOptions.data);
         } else {
@@ -62,6 +59,11 @@
         additionalOpts = {};
       }
       return api.send('GET', "botevents/" + id, null, additionalOpts);
+    };
+    api.refreshBalances = function(id) {
+      return api.send('POST', "balancerefresh/" + id, null, {
+        background: true
+      });
     };
     api.newUser = function(userAttributes) {
       return api.send('POST', 'users', userAttributes);
@@ -240,11 +242,9 @@
       errorsProp([]);
       formStatusProp('submitting');
       return apiCallFn.apply(null, apiCallArgs).then(function(apiResponse) {
-        console.log("apiResponse=", apiResponse);
         formStatusProp('submitted');
         return apiResponse;
       }, function(error) {
-        console.log("error=", error);
         formStatusProp('active');
         errorsProp(error.errors);
         return m.deferred().reject(error).promise;
@@ -735,16 +735,13 @@
       client.disconnect();
     };
     handleBotEventMessage = function(data) {
-      var _ref, _ref1;
-      console.log("pusher received:", data);
-      console.log("msg:", data != null ? (_ref = data.event) != null ? _ref.msg : void 0 : void 0);
-      if (data != null ? (_ref1 = data.event) != null ? _ref1.msg : void 0 : void 0) {
+      var _ref;
+      if (data != null ? (_ref = data.event) != null ? _ref.msg : void 0 : void 0) {
         vm.botEvents().unshift(data);
         m.redraw(true);
       }
     };
     handleBotBalancesMessage = function(data) {
-      console.log("bot balances:", data);
       if (data != null) {
         vm.updateBalances(data);
         m.redraw(true);
@@ -849,7 +846,6 @@
             val: val
           });
         }
-        console.log("buildBalancesPropValue out=", out);
         return out;
       };
       vm = {};
@@ -871,7 +867,6 @@
         vm.balances = m.prop(buildBalancesPropValue([]));
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
-          console.log("botData", botData);
           vm.resourceId(botData.id);
           vm.name(botData.name);
           vm.address(botData.address);
@@ -889,21 +884,21 @@
         });
         vm.pusherClient(subscribeToPusherChannel("swapbot_events_" + id, handleBotEventMessage));
         vm.pusherClient(subscribeToPusherChannel("swapbot_balances_" + id, handleBotBalancesMessage));
-        console.log("vm.pusherClient=", vm.pusherClient());
+        sbAdmin.api.refreshBalances(id).then(function(apiResponse) {}, function(errorResponse) {
+          console.log("ERROR: " + errorResponse.msg);
+        });
       };
       return vm;
     })();
     sbAdmin.ctrl.botView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        console.log("unload bot view vm.pusherClient()=", vm.pusherClient());
         closePusherChannel(vm.pusherClient());
       };
       vm.init();
     };
     sbAdmin.ctrl.botView.view = function() {
       var mEl;
-      console.log("vm.balances()=", vm.balances());
       mEl = m("div", [
         m("h2", "SwapBot " + (vm.name())), m("div", {
           "class": "spacer1"

@@ -87,12 +87,12 @@ sbAdmin.form = do ()->
         # submit to the api
         return apiCallFn.apply(null, apiCallArgs).then(
             (apiResponse)->
-                console.log "apiResponse=", apiResponse
+                # console.log "apiResponse=", apiResponse
                 # success
                 formStatusProp('submitted')
                 return apiResponse
             , (error)->
-                console.log "error=", error
+                # console.log "error=", error
                 # failed
                 formStatusProp('active')
                 errorsProp(error.errors)
