@@ -28,6 +28,7 @@ class CreateBotsTable extends Migration {
             $table->string('send_monitor_id', 36)->unique()->nullable();
 
             $table->text('balances')->nullable();
+            $table->timestamp('balances_updated_at')->nullable();
 
             $table->text('blacklist_addresses')->nullable();
 

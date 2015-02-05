@@ -24,6 +24,7 @@ class BotHelper  {
             'receive_monitor_id'  => null,
             'send_monitor_id'     => null,
             'balances'            => null,
+            'balances_updated_at' => null,
             'blacklist_addresses' => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
 
             'swaps' => [

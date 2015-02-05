@@ -10,6 +10,7 @@ use \PHPUnit_Framework_Assert as PHPUnit;
 class APITestHelper  {
 
     protected $override_user = null;
+    protected $repository    = null;
 
     function __construct(Application $app) {
         $this->app = $app;
@@ -51,8 +52,10 @@ class APITestHelper  {
         if (isset($this->cleanup_fn) AND is_callable($this->cleanup_fn)) {
             call_user_func($this->cleanup_fn, $this->repository);
         } else {
-            foreach($this->repository->findAll() as $model) {
-                $this->repository->delete($model);
+            if ($this->repository) {
+                foreach($this->repository->findAll() as $model) {
+                    $this->repository->delete($model);
+                }
             }
         }
         return $this;
@@ -64,8 +67,11 @@ class APITestHelper  {
         // create a model
         $created_model = $this->newModel();
 
+        return $this->testURLCallRequiresUser($this->extendURL($this->url_base, '/'.$created_model['uuid']));
+    }
+
+    public function testURLCallRequiresUser($url) {
         // call the API without a user
-        $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
         $request = $this->createAPIRequest('GET', $url);
         $response = $this->sendRequest($request);
         PHPUnit::assertEquals(403, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
@@ -212,7 +218,7 @@ class APITestHelper  {
         return $this->sendRequest($request);
     }
 
-    protected function createAPIRequest($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
+    public function createAPIRequest($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
         // convert a POST to json
         if ($parameters AND in_array($method, ['POST', 'PUT', 'PATCH'])) {
             $content = json_encode($parameters);
@@ -223,7 +229,7 @@ class APITestHelper  {
         return Request::create($uri, $method, $parameters, $cookies, $files, $server, $content);
     }
 
-    protected function sendRequest($request) {
+    public function sendRequest($request) {
         return $this->app->make('Illuminate\Contracts\Http\Kernel')->handle($request);
     }
 

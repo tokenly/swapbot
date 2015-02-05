@@ -2,6 +2,7 @@
 
 namespace Swapbot\Handlers\Commands;
 
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Event;
@@ -41,14 +42,15 @@ class UpdateBotBalancesHandler {
         // get balances
         if (!$bot['address']) { throw new Exception("This bot does not have an address yet", 1); }
         $new_balances = $this->xchain_client->getBalances($bot['address']);
-        $update_vars['balances'] = $new_balances;
-
-        // update the bot
-        $this->repository->update($bot, $update_vars);
 
         // fire an event
-        $balances_were_updated = (json_encode($old_balances) != json_encode($new_balances));
-        if ($balances_were_updated) {
+        $balances_were_changed = (json_encode($old_balances) != json_encode($new_balances));
+        if ($balances_were_changed) {
+            // update the bot
+            $update_vars['balances'] = $new_balances;
+            $update_vars['balances_updated_at'] = new Carbon();
+            $this->repository->update($bot, $update_vars);
+
             Event::fire(new BotBalancesUpdated($bot, $old_balances, $new_balances));
         }
 

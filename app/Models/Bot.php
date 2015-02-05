@@ -8,6 +8,7 @@ class Bot extends APIModel {
 
     protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'active', ];
 
+    protected $dates = ['balances_updated_at'];
 
     public function buildSwapID($swap) {
         return $swap['in'].':'.$swap['out'];

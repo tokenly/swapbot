@@ -11,12 +11,15 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
-Route::get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
+$router->get('/', 'WelcomeController@index');
+$router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 
 
 // Bot API
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);
+
+// Balance Refresh
+$router->post('api/v1/balancerefresh/{botuuid}', 'API\BalanceRefresh\BalanceRefreshController@refresh');
 
 // Bot Events API
 $router->get('api/v1/botevents/{botuuid}', 'API\BotEvents\BotEventsController@index', ['only' => ['index']]);
