@@ -176,6 +176,9 @@ do ()->
         return vm
 
     sbAdmin.ctrl.botView.controller = ()->
+        # require login
+        sbAdmin.auth.redirectIfNotLoggedIn()
+
         # bind unload event
         this.onunload = (e)->
             console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
@@ -190,78 +193,79 @@ do ()->
 
         console.log "vm.balances()=",vm.balances()
 
-        return m("div", [
-                    m("h2", "SwapBot #{vm.name()}"),
+        mEl = m("div", [
+                m("h2", "SwapBot #{vm.name()}"),
 
-                    m("div", {class: "spacer1"}),
+                m("div", {class: "spacer1"}),
 
-                    m("div", {class: "bot-view"}, [
-                        sbAdmin.form.mAlerts(vm.errorMessages),
+                m("div", {class: "bot-view"}, [
+                    sbAdmin.form.mAlerts(vm.errorMessages),
 
-                        m("div", { class: "row"}, [
+                    m("div", { class: "row"}, [
 
-                            m("div", {class: "col-md-8"}, [
+                        m("div", {class: "col-md-8"}, [
 
-                                m("div", { class: "row"}, [
-                                    m("div", {class: "col-md-4"}, [
-                                        sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
-                                    ]),
-                                    m("div", {class: "col-md-5"}, [
-                                        sbAdmin.form.mValueDisplay("Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
-                                    ]),
-                                    m("div", {class: "col-md-3"}, [
-                                        sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, if vm.active() then m("span", {class: 'yes'}, "Active") else m("span", {class: 'no'}, "Inactive")),
-                                    ]),
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
                                 ]),
-
-                                m("div", { class: "row"}, [
-                                    m("div", {class: "col-md-12"}, [
-                                        sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
-                                    ]),
-
-
+                                m("div", {class: "col-md-6"}, [
+                                    sbAdmin.form.mValueDisplay("Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
+                                ]),
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, if vm.active() then m("span", {class: 'yes'}, "Active") else m("span", {class: 'no'}, "Inactive")),
                                 ]),
                             ]),
 
-                            # #### Balances
-                            m("div", {class: "col-md-4"}, [
-                                sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, buildBalancesMElement(vm.balances())),
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-12"}, [
+                                    sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
+                                ]),
+
+
                             ]),
                         ]),
 
-
-                        m("hr"),
-
-                        vm.swaps().map (swap, offset)->
-                            return swapGroup(offset+1, swap)
-
-
-                        m("hr"),
-
-                        m("div", {class: "bot-events"}, [
-                            m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
-                            m("h3", "Events"),
-                            m("ul", {class: "list-unstyled striped-list event-list"}, [
-                                vm.botEvents().map (botEventObj)->
-                                    dateObj = window.moment(botEventObj.createdAt)
-                                    return m("li", {class: "event"}, [
-                                        m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
-                                        m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
-                                        m("span", {class: "msg"}, botEventObj.event?.msg),
-                                    ])
-                            ]),
+                        # #### Balances
+                        m("div", {class: "col-md-4"}, [
+                            sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, buildBalancesMElement(vm.balances())),
                         ]),
-
-
-                        m("div", {class: "spacer2"}),
-
-                        m("a[href='/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
-                        m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
-                        
-
                     ]),
 
 
+                    m("hr"),
+
+                    vm.swaps().map (swap, offset)->
+                        return swapGroup(offset+1, swap)
+
+
+                    m("hr"),
+
+                    m("div", {class: "bot-events"}, [
+                        m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
+                        m("h3", "Events"),
+                        m("ul", {class: "list-unstyled striped-list event-list"}, [
+                            vm.botEvents().map (botEventObj)->
+                                dateObj = window.moment(botEventObj.createdAt)
+                                return m("li", {class: "event"}, [
+                                    m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
+                                    m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
+                                    m("span", {class: "msg"}, botEventObj.event?.msg),
+                                ])
+                        ]),
+                    ]),
+
+
+                    m("div", {class: "spacer2"}),
+
+                    m("a[href='/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
+                    m("a[href='/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
+                    
+
+                ]),
+
+
         ])
+        return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
 
     sbAdmin.ctrl.botView.UnloadEvent

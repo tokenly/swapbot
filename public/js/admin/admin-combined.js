@@ -63,6 +63,18 @@
       }
       return api.send('GET', "botevents/" + id, null, additionalOpts);
     };
+    api.newUser = function(userAttributes) {
+      return api.send('POST', 'users', userAttributes);
+    };
+    api.updateUser = function(id, userAttributes) {
+      return api.send('PUT', "users/" + id, userAttributes);
+    };
+    api.getAllUsers = function() {
+      return api.send('GET', 'users');
+    };
+    api.getUser = function(id) {
+      return api.send('GET', "users/" + id);
+    };
     api.send = function(method, apiPathSuffix, params, additionalOpts) {
       var k, opts, path, v;
       if (params == null) {
@@ -239,6 +251,129 @@
       });
     };
     return form;
+  })();
+
+  sbAdmin.nav = (function() {
+    var buildRightNav, buildUsersNavLink, nav;
+    nav = {};
+    buildRightNav = function(user) {
+      var username;
+      username = user != null ? user.name : void 0;
+      if (username) {
+        return m("ul", {
+          "class": "nav navbar-nav navbar-right"
+        }, [
+          m("li", {
+            "class": "dropdown"
+          }, [
+            m("a[href=#]", {
+              "class": "dropdown-toggle",
+              "data-toggle": "dropdown",
+              "role": "button",
+              "aria-expanded": "false"
+            }, [
+              username, m("span", {
+                "class": "caret"
+              })
+            ]), m("ul", {
+              "class": "dropdown-menu",
+              role: "menu"
+            }, [
+              m("li", {
+                "class": ""
+              }, [
+                m("a[href='/logout']", {
+                  "class": "",
+                  config: m.route
+                }, "Logout")
+              ])
+            ])
+          ])
+        ]);
+      } else {
+        return m("ul", {
+          "class": "nav navbar-nav navbar-right"
+        }, [
+          m("li", {
+            "class": ""
+          }, [
+            m("a[href='/login']", {
+              "class": "",
+              config: m.route
+            }, "Login")
+          ])
+        ]);
+      }
+    };
+    buildUsersNavLink = function(user) {
+      if (user.privileges) {
+        return m("li", {
+          "class": ""
+        }, [
+          m("a[href='/users']", {
+            "class": "",
+            config: m.route
+          }, "Users")
+        ]);
+      }
+      return null;
+    };
+    nav.buildNav = function() {
+      var user;
+      user = sbAdmin.auth.getUser();
+      return m("nav", {
+        "class": "navbar navbar-default"
+      }, [
+        m("div", {
+          "class": "container-fluid"
+        }, [
+          m("div", {
+            "class": "navbar-header"
+          }, [
+            m("a[href='/dashboard']", {
+              "class": "navbar-brand",
+              config: m.route
+            }, "Swapbot Admin")
+          ]), m("ul", {
+            "class": "nav navbar-nav"
+          }, [
+            m("li", {
+              "class": ""
+            }, [
+              m("a[href='/dashboard']", {
+                "class": "",
+                config: m.route
+              }, "Dashboard")
+            ]), m("li", {
+              "class": ""
+            }, [
+              m("a[href='/edit/bot/new']", {
+                "class": "",
+                config: m.route
+              }, "New Bot")
+            ]), buildUsersNavLink(user)
+          ]), buildRightNav(user)
+        ])
+      ]);
+    };
+    nav.buildInContainer = function(mEl) {
+      return m("div", {
+        "class": "container",
+        style: {
+          marginTop: "0px",
+          marginBottom: "24px"
+        }
+      }, [
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12 col-lg-10 col-lg-offset-1"
+          }, [mEl])
+        ])
+      ]);
+    };
+    return nav;
   })();
 
   sbAdmin.utils = (function() {
@@ -443,10 +578,12 @@
       return vm;
     })();
     sbAdmin.ctrl.botForm.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
       vm.init();
     };
     return sbAdmin.ctrl.botForm.view = function() {
-      return m("div", [
+      var mEl;
+      mEl = m("div", [
         m("div", {
           "class": "row"
         }, [
@@ -541,6 +678,7 @@
           ])
         ])
       ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
   })();
 
@@ -756,6 +894,7 @@
       return vm;
     })();
     sbAdmin.ctrl.botView.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
         console.log("unload bot view vm.pusherClient()=", vm.pusherClient());
         closePusherChannel(vm.pusherClient());
@@ -763,8 +902,9 @@
       vm.init();
     };
     sbAdmin.ctrl.botView.view = function() {
+      var mEl;
       console.log("vm.balances()=", vm.balances());
-      return m("div", [
+      mEl = m("div", [
         m("h2", "SwapBot " + (vm.name())), m("div", {
           "class": "spacer1"
         }), m("div", {
@@ -780,13 +920,13 @@
                 "class": "row"
               }, [
                 m("div", {
-                  "class": "col-md-4"
+                  "class": "col-md-3"
                 }, [
                   sbAdmin.form.mValueDisplay("Bot Name", {
                     id: 'name'
                   }, vm.name())
                 ]), m("div", {
-                  "class": "col-md-5"
+                  "class": "col-md-6"
                 }, [
                   sbAdmin.form.mValueDisplay("Address", {
                     id: 'address'
@@ -872,6 +1012,7 @@
           }, "Back to Dashboard")
         ])
       ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
     return sbAdmin.ctrl.botView.UnloadEvent;
   })();
@@ -900,7 +1041,8 @@
       vm.init();
     };
     return sbAdmin.ctrl.dashboard.view = function() {
-      return m("div", [
+      var mEl;
+      mEl = m("div", [
         m("h2", "Welcome, " + (vm.user().name)), m("div", {
           "class": "spacer1"
         }), m("div", {
@@ -918,7 +1060,7 @@
                     m("a[href='/view/bot/" + bot.id + "']", {
                       "class": "",
                       config: m.route
-                    }, "Bot " + bot.name), " ", m("a[href='/edit/bot/" + bot.id + "']", {
+                    }, "" + bot.name), " ", m("a[href='/edit/bot/" + bot.id + "']", {
                       "class": "dashboard-edit-link pull-right",
                       config: m.route
                     }, [
@@ -937,14 +1079,9 @@
         }), m("a[href='/edit/bot/new']", {
           "class": "btn btn-primary",
           config: m.route
-        }, "Create a new Swapbot"), m("div", {
-          "class": "spacer3"
-        }), m("div", [
-          m("a[href='/logout']", {
-            config: m.route
-          }, "Logout")
-        ])
+        }, "Create a new Swapbot")
       ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
   })();
 
@@ -973,7 +1110,8 @@
       vm.init();
     };
     return sbAdmin.ctrl.login.view = function() {
-      return m("div", [
+      var mEl;
+      mEl = m("div", [
         m("div", {
           "class": "row"
         }, [
@@ -1030,16 +1168,19 @@
           ])
         ])
       ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
   })();
 
   (function() {
     sbAdmin.ctrl.logout = {};
     sbAdmin.ctrl.logout.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
       sbAdmin.auth.logout();
     };
     return sbAdmin.ctrl.logout.view = function() {
-      return m("div", [
+      var mEl;
+      mEl = m("div", [
         m("div", {
           "class": "row"
         }, [
@@ -1054,6 +1195,216 @@
           ])
         ])
       ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
+    var formatPrivileges, vm;
+    sbAdmin.ctrl.userForm = {};
+    formatPrivileges = function(privileges) {
+      var out, privilege, set;
+      out = (function() {
+        var _results;
+        _results = [];
+        for (privilege in privileges) {
+          set = privileges[privilege];
+          _results.push(privilege);
+        }
+        return _results;
+      })();
+      if (out.length) {
+        return out.join(", ");
+      }
+      return "No Privileges";
+    };
+    vm = sbAdmin.ctrl.userForm.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        var id;
+        vm.errorMessages = m.prop([]);
+        vm.formStatus = m.prop('active');
+        vm.resourceId = m.prop('');
+        vm.name = m.prop('');
+        vm.email = m.prop('');
+        vm.apitoken = m.prop('');
+        vm.apisecretkey = m.prop('');
+        vm.privileges = m.prop('');
+        id = m.route.param('id');
+        if (id !== 'new') {
+          sbAdmin.api.getUser(id).then(function(userData) {
+            vm.resourceId(userData.id);
+            vm.name(userData.name);
+            vm.email(userData.email);
+            vm.apitoken(userData.apitoken);
+            vm.apisecretkey(userData.apisecretkey);
+            vm.privileges(userData.privileges);
+          }, function(errorResponse) {
+            vm.errorMessages(errorResponse.errors);
+          });
+        }
+        vm.save = function(e) {
+          var apiArgs, apiCall, attributes;
+          e.preventDefault();
+          attributes = {
+            name: vm.name(),
+            email: vm.email()
+          };
+          if (vm.resourceId().length > 0) {
+            apiCall = sbAdmin.api.updateUser;
+            apiArgs = [vm.resourceId(), attributes];
+          } else {
+            apiCall = sbAdmin.api.newUser;
+            apiArgs = [attributes];
+          }
+          return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
+            m.route('/users');
+          });
+        };
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.userForm.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.userForm.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12"
+          }, [
+            m("h2", vm.resourceId() ? "Edit User " + (vm.name()) : "Create a New User"), m("div", {
+              "class": "spacer1"
+            }), sbAdmin.form.mForm({
+              errors: vm.errorMessages,
+              status: vm.formStatus
+            }, {
+              onsubmit: vm.save
+            }, [
+              sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-5"
+                }, [
+                  sbAdmin.form.mFormField("Name", {
+                    id: 'name',
+                    'placeholder': "User Name",
+                    required: true
+                  }, vm.name)
+                ]), m("div", {
+                  "class": "col-md-7"
+                }, [
+                  sbAdmin.form.mFormField("Email", {
+                    type: 'email',
+                    id: 'email',
+                    'placeholder': "User Email",
+                    required: true
+                  }, vm.email)
+                ])
+              ]), m("hr"), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-4"
+                }, [
+                  sbAdmin.form.mValueDisplay("API Token", {
+                    id: "apitoken"
+                  }, vm.apitoken())
+                ]), m("div", {
+                  "class": "col-md-8"
+                }, [
+                  sbAdmin.form.mValueDisplay("API Secret Key", {
+                    id: "apisecretkey"
+                  }, vm.apisecretkey())
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-6"
+                }, [
+                  sbAdmin.form.mValueDisplay("privileges", {
+                    id: "apitoken"
+                  }, formatPrivileges(vm.privileges()))
+                ])
+              ]), m("div", {
+                "class": "spacer1"
+              }), sbAdmin.form.mSubmitBtn("Save User"), m("a[href='/users']", {
+                "class": "btn btn-default pull-right",
+                config: m.route
+              }, "Return without Saving")
+            ])
+          ])
+        ])
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.usersView = {};
+    vm = sbAdmin.ctrl.usersView.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        vm.users = m.prop([]);
+        sbAdmin.api.getAllUsers().then(function(usersList) {
+          vm.users(usersList);
+        });
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.usersView.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.usersView.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("h2", "API Users"), m("div", {
+          "class": "spacer1"
+        }), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-6 col-lg-4"
+          }, [
+            m("ul", {
+              "class": "list-unstyled striped-list user-list"
+            }, [
+              vm.users().map(function(user) {
+                return m("li", {}, [
+                  m("div", {}, [
+                    m("a[href='/edit/user/" + user.id + "']", {
+                      "class": "",
+                      config: m.route
+                    }, "" + user.name), " ", m("a[href='/edit/user/" + user.id + "']", {
+                      "class": "usersView-edit-link pull-right",
+                      config: m.route
+                    }, [
+                      m("span", {
+                        "class": "glyphicon glyphicon-edit",
+                        title: "Edit User " + user.name
+                      }, ''), " Edit"
+                    ])
+                  ])
+                ]);
+              })
+            ])
+          ])
+        ]), m("div", {
+          "class": "spacer1"
+        }), m("a[href='/edit/user/new']", {
+          "class": "btn btn-primary",
+          config: m.route
+        }, "Create a new user")
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
   })();
 
@@ -1064,7 +1415,9 @@
     "/logout": sbAdmin.ctrl.logout,
     "/dashboard": sbAdmin.ctrl.dashboard,
     "/edit/bot/:id": sbAdmin.ctrl.botForm,
-    "/view/bot/:id": sbAdmin.ctrl.botView
+    "/view/bot/:id": sbAdmin.ctrl.botView,
+    "/users": sbAdmin.ctrl.usersView,
+    "/edit/user/:id": sbAdmin.ctrl.userForm
   });
 
 }).call(this);

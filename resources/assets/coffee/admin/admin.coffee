@@ -24,6 +24,8 @@ m.route(
         "/dashboard" : sbAdmin.ctrl.dashboard,
         "/edit/bot/:id"   : sbAdmin.ctrl.botForm,
         "/view/bot/:id"   : sbAdmin.ctrl.botView,
+        "/users" : sbAdmin.ctrl.usersView,
+        "/edit/user/:id"   : sbAdmin.ctrl.userForm,
     }
 )
 # m.module(document.getElementById('admin'), {controller: sbAdmin.ctrl.dashboard.controller, view: sbAdmin.ctrl.dashboard.view})

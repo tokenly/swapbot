@@ -38,7 +38,7 @@ do ()->
         return
 
     sbAdmin.ctrl.login.view = ()->
-        return m("div", [
+        mEl = m("div", [
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-12"}, [
                     m("h2", "Please Login to Continue"),
@@ -79,4 +79,5 @@ do ()->
 
 
         ])
+        return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
 

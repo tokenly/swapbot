@@ -68,6 +68,19 @@ sbAdmin.api = do ()->
         return api.send('GET', "botevents/#{id}", null, additionalOpts)
 
 
+    api.newUser = (userAttributes)->
+        return api.send('POST', 'users', userAttributes)
+
+    api.updateUser = (id, userAttributes)->
+        return api.send('PUT', "users/#{id}", userAttributes)
+
+    api.getAllUsers = ()->
+        return api.send('GET', 'users')
+
+    api.getUser = (id)->
+        return api.send('GET', "users/#{id}")
+
+
 
     api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
         path = '/api/v1/'+apiPathSuffix

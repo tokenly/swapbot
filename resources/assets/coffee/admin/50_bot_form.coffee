@@ -154,11 +154,14 @@ do ()->
         return vm
 
     sbAdmin.ctrl.botForm.controller = ()->
+        # require login
+        sbAdmin.auth.redirectIfNotLoggedIn()
+
         vm.init()
         return
 
     sbAdmin.ctrl.botForm.view = ()->
-        return m("div", [
+        mEl = m("div", [
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-12"}, [
                     m("h2", if vm.resourceId() then "Edit SwapBot #{vm.name()}" else "Create a New Swapbot"),
@@ -232,4 +235,6 @@ do ()->
 
 
         ])
+        return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+
 

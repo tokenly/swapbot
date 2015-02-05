@@ -10,7 +10,7 @@ use Swapbot\Models\Base\APIModel;
 
 class User extends APIModel implements AuthenticatableContract, CanResetPasswordContract {
 
-    protected $api_attributes = ['id', 'name', 'email', 'apitoken', 'privileges',];
+    protected $api_attributes = ['id', 'name', 'email', 'apitoken', 'apisecretkey', 'privileges',];
 
     use Authenticatable, CanResetPassword;
 

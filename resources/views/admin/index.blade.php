@@ -26,13 +26,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="/bower_components/mithril/mithril.min.js"></script>
 
-    <div class="container" style="margin-top:0px; margin-bottom: 24px;">
-        <div class="row">
-            <div class="col-md-12 col-lg-10 col-lg-offset-1">
-                <div id="admin"></div>
-            </div>
-        </div>
-    </div>
+
+    <div id="admin"></div>
 
     <!-- deps -->
     <script src="/bower_components/cryptojslib/rollups/sha1.js"></script>
