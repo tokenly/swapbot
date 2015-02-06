@@ -70,7 +70,8 @@ class ReceiveWebhookHandler {
         if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
-        return DB::transaction(function() use ($xchain_notification, $bot) {
+        $should_update_bot_balance = null;
+        $bot = DB::transaction(function() use ($xchain_notification, $bot, &$should_update_bot_balance) {
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
@@ -235,10 +236,6 @@ class ReceiveWebhookHandler {
                 $this->transaction_repository->update($transaction_model, $update_vars);
             }
 
-            if ($should_update_bot_balance) {
-                $this->updateBotBalance($bot);
-            }
-
             if (!$any_notification_given) {
                 // no feedback was given to the user
                 //   this should never happen
@@ -249,6 +246,12 @@ class ReceiveWebhookHandler {
 
         });
 
+        // bot balance update must be done outside of the transaction
+        if ($should_update_bot_balance) {
+            $this->updateBotBalance($bot);
+        }
+
+        return $bot;
     }
 
     protected function handleSend($xchain_notification) {
@@ -257,7 +260,8 @@ class ReceiveWebhookHandler {
         if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
-        return DB::transaction(function() use ($xchain_notification, $bot) {
+        $should_update_bot_balance = null;
+        $bot = DB::transaction(function() use ($xchain_notification, $bot, &$should_update_bot_balance) {
 
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
@@ -306,14 +310,18 @@ class ReceiveWebhookHandler {
                 }
             }
 
-            if ($should_update_bot_balance) {
-                $this->updateBotBalance($bot);
-            }
-
 
             return $bot;
 
         });
+
+
+        // bot balance update must be done outside of the transaction
+        if ($should_update_bot_balance) {
+            $this->updateBotBalance($bot);
+        }
+
+        return $bot;
     }
 
     ////////////////////////////////////////////////////////////////////////
