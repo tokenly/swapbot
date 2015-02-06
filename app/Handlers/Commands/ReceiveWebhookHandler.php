@@ -490,18 +490,20 @@ class ReceiveWebhookHandler {
 
     protected function logSwapFailed($bot, $xchain_notification, $e) {
         $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
-            'msg'         => "Failed to swap asset. ".$e->getMessage(),
-            'txid'        => $xchain_notification['txid'],
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'msg'   => "Failed to swap asset.",
+            'error' => $e->getMessage(),
+            'txid'  => $xchain_notification['txid'],
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine(),
         ]);
     }
 
     protected function logBalanceUpdateFailed($bot, $e) {
         $this->logToBotEventsWithoutEventLog($bot, 'balanceupdate.failed', BotEvent::LEVEL_WARNING, [
-            'msg'         => "Failed to update balances. ".$e->getMessage(),
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'msg'   => "Failed to update balances.",
+            'error' => $e->getMessage(),
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine(),
         ]);
     }
 
