@@ -1,2 +1,3 @@
 name: swap.failed
-msg: Failed to swap asset. Test Exception Triggered
+msg: Failed to swap asset.
+error: Test Exception Triggered

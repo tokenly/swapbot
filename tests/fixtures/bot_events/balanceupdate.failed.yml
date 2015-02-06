@@ -1,2 +1,3 @@
 name: balanceupdate.failed
-msg: Failed to update balances. Test Exception Triggered
+msg: Failed to update balances.
+error: Test Exception Triggered
