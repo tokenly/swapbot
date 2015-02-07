@@ -121,6 +121,12 @@ do ()->
             vm.balances(buildBalancesPropValue(newBalances))
             return
 
+        vm.toggleDebugView = (e)->
+            e.preventDefault()
+            vm.showDebug = !vm.showDebug
+            return
+
+
         vm.init = ()->
             # view status
             vm.errorMessages = m.prop([])
@@ -128,6 +134,7 @@ do ()->
             vm.resourceId = m.prop('new')
             vm.pusherClient = m.prop(null)
             vm.botEvents = m.prop([])
+            vm.showDebug = false
 
             # fields
             vm.name = m.prop('')
@@ -255,6 +262,8 @@ do ()->
                         m("h3", "Events"),
                         m("ul", {class: "list-unstyled striped-list event-list"}, [
                             vm.botEvents().map (botEventObj)->
+                                if not vm.showDebug and botEventObj.level <= 100
+                                    return
                                 dateObj = window.moment(botEventObj.createdAt)
                                 return m("li", {class: "event"}, [
                                     m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
@@ -262,8 +271,15 @@ do ()->
                                     m("span", {class: "msg"}, botEventObj.event?.msg),
                                 ])
                         ]),
+                        m("div", {class: "pull-right"}, [
+                            m("a[href='#show-debug']", {onclick: vm.toggleDebugView, class: "btn #{if vm.showDebug then 'btn-warning' else 'btn-default'} btn-xs", style: {"margin-right": "16px",} }, [
+                                if vm.showDebug then "Hide Debug" else "Show Debug"
+                            ]),
+                        ]),
                     ]),
 
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
 
                     m("div", {class: "spacer2"}),
 

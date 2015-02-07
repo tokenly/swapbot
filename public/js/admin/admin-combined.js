@@ -853,6 +853,10 @@
       vm.updateBalances = function(newBalances) {
         vm.balances(buildBalancesPropValue(newBalances));
       };
+      vm.toggleDebugView = function(e) {
+        e.preventDefault();
+        vm.showDebug = !vm.showDebug;
+      };
       vm.init = function() {
         var id;
         vm.errorMessages = m.prop([]);
@@ -860,6 +864,7 @@
         vm.resourceId = m.prop('new');
         vm.pusherClient = m.prop(null);
         vm.botEvents = m.prop([]);
+        vm.showDebug = false;
         vm.name = m.prop('');
         vm.description = m.prop('');
         vm.address = m.prop('');
@@ -982,6 +987,9 @@
             }, [
               vm.botEvents().map(function(botEventObj) {
                 var dateObj, _ref;
+                if (!vm.showDebug && botEventObj.level <= 100) {
+                  return;
+                }
                 dateObj = window.moment(botEventObj.createdAt);
                 return m("li", {
                   "class": "event"
@@ -996,8 +1004,20 @@
                   }, (_ref = botEventObj.event) != null ? _ref.msg : void 0)
                 ]);
               })
+            ]), m("div", {
+              "class": "pull-right"
+            }, [
+              m("a[href='#show-debug']", {
+                onclick: vm.toggleDebugView,
+                "class": "btn " + (vm.showDebug ? 'btn-warning' : 'btn-default') + " btn-xs",
+                style: {
+                  "margin-right": "16px"
+                }
+              }, [vm.showDebug ? "Hide Debug" : "Show Debug"])
             ])
           ]), m("div", {
+            "class": "spacer1"
+          }), m("hr"), m("div", {
             "class": "spacer2"
           }), m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
             "class": "btn btn-success",
