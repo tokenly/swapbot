@@ -12,8 +12,18 @@
 */
 
 $router->get('/', 'WelcomeController@index');
-$router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 
+
+////////////////////////////////////////////////////////////////////////
+// Website
+
+// admin
+$router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
+$router->get('/public/{userid}/{botid}', 'PublicBotController@showBot');
+
+
+////////////////////////////////////////////////////////////////////////
+// API
 
 // Bot API
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);

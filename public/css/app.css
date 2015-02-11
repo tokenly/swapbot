@@ -6227,7 +6227,7 @@ button.close {
   }
 }
 .pulse-spinner {
-  width: 50px;
+  width: 60px;
   height: 30px;
   text-align: center;
   font-size: 10px;
@@ -6401,4 +6401,12 @@ li.botlink a span.glyphicon {
 }
 li.botlink a:hover {
   background-color: #286090;
+}
+footer {
+  margin-top: 24px;
+  padding: 16px 24px;
+  border-top: 1px solid #bbb;
+  background-color: #e9e9e9;
+  color: #333;
+  font-size: 1.2rem;
 }
