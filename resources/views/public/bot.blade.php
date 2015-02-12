@@ -110,10 +110,18 @@
                                         <div id="name" class=" form-control-static">The Sample LTBCOIN Bot</div>
                                     </div>
                                 </div>
-                                <div class=" col-md-6">
+                                <div class=" col-md-4">
                                     <div class=" form-group">
                                         <label for="address" class=" control-label">Address</label>
                                         <div id="address" class=" form-control-static">1ThEBOtAddr3ssuzhrPVvGFEXeiqESnyys</div>
+                                    </div>
+                                </div>
+                                <div class=" col-md-5">
+                                    <div class=" form-group">
+                                        <label for="status" class=" control-label">Status</label>
+                                        <div id="status" class=" form-control-static">
+                                            <p><span style="color: green; font-weight: bold;">Active</span><br/> This bot is receiving and sending transactions.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
