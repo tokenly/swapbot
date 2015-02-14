@@ -148,7 +148,7 @@ return [
 		'Swapbot\Providers\EventLog\EventLogServiceProvider',
 
 		/*
-		 * Vender Service Providers...
+		 * Vendor Service Providers...
 		 */
 		'Tokenly\XChainClient\XChainServiceProvider',
 		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
