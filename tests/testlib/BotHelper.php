@@ -4,6 +4,7 @@ use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Commands\CreateBot;
+use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
 
 class BotHelper  {
@@ -29,9 +30,10 @@ class BotHelper  {
 
             'swaps' => [
                 [
-                    'in'   => 'BTC',
-                    'out'  => 'LTBCOIN',
-                    'rate' => 0.00000150,
+                    'in'       => 'BTC',
+                    'out'      => 'LTBCOIN',
+                    'strategy' => 'rate',
+                    'rate'     => 0.00000150,
                 ],
             ],
         ];
@@ -60,6 +62,14 @@ class BotHelper  {
             if (!isset($attributes['uuid'])) {
                 $uuid = Uuid::uuid4()->toString();
                 $attributes['uuid'] = $uuid;
+            }
+
+            if (isset($attributes['swaps'])) {
+                $swap_configs = [];
+                foreach ($attributes['swaps'] as $swap_config_data) {
+                    $swap_configs[] = SwapConfig::createFromSerialized($swap_config_data);
+                }
+                $attributes['swaps'] = $swap_configs;
             }
 
             $bot_model = $this->bot_repository->create($attributes);

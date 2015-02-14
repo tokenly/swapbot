@@ -179,7 +179,7 @@
       ]);
     };
     form.mInputEl = function(attributes, prop) {
-      var inputEl, inputProps, name;
+      var inputEl, inputProps, name, options;
       inputProps = sbAdmin.utils.clone(attributes);
       name = inputProps.name || inputProps.id;
       inputProps.onchange = m.withAttr("value", prop);
@@ -190,12 +190,26 @@
       if (inputProps.name == null) {
         inputProps.name = inputProps.id;
       }
-      if (inputProps.type === 'textarea') {
-        delete inputProps.type;
-        inputProps.rows = inputProps.rows || 3;
-        inputEl = m("textarea", inputProps);
-      } else {
-        inputEl = m("input", inputProps);
+      switch (inputProps.type) {
+        case 'textarea':
+          delete inputProps.type;
+          inputProps.rows = inputProps.rows || 3;
+          inputEl = m("textarea", inputProps);
+          break;
+        case 'select':
+          delete inputProps.type;
+          options = inputProps.options || {
+            '': '- None -'
+          };
+          inputEl = m("select", inputProps, options.map(function(opt) {
+            return m("option", {
+              value: opt.v,
+              label: opt.k
+            });
+          }));
+          break;
+        default:
+          inputEl = m("input", inputProps);
       }
       return inputEl;
     };
@@ -377,6 +391,46 @@
     return nav;
   })();
 
+  sbAdmin.swaputils = (function() {
+    var strategyLabelCache, swaputils;
+    swaputils = {};
+    swaputils.newSwapProp = function(swap) {
+      if (swap == null) {
+        swap = {};
+      }
+      return m.prop({
+        strategy: m.prop(swap.strategy || 'rate'),
+        "in": m.prop(swap["in"] || ''),
+        out: m.prop(swap.out || ''),
+        rate: m.prop(swap.rate || ''),
+        in_qty: m.prop(swap.in_qty || ''),
+        out_qty: m.prop(swap.out_qty || '')
+      });
+    };
+    swaputils.allStrategyOptions = function() {
+      return [
+        {
+          k: "By Rate",
+          v: 'rate'
+        }, {
+          k: "By Fixed Amounts",
+          v: 'fixed'
+        }
+      ];
+    };
+    strategyLabelCache = null;
+    swaputils.strategyLabelByValue = function(strategyValue) {
+      if (strategyLabelCache === null) {
+        strategyLabelCache = {};
+        swaputils.allStrategyOptions().map(function(opt) {
+          strategyLabelCache[opt.v] = opt.k;
+        });
+      }
+      return strategyLabelCache[strategyValue];
+    };
+    return swaputils;
+  })();
+
   sbAdmin.utils = (function() {
     var utils;
     utils = {};
@@ -415,9 +469,10 @@
   })();
 
   (function() {
-    var swapGroup, vm;
+    var swapGroup, swapGroupRenderers, vm;
     sbAdmin.ctrl.botForm = {};
-    swapGroup = function(number, swapProp) {
+    swapGroupRenderers = {};
+    swapGroupRenderers.rate = function(number, swap) {
       return m("div", {
         "class": "asset-group"
       }, [
@@ -425,21 +480,29 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-4"
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField("Swap Type", {
+              id: "swap_strategy_" + number,
+              type: 'select',
+              options: sbAdmin.swaputils.allStrategyOptions()
+            }, swap.strategy)
+          ]), m("div", {
+            "class": "col-md-3"
           }, [
             sbAdmin.form.mFormField("Receives Asset", {
               id: "swap_in_" + number,
               'placeholder': "BTC"
-            }, swapProp()["in"])
+            }, swap["in"])
           ]), m("div", {
-            "class": "col-md-4"
+            "class": "col-md-3"
           }, [
             sbAdmin.form.mFormField("Sends Asset", {
               id: "swap_out_" + number,
               'placeholder': "LTBCOIN"
-            }, swapProp().out)
+            }, swap.out)
           ]), m("div", {
-            "class": "col-md-3"
+            "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("At Rate", {
               type: "number",
@@ -447,7 +510,7 @@
               min: "0",
               id: "swap_rate_" + number,
               'placeholder': "0.000001"
-            }, swapProp().rate)
+            }, swap.rate)
           ]), m("div", {
             "class": "col-md-1"
           }, [
@@ -468,29 +531,91 @@
         ])
       ]);
     };
+    swapGroupRenderers.fixed = function(number, swap) {
+      return m("div", {
+        "class": "asset-group"
+      }, [
+        m("h4", "Swap #" + number), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField("Swap Type", {
+              id: "swap_strategy_" + number,
+              type: 'select',
+              options: sbAdmin.swaputils.allStrategyOptions()
+            }, swap.strategy)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Receives Asset", {
+              id: "swap_in_" + number,
+              'placeholder': "BTC"
+            }, swap["in"])
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Receives Quantity", {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_in_qty_" + number,
+              'placeholder': "1"
+            }, swap.in_qty)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Sends Asset", {
+              id: "swap_out_" + number,
+              'placeholder': "LTBCOIN"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Sends Quantity", {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_out_qty_" + number,
+              'placeholder': "1"
+            }, swap.out_qty)
+          ]), m("div", {
+            "class": "col-md-1"
+          }, [
+            m("a", {
+              "class": "remove-link",
+              href: '#remove',
+              onclick: vm.buildRemoveSwapFn(number),
+              style: number === 1 ? {
+                display: 'none'
+              } : ""
+            }, [
+              m("span", {
+                "class": "glyphicon glyphicon-remove-circle",
+                title: "Remove Swap " + number
+              }, '')
+            ])
+          ])
+        ])
+      ]);
+    };
+    swapGroup = function(number, swapProp) {
+      return swapGroupRenderers[swapProp().strategy()](number, swapProp());
+    };
     vm = sbAdmin.ctrl.botForm.vm = (function() {
-      var buildBlacklistAddressesPropValue, buildSwapsPropValue, newSwapProp;
+      var buildBlacklistAddressesPropValue, buildSwapsPropValue;
       buildSwapsPropValue = function(swaps) {
         var out, swap, _i, _len;
         out = [];
         for (_i = 0, _len = swaps.length; _i < _len; _i++) {
           swap = swaps[_i];
-          out.push(newSwapProp(swap));
+          out.push(sbAdmin.swaputils.newSwapProp(swap));
         }
         if (!out.length) {
-          out.push(newSwapProp());
+          out.push(sbAdmin.swaputils.newSwapProp());
         }
         return out;
-      };
-      newSwapProp = function(swap) {
-        if (swap == null) {
-          swap = {};
-        }
-        return m.prop({
-          "in": m.prop(swap["in"] || ''),
-          out: m.prop(swap.out || ''),
-          rate: m.prop(swap.rate || '')
-        });
       };
       buildBlacklistAddressesPropValue = function(addresses) {
         var address, out, _i, _len;
@@ -512,7 +637,7 @@
         vm.resourceId = m.prop('');
         vm.name = m.prop('');
         vm.description = m.prop('');
-        vm.swaps = m.prop([newSwapProp()]);
+        vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.blacklistAddresses = m.prop([m.prop('')]);
         id = m.route.param('id');
         if (id !== 'new') {
@@ -528,7 +653,7 @@
         }
         vm.addSwap = function(e) {
           e.preventDefault();
-          vm.swaps().push(newSwapProp());
+          vm.swaps().push(sbAdmin.swaputils.newSwapProp());
         };
         vm.buildRemoveSwapFn = function(number) {
           return function(e) {
@@ -684,9 +809,10 @@
   })();
 
   (function() {
-    var buildBalancesMElement, buildMLevel, closePusherChannel, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, subscribeToPusherChannel, swapGroup, vm;
+    var buildBalancesMElement, buildMLevel, closePusherChannel, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, subscribeToPusherChannel, swapGroup, swapGroupRenderers, vm;
     sbAdmin.ctrl.botView = {};
-    swapGroup = function(number, swapProp) {
+    swapGroupRenderers = {};
+    swapGroupRenderers.rate = function(number, swap) {
       return m("div", {
         "class": "asset-group"
       }, [
@@ -694,29 +820,79 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-4"
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mValueDisplay("Swap Type", {
+              id: "swap_strategy_" + number
+            }, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
+          ]), m("div", {
+            "class": "col-md-3"
           }, [
             sbAdmin.form.mValueDisplay("Receives Asset", {
               id: "swap_in_" + number
-            }, swapProp()["in"]())
+            }, swap["in"]())
           ]), m("div", {
-            "class": "col-md-4"
+            "class": "col-md-3"
           }, [
             sbAdmin.form.mValueDisplay("Sends Asset", {
               id: "swap_out_" + number
-            }, swapProp().out())
+            }, swap.out())
           ]), m("div", {
-            "class": "col-md-4"
+            "class": "col-md-3"
           }, [
             sbAdmin.form.mValueDisplay("Rate", {
               type: "number",
               step: "any",
               min: "0",
               id: "swap_rate_" + number
-            }, swapProp().rate())
+            }, swap.rate())
           ])
         ])
       ]);
+    };
+    swapGroupRenderers.fixed = function(number, swap) {
+      return m("div", {
+        "class": "asset-group"
+      }, [
+        m("h4", "Swap #" + number), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mValueDisplay("Swap Type", {
+              id: "swap_strategy_" + number
+            }, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Receives Asset", {
+              id: "swap_in_" + number
+            }, swap["in"]())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Receives Quantity", {
+              id: "swap_in_qty_" + number
+            }, swap.in_qty())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Sends Asset", {
+              id: "swap_out_" + number
+            }, swap.out())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Sends Quantity", {
+              id: "swap_out_qty_" + number
+            }, swap.out_qty())
+          ])
+        ])
+      ]);
+    };
+    swapGroup = function(number, swapProp) {
+      return swapGroupRenderers[swapProp().strategy()](number, swapProp());
     };
     serializeSwaps = function(swap) {
       var out;
@@ -817,25 +993,15 @@
       }
     };
     vm = sbAdmin.ctrl.botView.vm = (function() {
-      var buildBalancesPropValue, buildSwapsPropValue, newSwapProp;
+      var buildBalancesPropValue, buildSwapsPropValue;
       buildSwapsPropValue = function(swaps) {
         var out, swap, _i, _len;
         out = [];
         for (_i = 0, _len = swaps.length; _i < _len; _i++) {
           swap = swaps[_i];
-          out.push(newSwapProp(swap));
+          out.push(sbAdmin.swaputils.newSwapProp(swap));
         }
         return out;
-      };
-      newSwapProp = function(swap) {
-        if (swap == null) {
-          swap = {};
-        }
-        return m.prop({
-          "in": m.prop(swap["in"] || ''),
-          out: m.prop(swap.out || ''),
-          rate: m.prop(swap.rate || '')
-        });
       };
       buildBalancesPropValue = function(balances) {
         var asset, out, val;

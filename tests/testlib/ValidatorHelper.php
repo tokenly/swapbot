@@ -27,7 +27,7 @@ class ValidatorHelper  {
             
             if ($test_spec['error']) {
                 // check errors
-                PHPUnit::assertFalse($was_valid, "Test $test_spec_offset was valid when it should not have been.");
+                PHPUnit::assertFalse($was_valid, "Test $test_spec_offset was valid when it should not have been.  Expected error: {$test_spec['error']}");
                 PHPUnit::assertContains($test_spec['error'], $errors_string, "unexpected error in test $test_spec_offset.");
             } else {
                 // no errors

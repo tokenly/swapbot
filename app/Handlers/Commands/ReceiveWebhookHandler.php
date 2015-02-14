@@ -9,9 +9,11 @@ use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Models\BotEvent;
-use Tokenly\LaravelEventLog\Facade\EventLog;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
+use Swapbot\Swap\Exception\SwapStrategyException;
+use Swapbot\Swap\Factory\StrategyFactory;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 
 class ReceiveWebhookHandler {
@@ -23,11 +25,12 @@ class ReceiveWebhookHandler {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, Client $xchain_client)
+    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, Client $xchain_client, StrategyFactory $strategy_factory)
     {
         $this->bot_repository         = $bot_repository;
         $this->transaction_repository = $transaction_repository;
         $this->xchain_client          = $xchain_client;
+        $this->strategy_factory       = $strategy_factory;
     }
 
     /**
@@ -133,15 +136,16 @@ class ReceiveWebhookHandler {
                         try {
                             $any_swap_processed = true;
 
+                            // build the swap strategy
+                            $strategy = $this->strategy_factory->newStrategy($swap['strategy']);
+
                             // we recieved an asset - exchange 'in' for 'out'
 
                             // determine the swap ID
                             $swap_id = $bot->buildSwapID($swap);
 
                             // calculate the receipient's quantity and asset
-                            $quantity = $xchain_notification['quantity'] * $swap['rate'];
-                            $asset = $swap['out'];
-
+                            list($quantity, $asset) = $strategy->buildSwapOutputQuantityAndAsset($swap, $xchain_notification);
 
                             // should we process this swap?
                             $should_process_swap = true;
@@ -205,8 +209,13 @@ class ReceiveWebhookHandler {
 
                         } catch (Exception $e) {
                             // log any failure
-                            EventLog::logError('swap.failed', $e);
-                            $this->logSwapFailed($bot, $xchain_notification, $e);
+                            if ($e instanceof SwapStrategyException) {
+                                EventLog::logError('swap.failed', $e);
+                                $this->logToBotEventsWithoutEventLog($bot, $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
+                            } else {
+                                EventLog::logError('swap.failed', $e);
+                                $this->logSwapFailed($bot, $xchain_notification, $e);
+                            }
                             $any_notification_given = true;
                         }
                     }

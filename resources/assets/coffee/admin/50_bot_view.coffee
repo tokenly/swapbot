@@ -3,22 +3,51 @@ do ()->
     sbAdmin.ctrl.botView = {}
 
     # ### helpers #####################################
-    swapGroup = (number, swapProp)->
+    swapGroupRenderers = {}
 
+    swapGroupRenderers.rate = (number, swap)->
         return m("div", {class: "asset-group"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-4"}, [
-                    sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swapProp().in()),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy())),
                 ]),
-                m("div", {class: "col-md-4"}, [
-                    sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swapProp().out()),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
                 ]),
-                m("div", {class: "col-md-4"}, [
-                    sbAdmin.form.mValueDisplay("Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", }, swapProp().rate()),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
+                ]),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mValueDisplay("Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", }, swap.rate()),
                 ]),
             ]),
         ])
+
+    swapGroupRenderers.fixed = (number, swap)->
+        return m("div", {class: "asset-group"}, [
+            m("h4", "Swap ##{number}"),
+            m("div", { class: "row"}, [
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy())),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Receives Quantity", {id: "swap_in_qty_#{number}", }, swap.in_qty()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Sends Quantity", {id: "swap_out_qty_#{number}", }, swap.out_qty()),
+                ]),
+            ]),
+        ])
+
+    swapGroup = (number, swapProp)->
+        return swapGroupRenderers[swapProp().strategy()](number, swapProp())
 
     serializeSwaps = (swap)->
         out = []
@@ -94,15 +123,8 @@ do ()->
         buildSwapsPropValue = (swaps)->
             out = []
             for swap in swaps
-                out.push(newSwapProp(swap))
+                out.push(sbAdmin.swaputils.newSwapProp(swap))
             return out
-
-        newSwapProp = (swap={})->
-            return m.prop({
-                in: m.prop(swap.in or '')
-                out: m.prop(swap.out or '')
-                rate: m.prop(swap.rate or '')
-            })
 
 
         buildBalancesPropValue = (balances)->

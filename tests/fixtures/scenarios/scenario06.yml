@@ -8,14 +8,17 @@ bots:
       -
         in: BTC
         out: LTBCOIN
+        strategy: rate
         rate: 1000000
       -
         in: BTC
         out: SOUP
+        strategy: rate
         rate: 5000000
       -
         in: LTBCOIN
         out: BTC
+        strategy: rate
         rate: 0.000001
 
 

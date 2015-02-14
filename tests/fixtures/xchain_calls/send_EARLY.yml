@@ -1,0 +1,7 @@
+method: POST
+path: /sends/PAYMENT_ADDRESS_ID_01
+data:
+    destination: SENDER01
+    quantity: 1
+    asset: EARLY
+    sweep: false

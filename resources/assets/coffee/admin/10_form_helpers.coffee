@@ -32,12 +32,19 @@ sbAdmin.form = do ()->
         inputProps.class = 'form-control' if not inputProps.class?
         inputProps.name = inputProps.id if not inputProps.name?
 
-        if inputProps.type == 'textarea'
-            delete inputProps.type
-            inputProps.rows = inputProps.rows or 3
-            inputEl = m("textarea", inputProps)
-        else
-            inputEl = m("input", inputProps)
+        switch inputProps.type
+            when 'textarea'
+                delete inputProps.type
+                inputProps.rows = inputProps.rows or 3
+                inputEl = m("textarea", inputProps)
+            when 'select'
+                delete inputProps.type
+                options = inputProps.options or {'': '- None -'}
+                inputEl = m("select", inputProps, options.map((opt)->
+                    return m("option", {value: opt.v, label: opt.k})
+                ))
+            else
+                inputEl = m("input", inputProps)
 
 
         return inputEl;

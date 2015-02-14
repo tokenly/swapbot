@@ -1,5 +1,5 @@
-name: Sample Bot One
-description: Just a Sample Bot
+name: Sample Fixed Rate One
+description: A Sample Fixed Rate Bot
 active: true
 
 address: botaddress000000000000000000000001
@@ -9,12 +9,14 @@ receive_monitor_id: RECEIVE_MONITOR_ID_01
 
 swaps:
   -
-    in: BTC
+    strategy: fixed
+    in_qty: 1
+    out_qty: 10000
+    in: EARLY
     out: LTBCOIN
-    strategy: rate
-    rate: 1000000
   -
+    strategy: fixed
+    in_qty: 10000
+    out_qty: 1
     in: LTBCOIN
-    out: BTC
-    strategy: rate
-    rate: 0.00000100
+    out: EARLY

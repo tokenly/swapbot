@@ -48,18 +48,49 @@ class BotValidatorTest extends TestCase {
             ],
 
             [
-                'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC',]]]),
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC','strategy' => 'rate',]]]),
                 'error' => 'specify an asset to send for swap #2',
             ],
             [
-                'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC',]]]),
-                'error' => 'Please specify a valid rate for swap #',
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC','strategy' => 'rate',]]]),
+                'error' => 'Please specify a valid rate for swap #2',
             ],
             [
                 'vars' => array_replace_recursive($sample_vars, ['blacklist_addresses' => ['abadaddress1']]),
                 'error' => 'not a valid bitcoin address.',
             ],
+
+            [
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['strategy' => null,]]]),
+                'error' => 'Please specify a swap strategy for swap #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC','out' => 'BOOC','rate'=>1,]]]),
+                'error' => 'Please specify a swap strategy for swap #2',
+            ],
         ];
+
+        // fixed
+        $fixed_sample_vars = array_replace_recursive($this->app->make('BotHelper')->sampleBotVars(), ['swaps' => [0 => ['strategy' => 'fixed', 'in' => 'EARLY', 'in_qty' => 1, 'out' => 'LTCOIN', 'out_qty' => 10000]]]);
+        $test_specs = array_merge($test_specs, [
+            [
+                'vars' => $fixed_sample_vars,
+                'error' => null,
+            ],
+            [
+                'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['in_qty' => 0,]]]),
+                'error' => 'The receive quantity for swap #1 was not valid.',
+            ],
+            [
+                'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['out_qty' => 0,]]]),
+                'error' => 'The send quantity for swap #1 was not valid.',
+            ],
+            [
+                'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['in' => 'BAD',]]]),
+                'error' => 'The receive asset name for swap #1 was not valid.',
+            ],
+        ]);
+
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
 
@@ -86,7 +117,7 @@ class BotValidatorTest extends TestCase {
                 'error' => 'at least one swap',
             ],
             [
-                'vars' => ['swaps' => [0 => ['in' => '', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,]]],
+                'vars' => ['swaps' => [0 => ['in' => '', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,'strategy' => 'rate']]],
                 'error' => 'specify an asset to receive for swap #1',
             ],
         ];

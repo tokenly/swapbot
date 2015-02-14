@@ -3,11 +3,12 @@
 namespace Swapbot\Http\Requests\Bot\Transformers;
 
 use Illuminate\Support\Facades\Log;
+use Swapbot\Models\Data\SwapConfig;
 
 class BotTransformer {
 
     public function santizeAttributes($attributes, $rules) {
-        Log::debug('$attributes'.json_encode($attributes, 192));
+        // Log::debug('$attributes'.json_encode($attributes, 192));
 
         $out = [];
         foreach (array_keys($rules) as $field_name) {
@@ -43,13 +44,7 @@ class BotTransformer {
     }
 
     protected function sanitizeSwap($swap) {
-
-        return [
-            'in'   => isset($swap['in']) ? $swap['in'] : null,
-            'out'  => isset($swap['out']) ? $swap['out'] : null,
-            'rate' => isset($swap['rate']) ? $swap['rate'] : null,
-        ];
-
+        return SwapConfig::createFromSerialized($swap);
     }
 
 

@@ -3,17 +3,20 @@
 namespace Swapbot\Http\Requests\Bot\Validators;
 
 use Illuminate\Contracts\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\Validator;
 use LinusU\Bitcoin\AddressValidator;
+use Swapbot\Swap\Factory\StrategyFactory;
 
 
 class BotValidator {
 
     protected $swaps_required = true;
 
-    function __construct(Factory $validator_factory) {
-        $this->validator_factory = $validator_factory;
+    function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory) {
+        $this->validator_factory     = $validator_factory;
+        $this->swap_strategy_factory = $swap_strategy_factory;
     }
 
     protected $rules = [];
@@ -61,72 +64,25 @@ class BotValidator {
     }
 
     protected function validateSwap($offset, $swap, $validator) {
-        $in_value   = isset($swap['in']) ? $swap['in'] : null;
-        $out_value  = isset($swap['out']) ? $swap['out'] : null;
-        $rate_value = isset($swap['rate']) ? $swap['rate'] : null;
-
+        $strategy_name = isset($swap['strategy']) ? $swap['strategy'] : null;
         $swap_number = $offset + 1;
-        $exists = (strlen($in_value) OR strlen($out_value) OR strlen($rate_value));
-        if ($exists) {
-            $assets_are_valid = true;
 
-            // in asset
-            if (strlen($in_value)) {
-                if (!$this->isValidAssetName($in_value)) {
-                    $assets_are_valid = false;
-                    $validator->errors()->add('in', "The receive asset name for swap #{$swap_number} was not valid.");
-                }
+        // strategy
+        if (strlen($strategy_name)) {
+            if ($this->isValidStrategyType($strategy_name)) {
+                $this->swap_strategy_factory->newStrategy($strategy_name)->validateSwap($swap_number, $swap, $validator->errors());
             } else {
-                $validator->errors()->add('in', "Please specify an asset to receive for swap #{$swap_number}");
-            }
-
-            // out asset
-            if (strlen($out_value)) {
-                if (!$this->isValidAssetName($out_value)) {
-                    $assets_are_valid = false;
-                    $validator->errors()->add('out', "The send asset name for swap #{$swap_number} was not valid.");
-                }
-            } else {
-                $validator->errors()->add('out', "Please specify an asset to send for swap #{$swap_number}");
-            }
-
-            // rate
-            if (strlen($rate_value)) {
-                if (!$this->isValidRate($rate_value)) {
-                    $validator->errors()->add('rate', "The rate for swap #{$swap_number} was not valid.");
-                }
-            } else {
-                $validator->errors()->add('rate', "Please specify a valid rate for swap #{$swap_number}");
-            }
-
-            // make sure assets aren't the same
-            if ($assets_are_valid AND $in_value == $out_value) {
-                $validator->errors()->add('rate', "The assets to receive and send for swap #{$swap_number} should not be the same.");
+                $validator->errors()->add('strategy', "The strategy for swap #{$swap_number} was not valid.");
             }
         } else {
-            $validator->errors()->add('swaps', "The values specified for swap #{$swap_number} were not valid.");
+            $validator->errors()->add('strategy', "Please specify a swap strategy for swap #{$swap_number}");
         }
 
-
     }
 
-    protected function isValidAssetName($name) {
-        if ($name === 'BTC') { return true; }
-        if (!preg_match('!^[A-Z]+$!', $name)) { return false; }
-        if (strlen($name) < 4) { return false; }
-        if (substr($name, 0, 1) == 'A') { return false; }
-        if (strlen($name) > 12) { return false; }
-
-        return true;
+    protected function isValidStrategyType($strategy) {
+        return $this->swap_strategy_factory->isValidStrategyType($strategy);
     }
-
-    protected function isValidRate($rate) {
-        $rate = floatval($rate);
-        if ($rate <= 0) { return false; }
-
-        return true;
-    }
-
 
     protected function validateBlacklistAddresses($blacklist_addresses, $validator) {
         if ($blacklist_addresses) {

@@ -2,7 +2,10 @@
 
 namespace Swapbot\Models;
 
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Base\APIModel;
+use Swapbot\Models\Data\SwapConfig;
 
 class Bot extends APIModel {
 
@@ -15,7 +18,7 @@ class Bot extends APIModel {
     }
 
     public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
-    public function getSwapsAttribute() { return $this->deSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
+    public function getSwapsAttribute() { return $this->unSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
 
     public function setActiveAttribute($active) { $this->attributes['active'] = $active ? 1 : 0; }
     public function getActiveAttribute() { return !!$this->attributes['active']; }
@@ -24,24 +27,24 @@ class Bot extends APIModel {
     public function getBalancesAttribute() { return isset($this->attributes['balances']) ? json_decode($this->attributes['balances'], true) : []; }
 
     public function setBlacklistAddressesAttribute($blacklist_addresses) { $this->attributes['blacklist_addresses'] = json_encode($this->serializeBlacklistAddresses($blacklist_addresses)); }
-    public function getBlacklistAddressesAttribute() { return $this->deSerializeBlacklistAddresses(json_decode($this->attributes['blacklist_addresses'], true)); }
+    public function getBlacklistAddressesAttribute() { return $this->unSerializeBlacklistAddresses(json_decode($this->attributes['blacklist_addresses'], true)); }
 
     public function serializeSwaps($swaps) {
         $serialized_swaps = [];
-        foreach($swaps as $asset) {
-            $serialized_swaps[] = [$asset['in'], $asset['out'], $asset['rate']];
+        foreach($swaps as $swap) {
+            if (!($swap instanceof SwapConfig)) {
+                debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+                throw new Exception("Invalid Swap Type", 1);
+            }
+            $serialized_swaps[] = $swap->serialize();
         }
         return $serialized_swaps;
     }
 
-    public function deSerializeSwaps($serialized_swaps) {
+    public function unSerializeSwaps($serialized_swaps) {
         $deserialized_swaps = [];
-        foreach($serialized_swaps as $asset) {
-            $deserialized_swaps[] = [
-                'in'   => $asset[0],
-                'out'  => $asset[1],
-                'rate' => $asset[2],
-            ];
+        foreach($serialized_swaps as $serialized_swap_data) {
+            $deserialized_swaps[] = SwapConfig::createFromSerialized($serialized_swap_data);
         }
         return $deserialized_swaps;
     }
@@ -58,7 +61,7 @@ class Bot extends APIModel {
         return $serialized_blacklist_addresses;
     }
 
-    public function deSerializeBlacklistAddresses($serialized_blacklist_addresses) {
+    public function unSerializeBlacklistAddresses($serialized_blacklist_addresses) {
         if (!is_array($serialized_blacklist_addresses)) { return []; }
         return $serialized_blacklist_addresses;
     }

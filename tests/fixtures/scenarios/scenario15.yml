@@ -1,0 +1,49 @@
+# fixed strategy - multiple early purchased
+# simple live transaction received
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot02.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    quantity: 20001
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_EARLY.yml }
+    data:
+      quantity: 2
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.found.yml }
+    msg: Received 20001 LTBCOIN from SENDER01 with 1 confirmation. Will vend 2 EARLY to SENDER01.
+    inQty: 20001
+    inAsset: LTBCOIN
+    outQty: 2
+    outAsset: EARLY
+  - 
+    meta: { baseFilename: swap.sent.yml }
+    msg: Received 20001 LTBCOIN from SENDER01 with 1 confirmation. Sent 2 EARLY to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    inQty: 20001
+    inAsset: LTBCOIN
+    outQty: 2
+    outAsset: EARLY
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_EMPTY_RECEIPTS.yml }
+    swap_receipts: 
+        "LTBCOIN:EARLY":
+            txid: "0000000000000000000000000000001111"
+            confirmations: 1

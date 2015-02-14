@@ -3,19 +3,22 @@ do ()->
     sbAdmin.ctrl.botForm = {}
 
     # ### helpers #####################################
-    swapGroup = (number, swapProp)->
-
+    swapGroupRenderers = {}
+    swapGroupRenderers.rate = (number, swap)->
         return m("div", {class: "asset-group"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-4"}, [
-                    sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swapProp().in),
-                ]),
-                m("div", {class: "col-md-4"}, [
-                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swapProp().out),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mFormField("Swap Type", {id: "swap_strategy_#{number}", type: 'select', options: sbAdmin.swaputils.allStrategyOptions()}, swap.strategy),
                 ]),
                 m("div", {class: "col-md-3"}, [
-                    sbAdmin.form.mFormField("At Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swapProp().rate),
+                    sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
+                ]),
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("At Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swap.rate),
                 ]),
                 m("div", {class: "col-md-1"}, [
                     m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [
@@ -25,10 +28,36 @@ do ()->
             ]),
         ])
 
-    # serializeSwaps = (swap)->
-    #     out = []
-    #     out.push(swap)
-    #     return out
+    swapGroupRenderers.fixed = (number, swap)->
+        return m("div", {class: "asset-group"}, [
+            m("h4", "Swap ##{number}"),
+            m("div", { class: "row"}, [
+                m("div", {class: "col-md-3"}, [
+                    sbAdmin.form.mFormField("Swap Type", {id: "swap_strategy_#{number}", type: 'select', options: sbAdmin.swaputils.allStrategyOptions()}, swap.strategy),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("Receives Quantity", {type: "number", step: "any", min: "0", id: "swap_in_qty_#{number}", 'placeholder': "1", }, swap.in_qty),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("Sends Quantity", {type: "number", step: "any", min: "0", id: "swap_out_qty_#{number}", 'placeholder': "1", }, swap.out_qty),
+                ]),
+                m("div", {class: "col-md-1"}, [
+                    m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [
+                        m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Swap #{number}"}, ''),
+                    ]),
+                ]),
+            ]),
+        ])
+
+    swapGroup = (number, swapProp)->
+        return swapGroupRenderers[swapProp().strategy()](number, swapProp())
+
 
     # ################################################
 
@@ -36,20 +65,14 @@ do ()->
         buildSwapsPropValue = (swaps)->
             out = []
             for swap in swaps
-                out.push(newSwapProp(swap))
+                out.push(sbAdmin.swaputils.newSwapProp(swap))
 
             # always have at least one
             if not out.length
-                out.push(newSwapProp())
+                out.push(sbAdmin.swaputils.newSwapProp())
 
             return out
 
-        newSwapProp = (swap={})->
-            return m.prop({
-                in: m.prop(swap.in or '')
-                out: m.prop(swap.out or '')
-                rate: m.prop(swap.rate or '')
-            })
 
         buildBlacklistAddressesPropValue = (addresses)->
             out = []
@@ -72,7 +95,7 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
-            vm.swaps = m.prop([newSwapProp()])
+            vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
             vm.blacklistAddresses = m.prop([m.prop('')])
 
             # if there is an id, then load it from the api
@@ -96,7 +119,7 @@ do ()->
 
             vm.addSwap = (e)->
                 e.preventDefault()
-                vm.swaps().push(newSwapProp())
+                vm.swaps().push(sbAdmin.swaputils.newSwapProp())
                 return
 
             vm.buildRemoveSwapFn = (number)->
