@@ -48,8 +48,10 @@
 			"php artisan key:generate"
 		]
 	},
-	"config": {
-		"preferred-install": "auto"
-	},
-	"minimum-stability": "dev"
+    "config": {
+        "preferred-install": "auto"
+    },
+
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
