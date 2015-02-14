@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Events\BotBalancesUpdated;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 

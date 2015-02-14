@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\WebHookReceiver;
 
 class WebhookController extends Controller {

@@ -4,7 +4,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
 use Swapbot\Commands\ActivateBot;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Swapbot\Repositories\BotRepository;
 use Tokenly\XChainClient\Client;
 

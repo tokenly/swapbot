@@ -16,7 +16,7 @@ use Swapbot\Commands\CreateBot;
 use Swapbot\Commands\DeleteBot;
 use Swapbot\Commands\UpdateBot;
 use Swapbot\Http\Controllers\API\Base\APIController;
-use Swapbot\Http\Controllers\API\Helpers\APIControllerHelper;
+use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 use Swapbot\Http\Requests;
 use Swapbot\Repositories\BotRepository;
 

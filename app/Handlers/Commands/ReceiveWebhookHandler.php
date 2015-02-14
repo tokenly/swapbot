@@ -9,7 +9,7 @@ use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Models\BotEvent;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Tokenly\XChainClient\Client;

@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
 use Swapbot\Commands\ActivateBot;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 

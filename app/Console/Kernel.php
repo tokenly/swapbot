@@ -12,8 +12,8 @@ class Kernel extends ConsoleKernel {
 	 */
 	protected $commands = [
 		// 'Swapbot\Console\Commands\Inspire',
-		'Swapbot\Console\Commands\APIUser\APINewUserCommand',
-		'Swapbot\Console\Commands\APIUser\APIListUsersCommand',
+		// 'Swapbot\Console\Commands\APIUser\APINewUserCommand',
+		// 'Swapbot\Console\Commands\APIUser\APIListUsersCommand',
 
 		'Swapbot\Console\Commands\Bot\UpdateBotBalancesCommand',
 		'Swapbot\Console\Commands\Bot\ActivateBotCommand',

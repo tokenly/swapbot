@@ -4,14 +4,13 @@ namespace Swapbot\Repositories;
 
 use Swapbot\Models\Bot;
 use Swapbot\Models\User;
-use Swapbot\Repositories\Base\APIRepository;
-use Swapbot\Repositories\Contracts\APIResourceRepositoryContract;
+use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 
 /*
 * BotRepository
 */
-class BotRepository extends APIRepository implements APIResourceRepositoryContract
+class BotRepository extends APIRepository
 {
 
     protected $model_type = 'Swapbot\Models\Bot';

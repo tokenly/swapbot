@@ -16,7 +16,7 @@ use Swapbot\Commands\CreateUser;
 use Swapbot\Commands\DeleteUser;
 use Swapbot\Commands\UpdateUser;
 use Swapbot\Http\Controllers\API\Base\APIController;
-use Swapbot\Http\Controllers\API\Helpers\APIControllerHelper;
+use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 use Swapbot\Http\Requests;
 use Swapbot\Repositories\UserRepository;
 

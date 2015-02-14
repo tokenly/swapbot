@@ -8,7 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Http\Controllers\API\Base\APIController;
-use Swapbot\Http\Controllers\API\Helpers\APIControllerHelper;
+use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 use Swapbot\Repositories\BotRepository;
 
 class BalanceRefreshController extends APIController {

@@ -145,11 +145,12 @@ return [
 		'Swapbot\Providers\EventServiceProvider',
 		'Swapbot\Providers\RouteServiceProvider',
 
-		'Swapbot\Providers\EventLog\EventLogServiceProvider',
 
 		/*
 		 * Vendor Service Providers...
 		 */
+		'Tokenly\LaravelEventLog\EventLogServiceProvider',
+		'Tokenly\LaravelApiProvider\APIServiceProvider',
 		'Tokenly\XChainClient\XChainServiceProvider',
 		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
 

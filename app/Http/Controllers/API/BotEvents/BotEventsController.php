@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Http\Controllers\API\Base\APIController;
-use Swapbot\Http\Controllers\API\Helpers\APIControllerHelper;
+use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 use Swapbot\Http\Requests;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotRepository;

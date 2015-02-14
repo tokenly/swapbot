@@ -4,7 +4,7 @@ namespace Swapbot\Console\Commands\Development;
 
 use Exception;
 use Illuminate\Console\Command;
-use Swapbot\Providers\EventLog\Facade\EventLog;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 

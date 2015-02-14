@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Models\User;
-use Swapbot\Repositories\Base\APIRepository;
-use Swapbot\Repositories\Contracts\APIResourceRepositoryContract;
+use Tokenly\LaravelApiProvider\Repositories\APIRepository;
+use Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract;
 use Tokenly\TokenGenerator\TokenGenerator;
 use \Exception;
 
 /*
 * UserRepository
 */
-class UserRepository extends APIRepository implements APIResourceRepositoryContract
+class UserRepository extends APIRepository implements APIUserRepositoryContract
 {
 
     protected $model_type = 'Swapbot\Models\User';

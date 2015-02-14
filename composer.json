@@ -12,6 +12,8 @@
         "tokenly/bitcoin-currency-lib": "dev-master",
 		"tokenly/token-generator": "dev-master",
 		"tokenly/pusher-client": "dev-master",
+		"tokenly/laravel-event-log": "dev-master",
+		"tokenly/laravel-api-provider": "dev-master",
 		"linusu/bitcoin-address-validator": "~0"
 	},
 	"require-dev": {
