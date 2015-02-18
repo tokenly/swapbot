@@ -2425,12 +2425,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "c86d4a9e5ba7a078014e716f85ef82aa79f016f0"
+                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/c86d4a9e5ba7a078014e716f85ef82aa79f016f0",
-                "reference": "c86d4a9e5ba7a078014e716f85ef82aa79f016f0",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
+                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
                 "shasum": ""
             },
             "require": {
@@ -2461,7 +2461,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-02-14 17:17:28"
+            "time": "2015-02-17 14:27:56"
         },
         {
             "name": "tokenly/laravel-event-log",
