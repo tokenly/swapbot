@@ -5,3 +5,4 @@ data:
     quantity: 1
     asset: EARLY
     sweep: false
+    fee: 0.0001

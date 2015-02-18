@@ -1,0 +1,35 @@
+# simple live transaction received
+# Low Fee
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    return_fee: 0.00005
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC.yml }
+    data:
+      fee: 0.00005
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.found.yml }
+  - 
+    meta: { baseFilename: swap.sent.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }

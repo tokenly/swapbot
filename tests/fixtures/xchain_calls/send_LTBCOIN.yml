@@ -5,3 +5,4 @@ data:
     quantity: 1000
     asset: LTBCOIN
     sweep: false
+    fee: 0.0001

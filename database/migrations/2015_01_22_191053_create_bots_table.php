@@ -32,6 +32,8 @@ class CreateBotsTable extends Migration {
 
             $table->text('blacklist_addresses')->nullable();
 
+            $table->bigInteger('return_fee')->unsigned()->default(10000);  // 0.0001
+
             $table->boolean('active')->default(0);
 			$table->timestamps();
 		});

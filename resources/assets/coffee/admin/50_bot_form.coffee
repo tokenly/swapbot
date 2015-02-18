@@ -95,6 +95,7 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
+            vm.returnFee = m.prop(0.0001)
             vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
             vm.blacklistAddresses = m.prop([m.prop('')])
 
@@ -110,6 +111,7 @@ do ()->
                         vm.description(botData.description)
                         vm.swaps(buildSwapsPropValue(botData.swaps))
                         vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses))
+                        vm.returnFee(botData.returnFee or 0.0001)
 
                         return
                     , (errorResponse)->
@@ -155,6 +157,7 @@ do ()->
                     description: vm.description()
                     blacklistAddresses: vm.blacklistAddresses()
                     swaps: vm.swaps()
+                    returnFee: vm.returnFee()
                 }
 
                 if vm.resourceId().length > 0
@@ -201,7 +204,8 @@ do ()->
 
                         m("hr"),
 
-                        m("h4", "Blacklisted Addresses"),
+                        m("h4", "Settings"),
+                        m("h5", "Blacklisted Addresses"),
                         m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]),
                         vm.blacklistAddresses().map((address, offset)->
                             number = offset+1
@@ -227,7 +231,13 @@ do ()->
                                 ]),
                         ]),
 
-
+                        # return fee
+                        m("div", {class: "spacer1"}),
+                        m("div", { class: "row"}, [
+                            m("div", {class: "col-md-5"}, [
+                                sbAdmin.form.mFormField("Return Transaction Fee", {id: 'name', 'placeholder': "0.0001", required: true, }, vm.returnFee),
+                            ]),
+                        ]),
 
                         m("hr"),
 

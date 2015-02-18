@@ -5,3 +5,4 @@ data:
     quantity: 0.0005
     asset: BTC
     sweep: false
+    fee: 0.0001

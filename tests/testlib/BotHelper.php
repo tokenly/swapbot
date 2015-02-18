@@ -4,6 +4,7 @@ use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Commands\CreateBot;
+use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
 
@@ -11,8 +12,9 @@ class BotHelper  {
 
     use DispatchesCommands;
 
-    function __construct(BotRepository $bot_repository) {
+    function __construct(BotRepository $bot_repository, CreateBotValidator $create_bot_validator) {
         $this->bot_repository = $bot_repository;
+        $this->create_bot_validator = $create_bot_validator;
     }
 
     public function sampleBotVars() {
@@ -27,6 +29,7 @@ class BotHelper  {
             'balances'            => null,
             'balances_updated_at' => null,
             'blacklist_addresses' => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
+            'return_fee'          => 0.0001,
 
             'swaps' => [
                 [
@@ -37,6 +40,22 @@ class BotHelper  {
                 ],
             ],
         ];
+    }
+
+    public function sampleBotVarsForAPI() {
+        $out = [];
+        $sample_bot_vars = $this->sampleBotVars();
+        foreach (array_keys($this->create_bot_validator->getRules()) as $snake_field_name) {
+            if (isset($sample_bot_vars[$snake_field_name])) {
+                $out[camel_case($snake_field_name)] = $sample_bot_vars[$snake_field_name];
+            }
+        }
+
+        // add swaps and blacklist addresses
+        $out['swaps'] = $sample_bot_vars['swaps'];
+        $out['blacklistAddresses'] = $sample_bot_vars['blacklist_addresses'];
+        
+        return $out;
     }
 
     public function getSampleBot($user) {

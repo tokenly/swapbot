@@ -637,6 +637,7 @@
         vm.resourceId = m.prop('');
         vm.name = m.prop('');
         vm.description = m.prop('');
+        vm.returnFee = m.prop(0.0001);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.blacklistAddresses = m.prop([m.prop('')]);
         id = m.route.param('id');
@@ -647,6 +648,7 @@
             vm.description(botData.description);
             vm.swaps(buildSwapsPropValue(botData.swaps));
             vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses));
+            vm.returnFee(botData.returnFee || 0.0001);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -686,7 +688,8 @@
             name: vm.name(),
             description: vm.description(),
             blacklistAddresses: vm.blacklistAddresses(),
-            swaps: vm.swaps()
+            swaps: vm.swaps(),
+            returnFee: vm.returnFee()
           };
           if (vm.resourceId().length > 0) {
             apiCall = sbAdmin.api.updateBot;
@@ -733,7 +736,7 @@
                 id: 'description',
                 'placeholder': "Bot Description",
                 required: true
-              }, vm.description), m("hr"), m("h4", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddresses().map(function(address, offset) {
+              }, vm.description), m("hr"), m("h4", "Settings"), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddresses().map(function(address, offset) {
                 var number;
                 number = offset + 1;
                 return m("div", {
@@ -779,6 +782,20 @@
                   m("span", {
                     "class": "glyphicon glyphicon-plus"
                   }, ''), m("span", {}, ' Add Another Blacklist Address')
+                ])
+              ]), m("div", {
+                "class": "spacer1"
+              }), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-5"
+                }, [
+                  sbAdmin.form.mFormField("Return Transaction Fee", {
+                    id: 'name',
+                    'placeholder': "0.0001",
+                    required: true
+                  }, vm.returnFee)
                 ])
               ]), m("hr"), vm.swaps().map(function(swap, offset) {
                 return swapGroup(offset + 1, swap);

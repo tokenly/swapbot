@@ -24,13 +24,13 @@ class BotAPITest extends TestCase {
         
         // test create
         $bot_helper = $this->app->make('BotHelper');
-        $tester->testCreate($bot_helper->sampleBotVars());
+        $tester->testCreate($bot_helper->sampleBotVarsForAPI());
 
         // test show
         $tester->testShow();
 
         // test update
-        $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description']);
+        $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description', 'returnFee' => 0.0000123]);
 
         // test delete
         $tester->testDelete();

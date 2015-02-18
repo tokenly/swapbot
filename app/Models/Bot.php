@@ -6,10 +6,11 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\SwapConfig;
+use Tokenly\CurrencyLib\CurrencyUtil;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'active', ];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'return_fee', 'active', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -28,6 +29,9 @@ class Bot extends APIModel {
 
     public function setBlacklistAddressesAttribute($blacklist_addresses) { $this->attributes['blacklist_addresses'] = json_encode($this->serializeBlacklistAddresses($blacklist_addresses)); }
     public function getBlacklistAddressesAttribute() { return $this->unSerializeBlacklistAddresses(json_decode($this->attributes['blacklist_addresses'], true)); }
+
+    public function setReturnFeeAttribute($return_fee) { $this->attributes['return_fee'] = CurrencyUtil::valueToSatoshis($return_fee); }
+    public function getReturnFeeAttribute() { return isset($this->attributes['return_fee']) ? CurrencyUtil::satoshisToValue($this->attributes['return_fee']) : 0; }
 
     public function serializeSwaps($swaps) {
         $serialized_swaps = [];

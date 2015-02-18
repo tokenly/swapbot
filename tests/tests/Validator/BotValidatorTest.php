@@ -27,6 +27,14 @@ class BotValidatorTest extends TestCase {
                 'error' => 'at least one swap',
             ],
             [
+                'vars' => array_merge($sample_vars, ['return_fee' => '']),
+                'error' => 'The return fee field is required.',
+            ],
+            [
+                'vars' => array_merge($sample_vars, ['return_fee' => 0]),
+                'error' => 'The return fee must be at least 0.00001.',
+            ],
+            [
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['in' => '',]]]),
                 'error' => 'specify an asset to receive for swap #1',
             ],
@@ -111,6 +119,10 @@ class BotValidatorTest extends TestCase {
             [
                 'vars' => ['description' => ''],
                 'error' => 'The description field is required.',
+            ],
+            [
+                'vars' => ['return_fee' => 0],
+                'error' => 'The return fee must be at least 0.00001.',
             ],
             [
                 'vars' => ['swaps' => []],

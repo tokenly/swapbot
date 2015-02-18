@@ -2425,12 +2425,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be"
+                "reference": "c86d4a9e5ba7a078014e716f85ef82aa79f016f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
-                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/c86d4a9e5ba7a078014e716f85ef82aa79f016f0",
+                "reference": "c86d4a9e5ba7a078014e716f85ef82aa79f016f0",
                 "shasum": ""
             },
             "require": {
@@ -2590,12 +2590,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "f51d3204bfe3705c12a5584e27325b94f71896ab"
+                "reference": "e28126c81c24a2c41e31f7c05183d49e386de1a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/f51d3204bfe3705c12a5584e27325b94f71896ab",
-                "reference": "f51d3204bfe3705c12a5584e27325b94f71896ab",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/e28126c81c24a2c41e31f7c05183d49e386de1a8",
+                "reference": "e28126c81c24a2c41e31f7c05183d49e386de1a8",
                 "shasum": ""
             },
             "require": {
@@ -2625,7 +2625,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-02-14 12:35:58"
+            "time": "2015-02-18 03:42:08"
         },
         {
             "name": "vlucas/phpdotenv",
