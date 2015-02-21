@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Swap\Exception\SwapStrategyException;
 use Swapbot\Swap\Factory\StrategyFactory;
-use Swapbot\Swap\Logger\SwapEventLogger;
+use Swapbot\Swap\Logger\BotEventLogger;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 use ArrayObject;
@@ -18,7 +18,7 @@ class SwapProcessor {
      *
      * @return void
      */
-    public function __construct(Client $xchain_client, StrategyFactory $strategy_factory, SwapEventLogger $swap_event_logger)
+    public function __construct(Client $xchain_client, StrategyFactory $strategy_factory, BotEventLogger $swap_event_logger)
     {
         $this->xchain_client          = $xchain_client;
         $this->strategy_factory       = $strategy_factory;
@@ -44,9 +44,6 @@ class SwapProcessor {
 
             // handle an unconfirmed TX
             $this->handleUnconfirmedTX($swap_process, $tx_process);
-
-            // is the bot active?
-            $this->handleInactiveBot($swap_process, $tx_process);
 
             // see if the swap has already been handled
             $this->handlePreviouslyProcessedSwap($swap_process, $tx_process);
@@ -92,24 +89,9 @@ class SwapProcessor {
     protected function sendAssets($bot, $xchain_notification, $destination, $quantity, $asset) {
         // call xchain
         $fee = $bot['return_fee'];
-        $send_result = $this->xchain_client->send($bot['payment_address_id'], $destination, $quantity, $asset, $fee);
+        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee);
 
         return $send_result;
-    }
-
-    protected function handleInactiveBot($swap_process, $tx_process) {
-        if ($swap_process['should_process_swap'] AND !$tx_process['bot']['active']) {
-            $swap_process['should_process_swap'] = false;
-
-            // mark the transaction as processed
-            //   even though the bot was inactive
-            $tx_process['should_update_transaction'] = true;
-
-            // log the inactive bot status
-            $this->swap_event_logger->logInactiveBot($tx_process['bot'], $tx_process['xchain_notification']);
-            $tx_process['any_notification_given'] = true;
-        }
-
     }
 
     protected function handlePreviouslyProcessedSwap($swap_process, $tx_process) {

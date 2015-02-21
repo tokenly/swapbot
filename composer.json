@@ -14,10 +14,12 @@
 		"tokenly/pusher-client": "dev-master",
 		"tokenly/laravel-event-log": "dev-master",
 		"tokenly/laravel-api-provider": "dev-master",
-		"linusu/bitcoin-address-validator": "~0"
+		"linusu/bitcoin-address-validator": "~0",
+		"metabor/statemachine": "dev-master"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",
+		"graphp/graphviz": "~0.2.0",
 		"phpspec/phpspec": "~2.1"
 	},
 	"autoload": {

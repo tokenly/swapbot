@@ -20,13 +20,13 @@ class BotRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
 
         // findBySendMonitorID
-        // findByReceiveMonitorID
-        $actual_bot = $helper->cleanup()->testUpdate(['receive_monitor_id' => 'foo123457']);
-        $loaded_bot = $this->app->make('Swapbot\Repositories\BotRepository')->findByReceiveMonitorID('foo123457');
+        // findByPublicMonitorID
+        $actual_bot = $helper->cleanup()->testUpdate(['public_receive_monitor_id' => 'foo123457']);
+        $loaded_bot = $this->app->make('Swapbot\Repositories\BotRepository')->findByPublicMonitorID('foo123457');
         PHPUnit::assertNotEmpty($loaded_bot);
         PHPUnit::assertEquals($actual_bot['uuid'], $loaded_bot['uuid']);
 
-        $actual_bot = $helper->cleanup()->testUpdate(['send_monitor_id' => 'foo123458']);
+        $actual_bot = $helper->cleanup()->testUpdate(['public_send_monitor_id' => 'foo123458']);
         $loaded_bot = $this->app->make('Swapbot\Repositories\BotRepository')->findBySendMonitorID('foo123458');
         PHPUnit::assertNotEmpty($loaded_bot);
         PHPUnit::assertEquals($actual_bot['uuid'], $loaded_bot['uuid']);

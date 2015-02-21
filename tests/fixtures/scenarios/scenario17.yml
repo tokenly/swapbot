@@ -1,0 +1,32 @@
+# simple live transaction received
+# brandnew
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: bot.brandnew.yml }
+
+
+
+
+
+

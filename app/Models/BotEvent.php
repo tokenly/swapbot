@@ -3,8 +3,11 @@
 namespace Swapbot\Models;
 
 use Swapbot\Models\Base\APIModel;
+use Swapbot\Models\Traits\CreatedAtDateOnly;
 
 class BotEvent extends APIModel {
+
+    use CreatedAtDateOnly;
 
     const LEVEL_DEBUG     = 100;
     const LEVEL_INFO      = 200;
@@ -29,12 +32,6 @@ class BotEvent extends APIModel {
 
 
 
-
-    // no updated_at
-    public function getDates() {
-        return [static::CREATED_AT];
-    }
-    public function setUpdatedAt($value) { }
 
 
 }

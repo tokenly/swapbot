@@ -4,9 +4,9 @@ txid: 00000000000000000000000000000000000000000000000000000xcptx111111
 network: counterparty
 event: receive
 notifiedAddress: SWAPBOTADDR01
-notifiedAddressId: RECEIVE_MONITOR_ID_01
+notifiedAddressId: PUBLIC_RECEIVE_MONITOR_ID_01
 sources: [SENDER01]
-destinations: [SWAPBOTADDR01]
+destinations: [botaddress000000000000000000000001]
 confirmed: true
 confirmations: 1
 asset: EARLY

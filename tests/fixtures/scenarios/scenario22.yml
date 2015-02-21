@@ -1,0 +1,67 @@
+# a payment received and a confirmed fuel transaction
+#   move the bot to an active state
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+
+  # receive a payment
+  - meta: { baseFilename: mempool_BTC_RECEIVE_PAYMENT_notification_01.yml }
+
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+    blockId: 300001
+
+  # confirm that the fuel was received
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: payment.unconfirmed.yml }
+  - 
+    meta: { baseFilename: payment.confirmed.yml }
+  - 
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+  - 
+    meta: { baseFilename: payment.creationFeePaid.yml }
+  - 
+    # state change to lowfuel
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - 
+    meta: { baseFilename: payment.moveFuelConfirmed.yml }
+  - 
+    # state change to active
+    meta: { baseFilename: bot.stateChange-active.yml }
+
+
+expectedBotLedgerEntries:
+  - 
+    meta: { baseFilename: bot_ledger_entry_model_01.yml }
+  - 
+    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
+
+
+expectedBotModels:
+  - 
+    # bot should be in state active when done
+    state: active

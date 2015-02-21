@@ -23,7 +23,7 @@ class ActivateBotCommandTest extends TestCase {
         // check the calls
         $calls = $mock->calls;
         PHPUnit::assertNotEmpty($calls);
-        PHPUnit::assertCount(3, $calls);
+        PHPUnit::assertCount(6, $calls);
         PHPUnit::assertEquals('1oLaf1CoYcVE3aH5n5XeCJcaKPPGTxnxW', $calls[1]['data']['address']);
         PHPUnit::assertEquals('receive', $calls[1]['data']['monitorType']);
         PHPUnit::assertEquals('send', $calls[2]['data']['monitorType']);
@@ -31,10 +31,10 @@ class ActivateBotCommandTest extends TestCase {
         // check the bot repository
         $repository = app('Swapbot\Repositories\BotRepository');
         $loaded_bot = $repository->findById($bot['id']);
-        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-111111111111', $bot['payment_address_id']);
+        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-111111111111', $bot['public_address_id']);
         PHPUnit::assertEquals('1oLaf1CoYcVE3aH5n5XeCJcaKPPGTxnxW', $bot['address']);
-        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['receive_monitor_id']);
-        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['send_monitor_id']);
+        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['public_receive_monitor_id']);
+        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['public_send_monitor_id']);
         PHPUnit::assertTrue($bot['active']);
     }
 

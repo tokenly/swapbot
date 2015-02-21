@@ -3,6 +3,7 @@
 namespace Swapbot\Repositories;
 
 use Swapbot\Models\Bot;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
@@ -25,18 +26,26 @@ class BotRepository extends APIRepository
         return call_user_func([$this->model_type, 'where'], 'user_id', $user_id)->get();
     }
 
-    public function findByReceiveMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'receive_monitor_id', $monitor_id)->first();
+    public function findByPublicMonitorID($monitor_id) {
+        return call_user_func([$this->model_type, 'where'], 'public_receive_monitor_id', $monitor_id)->first();
+    }
+
+    public function findByPaymentMonitorID($monitor_id) {
+        return call_user_func([$this->model_type, 'where'], 'payment_receive_monitor_id', $monitor_id)->first();
     }
 
     public function findBySendMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'send_monitor_id', $monitor_id)->first();
+        return call_user_func([$this->model_type, 'where'], 'public_send_monitor_id', $monitor_id)->first();
     }
 
 
 
     protected function modifyAttributesBeforeCreate($attributes) {
         if (!isset($attributes['active'])) { $attributes['active'] = false; }
+
+        // default to the unpaid state
+        if (!isset($attributes['state'])) { $attributes['state'] = BotState::BRAND_NEW; }
+
         return $attributes;
     }
 

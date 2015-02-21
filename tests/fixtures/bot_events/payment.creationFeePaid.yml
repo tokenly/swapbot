@@ -1,0 +1,4 @@
+name: payment.creationFeePaid
+msg: Paid 0.005 BTC as a creation fee.
+qty: 0.005000
+asset: BTC

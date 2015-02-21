@@ -1,0 +1,65 @@
+# a payment received and an insufficient fuel transaction
+#   keeps the bot in a low fuel state
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+
+  # receive a payment
+  - meta: { baseFilename: mempool_BTC_RECEIVE_PAYMENT_notification_01.yml }
+
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+    blockId: 300001
+
+  # confirm that the fuel was received
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.0009
+    blockId: 300002
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+  - 
+    meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: payment.unconfirmed.yml }
+  - 
+    meta: { baseFilename: payment.confirmed.yml }
+  - 
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+  - 
+    meta: { baseFilename: payment.creationFeePaid.yml }
+  - 
+    # state change to lowfuel
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - 
+    meta: { baseFilename: payment.moveFuelConfirmed.yml }
+    msg: Received swapbot fuel of 0.0009 BTC from the payment address with transaction ID 00000000000000000000000000000000000000000000000000000BTCtx333333.
+    qty: 0.0009
+
+expectedBotLedgerEntries:
+  - 
+    meta: { baseFilename: bot_ledger_entry_model_01.yml }
+  - 
+    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
+
+
+expectedBotModels:
+  - 
+    # bot should be in state lowfuel when done
+    state: lowfuel

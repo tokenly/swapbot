@@ -1,11 +1,17 @@
 name: Sample Bot One
 description: Just a Sample Bot
 active: true
+state: active
 
 address: botaddress000000000000000000000001
+public_address_id: PUBLIC_ADDRESS_ID_01
+public_receive_monitor_id: PUBLIC_RECEIVE_MONITOR_ID_01
+public_send_monitor_id: PUBLIC_SEND_MONITOR_ID_01
+
+payment_address: paymentaddress00000000000000000001
 payment_address_id: PAYMENT_ADDRESS_ID_01
-send_monitor_id: SEND_MONITOR_ID_01
-receive_monitor_id: RECEIVE_MONITOR_ID_01
+payment_receive_monitor_id: PAYMENT_RECEIVE_MONITOR_ID_01
+payment_send_monitor_id: PAYMENT_SEND_MONITOR_ID_01
 
 return_fee: 0.0001
 

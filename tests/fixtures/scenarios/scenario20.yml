@@ -1,0 +1,30 @@
+# bad payment type (trying to pay with LTBCOIN instead of BTC)
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # receive a payment of an incorrect type
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    notifiedAddress: paymentaddress00000000000000000001
+    notifiedAddressId: PAYMENT_RECEIVE_MONITOR_ID_01
+    destinations: [paymentaddress00000000000000000001]
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  # - 
+  #   meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    # bot should be in the lowfuel state
+    meta: { baseFilename: payment.unknown.yml }

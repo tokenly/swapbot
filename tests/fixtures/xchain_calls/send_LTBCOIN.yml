@@ -1,5 +1,5 @@
 method: POST
-path: /sends/PAYMENT_ADDRESS_ID_01
+path: /sends/PUBLIC_ADDRESS_ID_01
 data:
     destination: SENDER01
     quantity: 1000

@@ -1,0 +1,41 @@
+# a payment puts the bot into a low fuel state
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # receive a payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+  # now receive an incoming tx
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  # - 
+  #   meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    # payment confirmation
+    meta: { baseFilename: payment.confirmed.yml }
+  - 
+    # the move fuel transaction was created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+  - 
+    # creation fee paid
+    meta: { baseFilename: payment.creationFeePaid.yml }
+  - 
+    # state change to lowfuel
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - 
+    # bot should be in the lowfuel state
+    meta: { baseFilename: bot.lowfuel.yml }

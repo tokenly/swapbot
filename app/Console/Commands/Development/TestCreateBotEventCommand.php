@@ -5,7 +5,6 @@ namespace Swapbot\Console\Commands\Development;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
-use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Models\BotEvent;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
@@ -72,7 +71,7 @@ EOF
 
         $this->info("Creating event for bot ".$bot['name']." ({$bot['uuid']})");
         $level = $this->input->getOption('level');
-        $this->dispatch(new CreateBotEvent($bot, $level, $event));
+        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot, $level, $event);
         $this->info("done");
     }
 

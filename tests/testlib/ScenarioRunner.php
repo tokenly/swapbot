@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Repositories\BotEventRepository;
+use Swapbot\Repositories\BotLedgerEntryRepository;
+use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\parse;
@@ -21,13 +23,15 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotEventRepository $bot_event_repository, MockBuilder $mock_builder) {
-        $this->app                    = $app;
-        $this->bot_helper             = $bot_helper;
-        $this->user_helper            = $user_helper;
-        $this->transaction_repository = $transaction_repository;
-        $this->bot_event_repository   = $bot_event_repository;
-        $this->mock_builder           = $mock_builder;
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, MockBuilder $mock_builder) {
+        $this->app                         = $app;
+        $this->bot_helper                  = $bot_helper;
+        $this->user_helper                 = $user_helper;
+        $this->transaction_repository      = $transaction_repository;
+        $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
+        $this->bot_event_repository        = $bot_event_repository;
+        $this->bot_repository              = $bot_repository;
+        $this->mock_builder                = $mock_builder;
 
     }
 
@@ -93,6 +97,8 @@ class ScenarioRunner
         if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls']); }
         if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
         if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
+        if (isset($scenario_data['expectedBotLedgerEntries'])) { $this->validateExpectedBotLedgerEntryModels($scenario_data['expectedBotLedgerEntries']); }
+        if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
     }
 
 
@@ -201,7 +207,7 @@ class ScenarioRunner
         }
 
         // make sure the counts are the same
-        PHPUnit::assertCount(count($expected_xchain_calls), $actual_xchain_calls, "Did not find the correct number of XChain calls");
+        PHPUnit::assertCount(count($expected_xchain_calls), $actual_xchain_calls, "Did not find the correct number of XChain calls\n\$actual_xchain_calls=".json_encode($actual_xchain_calls, 192));
 
     }
 
@@ -255,10 +261,10 @@ class ScenarioRunner
     // ExpectedTransactionModels
 
     protected function validateExpectedTransactionModels($expected_transaction_models) {
-        if ($expected_transaction_models === 'none') {
-            PHPUnit::assertEmpty($this->xchain_mock_recorder->calls);
-            return;
-        }
+        // if ($expected_transaction_models === 'none') {
+        //     PHPUnit::assertEmpty($this->xchain_mock_recorder->calls);
+        //     return;
+        // }
 
         $actual_transaction_models = [];
         foreach ($this->transaction_repository->findAll() as $transaction_model) {
@@ -283,7 +289,7 @@ class ScenarioRunner
     }
 
     protected function validateExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model) {
-        PHPUnit::assertNotEmpty($actual_transaction_model, "Missing xchain call ".json_encode($expected_transaction_model, 192));
+        PHPUnit::assertNotEmpty($actual_transaction_model, "Missing transaction model ".json_encode($expected_transaction_model, 192));
         PHPUnit::assertEquals($expected_transaction_model, $actual_transaction_model, "ExpectedTransactionRecord mismatch");
     }
 
@@ -332,6 +338,165 @@ class ScenarioRunner
     }
 
 
+    ////////////////////////////////////////////////////////////////////////
+    // ExpectedBotLedgerEntryModels
+
+    protected function validateExpectedBotLedgerEntryModels($expected_bot_ledger_entries) {
+        $actual_bot_ledger_entries = [];
+        foreach ($this->bot_ledger_entry_repository->findAll() as $bot_ledger_entry_model) {
+            $actual_bot_ledger_entries[] = $bot_ledger_entry_model->toArray();
+        }
+
+        foreach ($expected_bot_ledger_entries as $offset => $raw_expected_bot_ledger_entry_model) {
+            $actual_bot_ledger_entry_model = isset($actual_bot_ledger_entries[$offset]) ? $actual_bot_ledger_entries[$offset] : null;
+
+            $expected_bot_ledger_entry_model = $raw_expected_bot_ledger_entry_model;
+            unset($expected_bot_ledger_entry_model['meta']);
+            $expected_bot_ledger_entry_model = array_replace_recursive($this->loadBaseFilename($raw_expected_bot_ledger_entry_model, "bot_ledger_models"), $expected_bot_ledger_entry_model);
+
+            $expected_bot_ledger_entry_model = $this->normalizeExpectedBotLedgerEntryRecord($expected_bot_ledger_entry_model, $actual_bot_ledger_entry_model);
+            
+            $this->validateExpectedBotLedgerEntryRecord($expected_bot_ledger_entry_model, $actual_bot_ledger_entry_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_bot_ledger_entries), $actual_bot_ledger_entries, "Did not find the correct number of BotLedgerEntry models");
+
+    }
+
+    protected function validateExpectedBotLedgerEntryRecord($expected_bot_ledger_entry_model, $actual_bot_ledger_entry_model) {
+        PHPUnit::assertNotEmpty($actual_bot_ledger_entry_model, "Missing ledger entry model ".json_encode($expected_bot_ledger_entry_model, 192));
+        PHPUnit::assertEquals($expected_bot_ledger_entry_model, $actual_bot_ledger_entry_model, "ExpectedBotLedgerEntryRecord mismatch");
+    }
+
+
+
+
+    protected function normalizeExpectedBotLedgerEntryRecord($expected_bot_ledger_entry_model, $actual_bot_ledger_entry_model) {
+        $normalized_expected_bot_ledger_entry_model = [];
+
+        // placeholder
+        $normalized_expected_bot_ledger_entry_model = $expected_bot_ledger_entry_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_bot_ledger_entry_model[$field])) { $normalized_expected_bot_ledger_entry_model[$field] = $expected_bot_ledger_entry_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = ['id','uuid','user_id','bot_id','created_at',];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_bot_ledger_entry_model[$field])) { $normalized_expected_bot_ledger_entry_model[$field] = $expected_bot_ledger_entry_model[$field]; }
+                else if (isset($actual_bot_ledger_entry_model[$field])) { $normalized_expected_bot_ledger_entry_model[$field] = $actual_bot_ledger_entry_model[$field]; }
+        }
+        ///////////////////
+
+        ///////////////////
+        // JUST NEEDS TO EXIST
+        $must_exist_fields = ['bot_event_id',];
+        foreach ($must_exist_fields as $field) {
+            if (isset($actual_bot_ledger_entry_model[$field])) { $normalized_expected_bot_ledger_entry_model[$field] = $actual_bot_ledger_entry_model[$field]; }
+        }
+        ///////////////////
+
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_bot_ledger_entry_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_bot_ledger_entry_model['quantity']);
+        // // blockhash
+        // if (isset($expected_bot_ledger_entry_model['blockhash'])) {
+        //     $normalized_expected_bot_ledger_entry_model['bitcoinTx']['blockhash'] = $expected_bot_ledger_entry_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_bot_ledger_entry_model;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // ExpectedBotModels
+
+    protected function validateExpectedBotModels($expected_bots) {
+        $actual_bots = [];
+        foreach ($this->bot_repository->findAll() as $bot_model) {
+            $actual_bots[] = $bot_model->toArray();
+        }
+
+        foreach ($expected_bots as $offset => $raw_expected_bot_model) {
+            $actual_bot_model = isset($actual_bots[$offset]) ? $actual_bots[$offset] : null;
+
+            $expected_bot_model = $raw_expected_bot_model;
+            unset($expected_bot_model['meta']);
+            $expected_bot_model = array_replace_recursive($this->loadBaseFilename($raw_expected_bot_model, "bots"), $expected_bot_model);
+
+            $expected_bot_model = $this->normalizeExpectedBotRecord($expected_bot_model, $actual_bot_model);
+            
+            $this->validateExpectedBotRecord($expected_bot_model, $actual_bot_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_bots), $actual_bots, "Did not find the correct number of Bot models");
+
+    }
+
+    protected function validateExpectedBotRecord($expected_bot_model, $actual_bot_model) {
+        PHPUnit::assertNotEmpty($actual_bot_model, "Missing bot model ".json_encode($expected_bot_model, 192));
+        PHPUnit::assertEquals($expected_bot_model, $actual_bot_model, "ExpectedBotRecord mismatch");
+    }
+
+
+
+
+    protected function normalizeExpectedBotRecord($expected_bot_model, $actual_bot_model) {
+        $normalized_expected_bot_model = [];
+
+        // placeholder
+        $normalized_expected_bot_model = $expected_bot_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_bot_model[$field])) { $normalized_expected_bot_model[$field] = $expected_bot_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = [];
+        // ['id','state','swaps','uuid','user_id','balances','balances_updated_at','blacklist_addresses','status_details','created_at','updated_at',]
+        $optional_fields = array_merge(array_keys(app('BotHelper')->sampleBotVars()), ['id','uuid','user_id','created_at','updated_at',]);
+        foreach ($optional_fields as $field) {
+            if (isset($expected_bot_model[$field])) { $normalized_expected_bot_model[$field] = $expected_bot_model[$field]; }
+                else if (isset($actual_bot_model[$field])) { $normalized_expected_bot_model[$field] = $actual_bot_model[$field]; }
+        }
+        ///////////////////
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_bot_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_bot_model['quantity']);
+        // // blockhash
+        // if (isset($expected_bot_model['blockhash'])) {
+        //     $normalized_expected_bot_model['bitcoinTx']['blockhash'] = $expected_bot_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_bot_model;
+    }
 
     
     ////////////////////////////////////////////////////////////////////////
@@ -358,7 +523,9 @@ class ScenarioRunner
     protected function loadBaseFilename($entry, $fixtures_folder) {
         if (isset($entry['meta']) AND isset($entry['meta']['baseFilename'])) {
             $base_filename = $entry['meta']['baseFilename'];
-        } else { throw new Exception("No base filename", 1); }
+        } else {
+            return [];
+        }
 
         $directory = base_path().'/tests/fixtures/'.trim($fixtures_folder, '/');
         $filepath = $directory.'/'.$base_filename;

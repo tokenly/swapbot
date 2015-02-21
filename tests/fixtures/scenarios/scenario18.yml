@@ -1,0 +1,27 @@
+# unconfirmed payment received
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # receive a payment
+  - meta: { baseFilename: mempool_BTC_RECEIVE_PAYMENT_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls: []
+  # - 
+  #   meta: { baseFilename: get_balances.yml }
+
+
+expectedBotEvents:
+  - 
+    # bot should be in the lowfuel state
+    meta: { baseFilename: payment.unconfirmed.yml }

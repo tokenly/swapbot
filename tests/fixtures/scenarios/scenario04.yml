@@ -5,7 +5,7 @@
 bots:
   - 
     meta: { baseFilename: bot01.yml }
-    active: false
+    state: inactive
 
 ############################
 # receive notifications from xchain

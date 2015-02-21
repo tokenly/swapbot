@@ -2,7 +2,6 @@
 
 use Illuminate\Http\RedirectResponse;
 use Swapbot\Commands\ActivateBot;
-use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Models\User;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
@@ -18,7 +17,7 @@ class CreateBotEventCommandTest extends TestCase {
         // send a bot event to be created
         $level = 1;
         $event_data = ['foo' => 'bar', 'baz' => 'bar2'];
-        app('Illuminate\Contracts\Bus\Dispatcher')->dispatch(new CreateBotEvent($bot, $level, $event_data));
+        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot, $level, $event_data);
 
 
         // check the bot event repository

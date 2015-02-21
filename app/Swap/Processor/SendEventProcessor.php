@@ -10,7 +10,7 @@ use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Models\BotEvent;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
-use Swapbot\Swap\Logger\SwapEventLogger;
+use Swapbot\Swap\Logger\BotEventLogger;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class SendEventProcessor {
@@ -22,7 +22,7 @@ class SendEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, SwapEventLogger $swap_event_logger)
+    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, BotEventLogger $swap_event_logger)
     {
         $this->bot_repository         = $bot_repository;
         $this->transaction_repository = $transaction_repository;

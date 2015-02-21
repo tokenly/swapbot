@@ -5,6 +5,8 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Commands\CreateBot;
 use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
+use Swapbot\Models\Bot;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
 
@@ -17,21 +19,32 @@ class BotHelper  {
         $this->create_bot_validator = $create_bot_validator;
     }
 
+
     public function sampleBotVars() {
         return [
-            'name'                => 'Sample Bot One',
-            'description'         => 'The bot description goes here.',
-            'active'              => false,
-            'address'             => null,
-            'payment_address_id'  => null,
-            'receive_monitor_id'  => null,
-            'send_monitor_id'     => null,
-            'balances'            => null,
-            'balances_updated_at' => null,
-            'blacklist_addresses' => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
-            'return_fee'          => 0.0001,
+            'name'                       => 'Sample Bot One',
+            'description'                => 'The bot description goes here.',
+            'active'                     => false,
+            'address'                    => null,
+            'public_address_id'          => null,
+            'public_receive_monitor_id'  => null,
+            'public_send_monitor_id'     => null,
 
-            'swaps' => [
+            'payment_address'            => null,
+            'payment_address_id'         => null,
+            'payment_receive_monitor_id' => null,
+            'payment_send_monitor_id'    => null,
+
+            'balances'                   => null,
+
+            'balances_updated_at'        => null,
+            'blacklist_addresses'        => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
+            'return_fee'                 => 0.0001,
+            'state'                      => BotState::BRAND_NEW,
+
+            'status_details'             => null,
+
+            'swaps'                      => [
                 [
                     'in'       => 'BTC',
                     'out'      => 'LTBCOIN',
@@ -40,6 +53,15 @@ class BotHelper  {
                 ],
             ],
         ];
+    }
+
+    public function newBotInMemory() {
+        $sample_bot_vars = $this->sampleBotVars();
+        $create_vars = app('Swapbot\Http\Requests\Bot\Transformers\BotTransformer')->santizeAttributes($sample_bot_vars, $this->create_bot_validator->getRules());
+
+        $create_vars['state'] = $sample_bot_vars['state'];
+
+        return new Bot($create_vars);
     }
 
     public function sampleBotVarsForAPI() {
