@@ -7,9 +7,9 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\UpdateBotBalances;
+use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotRepository;
@@ -34,7 +34,7 @@ class ReceiveEventProcessor {
         $this->bot_repository            = $bot_repository;
         $this->transaction_repository    = $transaction_repository;
         $this->swap_processor            = $swap_processor;
-        $this->bot_event_logger         = $bot_event_logger;
+        $this->bot_event_logger          = $bot_event_logger;
         $this->receive_payment_processor = $receive_payment_processor;
     }
 
@@ -70,12 +70,9 @@ class ReceiveEventProcessor {
                 'confirmations'             => $xchain_notification['confirmations'],
                 'is_confirmed'              => $xchain_notification['confirmed'],
                 'destination'               => $xchain_notification['sources'][0],
-                'swap_receipts'             => $transaction_model['swap_receipts'],
-
-                'any_swap_executed'         => false,
 
                 'tx_is_handled'             => false,
-                'should_update_transaction' => false,
+                'transaction_update_vars'   => [],
                 'should_update_bot_balance' => ($xchain_notification['confirmed'] ? true : false),
                 // 'bot_balances_delta'     => [],
 
@@ -190,9 +187,10 @@ class ReceiveEventProcessor {
             // blacklisted
             $this->bot_event_logger->logSendFromBlacklistedAddress($tx_process['bot'], $tx_process['xchain_notification'], $tx_process['is_confirmed']);
 
-            $tx_process['tx_is_handled']             = true;
-            $tx_process['should_update_transaction'] = true;
-            $tx_process['any_notification_given']    = true;
+            $tx_process['tx_is_handled']                            = true;
+            $tx_process['transaction_update_vars']['processed']     = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
+            $tx_process['any_notification_given']                   = true;
 
         }
 
@@ -207,9 +205,10 @@ class ReceiveEventProcessor {
             // this is a fuel transaction
             $this->bot_event_logger->logFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
 
-            $tx_process['tx_is_handled']             = true;
-            $tx_process['should_update_transaction'] = true;
-            $tx_process['any_notification_given']    = true;
+            $tx_process['tx_is_handled']                        = true;
+            $tx_process['transaction_update_vars']['processed'] = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
+            $tx_process['any_notification_given']               = true;
 
             // update the bot's balance in memory only
             $tx_process['bot']->modifyBalance($tx_process['xchain_notification']['asset'], $tx_process['xchain_notification']['quantity']);
@@ -246,7 +245,8 @@ class ReceiveEventProcessor {
 
             // a manually inactive bot still marks the transaction as processed
             if ($bot_state->getName() == BotState::INACTIVE) {
-                $tx_process['should_update_transaction'] = true;
+                $tx_process['transaction_update_vars']['processed'] = true;
+                $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
             }
         }
     }
@@ -256,43 +256,59 @@ class ReceiveEventProcessor {
 
         $bot = $tx_process['bot'];
 
-        $any_swap_processed = false;
-        foreach ($bot['swaps'] as $swap) {
-            $swap_processed = $this->swap_processor->processSwap($swap, $tx_process);
-            if ($swap_processed) { $any_swap_processed = true; }
+        $any_swap_processed     = false;
+        $all_matched_swaps_sent = true;
+        foreach ($bot['swaps'] as $swap_config) {
+            $was_processed = false;
+            $was_sent      = false;
 
-            // there will be a swap id, eventually
-            $swap_id = null;
-        }
-
-        if ($any_swap_processed) {
-            if ($tx_process['any_swap_executed']) {
-                // debit the bot's payment account
-                $debit_amount = $bot->getTXFee();
-                $bot_event = $this->bot_event_logger->logTransactionFee($bot, $debit_amount, $swap_id);
-                $this->dispatch(new UpdateBotPaymentAccount($bot, $debit_amount, $is_credit=false, $bot_event));
+            // process it
+            $swap = $this->swap_processor->processSwapConfig($swap_config, $tx_process);
+            if ($swap) {
+                $any_swap_processed = true;
+                $was_processed = true;
+                $was_sent = $swap->wasSent();
             }
-        } else {
+
+            if (!$was_sent AND $was_processed) {
+                // this is a swap that needs to be sent, but was not sent yet
+                $all_matched_swaps_sent = false;
+            }
+        }
+        if (!$any_swap_processed) { $all_matched_swaps_sent = false; }
+
+        if ($any_swap_processed AND $all_matched_swaps_sent) {
+            // debit the bot's payment account (when any transaction was processed)
+            $debit_amount = $bot->getTXFee();
+            $bot_event = $this->bot_event_logger->logTransactionFee($bot, $debit_amount, $tx_process['transaction']['id']);
+            $this->dispatch(new UpdateBotPaymentAccount($bot, $debit_amount, $is_credit=false, $bot_event));
+
+            // save the billing event id
+            $tx_process['transaction_update_vars']['billed_event_id'] = $bot_event['id'];
+
+            // mark this transaction as processed (completed)
+            $tx_process['transaction_update_vars']['processed']     = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
+        } else if (!$any_swap_processed) {
             // we received an asset, but no swap was processed
             $this->bot_event_logger->logUnknownReceiveTransaction($bot, $tx_process['xchain_notification']);
             $tx_process['any_notification_given'] = true;
 
             // mark the transaction as processed
             //   this was probably a transaction to fill up the bot
-            $tx_process['should_update_transaction'] = true;
+            $tx_process['transaction_update_vars']['processed']     = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
         }
 
     }
 
     protected function updateTransaction($tx_process) {
-        if ($tx_process['should_update_transaction']) {
-            $update_vars = [
-                'swap_receipts' => $tx_process['swap_receipts'],
-                'confirmations' => $tx_process['confirmations'],
-            ];
+        if ($tx_process['transaction_update_vars']) {
+
+            $update_vars = $tx_process['transaction_update_vars'];
 
             // mark the transaction as processed only if there were no errros
-            if (!$tx_process['any_processing_errors']) { $update_vars['processed'] = true; }
+            // if (!$tx_process['any_processing_errors']) { $update_vars['processed'] = true; }
 
             $this->transaction_repository->update($tx_process['transaction'], $update_vars);
         }
@@ -305,5 +321,6 @@ class ReceiveEventProcessor {
             $this->bot_event_logger->logUnhandledTransaction($tx_process['bot'], $tx_process['xchain_notification']);
         }
     }
+
 
 }

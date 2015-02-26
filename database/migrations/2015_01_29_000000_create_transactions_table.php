@@ -21,10 +21,11 @@ class CreateTransactionsTable extends Migration {
             $table->integer('confirmations')->unsigned()->default(0);
             $table->boolean('processed')->default(false);
 
+            $table->integer('billed_event_id')->unsigned()->nullable();
+            $table->foreign('billed_event_id')->references('id')->on('bot_events');
+
             $table->integer('bot_id')->unsigned()->index();
             $table->foreign('bot_id')->references('id')->on('bots');
-
-            $table->mediumText('swap_receipts')->nullable();
 
             $table->index(['txid', 'bot_id']);
 

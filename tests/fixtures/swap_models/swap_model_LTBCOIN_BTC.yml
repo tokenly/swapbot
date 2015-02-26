@@ -1,0 +1,6 @@
+name: LTBCOIN:BTC
+state: sent
+processed: true
+receipt:
+    txid: "0000000000000000000000000000001111"
+    confirmations: 1

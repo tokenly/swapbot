@@ -10,10 +10,10 @@ class TransactionHelper  {
 
     public function sampleTransactionVars() {
         return [
-            'txid'           => 'transactionid0000000000001',
-            'confirmations'  => '0',
-            'processed'      => '0',
-            'swap_receipts'  => null,
+            'txid'            => 'transactionid0000000000001',
+            'confirmations'   => '0',
+            'processed'       => '0',
+            'billed_event_id' => null,
         ];
     }
 

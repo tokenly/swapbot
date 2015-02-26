@@ -106,8 +106,8 @@ class RepositoryTestHelper  {
         $loaded_models = array_values(iterator_to_array($this->repository->findAll()));
         PHPUnit::assertNotEmpty($loaded_models);
         PHPUnit::assertCount(2, $loaded_models);
-        PHPUnit::assertEquals((array)$created_model, (array)$loaded_models[0]);
-        PHPUnit::assertEquals((array)$created_model_2, (array)$loaded_models[1]);
+        PHPUnit::assertEquals($created_model->toArray(), $loaded_models[0]->toArray());
+        PHPUnit::assertEquals($created_model_2->toArray(), $loaded_models[1]->toArray());
     }
 
 

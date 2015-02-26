@@ -30,4 +30,3 @@ expectedTransactionModels:
     txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
     confirmations: '1'
     processed: '1'
-    swap_receipts: {}

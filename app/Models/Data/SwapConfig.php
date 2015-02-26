@@ -3,9 +3,12 @@
 namespace Swapbot\Models\Data;
 
 use ArrayObject;
+use Swapbot\Swap\Contracts\Strategy;
 use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class SwapConfig extends ArrayObject implements APISerializeable {
+
+    protected $strategy_obj = null;
 
     function __construct($data=[]) {
         parent::__construct($data);
@@ -19,14 +22,14 @@ class SwapConfig extends ArrayObject implements APISerializeable {
 
     public function unSerialize($data) {
         // legacy conversion
-        if (!isset($data['strategy']) AND !isset($data['in']) AND isset($data[0])) { return $this->unSerializeLegacyData($data); }
+        // if (!isset($data['strategy']) AND !isset($data['in']) AND isset($data[0])) { return $this->unSerializeLegacyData($data); }
 
-        // strategy
+        // set the strategy
         $strategy_type = isset($data['strategy']) ? $data['strategy'] : 'rate';
         $this['strategy'] = $strategy_type;
         
-        $strategy = app('Swapbot\Swap\Factory\StrategyFactory')->newStrategy($strategy_type);
-        $strategy->unSerializeDataToSwap($data, $this);
+        // let the strategy unserialize the data
+        $this->getStrategy()->unSerializeDataToSwap($data, $this);
 
         return $this;
     }
@@ -40,13 +43,27 @@ class SwapConfig extends ArrayObject implements APISerializeable {
     public function serializeForAPI() { return $this->serialize(); }
 
 
-
-    protected function unSerializeLegacyData($data) {
-        $this['in']       = $data[0];
-        $this['out']      = $data[1];
-        $this['strategy'] = 'rate';
-        $this['rate']     = $data[2];
-        return $this;
+    public function buildName() {
+        return $this['in'].':'.$this['out'];
     }
+
+    public function getStrategy() {
+        if (!isset($this->strategy_obj)) {
+            $this->strategy_obj = app('Swapbot\Swap\Factory\StrategyFactory')->newStrategy($this['strategy']);
+        }
+        return $this->strategy_obj;
+    }
+
+    public function setStrategy(Strategy $strategy) {
+        $this->strategy_obj = $strategy;
+    }
+
+    // protected function unSerializeLegacyData($data) {
+    //     $this['in']       = $data[0];
+    //     $this['out']      = $data[1];
+    //     $this['strategy'] = 'rate';
+    //     $this['rate']     = $data[2];
+    //     return $this;
+    // }
 
 }

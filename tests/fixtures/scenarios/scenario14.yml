@@ -44,7 +44,7 @@ expectedBotEvents:
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_EMPTY_RECEIPTS.yml }
-    swap_receipts: 
-        "LTBCOIN:EARLY":
-            txid: "0000000000000000000000000000001111"
-            confirmations: 1
+    # swap_receipts: 
+    #     "LTBCOIN:EARLY":
+    #         txid: "0000000000000000000000000000001111"
+    #         confirmations: 1

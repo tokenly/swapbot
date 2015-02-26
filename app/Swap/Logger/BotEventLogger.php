@@ -294,11 +294,11 @@ class BotEventLogger {
         ]);
     }
 
-    public function logTransactionFee(Bot $bot, $fee, $swap_id) {
+    public function logTransactionFee(Bot $bot, $fee, $transaction_id) {
         return $this->logToBotEvents($bot, 'fee.transaction', BotEvent::LEVEL_INFO, [
-            'msg'    => "Paid a transaction fee of $fee.",
-            'fee'    => $fee,
-            'swapId' => $swap_id,
+            'msg'           => "Paid a transaction fee of $fee.",
+            'fee'           => $fee,
+            'transactionId' => $transaction_id,
         ]);
     }
 

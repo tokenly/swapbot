@@ -19,10 +19,6 @@ class Bot extends APIModel {
     protected $state_machine        = null;
     protected $payment_plan_details = null;
 
-    public function buildSwapID($swap) {
-        return $swap['in'].':'.$swap['out'];
-    }
-
     public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
     public function getSwapsAttribute() { return $this->unSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
 

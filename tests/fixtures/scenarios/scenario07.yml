@@ -77,9 +77,6 @@ expectedBotEvents:
 
   - 
     meta: { baseFilename: swap.failed.yml }
-  - 
-    # pay a transaction fee
-    meta: { baseFilename: fee.transaction.yml }
 
   - 
     meta: { baseFilename: balanceupdate.failed.yml }
@@ -106,14 +103,11 @@ expectedBotEvents:
     outQty: 5000
     outAsset: SOUP
 
-  ################################################################################
-  # This shouldn't be here ecause it has already been debited
-  #   This needs to be fixed
   - 
     # pay a transaction fee
+    #   (once at the end)
     meta: { baseFilename: fee.transaction.yml }
-  #
-  ################################################################################
+
 
 expectedTransactionModels:
   - 
@@ -121,11 +115,17 @@ expectedTransactionModels:
     txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
     confirmations: '1'
     processed: '1'
-    swap_receipts: 
-        "BTC:LTBCOIN":
-            txid: "0000000000000000000000000000001111"
-            confirmations: 1
-        "BTC:SOUP":
-            txid: "0000000000000000000000000000001111"
-            confirmations: 1
+    # swap_receipts: 
+    #     "BTC:LTBCOIN":
+    #         txid: "0000000000000000000000000000001111"
+    #         confirmations: 1
+    #     "BTC:SOUP":
+    #         txid: "0000000000000000000000000000001111"
+    #         confirmations: 1
 
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+  -
+    meta: { baseFilename: swap_model_BTC_SOUP.yml }

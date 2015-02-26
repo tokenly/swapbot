@@ -6,6 +6,7 @@ use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\parse;
@@ -23,7 +24,7 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, MockBuilder $mock_builder) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -31,6 +32,7 @@ class ScenarioRunner
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->bot_event_repository        = $bot_event_repository;
         $this->bot_repository              = $bot_repository;
+        $this->swap_repository             = $swap_repository;
         $this->mock_builder                = $mock_builder;
 
     }
@@ -99,9 +101,54 @@ class ScenarioRunner
         if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
         if (isset($scenario_data['expectedBotLedgerEntries'])) { $this->validateExpectedBotLedgerEntryModels($scenario_data['expectedBotLedgerEntries']); }
         if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
+        if (isset($scenario_data['expectedSwapModels'])) { $this->validateExpectedSwapModels($scenario_data['expectedSwapModels']); }
     }
 
 
+
+
+    
+    ////////////////////////////////////////////////////////////////////////
+    // Bots
+
+    protected function addBots($bots) {
+        if (!isset($this->bot_models)) { $this->bot_models = []; }
+        foreach($bots as $bot_entry) {
+            $bot_attributes = $this->loadBaseFilename($bot_entry, "bots");
+            unset($bot_entry['meta']);
+            $bot_attributes = array_replace_recursive($bot_attributes, $bot_entry);
+            $this->bot_models[] = $this->bot_helper->newSampleBot($this->getSampleUser(), $bot_attributes);
+        }
+        return $this->bot_models;
+    }
+
+    protected function getSampleUser() {
+        if (!isset($this->sample_user)) {
+            $this->sample_user = $this->user_helper->getSampleUser();
+        }
+        return $this->sample_user;
+    }
+
+    protected function loadBaseFilename($entry, $fixtures_folder) {
+        if (isset($entry['meta']) AND isset($entry['meta']['baseFilename'])) {
+            $base_filename = $entry['meta']['baseFilename'];
+        } else {
+            return [];
+        }
+
+        $directory = base_path().'/tests/fixtures/'.trim($fixtures_folder, '/');
+        $filepath = $directory.'/'.$base_filename;
+        PHPUnit::assertTrue(file_exists($filepath), "Filepath did not exist: {$filepath}.  Files were: ".json_encode(scandir($directory), 192));
+
+        $text = file_get_contents($filepath);
+        if (substr($base_filename, -5) == '.json') {
+            return json_decode($text, true);
+        }
+        if (substr($base_filename, -4) == '.yml') {
+            return Yaml::parse($text);
+        }
+        throw new Exception("Unknown filename $filename", 1);
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // ExpectedBotEvents
@@ -158,7 +205,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['txid','file','line',];
+        $optional_fields = ['txid','file','line','transactionId',];
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_event[$field])) { $normalized_expected_bot_event[$field] = $expected_bot_event[$field]; }
                 else if (isset($actual_bot_event[$field])) { $normalized_expected_bot_event[$field] = $actual_bot_event[$field]; }
@@ -313,10 +360,11 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['id','bot_id','updated_at','created_at',];
+        $optional_fields = ['id','bot_id','billed_event_id','updated_at','created_at',];
         foreach ($optional_fields as $field) {
             if (isset($expected_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $expected_transaction_model[$field]; }
                 else if (isset($actual_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $actual_transaction_model[$field]; }
+                else { $normalized_expected_transaction_model[$field] = null; }
         }
         ///////////////////
 
@@ -497,47 +545,91 @@ class ScenarioRunner
         return $normalized_expected_bot_model;
     }
 
-    
+
     ////////////////////////////////////////////////////////////////////////
-    // Bots
+    // ExpectedSwapModels
 
-    protected function addBots($bots) {
-        if (!isset($this->bot_models)) { $this->bot_models = []; }
-        foreach($bots as $bot_entry) {
-            $bot_attributes = $this->loadBaseFilename($bot_entry, "bots");
-            unset($bot_entry['meta']);
-            $bot_attributes = array_replace_recursive($bot_attributes, $bot_entry);
-            $this->bot_models[] = $this->bot_helper->newSampleBot($this->getSampleUser(), $bot_attributes);
+    protected function validateExpectedSwapModels($expected_swaps) {
+        $actual_swaps = [];
+        foreach ($this->swap_repository->findAll() as $swap_model) {
+            $actual_swaps[] = $swap_model->toArray();
         }
-        return $this->bot_models;
+
+        foreach ($expected_swaps as $offset => $raw_expected_swap_model) {
+            $actual_swap_model = isset($actual_swaps[$offset]) ? $actual_swaps[$offset] : null;
+
+            $expected_swap_model = $raw_expected_swap_model;
+            unset($expected_swap_model['meta']);
+            $expected_swap_model = array_replace_recursive($this->loadBaseFilename($raw_expected_swap_model, "swap_models"), $expected_swap_model);
+
+            $expected_swap_model = $this->normalizeExpectedSwapRecord($expected_swap_model, $actual_swap_model);
+            
+            $this->validateExpectedSwapRecord($expected_swap_model, $actual_swap_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_swaps), $actual_swaps, "Did not find the correct number of Swap models");
+
     }
 
-    protected function getSampleUser() {
-        if (!isset($this->sample_user)) {
-            $this->sample_user = $this->user_helper->getSampleUser();
-        }
-        return $this->sample_user;
+    protected function validateExpectedSwapRecord($expected_swap_model, $actual_swap_model) {
+        PHPUnit::assertNotEmpty($actual_swap_model, "Missing swap model ".json_encode($expected_swap_model, 192));
+        PHPUnit::assertEquals($expected_swap_model, $actual_swap_model, "ExpectedSwapRecord mismatch");
     }
 
-    protected function loadBaseFilename($entry, $fixtures_folder) {
-        if (isset($entry['meta']) AND isset($entry['meta']['baseFilename'])) {
-            $base_filename = $entry['meta']['baseFilename'];
-        } else {
-            return [];
-        }
 
-        $directory = base_path().'/tests/fixtures/'.trim($fixtures_folder, '/');
-        $filepath = $directory.'/'.$base_filename;
-        PHPUnit::assertTrue(file_exists($filepath), "Filepath did not exist: {$filepath}.  Files were: ".json_encode(scandir($directory), 192));
 
-        $text = file_get_contents($filepath);
-        if (substr($base_filename, -5) == '.json') {
-            return json_decode($text, true);
+
+    protected function normalizeExpectedSwapRecord($expected_swap_model, $actual_swap_model) {
+        $normalized_expected_swap_model = [];
+
+        // placeholder
+        $normalized_expected_swap_model = $expected_swap_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_swap_model[$field])) { $normalized_expected_swap_model[$field] = $expected_swap_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = ['id','uuid','definition','transaction_id','bot_id','created_at','updated_at',];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_swap_model[$field])) { $normalized_expected_swap_model[$field] = $expected_swap_model[$field]; }
+                else if (isset($actual_swap_model[$field])) { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
         }
-        if (substr($base_filename, -4) == '.yml') {
-            return Yaml::parse($text);
+        ///////////////////
+
+        ///////////////////
+        // JUST NEEDS TO EXIST
+        $must_exist_fields = ['bot_event_id',];
+        foreach ($must_exist_fields as $field) {
+            if (isset($actual_swap_model[$field])) { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
         }
-        throw new Exception("Unknown filename $filename", 1);
+        ///////////////////
+
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_swap_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_swap_model['quantity']);
+        // // blockhash
+        // if (isset($expected_swap_model['blockhash'])) {
+        //     $normalized_expected_swap_model['bitcoinTx']['blockhash'] = $expected_swap_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_swap_model;
     }
+
+
+
 
 }
