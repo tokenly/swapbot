@@ -16,4 +16,4 @@ before_script:
   - composer --dev --prefer-source install
 
 after_script:
-  - php vendor/bin/coveralls.php -v
+  - php vendor/bin/coveralls -v
