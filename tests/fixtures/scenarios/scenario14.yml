@@ -37,6 +37,9 @@ expectedBotEvents:
     inAsset: LTBCOIN
     outQty: 1
     outAsset: EARLY
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:
   - 

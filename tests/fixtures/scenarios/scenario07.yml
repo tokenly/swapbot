@@ -77,6 +77,9 @@ expectedBotEvents:
 
   - 
     meta: { baseFilename: swap.failed.yml }
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
 
   - 
     meta: { baseFilename: balanceupdate.failed.yml }
@@ -102,6 +105,15 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
+
+  ################################################################################
+  # This shouldn't be here ecause it has already been debited
+  #   This needs to be fixed
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
+  #
+  ################################################################################
 
 expectedTransactionModels:
   - 

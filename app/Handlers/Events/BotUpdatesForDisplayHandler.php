@@ -46,7 +46,7 @@ class BotUpdatesForDisplayHandler {
     {
         $events->listen('Swapbot\Events\BotEventCreated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBotEventToPusher');
         $events->listen('Swapbot\Events\BotBalancesUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBalanceUpdateToPusher');
-        $events->listen('Swapbot\Events\BotPaymentReceived', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
+        $events->listen('Swapbot\Events\BotPaymentAccountUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
     }
 
 

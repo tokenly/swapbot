@@ -13,7 +13,7 @@ sbAdmin.planutils = do ()->
         return null
 
     planutils.allPlansData = ()->
-        initialFuel = 0.005
+        initialFuel = 0.01
 
         return {
             txfee001: {

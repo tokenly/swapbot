@@ -2,6 +2,7 @@ name: Sample Bot One
 description: Just a Sample Bot
 active: true
 state: active
+payment_plan: txfee001
 
 address: botaddress000000000000000000000001
 public_address_id: PUBLIC_ADDRESS_ID_01

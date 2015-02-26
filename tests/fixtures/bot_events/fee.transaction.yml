@@ -1,0 +1,4 @@
+name: fee.transaction
+msg: Paid a transaction fee of 0.001.
+fee: 0.001000
+swapId: ~

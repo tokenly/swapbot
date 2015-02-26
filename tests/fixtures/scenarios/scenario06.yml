@@ -74,6 +74,9 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:
   - 

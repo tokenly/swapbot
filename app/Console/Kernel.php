@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\TestConfigCommand',
 
 		'Swapbot\Console\Commands\Development\ExportBotStateGraph',
-		'Swapbot\Console\Commands\Development\ReceiveBotPayment',
+		'Swapbot\Console\Commands\Development\UpdateBotPaymentAccount',
 	];
 
 	/**

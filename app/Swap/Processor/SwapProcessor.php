@@ -124,6 +124,9 @@ class SwapProcessor {
 
         $this->swap_event_logger->logSendResult($tx_process['bot'], $send_result, $tx_process['xchain_notification'], $tx_process['destination'], $swap_process['quantity'], $swap_process['asset'], $tx_process['confirmations']);
         $tx_process['any_notification_given'] = true;
+
+        // mark the swap as executed
+        $tx_process['any_swap_executed'] = true;
     }
 
 }

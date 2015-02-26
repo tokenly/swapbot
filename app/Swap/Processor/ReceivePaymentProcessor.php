@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\ReceiveBotPayment;
+use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\TransactionRepository;
@@ -106,7 +106,7 @@ class ReceivePaymentProcessor {
             $amount = $tx_process['xchain_notification']['quantity'];
             $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
             $is_credit = true;
-            $this->dispatch(new ReceiveBotPayment($tx_process['bot'], $amount, $is_credit, $bot_event));
+            $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $is_credit, $bot_event));
 
             $tx_process['should_update_transaction'] = true;
         }

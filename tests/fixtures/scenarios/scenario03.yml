@@ -35,5 +35,8 @@ expectedBotEvents:
   - 
     meta: { baseFilename: swap.sent.yml }
   - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
+  - 
     meta: { baseFilename: tx.previous.yml }
 

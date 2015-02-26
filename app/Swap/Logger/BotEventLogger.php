@@ -86,23 +86,6 @@ class BotEventLogger {
         ]);
     }
 
-    public function logManualPayment(Bot $bot, $amount, $is_credit=true, $msg=null) {
-        if ($msg === null) {
-            if ($is_credit) {
-                $msg = "Applied a credit of {$amount}.";
-            } else {
-                $msg = "Applied a debit of {$amount}.";
-            }
-        } else {
-            $msg = str_replace('{{amount}}', $amount, $msg);
-        }
-
-        return $this->logToBotEvents($bot, 'payment.manual', BotEvent::LEVEL_INFO, [
-            'msg'       => $msg,
-            'amount'    => $amount,
-            'is_credit' => $is_credit,
-        ]);
-    }
 
     public function logUnknownPaymentTransaction(Bot $bot, $xchain_notification) {
         $confirmations = $xchain_notification['confirmations'];
@@ -290,6 +273,34 @@ class BotEventLogger {
     }
 
 
+    ////////////////////////////////////////////////////////////////////////
+    // payments
+
+    public function logManualPayment(Bot $bot, $amount, $is_credit=true, $msg=null) {
+        if ($msg === null) {
+            if ($is_credit) {
+                $msg = "Applied a credit of {$amount}.";
+            } else {
+                $msg = "Applied a debit of {$amount}.";
+            }
+        } else {
+            $msg = str_replace('{{amount}}', $amount, $msg);
+        }
+
+        return $this->logToBotEvents($bot, 'payment.manual', BotEvent::LEVEL_INFO, [
+            'msg'       => $msg,
+            'amount'    => $amount,
+            'is_credit' => $is_credit,
+        ]);
+    }
+
+    public function logTransactionFee(Bot $bot, $fee, $swap_id) {
+        return $this->logToBotEvents($bot, 'fee.transaction', BotEvent::LEVEL_INFO, [
+            'msg'    => "Paid a transaction fee of $fee.",
+            'fee'    => $fee,
+            'swapId' => $swap_id,
+        ]);
+    }
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

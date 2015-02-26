@@ -5,12 +5,12 @@ namespace Swapbot\Handlers\Commands;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\ReceiveBotPayment;
+use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Commands\ReconcileBotState;
-use Swapbot\Events\BotPaymentReceived;
+use Swapbot\Events\BotPaymentAccountUpdated;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 
-class ReceiveBotPaymentHandler {
+class UpdateBotPaymentAccountHandler {
 
     use DispatchesCommands;
 
@@ -27,13 +27,11 @@ class ReceiveBotPaymentHandler {
     /**
      * Handle the command.
      *
-     * @param  ReceiveBotPayment  $command
+     * @param  UpdateBotPaymentAccount  $command
      * @return void
      */
-    public function handle(ReceiveBotPayment $command)
+    public function handle(UpdateBotPaymentAccount $command)
     {
-        Log::debug('handle ReceiveBotPayment');
-        
         // add a ledger entry
         if ($command->is_credit) {
             $this->bot_ledger_entry_repository->addCredit($command->bot, $command->amount, $command->bot_event);
@@ -45,8 +43,7 @@ class ReceiveBotPaymentHandler {
         $this->dispatch(new ReconcileBotState($command->bot));
         
         // fire an event
-        Log::debug('firing new BotPaymentReceived');
-        Event::fire(new BotPaymentReceived($command->bot, $command->amount));
+        Event::fire(new BotPaymentAccountUpdated($command->bot, $command->amount));
     }
 
 }

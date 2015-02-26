@@ -5,12 +5,12 @@ namespace Swapbot\Console\Commands\Development;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
-use Swapbot\Commands\ReceiveBotPayment as ReceiveBotPaymentCommand;
+use Swapbot\Commands\UpdateBotPaymentAccount as UpdateBotPaymentAccountCommand;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ReceiveBotPayment extends Command {
+class UpdateBotPaymentAccount extends Command {
 
     use DispatchesCommands;
 
@@ -19,7 +19,7 @@ class ReceiveBotPayment extends Command {
      *
      * @var string
      */
-    protected $name = 'swapbotdev:receive-bot-payment';
+    protected $name = 'swapbotdev:update-bot-payment-account';
 
     /**
      * The console command description.
@@ -72,7 +72,7 @@ class ReceiveBotPayment extends Command {
             // apply a payment
             // echo "\$bot:\n".json_encode($bot, 192)."\n";
             $bot_event = app('Swapbot\Swap\Logger\BotEventLogger')->logManualPayment($bot, $amount, $is_credit, $message);
-            $this->dispatch(new ReceiveBotPaymentCommand($bot, $amount, $is_credit, $bot_event));
+            $this->dispatch(new UpdateBotPaymentAccountCommand($bot, $amount, $is_credit, $bot_event));
 
         } catch (Exception $e) {
             $this->error('Error: '.$e->getMessage());

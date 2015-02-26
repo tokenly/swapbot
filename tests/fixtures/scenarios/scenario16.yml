@@ -29,6 +29,9 @@ expectedBotEvents:
     meta: { baseFilename: swap.found.yml }
   - 
     meta: { baseFilename: swap.sent.yml }
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:
   - 

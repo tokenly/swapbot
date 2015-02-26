@@ -5,7 +5,7 @@ namespace Swapbot\Events;
 use Swapbot\Events\Event;
 use Swapbot\Models\Bot;
 
-class BotPaymentReceived extends Event {
+class BotPaymentAccountUpdated extends Event {
 
 	var $bot;
 	var $amount;

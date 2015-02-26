@@ -16,7 +16,8 @@ class Bot extends APIModel {
 
     protected $dates = ['balances_updated_at'];
 
-    protected $state_machine = null;
+    protected $state_machine        = null;
+    protected $payment_plan_details = null;
 
     public function buildSwapID($swap) {
         return $swap['in'].':'.$swap['out'];
@@ -43,7 +44,11 @@ class Bot extends APIModel {
 
 
     public function getCreationFee() {
-        return 0.005;
+        return $this->paymentPlanDetails()['setupFee'];
+    }
+
+    public function getTXFee() {
+        return $this->paymentPlanDetails()['txFee'];
     }
 
     public function getStartingBTCFuel() {
@@ -128,5 +133,14 @@ class Bot extends APIModel {
             $this->state_machine = app('Swapbot\Statemachines\BotStateMachineFactory')->buildStateMachineFromBot($this);
         }
         return $this->state_machine;
+    }
+
+
+    public function paymentPlanDetails() {
+        if (!isset($this->payment_plan_details)) {
+            $plans = app('Swapbot\Billing\PaymentPlans')->allPaymentPlans();
+            $this->payment_plan_details = isset($plans[$this['payment_plan']]) ? $plans[$this['payment_plan']] : [];
+        }
+        return $this->payment_plan_details;
     }
 }

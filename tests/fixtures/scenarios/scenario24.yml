@@ -1,9 +1,11 @@
 # simple live transaction received
+#   tests that payment account is debited (txfee0002)
 
 ############################
 # setup bots
 bots:
   - meta: { baseFilename: bot01.yml }
+    payment_plan: txfee002
 
 
 ############################
@@ -28,7 +30,11 @@ expectedBotEvents:
   - 
     # pay a transaction fee
     meta: { baseFilename: fee.transaction.yml }
+    msg: Paid a transaction fee of 0.0005.
+    fee: 0.0005
 
-expectedTransactionModels:
+expectedBotLedgerEntries:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: bot_ledger_entry_model_TX_DEBIT.yml }
+    amount: 50000 # 0.0005
+

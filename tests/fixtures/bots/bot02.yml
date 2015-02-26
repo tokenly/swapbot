@@ -2,6 +2,7 @@ name: Sample Fixed Rate One
 description: A Sample Fixed Rate Bot
 active: true
 state: active
+payment_plan: txfee001
 
 address: botaddress000000000000000000000001
 public_address_id: PUBLIC_ADDRESS_ID_01

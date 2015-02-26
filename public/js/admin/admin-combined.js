@@ -433,7 +433,7 @@
     };
     planutils.allPlansData = function() {
       var initialFuel;
-      initialFuel = 0.005;
+      initialFuel = 0.01;
       return {
         txfee001: {
           id: "txfee001",

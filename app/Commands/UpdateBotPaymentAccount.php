@@ -6,7 +6,7 @@ use Swapbot\Commands\Command;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 
-class ReceiveBotPayment extends Command {
+class UpdateBotPaymentAccount extends Command {
 
 
     var $bot;
