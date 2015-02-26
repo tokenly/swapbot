@@ -2537,12 +2537,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be"
+                "reference": "04240037fd3e8b33c574cc6ff6ecec38c01e34e9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
-                "reference": "cc67fc95bd13d363fa3608c8dc11438c5f9e55be",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/04240037fd3e8b33c574cc6ff6ecec38c01e34e9",
+                "reference": "04240037fd3e8b33c574cc6ff6ecec38c01e34e9",
                 "shasum": ""
             },
             "require": {
@@ -2573,7 +2573,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-02-17 14:27:56"
+            "time": "2015-02-24 13:36:56"
         },
         {
             "name": "tokenly/laravel-event-log",
@@ -2702,12 +2702,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "e28126c81c24a2c41e31f7c05183d49e386de1a8"
+                "reference": "8d2881bebb26d591523d55b915f38a39f5ddaf0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/e28126c81c24a2c41e31f7c05183d49e386de1a8",
-                "reference": "e28126c81c24a2c41e31f7c05183d49e386de1a8",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/8d2881bebb26d591523d55b915f38a39f5ddaf0f",
+                "reference": "8d2881bebb26d591523d55b915f38a39f5ddaf0f",
                 "shasum": ""
             },
             "require": {
@@ -2737,7 +2737,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-02-18 03:42:08"
+            "time": "2015-02-26 01:29:36"
         },
         {
             "name": "vlucas/phpdotenv",
