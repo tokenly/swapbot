@@ -6325,34 +6325,42 @@ ul.striped-list li:nth-child(even) {
 .no {
   color: #d9534f;
 }
-ul.event-list {
+ul.bot-list {
   max-height: 420px;
   overflow-y: scroll;
 }
-ul.event-list li.event {
+ul.bot-list li.bot-list-entry {
   padding: 0px 6px 4px 6px;
   border-bottom: 1px dashed #e6e6e6;
 }
-ul.event-list li.event .labelWrapper {
+ul.bot-list li.bot-list-entry .labelWrapper {
   display: inline-block;
   min-width: 70px;
 }
-ul.event-list li.event .date {
+ul.bot-list li.bot-list-entry .date {
   display: inline-block;
-  min-width: 70px;
+  min-width: 82px;
   color: #bbb;
   font-size: 0.9rem;
   position: relative;
   top: 4px;
 }
-ul.event-list li.event .msg {
-  color: #333;
+ul.bot-list li.bot-list-entry .msg {
+  color: #555;
   font-size: 1.3rem;
   position: relative;
   top: 4px;
 }
-ul.event-list li:nth-child(even) {
+ul.bot-list li:nth-child(even) {
   background-color: #f6f6f6;
+}
+ul.bot-list .payment .amount {
+  color: #000;
+  font-size: 1.3rem;
+  position: relative;
+  top: 4px;
+  display: inline-block;
+  min-width: 120px;
 }
 .remove-link {
   margin-top: 29px;

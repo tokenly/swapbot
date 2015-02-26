@@ -17,6 +17,8 @@ class BotValidator {
     function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory) {
         $this->validator_factory     = $validator_factory;
         $this->swap_strategy_factory = $swap_strategy_factory;
+
+        $this->initValidatorRules();
     }
 
     protected $rules = [];
@@ -94,4 +96,7 @@ class BotValidator {
         }
     }
 
+    protected function initValidatorRules() {
+        // abstract method
+    }
 }

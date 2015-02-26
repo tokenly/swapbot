@@ -20,4 +20,8 @@ class APIModel extends Model
     protected $api_attributes = ['id'];
 
 
+    public function getAPIAttributes() {
+        return $this->api_attributes;
+    }
+
 }

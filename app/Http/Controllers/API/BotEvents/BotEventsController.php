@@ -3,13 +3,9 @@
 namespace Swapbot\Http\Controllers\API\BotEvents;
 
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Http\Exception\HttpResponseException;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Http\Controllers\API\Base\APIController;
 use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
-use Swapbot\Http\Requests;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotRepository;
 

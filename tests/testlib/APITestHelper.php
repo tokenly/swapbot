@@ -61,13 +61,13 @@ class APITestHelper  {
         return $this;
     }
 
-    public function testRequiresUser() {
+    public function testRequiresUser($url_extension=null) {
         $this->cleanup();
 
         // create a model
         $created_model = $this->newModel();
 
-        return $this->testURLCallRequiresUser($this->extendURL($this->url_base, '/'.$created_model['uuid']));
+        return $this->testURLCallRequiresUser($this->extendURL($this->url_base, $this->extendURL('/'.$created_model['uuid'], $url_extension)));
     }
 
     public function testURLCallRequiresUser($url) {
@@ -248,7 +248,7 @@ class APITestHelper  {
     
     
 
-    protected function newModel() {
+    public function newModel() {
         $model = call_user_func($this->create_model_fn, $this->getUser());
         if (!$model) { throw new Exception("Failed to create model", 1); }
         return $model;

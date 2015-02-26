@@ -40,11 +40,11 @@ do ()->
             m("h2", "Welcome, #{vm.user().name}"),
 
             m("div", {class: "spacer1"}),
-
+            
+            m("p", {class: ""}, "Here is a list of your Swapbots:"),
 
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-6 col-lg-4"}, [
-            
                     m("ul", {class: "list-unstyled striped-list bot-list"}, [
                         vm.bots().map((bot)->
                             return m("li", {}, [

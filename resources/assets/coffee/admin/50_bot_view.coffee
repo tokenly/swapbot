@@ -54,17 +54,6 @@ do ()->
         out.push(swap)
         return out
 
-    subscribeToPusherChannel = (channelName, callbackFn)->
-        client = new window.Faye.Client("#{window.PUSHER_URL}/public")
-        client.subscribe "/#{channelName}", (data)->
-            callbackFn(data)
-            return
-        return client
-
-    closePusherChannel = (client)->
-        client.disconnect()
-        return
-
 
 
     handleBotEventMessage = (data)->
@@ -83,6 +72,21 @@ do ()->
             # this is outside of mithril, so we must force a redraw
             m.redraw(true)
         return
+
+    curryHandleAccountUpdatesMessage = (id)->
+        return (data)->
+            updateBotAccountBalance(id)
+            return
+
+    updateBotAccountBalance = (id)->
+        sbAdmin.api.getBotPaymentBalance(id).then(
+            (apiResponse)->
+                vm.paymentBalance(apiResponse.balance)
+                return
+            , (errorResponse)->
+                vm.errorMessages(errorResponse.errors)
+                return
+        )
 
 
     buildMLevel = (levelNumber)->
@@ -116,6 +120,9 @@ do ()->
             ])
         else
             return m("div", {class: "form-group"}, "No Balances Found")
+
+
+
 
     # ################################################
 
@@ -162,9 +169,12 @@ do ()->
             vm.name = m.prop('')
             vm.description = m.prop('')
             vm.address = m.prop('')
-            vm.active = m.prop('')
+            vm.paymentAddress = m.prop('')
+            vm.paymentPlan = m.prop('')
+            vm.state = m.prop('')
             vm.swaps = m.prop(buildSwapsPropValue([]))
             vm.balances = m.prop(buildBalancesPropValue([]))
+            vm.paymentBalance = m.prop('')
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -176,7 +186,9 @@ do ()->
 
                     vm.name(botData.name)
                     vm.address(botData.address)
-                    vm.active(botData.active)
+                    vm.paymentAddress(botData.paymentAddress)
+                    vm.paymentPlan(botData.paymentPlan)
+                    vm.state(botData.state)
                     vm.description(botData.description)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
                     vm.balances(buildBalancesPropValue(botData.balances))
@@ -197,8 +209,12 @@ do ()->
                     return
             )
 
-            vm.pusherClient(subscribeToPusherChannel("swapbot_events_#{id}", handleBotEventMessage))
-            vm.pusherClient(subscribeToPusherChannel("swapbot_balances_#{id}", handleBotBalancesMessage))
+            # and get the bot balance
+            updateBotAccountBalance(id)
+
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_events_#{id}", handleBotEventMessage))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_balances_#{id}", handleBotBalancesMessage))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
             # console.log "vm.pusherClient=",vm.pusherClient()
 
             # and send a balance refresh on each reload
@@ -220,7 +236,7 @@ do ()->
         # bind unload event
         this.onunload = (e)->
             # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
-            closePusherChannel(vm.pusherClient())
+            sbAdmin.pusherutils.closePusherChannel(vm.pusherClient())
             return
 
         vm.init()
@@ -236,6 +252,12 @@ do ()->
 
                 m("div", {class: "spacer1"}),
 
+                m("div", {class: "bot-status"}, [
+                    sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), vm.paymentPlan(), vm.paymentAddress(), vm.address()))
+                ]),
+
+                m("div", {class: "spacer1"}),
+
                 m("div", {class: "bot-view"}, [
                     sbAdmin.form.mAlerts(vm.errorMessages),
 
@@ -248,10 +270,10 @@ do ()->
                                     sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
                                 ]),
                                 m("div", {class: "col-md-6"}, [
-                                    sbAdmin.form.mValueDisplay("Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
+                                    sbAdmin.form.mValueDisplay("Bot Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
                                 ]),
                                 m("div", {class: "col-md-3"}, [
-                                    sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, if vm.active() then m("span", {class: 'yes'}, "Active") else m("span", {class: 'no'}, "Inactive")),
+                                    sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, sbAdmin.stateutils.buildStateSpan(vm.state())),
                                 ]),
                             ]),
 
@@ -282,12 +304,12 @@ do ()->
                     m("div", {class: "bot-events"}, [
                         m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
                         m("h3", "Events"),
-                        m("ul", {class: "list-unstyled striped-list event-list"}, [
+                        m("ul", {class: "list-unstyled striped-list bot-list event-list"}, [
                             vm.botEvents().map (botEventObj)->
                                 if not vm.showDebug and botEventObj.level <= 100
                                     return
                                 dateObj = window.moment(botEventObj.createdAt)
-                                return m("li", {class: "event"}, [
+                                return m("li", {class: "bot-list-entry event"}, [
                                     m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
                                     m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
                                     m("span", {class: "msg"}, botEventObj.event?.msg),
@@ -303,11 +325,31 @@ do ()->
                     m("div", {class: "spacer1"}),
                     m("hr"),
 
+                    m("div", {class: "bot-payments"}, [
+                        m("h3", "Payment Status"),
+                        m("div", { class: "row"}, [
+                                m("div", {class: "col-md-4"}, [
+                                    sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())),
+                                ]),
+                                m("div", {class: "col-md-6"}, [
+                                    sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
+                                ]),
+                                m("div", {class: "col-md-2"}, [
+                                    sbAdmin.form.mValueDisplay("Account Balance", {id: 'value',  }, if vm.paymentBalance() == '' then '-' else vm.paymentBalance()+' BTC'),
+                                ]),
+                        ]),
+                    ]),
+
+                    m("a[href='/admin/payments/bot/#{vm.resourceId()}']", {class: "btn btn-info", config: m.route}, "View Payment Details"),
+
+                    m("div", {class: "spacer1"}),
+
+                    m("hr"),
+
                     m("div", {class: "spacer2"}),
 
                     m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
                     m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
-                    
 
                 ]),
 

@@ -34,7 +34,8 @@
     <script src="/bower_components/cryptojslib/rollups/hmac-sha256.js"></script>
     <script src="/bower_components/cryptojslib/components/enc-base64-min.js"></script>
     <script src="/bower_components/moment/min/moment.min.js"></script>
-
+    {{-- <script src="/bower_components/accounting.js/accounting.min.js"></script> --}}
+    <script src="/bower_components/numeral/min/numeral.min.js"></script>
     <!-- pusher -->
     <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>
     <script src="{{$pusherUrl}}/public/client.js"></script>

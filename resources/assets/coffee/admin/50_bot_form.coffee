@@ -95,13 +95,15 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
+            vm.paymentPlan = m.prop('')
             vm.returnFee = m.prop(0.0001)
             vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
             vm.blacklistAddresses = m.prop([m.prop('')])
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
-            if id != 'new'
+            vm.isNew = (id == 'new')
+            if !vm.isNew
                 # load the bot info from the api
                 sbAdmin.api.getBot(id).then(
                     (botData)->
@@ -109,6 +111,7 @@ do ()->
 
                         vm.name(botData.name)
                         vm.description(botData.description)
+                        vm.paymentPlan(botData.paymentPlan)
                         vm.swaps(buildSwapsPropValue(botData.swaps))
                         vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses))
                         vm.returnFee(botData.returnFee or 0.0001)
@@ -155,6 +158,7 @@ do ()->
                 attributes = {
                     name: vm.name()
                     description: vm.description()
+                    paymentPlan: vm.paymentPlan()
                     blacklistAddresses: vm.blacklistAddresses()
                     swaps: vm.swaps()
                     returnFee: vm.returnFee()
@@ -236,6 +240,17 @@ do ()->
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-5"}, [
                                 sbAdmin.form.mFormField("Return Transaction Fee", {id: 'name', 'placeholder': "0.0001", required: true, }, vm.returnFee),
+                            ]),
+                        ]),
+
+                        m("hr"),
+
+                        m("h4", "Payment"),
+                        # m("p", [m("small", "Choose a payment plan.")]),
+                        m("div", { class: "row"}, [
+                            m("div", {class: "col-md-12"}, [
+                                (if vm.isNew then sbAdmin.form.mFormField("Payment Plan", {id: "payment_plan", type: 'select', options: sbAdmin.planutils.allPlanOptions()}, vm.paymentPlan) else null),
+                                (if not vm.isNew then sbAdmin.form.mValueDisplay("Payment Plan", {id: 'payment_plan',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())) else null),
                             ]),
                         ]),
 

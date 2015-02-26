@@ -23,6 +23,14 @@ class BotValidatorTest extends TestCase {
                 'error' => 'The description field is required.',
             ],
             [
+                'vars' => array_replace_recursive($sample_vars, ['payment_plan' => '']),
+                'error' => 'The payment plan field is required.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['payment_plan' => 'badtype']),
+                'error' => 'The selected payment plan is invalid.',
+            ],
+            [
                 'vars' => array_merge($sample_vars, ['swaps' => []]),
                 'error' => 'at least one swap',
             ],

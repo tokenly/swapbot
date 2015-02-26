@@ -105,7 +105,8 @@ class ReceivePaymentProcessor {
 
             $amount = $tx_process['xchain_notification']['quantity'];
             $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
-            $this->dispatch(new ReceiveBotPayment($tx_process['bot'], $amount, $bot_event));
+            $is_credit = true;
+            $this->dispatch(new ReceiveBotPayment($tx_process['bot'], $amount, $is_credit, $bot_event));
 
             $tx_process['should_update_transaction'] = true;
         }

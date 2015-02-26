@@ -77,6 +77,12 @@
     api.getUser = function(id) {
       return api.send('GET', "users/" + id);
     };
+    api.getBotPaymentBalance = function(id) {
+      return api.send('GET', "payments/" + id + "/balance");
+    };
+    api.getAllBotPayments = function(id) {
+      return api.send('GET', "payments/" + id + "/all");
+    };
     api.send = function(method, apiPathSuffix, params, additionalOpts) {
       var k, opts, path, v;
       if (params == null) {
@@ -145,6 +151,25 @@
       };
     };
     return auth;
+  })();
+
+  sbAdmin.currencyutils = (function() {
+    var SATOSHI, currencyutils;
+    currencyutils = {};
+    SATOSHI = 100000000;
+    currencyutils.satoshisToValue = function(amount, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return currencyutils.formatValue(amount / SATOSHI, currencyPostfix);
+    };
+    currencyutils.formatValue = function(value, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
+    };
+    return currencyutils;
   })();
 
   sbAdmin.form = (function() {
@@ -389,6 +414,170 @@
       ]);
     };
     return nav;
+  })();
+
+  sbAdmin.planutils = (function() {
+    var planutils;
+    planutils = {};
+    planutils.paymentPlanDesc = function(planID) {
+      var _ref;
+      return ((_ref = planutils.planData(planID)) != null ? _ref.name : void 0) || 'unknown';
+    };
+    planutils.planData = function(planID) {
+      var plans;
+      plans = planutils.allPlansData();
+      if (plans[planID] != null) {
+        return plans[planID];
+      }
+      return null;
+    };
+    planutils.allPlansData = function() {
+      var initialFuel;
+      initialFuel = 0.005;
+      return {
+        txfee001: {
+          id: "txfee001",
+          name: "0.005 BTC creation fee + .001 BTC per TX",
+          creationFee: 0.005,
+          txFee: 0.001,
+          initialFuel: initialFuel
+        },
+        txfee002: {
+          id: "txfee002",
+          name: "0.05 BTC creation fee + .0005 BTC per TX",
+          creationFee: 0.05,
+          txFee: 0.0005,
+          initialFuel: initialFuel
+        },
+        txfee003: {
+          id: "txfee003",
+          name: "0.5 BTC creation fee + .0001 BTC per TX",
+          creationFee: 0.5,
+          txFee: 0.0001,
+          initialFuel: initialFuel
+        }
+      };
+    };
+    planutils.allPlanOptions = function() {
+      var k, opts, v;
+      opts = (function() {
+        var _ref, _results;
+        _ref = planutils.allPlansData();
+        _results = [];
+        for (k in _ref) {
+          v = _ref[k];
+          _results.push({
+            k: v.name,
+            v: v.id
+          });
+        }
+        return _results;
+      })();
+      return opts;
+    };
+    return planutils;
+  })();
+
+  sbAdmin.pusherutils = (function() {
+    var pusherutils;
+    pusherutils = {};
+    pusherutils.subscribeToPusherChannel = function(channelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
+      client.subscribe("/" + channelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    pusherutils.closePusherChannel = function(client) {
+      client.disconnect();
+    };
+    return pusherutils;
+  })();
+
+  sbAdmin.stateutils = (function() {
+    var stateutils;
+    stateutils = {};
+    stateutils.buildStateSpan = function(stateValue) {
+      switch (stateValue) {
+        case 'brandnew':
+          return m("span", {
+            "class": 'no'
+          }, stateutils.buildStateLabel(stateValue));
+        case 'lowfuel':
+          return m("span", {
+            "class": 'no'
+          }, stateutils.buildStateLabel(stateValue));
+        case 'active':
+          return m("span", {
+            "class": 'yes'
+          }, stateutils.buildStateLabel(stateValue));
+        default:
+          return m("span", {
+            "class": 'no'
+          }, stateutils.buildStateLabel(stateValue));
+      }
+    };
+    stateutils.buildStateLabel = function(stateValue) {
+      switch (stateValue) {
+        case 'brandnew':
+          return "Waiting for Payment";
+        case 'lowfuel':
+          return "Low Fuel";
+        case 'active':
+          return "Active";
+        default:
+          return "Inactive";
+      }
+    };
+    stateutils.buildStateDetails = function(stateValue, planName, paymentAddress, botAddress) {
+      var amount, details, planDetails;
+      details = {
+        label: '',
+        subtitle: '',
+        "class": ''
+      };
+      switch (stateValue) {
+        case 'brandnew':
+          planDetails = sbAdmin.planutils.planData(planName);
+          amount = planDetails.creationFee + planDetails.initialFuel;
+          details.label = stateutils.buildStateLabel(stateValue);
+          details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of " + (sbAdmin.currencyutils.formatValue(amount)) + " to " + paymentAddress + ".  This is a payment of " + planDetails.creationFee + " BTC for the creation of the bot and " + planDetails.initialFuel + " BTC as fuel to send transactions.";
+          details["class"] = "panel-warning inactive new";
+          break;
+        case 'lowfuel':
+          details.label = stateutils.buildStateLabel(stateValue);
+          details.subtitle = "This swapbot is low on BTC fuel.  Please send 0.005 BTC to " + paymentAddress + ".";
+          details["class"] = "panel-warning inactive lowfuel";
+          break;
+        case 'active':
+          details.label = stateutils.buildStateLabel(stateValue);
+          details.subtitle = "This swapbot is up and running.  All is well.";
+          details["class"] = "panel-success active";
+          break;
+        default:
+          details.label = stateutils.buildStateLabel(stateValue);
+          details.subtitle = "This swapbot is inactive.  Swaps are not being processed.";
+          details["class"] = "panel-danger inactive deactivated";
+      }
+      return details;
+    };
+    stateutils.buildStateDisplay = function(details) {
+      return m("div", {
+        "class": "panel " + details["class"]
+      }, [
+        m("div", {
+          "class": 'panel-heading'
+        }, [
+          m("h3", {
+            "class": 'panel-title'
+          }, details.label)
+        ]), m("div", {
+          "class": 'panel-body'
+        }, details.subtitle)
+      ]);
+    };
+    return stateutils;
   })();
 
   sbAdmin.swaputils = (function() {
@@ -637,15 +826,18 @@
         vm.resourceId = m.prop('');
         vm.name = m.prop('');
         vm.description = m.prop('');
+        vm.paymentPlan = m.prop('');
         vm.returnFee = m.prop(0.0001);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.blacklistAddresses = m.prop([m.prop('')]);
         id = m.route.param('id');
-        if (id !== 'new') {
+        vm.isNew = id === 'new';
+        if (!vm.isNew) {
           sbAdmin.api.getBot(id).then(function(botData) {
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
+            vm.paymentPlan(botData.paymentPlan);
             vm.swaps(buildSwapsPropValue(botData.swaps));
             vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses));
             vm.returnFee(botData.returnFee || 0.0001);
@@ -687,6 +879,7 @@
           attributes = {
             name: vm.name(),
             description: vm.description(),
+            paymentPlan: vm.paymentPlan(),
             blacklistAddresses: vm.blacklistAddresses(),
             swaps: vm.swaps(),
             returnFee: vm.returnFee()
@@ -797,6 +990,20 @@
                     required: true
                   }, vm.returnFee)
                 ])
+              ]), m("hr"), m("h4", "Payment"), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  (vm.isNew ? sbAdmin.form.mFormField("Payment Plan", {
+                    id: "payment_plan",
+                    type: 'select',
+                    options: sbAdmin.planutils.allPlanOptions()
+                  }, vm.paymentPlan) : null), (!vm.isNew ? sbAdmin.form.mValueDisplay("Payment Plan", {
+                    id: 'payment_plan'
+                  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())) : null)
+                ])
               ]), m("hr"), vm.swaps().map(function(swap, offset) {
                 return swapGroup(offset + 1, swap);
               }), m("div", {
@@ -826,7 +1033,146 @@
   })();
 
   (function() {
-    var buildBalancesMElement, buildMLevel, closePusherChannel, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, subscribeToPusherChannel, swapGroup, swapGroupRenderers, vm;
+    var buildPaymentTypeLabel, curryHandleAccountUpdatesMessage, updateAllAccountPayments, vm;
+    sbAdmin.ctrl.botPaymentsView = {};
+    curryHandleAccountUpdatesMessage = function(id) {
+      return function(data) {
+        updateAllAccountPayments(id);
+      };
+    };
+    updateAllAccountPayments = function(id) {
+      sbAdmin.api.getBotPaymentBalance(id).then(function(apiResponse) {
+        vm.paymentBalance(apiResponse.balance);
+      }, function(errorResponse) {
+        vm.errorMessages(errorResponse.errors);
+      });
+      sbAdmin.api.getAllBotPayments(id).then(function(apiResponse) {
+        apiResponse.reverse();
+        vm.payments(apiResponse);
+      }, function(errorResponse) {
+        vm.errorMessages(errorResponse.errors);
+      });
+    };
+    buildPaymentTypeLabel = function(isCredit) {
+      if (isCredit) {
+        return m('span', {
+          "class": "label label-success"
+        }, "Credit");
+      } else {
+        return m('span', {
+          "class": "label label-warning"
+        }, "Debit");
+      }
+    };
+    vm = sbAdmin.ctrl.botPaymentsView.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        var id;
+        vm.errorMessages = m.prop([]);
+        vm.resourceId = m.prop('');
+        vm.pusherClient = m.prop(null);
+        vm.name = m.prop('');
+        vm.address = m.prop('');
+        vm.paymentAddress = m.prop('');
+        vm.paymentPlan = m.prop('');
+        vm.state = m.prop('');
+        vm.paymentBalance = m.prop('');
+        vm.payments = m.prop([]);
+        id = m.route.param('id');
+        sbAdmin.api.getBot(id).then(function(botData) {
+          vm.resourceId(botData.id);
+          vm.name(botData.name);
+          vm.address(botData.address);
+          vm.paymentAddress(botData.paymentAddress);
+          vm.paymentPlan(botData.paymentPlan);
+          vm.state(botData.state);
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        updateAllAccountPayments(id);
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.botPaymentsView.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      this.onunload = function(e) {
+        sbAdmin.pusherutils.closePusherChannel(vm.pusherClient());
+      };
+      vm.init();
+    };
+    sbAdmin.ctrl.botPaymentsView.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("h2", "SwapBot " + (vm.name())), m("div", {
+          "class": "spacer1"
+        }), m("div", {
+          "class": "bot-payments-view"
+        }, [
+          sbAdmin.form.mAlerts(vm.errorMessages), m("h3", "Payment Status"), m("div", {
+            "class": "row"
+          }, [
+            m("div", {
+              "class": "col-md-4"
+            }, [
+              sbAdmin.form.mValueDisplay("Payment Plan", {
+                id: 'rate'
+              }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan()))
+            ]), m("div", {
+              "class": "col-md-6"
+            }, [
+              sbAdmin.form.mValueDisplay("Payment Address", {
+                id: 'paymentAddress'
+              }, vm.paymentAddress())
+            ]), m("div", {
+              "class": "col-md-2"
+            }, [
+              sbAdmin.form.mValueDisplay("Account Balance", {
+                id: 'value'
+              }, vm.paymentBalance() === '' ? '-' : sbAdmin.currencyutils.formatValue(vm.paymentBalance(), 'BTC'))
+            ])
+          ]), m("div", {
+            "class": "bot-payments"
+          }, [
+            m("small", {
+              "class": "pull-right"
+            }, "newest first"), m("h3", "Payment History"), m("ul", {
+              "class": "list-unstyled striped-list bot-list payment-list"
+            }, [
+              vm.payments().map(function(botPaymentObj) {
+                var dateObj;
+                dateObj = window.moment(botPaymentObj.createdAt);
+                return m("li", {
+                  "class": "bot-list-entry payment"
+                }, [
+                  m("div", {
+                    "class": "labelWrapper"
+                  }, buildPaymentTypeLabel(botPaymentObj.isCredit)), m("span", {
+                    "class": "date",
+                    title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
+                  }, dateObj.format('MMM D h:mm a')), m("span", {
+                    "class": "amount"
+                  }, sbAdmin.currencyutils.satoshisToValue(botPaymentObj.amount)), m("span", {
+                    "class": "msg"
+                  }, botPaymentObj.msg)
+                ]);
+              })
+            ])
+          ]), m("div", {
+            "class": "spacer2"
+          }), m("a[href='/admin/view/bot/" + (vm.resourceId()) + "']", {
+            "class": "btn btn-default",
+            config: m.route
+          }, "Return to Bot View")
+        ])
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+    return sbAdmin.ctrl.botPaymentsView.UnloadEvent;
+  })();
+
+  (function() {
+    var buildBalancesMElement, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
     sbAdmin.ctrl.botView = {};
     swapGroupRenderers = {};
     swapGroupRenderers.rate = function(number, swap) {
@@ -917,17 +1263,6 @@
       out.push(swap);
       return out;
     };
-    subscribeToPusherChannel = function(channelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + channelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
-    };
-    closePusherChannel = function(client) {
-      client.disconnect();
-    };
     handleBotEventMessage = function(data) {
       var _ref;
       if (data != null ? (_ref = data.event) != null ? _ref.msg : void 0 : void 0) {
@@ -940,6 +1275,18 @@
         vm.updateBalances(data);
         m.redraw(true);
       }
+    };
+    curryHandleAccountUpdatesMessage = function(id) {
+      return function(data) {
+        updateBotAccountBalance(id);
+      };
+    };
+    updateBotAccountBalance = function(id) {
+      return sbAdmin.api.getBotPaymentBalance(id).then(function(apiResponse) {
+        vm.paymentBalance(apiResponse.balance);
+      }, function(errorResponse) {
+        vm.errorMessages(errorResponse.errors);
+      });
     };
     buildMLevel = function(levelNumber) {
       switch (levelNumber) {
@@ -1051,15 +1398,20 @@
         vm.name = m.prop('');
         vm.description = m.prop('');
         vm.address = m.prop('');
-        vm.active = m.prop('');
+        vm.paymentAddress = m.prop('');
+        vm.paymentPlan = m.prop('');
+        vm.state = m.prop('');
         vm.swaps = m.prop(buildSwapsPropValue([]));
         vm.balances = m.prop(buildBalancesPropValue([]));
+        vm.paymentBalance = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           vm.resourceId(botData.id);
           vm.name(botData.name);
           vm.address(botData.address);
-          vm.active(botData.active);
+          vm.paymentAddress(botData.paymentAddress);
+          vm.paymentPlan(botData.paymentPlan);
+          vm.state(botData.state);
           vm.description(botData.description);
           vm.swaps(buildSwapsPropValue(botData.swaps));
           vm.balances(buildBalancesPropValue(botData.balances));
@@ -1071,8 +1423,10 @@
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
-        vm.pusherClient(subscribeToPusherChannel("swapbot_events_" + id, handleBotEventMessage));
-        vm.pusherClient(subscribeToPusherChannel("swapbot_balances_" + id, handleBotBalancesMessage));
+        updateBotAccountBalance(id);
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_events_" + id, handleBotEventMessage));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_balances_" + id, handleBotBalancesMessage));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
         sbAdmin.api.refreshBalances(id).then(function(apiResponse) {}, function(errorResponse) {
           console.log("ERROR: " + errorResponse.msg);
         });
@@ -1082,7 +1436,7 @@
     sbAdmin.ctrl.botView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        closePusherChannel(vm.pusherClient());
+        sbAdmin.pusherutils.closePusherChannel(vm.pusherClient());
       };
       vm.init();
     };
@@ -1090,6 +1444,10 @@
       var mEl;
       mEl = m("div", [
         m("h2", "SwapBot " + (vm.name())), m("div", {
+          "class": "spacer1"
+        }), m("div", {
+          "class": "bot-status"
+        }, [sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), vm.paymentPlan(), vm.paymentAddress(), vm.address()))]), m("div", {
           "class": "spacer1"
         }), m("div", {
           "class": "bot-view"
@@ -1112,7 +1470,7 @@
                 ]), m("div", {
                   "class": "col-md-6"
                 }, [
-                  sbAdmin.form.mValueDisplay("Address", {
+                  sbAdmin.form.mValueDisplay("Bot Address", {
                     id: 'address'
                   }, vm.address() ? vm.address() : m("span", {
                     "class": 'no'
@@ -1122,11 +1480,7 @@
                 }, [
                   sbAdmin.form.mValueDisplay("Status", {
                     id: 'status'
-                  }, vm.active() ? m("span", {
-                    "class": 'yes'
-                  }, "Active") : m("span", {
-                    "class": 'no'
-                  }, "Inactive"))
+                  }, sbAdmin.stateutils.buildStateSpan(vm.state()))
                 ])
               ]), m("div", {
                 "class": "row"
@@ -1166,7 +1520,7 @@
                 "class": "rect5"
               })
             ]), m("h3", "Events"), m("ul", {
-              "class": "list-unstyled striped-list event-list"
+              "class": "list-unstyled striped-list bot-list event-list"
             }, [
               vm.botEvents().map(function(botEventObj) {
                 var dateObj, _ref;
@@ -1175,7 +1529,7 @@
                 }
                 dateObj = window.moment(botEventObj.createdAt);
                 return m("li", {
-                  "class": "event"
+                  "class": "bot-list-entry event"
                 }, [
                   m("div", {
                     "class": "labelWrapper"
@@ -1199,6 +1553,37 @@
               }, [vm.showDebug ? "Hide Debug" : "Show Debug"])
             ])
           ]), m("div", {
+            "class": "spacer1"
+          }), m("hr"), m("div", {
+            "class": "bot-payments"
+          }, [
+            m("h3", "Payment Status"), m("div", {
+              "class": "row"
+            }, [
+              m("div", {
+                "class": "col-md-4"
+              }, [
+                sbAdmin.form.mValueDisplay("Payment Plan", {
+                  id: 'rate'
+                }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan()))
+              ]), m("div", {
+                "class": "col-md-6"
+              }, [
+                sbAdmin.form.mValueDisplay("Payment Address", {
+                  id: 'paymentAddress'
+                }, vm.paymentAddress())
+              ]), m("div", {
+                "class": "col-md-2"
+              }, [
+                sbAdmin.form.mValueDisplay("Account Balance", {
+                  id: 'value'
+                }, vm.paymentBalance() === '' ? '-' : vm.paymentBalance() + ' BTC')
+              ])
+            ])
+          ]), m("a[href='/admin/payments/bot/" + (vm.resourceId()) + "']", {
+            "class": "btn btn-info",
+            config: m.route
+          }, "View Payment Details"), m("div", {
             "class": "spacer1"
           }), m("hr"), m("div", {
             "class": "spacer2"
@@ -1244,7 +1629,9 @@
       mEl = m("div", [
         m("h2", "Welcome, " + (vm.user().name)), m("div", {
           "class": "spacer1"
-        }), m("div", {
+        }), m("p", {
+          "class": ""
+        }, "Here is a list of your Swapbots:"), m("div", {
           "class": "row"
         }, [
           m("div", {
@@ -1615,6 +2002,7 @@
     "/admin/dashboard": sbAdmin.ctrl.dashboard,
     "/admin/edit/bot/:id": sbAdmin.ctrl.botForm,
     "/admin/view/bot/:id": sbAdmin.ctrl.botView,
+    "/admin/payments/bot/:id": sbAdmin.ctrl.botPaymentsView,
     "/admin/users": sbAdmin.ctrl.usersView,
     "/admin/edit/user/:id": sbAdmin.ctrl.userForm
   });

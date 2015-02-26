@@ -3,6 +3,8 @@
 namespace Swapbot\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\BotLedgerEntry;
@@ -25,6 +27,24 @@ class BotLedgerEntryRepository extends APIRepository
 
     public function findByBotId($bot_id) {
         return $this->prototype_model->where('bot_id', $bot_id)->orderBy('id')->get();
+    }
+
+    public function findByBotWithBotEventEntries(Bot $bot) {
+        $bot_id = $bot['id'];
+
+        // $sql = DB::table('bot_ledger_entries')
+        //     ->join('bot_events', 'bot_events.id', '=', 'bot_ledger_entries.bot_event_id')
+        //     ->where('bot_ledger_entries.bot_id', $bot_id)
+        //     ->orderBy('bot_ledger_entries.id')
+        //     ->toSql();
+        //     Log::debug($sql);
+
+
+        return DB::table('bot_ledger_entries')
+            ->join('bot_events', 'bot_events.id', '=', 'bot_ledger_entries.bot_event_id')
+            ->where('bot_ledger_entries.bot_id', $bot_id)
+            ->orderBy('bot_ledger_entries.id')
+            ->get(['bot_ledger_entries.*', 'bot_events.event']);
     }
 
     public function addCredit(Bot $bot, $float_amount, BotEvent $bot_event) {

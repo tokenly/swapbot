@@ -11,7 +11,7 @@ class BotRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
 
         $helper->testLoad();
-        $helper->cleanup()->testUpdate(['name' => 'foo']);
+        $helper->cleanup()->testUpdate(['name' => 'foo',]);
         $helper->cleanup()->testDelete();
         $helper->cleanup()->testFindAll();
     }

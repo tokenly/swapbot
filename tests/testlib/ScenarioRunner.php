@@ -474,7 +474,6 @@ class ScenarioRunner
         ///////////////////
         // NOT REQUIRED
         $optional_fields = [];
-        // ['id','state','swaps','uuid','user_id','balances','balances_updated_at','blacklist_addresses','status_details','created_at','updated_at',]
         $optional_fields = array_merge(array_keys(app('BotHelper')->sampleBotVars()), ['id','uuid','user_id','created_at','updated_at',]);
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_model[$field])) { $normalized_expected_bot_model[$field] = $expected_bot_model[$field]; }

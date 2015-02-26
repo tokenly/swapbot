@@ -37,5 +37,10 @@ $router->get('api/v1/botevents/{botuuid}', 'API\BotEvents\BotEventsController@in
 // User API
 $router->resource('api/v1/users', 'API\User\UserController', ['except' => ['create','edit']]);
 
+// Payments API
+$router->get('api/v1/payments/{botuuid}/all', 'API\Payments\PaymentsController@index');
+$router->get('api/v1/payments/{botuuid}/balance', 'API\Payments\PaymentsController@balance');
+
+
 // webhook notifications
 Route::post('/_xchain_client_receive', 'WebhookController@receive');

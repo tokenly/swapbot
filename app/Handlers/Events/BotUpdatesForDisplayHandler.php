@@ -2,6 +2,7 @@
 
 namespace Swapbot\Handlers\Events;
 
+use Illuminate\Support\Facades\Log;
 use Swapbot\Events\Event;
 use Tokenly\PusherClient\Client;
 
@@ -27,6 +28,13 @@ class BotUpdatesForDisplayHandler {
         $this->pusher_client->send('/swapbot_balances_'.$bot['uuid'], $balances);
     }
 
+    public function sendAccountUpdatedToPusher(Event $event) {
+        $bot   = $event->bot;
+
+        Log::debug("sending to ".'/swapbot_account_updates_'.$bot['uuid']);
+        $this->pusher_client->send('/swapbot_account_updates_'.$bot['uuid'], ['accountUpdated' => true]);
+    }
+
 
     /**
      * Register the listeners for the subscriber.
@@ -38,6 +46,7 @@ class BotUpdatesForDisplayHandler {
     {
         $events->listen('Swapbot\Events\BotEventCreated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBotEventToPusher');
         $events->listen('Swapbot\Events\BotBalancesUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBalanceUpdateToPusher');
+        $events->listen('Swapbot\Events\BotPaymentReceived', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
     }
 
 

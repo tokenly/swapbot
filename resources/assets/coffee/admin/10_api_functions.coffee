@@ -83,6 +83,12 @@ sbAdmin.api = do ()->
         return api.send('GET', "users/#{id}")
 
 
+    api.getBotPaymentBalance = (id)->
+        return api.send('GET', "payments/#{id}/balance")
+
+    api.getAllBotPayments = (id)->
+        return api.send('GET', "payments/#{id}/all")
+
 
     api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
         path = '/api/v1/'+apiPathSuffix

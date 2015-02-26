@@ -57,11 +57,11 @@ ul.striped-list {
     color: @brand-danger;
 }
 
-ul.event-list {
+ul.bot-list {
     max-height: 420px;
     overflow-y: scroll;
 
-    li.event {
+    li.bot-list-entry {
         padding: 0px 6px 4px 6px;
         border-bottom: 1px dashed #e6e6e6;
 
@@ -74,7 +74,7 @@ ul.event-list {
 
         .date {
             display: inline-block;
-            min-width: 70px;
+            min-width: 82px;
             color: #bbb;
             font-size: 0.9rem;
 
@@ -83,7 +83,7 @@ ul.event-list {
         }
 
         .msg {
-            color: #333;
+            color: #555;
 
             font-size: 1.3rem;
             position: relative;
@@ -92,6 +92,19 @@ ul.event-list {
     }
     li:nth-child(even) {
         background-color: #f6f6f6;
+    }
+}
+
+ul.bot-list .payment {
+    .amount {
+        color: #000;
+
+        font-size: 1.3rem;
+        position: relative;
+        top: 4px;
+
+        display: inline-block;
+        min-width: 120px;
     }
 }
 

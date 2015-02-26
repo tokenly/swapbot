@@ -24,6 +24,7 @@ m.route(
         "/admin/dashboard" : sbAdmin.ctrl.dashboard,
         "/admin/edit/bot/:id"   : sbAdmin.ctrl.botForm,
         "/admin/view/bot/:id"   : sbAdmin.ctrl.botView,
+        "/admin/payments/bot/:id"   : sbAdmin.ctrl.botPaymentsView,
         "/admin/users" : sbAdmin.ctrl.usersView,
         "/admin/edit/user/:id"   : sbAdmin.ctrl.userForm,
     }

@@ -22,21 +22,27 @@ class CreateBotsTable extends Migration {
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
 
+            ////////////////////////////////////
             // public address
-            $table->string('address', 35)->unique()->nullable();
 
+            $table->string('address', 35)->unique()->nullable();
             $table->string('public_address_id', 36)->unique()->nullable();
             $table->string('public_receive_monitor_id', 36)->unique()->nullable();
             $table->string('public_send_monitor_id', 36)->unique()->nullable();
 
 
-            // payment address
-            $table->string('payment_address', 35)->unique()->nullable();
+            ////////////////////////////////////
+            // payment
 
+            $table->string('payment_plan')->nullable();
+            $table->string('payment_address', 35)->unique()->nullable();
             $table->string('payment_address_id', 36)->unique()->nullable();
             $table->string('payment_receive_monitor_id', 36)->unique()->nullable();
             $table->string('payment_send_monitor_id', 36)->unique()->nullable();
 
+
+            ////////////////////////////////////
+            // balances
 
             $table->text('balances')->nullable();
             $table->timestamp('balances_updated_at')->nullable();
@@ -45,12 +51,10 @@ class CreateBotsTable extends Migration {
 
             $table->bigInteger('return_fee')->unsigned()->default(10000);  // 0.0001
 
+
             $table->string('state');
-
             $table->boolean('active')->default(0);
-
             $table->text('status_details')->nullable();
-
 
 			$table->timestamps();
 		});
