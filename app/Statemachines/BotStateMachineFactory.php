@@ -3,50 +3,26 @@
 namespace Swapbot\Statemachines;
 
 use Exception;
-use Illuminate\Support\Facades\Log;
-use MetaborStd\Event\EventInterface;
-use Metabor\Statemachine\Process;
-use Metabor\Statemachine\Statemachine;
 use Metabor\Statemachine\Transition;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStateEvent;
-use Swapbot\Repositories\BotRepository;
 use Swapbot\Statemachines\BotCommand\CreationFeePaid;
 use Swapbot\Statemachines\BotCommand\Fueled;
+use Swapbot\Statemachines\StateMachineFactory;
 
 /*
 * BotStateMachineFactory
 */
-class BotStateMachineFactory {
+class BotStateMachineFactory extends StateMachineFactory {
 
-    public function __construct(BotRepository $bot_repository) {
-        $this->bot_repository = $bot_repository;
+    public function __construct() {
     }
 
     public function buildStateMachineFromBot(Bot $bot) {
-        // build a statemachine
-        $state_machine = new Statemachine($bot, $this->buildStateMachineProcess($bot['state']));
-
-        return $state_machine;
-
+        return $this->buildStateMachineFromModel($bot);
     }
 
-    public function buildStateMachineProcess($initial_state_name, $process_name='Swapbot State Machine') {
-        // build the statues
-        $states = $this->buildStates();
-
-        // build transitions
-        $this->addTransitionsToStates($states);
-
-        // get the initial state
-        if (!isset($states[$initial_state_name])) { throw new Exception("No such state: $initial_state_name", 1); }
-
-        // build a process that handles transitions
-        $process = new Process($process_name, $states[$initial_state_name]);
-
-        return $process;
-    }
 
     public function buildStates() {
         // build states

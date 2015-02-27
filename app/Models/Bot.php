@@ -55,6 +55,14 @@ class Bot extends APIModel {
         return 0.001;
     }
 
+    public function getBalance($asset) {
+        $balances = $this['balances'];
+        if (isset($balances[$asset])) {
+            return $balances[$asset];
+        }
+        return 0;
+    }
+
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 

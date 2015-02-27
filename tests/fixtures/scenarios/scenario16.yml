@@ -21,14 +21,16 @@ expectedXChainCalls:
     meta: { baseFilename: send_BTC.yml }
     data:
       fee: 0.00005
-  - 
-    meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - 
     meta: { baseFilename: swap.found.yml }
   - 
     meta: { baseFilename: swap.sent.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
   - 
     # pay a transaction fee
     meta: { baseFilename: fee.transaction.yml }

@@ -17,6 +17,10 @@ payment_send_monitor_id: PAYMENT_SEND_MONITOR_ID_01
 
 return_fee: 0.0001
 
+balances:
+    LTBCOIN: 50000
+    EARLY: 10
+
 swaps:
   -
     strategy: fixed

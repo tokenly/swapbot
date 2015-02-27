@@ -12,7 +12,6 @@ class SwapHelper  {
 
     public function sampleSwapVars() {
         return [
-            'processed'  => false,
             'state'      => 'brandnew',
             'name'       => 'SOUP:BTC',
 

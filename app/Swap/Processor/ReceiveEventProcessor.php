@@ -57,7 +57,7 @@ class ReceiveEventProcessor {
         $tx_process = DB::transaction(function() use ($xchain_notification, $bot) {
 
             // load or create a new transaction from the database
-            $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
+            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
             // initialize a DTO (data transfer object) to hold all the variables
@@ -98,16 +98,13 @@ class ReceiveEventProcessor {
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
 
-            // if the transaction was not handled, then log that as an event
-            $this->handleNoNotification($tx_process);
-
             return $tx_process;
         });
 
-        // bot balance update must be done outside of the transaction
-        if ($tx_process['should_update_bot_balance']) {
-            $this->updateBotBalance($tx_process['bot']);
-        }
+        // // bot balance update must be done outside of the transaction
+        // if ($tx_process['should_update_bot_balance']) {
+        //     $this->updateBotBalance($tx_process['bot']);
+        // }
     }
 
     public function handlePaymentAddressReceive($xchain_notification, $bot) {
@@ -127,27 +124,31 @@ class ReceiveEventProcessor {
     ////////////////////////////////////////////////////////////////////////
     // balance
     
-    protected function updateBotBalance($bot) {
-        try {
-            $this->dispatch(new UpdateBotBalances($bot));
-        } catch (Exception $e) {
-            // log any failure
-            EventLog::logError('balanceupdate.failed', $e);
-            $this->bot_event_logger->logBalanceUpdateFailed($bot, $e);
-        }
-    }
+    // protected function updateBotBalance($bot) {
+    //     try {
+    //         $this->dispatch(new UpdateBotBalances($bot));
+    //     } catch (Exception $e) {
+    //         // log any failure
+    //         EventLog::logError('balanceupdate.failed', $e);
+    //         $this->bot_event_logger->logBalanceUpdateFailed($bot, $e);
+    //     }
+    // }
 
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
     // Transaction
     
-    protected function findOrCreateTransaction($txid, $bot_id) {
-        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($txid, $bot_id);
+    protected function findOrCreateTransaction($xchain_notification, $bot_id) {
+        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($xchain_notification['txid'], $bot_id);
         if ($transaction_model) { return $transaction_model; }
 
         // create a new transaction
-        return $this->transaction_repository->create(['bot_id' => $bot_id, 'txid' => $txid]);
+        return $this->transaction_repository->create([
+            'txid'                => $xchain_notification['txid'],
+            'bot_id'              => $bot_id,
+            'xchain_notification' => $xchain_notification,
+        ]);
     }
 
 
@@ -262,12 +263,14 @@ class ReceiveEventProcessor {
             $was_processed = false;
             $was_sent      = false;
 
-            // process it
-            $swap = $this->swap_processor->processSwapConfig($swap_config, $tx_process);
-            if ($swap) {
-                $any_swap_processed = true;
-                $was_processed = true;
-                $was_sent = $swap->wasSent();
+            // only process if the incoming asset matches the swap config
+            if ($tx_process['xchain_notification']['asset'] == $swap_config['in']) {
+                $swap = $this->swap_processor->processSwapConfig($swap_config, $tx_process['bot']['id'], $tx_process['transaction']['id']);
+                if ($swap) {
+                    $any_swap_processed = true;
+                    $was_processed = true;
+                    $was_sent = $swap->wasSent();
+                }
             }
 
             if (!$was_sent AND $was_processed) {
@@ -289,6 +292,8 @@ class ReceiveEventProcessor {
             // mark this transaction as processed (completed)
             $tx_process['transaction_update_vars']['processed']     = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
+
+            $tx_process['any_notification_given'] = true;
         } else if (!$any_swap_processed) {
             // we received an asset, but no swap was processed
             $this->bot_event_logger->logUnknownReceiveTransaction($bot, $tx_process['xchain_notification']);
@@ -311,14 +316,6 @@ class ReceiveEventProcessor {
             // if (!$tx_process['any_processing_errors']) { $update_vars['processed'] = true; }
 
             $this->transaction_repository->update($tx_process['transaction'], $update_vars);
-        }
-    }
-
-    protected function handleNoNotification($tx_process) {
-        if (!$tx_process['any_notification_given']) {
-            // no feedback was given to the user
-            //   this should never happen
-            $this->bot_event_logger->logUnhandledTransaction($tx_process['bot'], $tx_process['xchain_notification']);
         }
     }
 

@@ -17,6 +17,7 @@ class CreateTransactionsTable extends Migration {
             $table->increments('id');
 
             $table->char('txid', 64)->index();
+            $table->longText('xchain_notification')->nullable();
 
             $table->integer('confirmations')->unsigned()->default(0);
             $table->boolean('processed')->default(false);

@@ -205,7 +205,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['txid','file','line','transactionId',];
+        $optional_fields = ['txid','file','line','transactionId','swapId',];
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_event[$field])) { $normalized_expected_bot_event[$field] = $expected_bot_event[$field]; }
                 else if (isset($actual_bot_event[$field])) { $normalized_expected_bot_event[$field] = $actual_bot_event[$field]; }
@@ -360,7 +360,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['id','bot_id','billed_event_id','updated_at','created_at',];
+        $optional_fields = ['id','bot_id','billed_event_id','xchain_notification','updated_at','created_at',];
         foreach ($optional_fields as $field) {
             if (isset($expected_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $expected_transaction_model[$field]; }
                 else if (isset($actual_transaction_model[$field])) { $normalized_expected_transaction_model[$field] = $actual_transaction_model[$field]; }
@@ -526,6 +526,7 @@ class ScenarioRunner
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_model[$field])) { $normalized_expected_bot_model[$field] = $expected_bot_model[$field]; }
                 else if (isset($actual_bot_model[$field])) { $normalized_expected_bot_model[$field] = $actual_bot_model[$field]; }
+                else { $normalized_expected_bot_model[$field] = null; }
         }
         ///////////////////
 

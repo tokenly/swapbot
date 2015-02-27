@@ -19,10 +19,10 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_EARLY.yml }
-  - 
-    meta: { baseFilename: get_balances.yml }
 
 expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - 
     meta: { baseFilename: swap.found.yml }
     msg: Received 12345 LTBCOIN from SENDER01 with 1 confirmation. Will vend 1 EARLY to SENDER01.
@@ -37,6 +37,8 @@ expectedBotEvents:
     inAsset: LTBCOIN
     outQty: 1
     outAsset: EARLY
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
   - 
     # pay a transaction fee
     meta: { baseFilename: fee.transaction.yml }

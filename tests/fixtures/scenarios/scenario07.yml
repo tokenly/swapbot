@@ -21,6 +21,10 @@ bots:
         out: BTC
         strategy: rate
         rate: 0.000001
+    balances:
+        LTBCOIN: 1000000
+        BTC: 1
+        SOUP: 5000
 
 
 ############################
@@ -48,11 +52,11 @@ expectedXChainCalls:
     data:
         quantity: 5000
         asset: SOUP
-  - 
-    meta: { baseFilename: get_balances.yml }
 
 
 expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - 
     meta: { baseFilename: swap.found.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 1000 LTBCOIN to SENDER01.
@@ -67,6 +71,11 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 1000
     outAsset: LTBCOIN
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - 
     meta: { baseFilename: swap.found.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.
@@ -78,8 +87,8 @@ expectedBotEvents:
   - 
     meta: { baseFilename: swap.failed.yml }
 
-  - 
-    meta: { baseFilename: balanceupdate.failed.yml }
+  # - 
+  #   meta: { baseFilename: balanceupdate.failed.yml }
 
   - 
     meta: { baseFilename: swap.processed.previous.yml }
@@ -102,6 +111,9 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
+
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
 
   - 
     # pay a transaction fee

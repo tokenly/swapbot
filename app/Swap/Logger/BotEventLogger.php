@@ -9,16 +9,19 @@ use Swapbot\Events\BotEventCreated;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Models\Swap;
 use Swapbot\Repositories\BotEventRepository;
+use Swapbot\Repositories\BotRepository;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class BotEventLogger {
 
     /**
      */
-    public function __construct(BotEventRepository $bot_event_repository)
+    public function __construct(BotEventRepository $bot_event_repository, BotRepository $bot_repository)
     {
         $this->bot_event_repository = $bot_event_repository;
+        $this->bot_repository       = $bot_repository;
     }
 
     public function logSendAttempt(Bot $bot, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
@@ -200,12 +203,12 @@ class BotEventLogger {
         ]);
     }
 
-    public function logUnhandledTransaction(Bot $bot, $xchain_notification) {
-        return $this->logToBotEvents($bot, 'tx.unhandled', BotEvent::LEVEL_WARNING, [
-            'msg'           => "Transaction ID {$xchain_notification['txid']} was not handled by this swapbot.",
-            'txid'          => $xchain_notification['txid'],
-        ]);
-    }
+    // public function logUnhandledTransaction(Bot $bot, $xchain_notification) {
+    //     return $this->logToBotEvents($bot, 'tx.unhandled', BotEvent::LEVEL_WARNING, [
+    //         'msg'           => "Transaction ID {$xchain_notification['txid']} was not handled by this swapbot.",
+    //         'txid'          => $xchain_notification['txid'],
+    //     ]);
+    // }
 
     public function logSwapFailed(Bot $bot, $xchain_notification, $e) {
         return $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
@@ -272,6 +275,28 @@ class BotEventLogger {
 
     }
 
+
+    ////////////////////////////////////////////////////////////////////////
+    // swap
+
+    public function logSwapStateChange(Swap $swap, $new_state) {
+        $bot = $this->bot_repository->findByID($swap['bot_id']);
+
+        return $this->logToBotEvents($bot, 'swap.stateChange', BotEvent::LEVEL_DEBUG, [
+            'msg'    => "Swap entered state {$new_state}",
+            'swapId' => $swap['id'],
+            'state'  => $new_state,
+        ]);
+
+    }
+
+    public function logSwapNotReady(Bot $bot, $transaction_id, $name, $swap_id) {
+        return $this->logToBotEvents($bot, 'swap.notReady', BotEvent::LEVEL_WARNING, [
+            'msg'           => "The swap {$name} could not be processed because it was not ready.",
+            'swapId'        => $swap_id,
+            'transactionId' => $transaction_id,
+        ]);
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // payments

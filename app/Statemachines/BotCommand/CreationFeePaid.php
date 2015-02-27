@@ -32,9 +32,6 @@ class CreationFeePaid extends BotCommand {
             // update the bot state in the database
             $this->updateBotState($bot, BotState::LOW_FUEL);
         });
-
-        // reconcile the state again
-        $this->dispatch(new ReconcileBotState($bot));
     }
 
     /**

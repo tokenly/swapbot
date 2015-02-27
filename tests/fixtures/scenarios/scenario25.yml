@@ -1,0 +1,39 @@
+# swap is moved to outofstock state if token is not available to vend
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    balances:
+        LTBCOIN: 0
+        BTC: 0
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls: []
+
+expectedBotEvents:
+  - 
+    meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - 
+    meta: { baseFilename: swap.notReady.yml }
+
+expectedBotLedgerEntries: []
+
+expectedBotModels:
+  - 
+    # bot should be in state outofstock
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+    state: outofstock
+    receipt: ~

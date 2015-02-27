@@ -12,7 +12,7 @@ class SwapRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
 
         $helper->testLoad();
-        $helper->cleanup()->testUpdate(['processed' => true, 'state' => 'partying']);
+        $helper->cleanup()->testUpdate(['receipt' => 'foo', 'state' => 'partying']);
         $helper->cleanup()->testDelete();
         $helper->cleanup()->testFindAll();
     }

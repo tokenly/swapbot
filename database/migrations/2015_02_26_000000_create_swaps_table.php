@@ -26,8 +26,9 @@ class CreateSwapsTable extends Migration {
             $table->foreign('transaction_id')->references('id')->on('transactions');
 
             $table->string('state');
-            $table->boolean('processed')->default(false);
             $table->mediumText('definition')->nullable();
+
+            // $table->bigInteger('in_qty')->unsigned()->default(0);
 
             $table->mediumText('receipt')->nullable();
 

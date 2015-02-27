@@ -9,8 +9,8 @@ use Swapbot\Swap\Strategies\StrategyHelpers;
 
 class RateStrategy implements Strategy {
 
-    public function buildSwapOutputQuantityAndAsset($swap, $xchain_notification) {
-        $quantity = $xchain_notification['quantity'] * $swap['rate'];
+    public function buildSwapOutputQuantityAndAsset($swap, $in_quantity) {
+        $quantity = $in_quantity * $swap['rate'];
         $asset = $swap['out'];
 
         return [$quantity, $asset];

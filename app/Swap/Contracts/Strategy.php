@@ -7,7 +7,7 @@ use Swapbot\Models\Data\SwapConfig;
 
 interface Strategy {
 
-    public function buildSwapOutputQuantityAndAsset($swap, $xchain_notification);
+    public function buildSwapOutputQuantityAndAsset($swap, $in_quantity);
 
     public function unSerializeDataToSwap($data, SwapConfig $swap);
     public function serializeSwap(SwapConfig $swap);

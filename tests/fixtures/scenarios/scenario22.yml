@@ -6,6 +6,10 @@
 bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
+    balances:
+        LTBCOIN: 0
+        BTC: 0
+
 
 
 ############################
@@ -31,8 +35,6 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
-  - 
-    meta: { baseFilename: get_balances.yml }
 
 
 expectedBotEvents:

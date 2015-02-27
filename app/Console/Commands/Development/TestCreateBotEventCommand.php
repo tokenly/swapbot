@@ -71,7 +71,7 @@ EOF
 
         $this->info("Creating event for bot ".$bot['name']." ({$bot['uuid']})");
         $level = $this->input->getOption('level');
-        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot, $level, $event);
+        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot['id'], $level, $event);
         $this->info("done");
     }
 

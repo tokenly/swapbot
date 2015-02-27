@@ -5,6 +5,9 @@
 bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
+    balances:
+        LTBCOIN: 0
+        BTC: 0
 
 
 ############################

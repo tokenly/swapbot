@@ -36,6 +36,8 @@ expectedBotEvents:
     meta: { baseFilename: payment.creationFeePaid.yml }
   - 
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - 
+    meta: { baseFilename: bot.stateChange-active.yml }
 
 
 expectedBotLedgerEntries:

@@ -39,26 +39,29 @@ class ReconcileBotStateHandler {
         $bot = $command->bot;
 
         DB::transaction(function () use ($bot) {
-            switch ($bot['state']) {
-                case BotState::BRAND_NEW:
-                    if ($this->paymentAddressHasEnoughForCreationFee($bot)) {
-                        // update the state
-                        $bot->stateMachine()->triggerEvent(BotStateEvent::CREATION_FEE_PAID);
-                    }
-                    break;
-                
-                case BotState::LOW_FUEL:
-                    if ($this->publicAddressHasEnoughFuel($bot)) {
-                        Log::debug('publicAddressHasEnoughFuel was TRUE');
-                        // update the state
-                        $bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
-                    }
-                    break;
-                
-                default:
-                    # code...
-                    break;
+            $done = false;
+
+            while (!$done) {
+                $done = true;
+                switch ($bot['state']) {
+                    case BotState::BRAND_NEW:
+                        if ($this->paymentAddressHasEnoughForCreationFee($bot)) {
+                            // update the state
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::CREATION_FEE_PAID);
+                            $done = false;
+                        }
+                        break;
+                    
+                    case BotState::LOW_FUEL:
+                        if ($this->publicAddressHasEnoughFuel($bot)) {
+                            Log::debug('publicAddressHasEnoughFuel was TRUE');
+                            // update the state
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
+                        }
+                        break;
+                }
             }
+
         });
     }
 
