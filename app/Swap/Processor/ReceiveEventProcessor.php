@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileBotState;
+use Swapbot\Commands\ReconcileBotSwapStates;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\BotEvent;
@@ -18,6 +19,7 @@ use Swapbot\Statemachines\BotStateMachineFactory;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Swapbot\Swap\Processor\ReceivePaymentProcessor;
 use Swapbot\Swap\Processor\SwapProcessor;
+use Swapbot\Swap\Processor\Util\BalanceUpdater;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class ReceiveEventProcessor {
@@ -29,13 +31,14 @@ class ReceiveEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, SwapProcessor $swap_processor, ReceivePaymentProcessor $receive_payment_processor, BotEventLogger $bot_event_logger)
+    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, SwapProcessor $swap_processor, ReceivePaymentProcessor $receive_payment_processor, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
     {
         $this->bot_repository            = $bot_repository;
         $this->transaction_repository    = $transaction_repository;
         $this->swap_processor            = $swap_processor;
         $this->bot_event_logger          = $bot_event_logger;
         $this->receive_payment_processor = $receive_payment_processor;
+        $this->balance_updater           = $balance_updater;
     }
 
 
@@ -62,22 +65,24 @@ class ReceiveEventProcessor {
 
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
-                'transaction'               => $transaction_model,
-                'xchain_notification'       => $xchain_notification,
-                'bot'                       => $bot,
-                'statemachine'              => $bot->stateMachine(),
+                'transaction'                  => $transaction_model,
+                'xchain_notification'          => $xchain_notification,
+                'bot'                          => $bot,
+                'statemachine'                 => $bot->stateMachine(),
 
-                'confirmations'             => $xchain_notification['confirmations'],
-                'is_confirmed'              => $xchain_notification['confirmed'],
-                'destination'               => $xchain_notification['sources'][0],
+                'confirmations'                => $xchain_notification['confirmations'],
+                'is_confirmed'                 => $xchain_notification['confirmed'],
+                'destination'                  => $xchain_notification['sources'][0],
 
-                'tx_is_handled'             => false,
-                'transaction_update_vars'   => [],
-                'should_update_bot_balance' => ($xchain_notification['confirmed'] ? true : false),
-                // 'bot_balances_delta'     => [],
+                'tx_is_handled'                => false,
+                'transaction_update_vars'      => [],
+                'should_update_bot_balance'    => ($xchain_notification['confirmed'] ? true : false),
+                'bot_balance_deltas'           => [],
 
-                'any_processing_errors'     => false,
-                'any_notification_given'    => false,
+                'any_processing_errors'        => false,
+                'any_notification_given'       => false,
+                'should_reconcile_bot_state'   => false,
+                'should_reconcile_swap_states' => false,
             ]);
 
             // previously processed transactions
@@ -98,8 +103,19 @@ class ReceiveEventProcessor {
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
 
+            // update any bot balances if they were changed
+            $this->handleUpdateBotBalances($tx_process);
+
+            // when done, reconcile the bot state if needed
+            $this->handleReconcileBotState($tx_process);
+            
+            // when done, reconcile the bot's swap states if needed
+            $this->handleReconcileSwapStates($tx_process);
+            
+
             return $tx_process;
         });
+
 
         // // bot balance update must be done outside of the transaction
         // if ($tx_process['should_update_bot_balance']) {
@@ -193,6 +209,14 @@ class ReceiveEventProcessor {
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
             $tx_process['any_notification_given']                   = true;
 
+            // update the bot's balance
+            $tx_process['bot_balance_deltas'] = $this->balance_updater->modifyBalanceDeltasFromTransactionReceived($tx_process['bot_balance_deltas'], $tx_process['xchain_notification']);
+
+            // the bot state might have changed, so check it
+            $tx_process['should_reconcile_bot_state'] = true;
+
+            // the swap states might have changed, so check those as well
+            $tx_process['should_reconcile_swap_states'] = true;
         }
 
     }
@@ -211,12 +235,11 @@ class ReceiveEventProcessor {
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
             $tx_process['any_notification_given']               = true;
 
-            // update the bot's balance in memory only
-            $tx_process['bot']->modifyBalance($tx_process['xchain_notification']['asset'], $tx_process['xchain_notification']['quantity']);
-            // Log::debug('balances: '.json_encode($tx_process['bot']['balances'], 192));
+            // update the bot's balance
+            $tx_process['bot_balance_deltas'] = $this->balance_updater->modifyBalanceDeltasFromTransactionReceived($tx_process['bot_balance_deltas'], $tx_process['xchain_notification']);
 
-            // the bot state might have changed, so check it now
-            $this->dispatch(new ReconcileBotState($tx_process['bot']));
+            // the bot state might have changed, so check it
+            $tx_process['should_reconcile_bot_state'] = true;
 
         }
 
@@ -319,5 +342,27 @@ class ReceiveEventProcessor {
         }
     }
 
+
+
+
+    protected function handleUpdateBotBalances($tx_process) {
+        if ($tx_process['bot_balance_deltas']) {
+            $this->balance_updater->updateBotBalances($tx_process['bot'], $tx_process['bot_balance_deltas']);
+        }
+    }
+
+
+    protected function handleReconcileBotState($tx_process) {
+        if ($tx_process['should_reconcile_bot_state']) {
+            // the bot state might have changed, so check it now
+            $this->dispatch(new ReconcileBotState($tx_process['bot']));
+        }
+    }
+    protected function handleReconcileSwapStates($tx_process) {
+        if ($tx_process['should_reconcile_swap_states']) {
+            // some swap states might have changed, so check those
+            $this->dispatch(new ReconcileBotSwapStates($tx_process['bot']));
+        }
+    }
 
 }

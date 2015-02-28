@@ -1,28 +1,65 @@
-# UNIMPLEMENTED - CHECK OUT OF STOCK
-# UNIMPLEMENTED - CHECK RESTOCK
-# UNIMPLEMENTED - CHECK COMPLETED STATE FOR SWAP
-# 
+# after one successful swap that depletes stock
+#   the second swap goes into out of stock state
 
 ############################
 # setup bots
 bots:
   - meta: { baseFilename: bot01.yml }
+    balances:
+        LTBCOIN: 1000
+        BTC: 0.001
 
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    txid: 00000000000000000000000000000000000000000000000000000BTCtx333333
+    blockId: 300001
 
 
 ############################
 # validate the expected results
-expectedXChainCalls: none
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+
 
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - 
-    meta: { baseFilename: unconfirmed.tx.yml }
+    meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+  - 
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - 
+    # pay a transaction fee
+    meta: { baseFilename: fee.transaction.yml }
 
+############## Transaction #2 ##############
 
+  - 
+    # swap moved to out of stock state
+    meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - 
+    meta: { baseFilename: swap.notReady.yml }
+
+expectedBotLedgerEntries:
+  - 
+    meta: { baseFilename: bot_ledger_entry_model_TX_DEBIT.yml }
+
+expectedBotModels:
+  - 
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+    state: sent
+  -
+    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+    state: outofstock
+    receipt: ~

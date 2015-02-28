@@ -29,6 +29,13 @@ class SwapRepository extends APIRepository
             ->where('transaction_id', $tx_id)
             ->where('name', $swap_name)
             ->first();
+    }
+        
+    public function findByBotIDWithStates($bot_id, $states) {
+        return $this->prototype_model
+            ->where('bot_id', $bot_id)
+            ->whereIn('state', $states)
+            ->get();
         
     }
 

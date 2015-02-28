@@ -1,0 +1,28 @@
+# UNIMPLEMENTED - CHECK OUT OF STOCK
+# UNIMPLEMENTED - CHECK RESTOCK
+# UNIMPLEMENTED - CHECK COMPLETED STATE FOR SWAP
+# 
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls: none
+
+expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - 
+    meta: { baseFilename: unconfirmed.tx.yml }
+
+

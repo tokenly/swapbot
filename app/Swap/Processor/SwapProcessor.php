@@ -10,10 +10,12 @@ use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Models\Swap;
+use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Exception\SwapStrategyException;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Logger\BotEventLogger;
+use Swapbot\Swap\Processor\Util\BalanceUpdater;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 
@@ -30,12 +32,14 @@ class SwapProcessor {
      *
      * @return void
      */
-    public function __construct(Client $xchain_client, SwapRepository $swap_repository, StrategyFactory $strategy_factory, BotEventLogger $bot_event_logger)
+    public function __construct(Client $xchain_client, SwapRepository $swap_repository, BotRepository $bot_repository, StrategyFactory $strategy_factory, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
     {
-        $this->xchain_client          = $xchain_client;
-        $this->swap_repository        = $swap_repository;
-        $this->strategy_factory       = $strategy_factory;
-        $this->bot_event_logger       = $bot_event_logger;
+        $this->xchain_client    = $xchain_client;
+        $this->swap_repository  = $swap_repository;
+        $this->bot_repository   = $bot_repository;
+        $this->strategy_factory = $strategy_factory;
+        $this->bot_event_logger = $bot_event_logger;
+        $this->balance_updater  = $balance_updater;
     }
 
 
@@ -60,25 +64,26 @@ class SwapProcessor {
 
             // initialize a DTO (data transfer object) to hold all the variables for this swap
             $swap_process = new ArrayObject([
-                'swap'                   => $swap,
-                'swap_config'            => $swap_config,
-                'swap_id'                => $swap_config->buildName(),
+                'swap'                => $swap,
+                'swap_config'         => $swap_config,
+                'swap_id'             => $swap_config->buildName(),
 
-                'transaction'            => $transaction,
-                'bot'                    => $bot,
+                'transaction'         => $transaction,
+                'bot'                 => $bot,
 
-                'xchain_notification'    => $xchain_notification,
-                'in_quantity'            => $xchain_notification['quantity'],
-                'destination'            => $xchain_notification['sources'][0],
-                'confirmations'          => $xchain_notification['confirmations'],
-                'is_confirmed'           => $xchain_notification['confirmed'],
+                'xchain_notification' => $xchain_notification,
+                'in_quantity'         => $xchain_notification['quantity'],
+                'destination'         => $xchain_notification['sources'][0],
+                'confirmations'       => $xchain_notification['confirmations'],
+                'is_confirmed'        => $xchain_notification['confirmed'],
 
-                'quantity'               => null,
-                'asset'                  => null,
-                'swap_was_handled'       => false,
+                'quantity'            => null,
+                'asset'               => null,
+                'swap_was_handled'    => false,
 
-                'swap_update_vars'       => [],
-                'state_trigger'          => [],
+                'swap_update_vars'    => [],
+                'bot_balance_deltas'  => [],
+                'state_trigger'       => [],
             ]);
 
             // calculate the receipient's quantity and asset
@@ -99,6 +104,9 @@ class SwapProcessor {
 
             // if anything was updated, then update the swap
             $this->handleUpdateSwapModel($swap_process);
+
+            // also update the bot balances
+            $this->handleUpdateBotBalances($swap_process);
 
         } catch (Exception $e) {
             // log any failure
@@ -167,10 +175,29 @@ class SwapProcessor {
             'confirmations' => $swap_process['confirmations']
         ];
 
+        // update the local balance
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);
+
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
 
         $this->bot_event_logger->logSendResult($swap_process['bot'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
+    }
+
+    protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas) {
+        $asset = $swap_process['asset'];
+        $quantity = $swap_process['quantity'];
+        $btc_fee = $swap_process['bot']['return_fee'];
+
+        // deduct the asset balance
+        if (!isset($bot_balance_deltas[$asset])) { $bot_balance_deltas[$asset] = 0; }
+        $bot_balance_deltas[$asset] = $bot_balance_deltas[$asset] - $quantity;
+
+        // deduct the BTC fee
+        if (!isset($bot_balance_deltas['BTC'])) { $bot_balance_deltas['BTC'] = 0; }
+        $bot_balance_deltas['BTC'] = $bot_balance_deltas['BTC'] - $btc_fee;
+
+        return $bot_balance_deltas;
     }
 
     protected function handleUpdateSwapModel($swap_process) {
@@ -184,6 +211,12 @@ class SwapProcessor {
             $swap_process['swap']->stateMachine()->triggerEvent($swap_process['state_trigger']);
         }
 
+    }
+
+    protected function handleUpdateBotBalances($swap_process) {
+        if ($swap_process['bot_balance_deltas']) {
+            $this->balance_updater->updateBotBalances($swap_process['bot'], $swap_process['bot_balance_deltas']);
+        }
     }
 
     protected function sendAssets($bot, $xchain_notification, $destination, $quantity, $asset) {

@@ -174,15 +174,15 @@ class ScenarioRunner
 
             $expected_bot_event = $this->normalizeExpectedBotEvent($expected_bot_event, $actual_bot_event);
             
-            $this->validateExpectedBotEvent($expected_bot_event, $actual_bot_event);
+            $this->validateExpectedBotEvent($expected_bot_event, $actual_bot_event, $offset+1);
         }
 
         // make sure the counts are the same
         PHPUnit::assertCount(count($expected_bot_events), $actual_bot_events, "Did not find the correct number of Bot Events.  \$actual_bot_events:".json_encode($actual_bot_events, 192));
     }
 
-    protected function validateExpectedBotEvent($expected_bot_event, $actual_bot_event) {
-        PHPUnit::assertNotEmpty($actual_bot_event, "Missing bot event ".json_encode($expected_bot_event, 192));
+    protected function validateExpectedBotEvent($expected_bot_event, $actual_bot_event, $number) {
+        PHPUnit::assertNotEmpty($actual_bot_event, "Missing bot event #{$number}: ".json_encode($expected_bot_event, 192));
         PHPUnit::assertEquals($expected_bot_event, $actual_bot_event, "ExpectedBotEvent mismatch");
     }
 

@@ -38,6 +38,10 @@ class BotRepository extends APIRepository
         return call_user_func([$this->model_type, 'where'], 'public_send_monitor_id', $monitor_id)->first();
     }
 
+    public function findByIDWithLock($bot_id) {
+        return $this->prototype_model->where('id', $bot_id)->lockForUpdate()->first();
+    }
+
 
 
     protected function modifyAttributesBeforeCreate($attributes) {

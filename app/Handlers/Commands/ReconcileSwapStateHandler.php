@@ -2,6 +2,7 @@
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;

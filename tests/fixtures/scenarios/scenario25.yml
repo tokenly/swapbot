@@ -29,7 +29,6 @@ expectedBotLedgerEntries: []
 
 expectedBotModels:
   - 
-    # bot should be in state outofstock
     state: active
 
 expectedSwapModels:

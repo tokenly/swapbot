@@ -62,6 +62,25 @@ class SwapRepositoryTest extends TestCase {
     }
 
 
+    public function testFindSwapByBotIDAndStates()
+    {
+        $helper = $this->createRepositoryTestHelper();
+
+        $bot = app('BotHelper')->newSampleBot();
+        $transaction = app('TransactionHelper')->newSampleTransaction($bot);
+
+        $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
+        $swap2 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar']);
+        $swap3 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar', 'name' => 'BTC:SOUP']);
+
+        $loaded_models = app('Swapbot\Repositories\SwapRepository')->findByBotIDWithStates($bot['id'], ['foobar']);
+        PHPUnit::assertNotEmpty($loaded_models);
+        PHPUnit::assertCount(2, $loaded_models);
+        PHPUnit::assertEquals($swap2->toArray(), $loaded_models[0]->toArray());
+        PHPUnit::assertEquals($swap3->toArray(), $loaded_models[1]->toArray());
+    }
+
+
 
     protected function createRepositoryTestHelper() {
         $create_model_fn = function() {

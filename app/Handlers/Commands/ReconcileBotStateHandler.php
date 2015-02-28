@@ -54,7 +54,6 @@ class ReconcileBotStateHandler {
                     
                     case BotState::LOW_FUEL:
                         if ($this->publicAddressHasEnoughFuel($bot)) {
-                            Log::debug('publicAddressHasEnoughFuel was TRUE');
                             // update the state
                             $bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
                         }
@@ -78,7 +77,7 @@ class ReconcileBotStateHandler {
     }
 
     protected function publicAddressHasEnoughFuel($bot) {
-        Log::debug("BTC balance: {$bot['balances']['BTC']}");
+        // Log::debug("BTC balance: {$bot['balances']['BTC']}");
         return $bot['balances']['BTC'] >= $bot->getMinimumBTCFuel();
     }
 
