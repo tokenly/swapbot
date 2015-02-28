@@ -28,8 +28,6 @@ class CreateSwapsTable extends Migration {
             $table->string('state');
             $table->mediumText('definition')->nullable();
 
-            // $table->bigInteger('in_qty')->unsigned()->default(0);
-
             $table->mediumText('receipt')->nullable();
 
             $table->unique(['bot_id', 'transaction_id', 'name', ]);
