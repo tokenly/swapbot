@@ -10,20 +10,32 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  - meta: { baseFilename: mempool_LTBCOIN_SEND_notification_01.yml }
+  -
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+  -
+    meta: { baseFilename: mempool_LTBCOIN_SEND_notification_01.yml }
+
+
 
 
 ############################
 # validate the expected results
-expectedXChainCalls: none
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
 
 expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+
   - #### found an unconfirmed send transaction
     meta: { baseFilename: send.unconfirmed.yml }
-
-expectedTransactionModels:
-  - 
-    meta: { baseFilename: transaction_model_EMPTY.yml }
-    txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
-    confirmations: '0'
-    processed: '0'

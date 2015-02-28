@@ -68,12 +68,6 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
-            // check unconfirmed transaction
-            $this->handleUnconfirmedTransaction($tx_process);
-
-            // check confirmed transaction
-            $this->handleConfirmedTransaction($tx_process);
-
             // process all swaps
             $this->processSwaps($tx_process);
 
@@ -107,57 +101,41 @@ class SendEventProcessor {
         }
     }
 
-    protected function handleUnconfirmedTransaction($tx_process) {
-        if ($tx_process['tx_is_handled']) { return; }
-
-        if (!$tx_process['is_confirmed']) {
-            // just log it
-            $xchain_notification = $tx_process['xchain_notification'];
-            $destination = $xchain_notification['destinations'][0];
-            $quantity = $xchain_notification['quantity'];
-            $asset = $xchain_notification['asset'];
-            $bot = $tx_process['bot'];
-            $this->bot_event_logger->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
-
-            $tx_process['tx_is_handled'] = true;
-        }
-    }
-
-    protected function handleConfirmedTransaction($tx_process) {
-        if ($tx_process['tx_is_handled']) { return; }
-
-        if ($tx_process['is_confirmed']) {
-            $xchain_notification = $tx_process['xchain_notification'];
-            $destination = $xchain_notification['destinations'][0];
-            $quantity = $xchain_notification['quantity'];
-            $asset = $xchain_notification['asset'];
-            $confirmations = $xchain_notification['confirmations'];
-            $bot = $tx_process['bot'];
-
-            $this->bot_event_logger->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
-        }
-    }
 
     protected function processSwaps($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
-        $bot = $tx_process['bot'];
+        $bot                 = $tx_process['bot'];
+        $xchain_notification = $tx_process['xchain_notification'];
+        $is_confirmed        = $tx_process['is_confirmed'];
+        $destination         = $xchain_notification['destinations'][0];
+        $quantity            = $xchain_notification['quantity'];
+        $asset               = $xchain_notification['asset'];
+        $confirmations       = $xchain_notification['confirmations'];
+
 
         // get all swaps that are in state sent
         $txid = $tx_process['xchain_notification']['txid'];
         $states = [SwapState::SENT];
         $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
         foreach($swaps as $swap) {
-            Log::debug('processSwaps swap='.json_encode($swap, 192));
+            Log::debug("txid=$txid receipt={$swap['receipt']['txid']}");
             if ($swap['receipt']['txid'] == $txid) {
-                // we found the transaction
-                //   move the swap into state completed
-                $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
-                $tx_process['tx_is_handled'] = true;
+                if ($is_confirmed) {
+                    // confirmed transaction
+                    $this->bot_event_logger->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
 
-                // this transaction was processed
-                $tx_process['transaction_update_vars']['processed']     = true;
-                $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
+                    //   move the swap into state completed
+                    $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
+                    $tx_process['tx_is_handled'] = true;
+
+                    // this transaction was processed
+                    $tx_process['transaction_update_vars']['processed']     = true;
+                    $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
+                } else {
+                    // just an unconfirmed transaction
+                    $this->bot_event_logger->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
+                }
             }
         }
     }

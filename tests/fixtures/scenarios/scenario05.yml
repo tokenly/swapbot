@@ -24,9 +24,9 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }

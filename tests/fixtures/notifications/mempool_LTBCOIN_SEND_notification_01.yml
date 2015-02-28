@@ -1,6 +1,6 @@
 # a simple XCP notification
 
-txid: 00000000000000000000000000000000000000000000000000000xcptx111111
+txid: "0000000000000000000000000000001111"
 network: counterparty
 event: send
 notifiedAddress: SWAPBOTADDR01
