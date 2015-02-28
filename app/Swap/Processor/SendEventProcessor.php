@@ -118,9 +118,13 @@ class SendEventProcessor {
         $txid = $tx_process['xchain_notification']['txid'];
         $states = [SwapState::SENT];
         $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
+
+        $any_swap_matched = false;
         foreach($swaps as $swap) {
             Log::debug("txid=$txid receipt={$swap['receipt']['txid']}");
             if ($swap['receipt']['txid'] == $txid) {
+                $any_swap_matched = true;
+
                 if ($is_confirmed) {
                     // confirmed transaction
                     $this->bot_event_logger->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
@@ -137,6 +141,10 @@ class SendEventProcessor {
                     $this->bot_event_logger->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
                 }
             }
+        }
+
+        if (!$any_swap_matched) {
+            $this->bot_event_logger->logUnknownSendTransaction($bot, $xchain_notification);
         }
     }
 

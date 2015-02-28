@@ -1,0 +1,23 @@
+# An unrecognized send transaction gets logged
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml }
+    asset: FOOBAR
+    quantity: 1000
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+
+expectedBotEvents:
+  - #### unknown send transaction
+    meta: { baseFilename: send.unknown.yml }

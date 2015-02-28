@@ -1,0 +1,6 @@
+name: send.unknown
+msg: Sent 1000 FOOBAR to SENDER01 with transaction ID 0000000000000000000000000000001111.  This transaction did not match any swaps.
+destination: SENDER01
+outQty: 1000
+outAsset: FOOBAR
+confirmations: 1
