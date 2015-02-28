@@ -1,0 +1,7 @@
+name: send.confirmed
+msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000000000000000000000000SENTxxxtx222222.
+source: SWAPBOTADDR01
+outQty: 0.0005
+outAsset: BTC
+destination: SENDER01
+confirmations: 1

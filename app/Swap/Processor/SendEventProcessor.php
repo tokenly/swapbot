@@ -2,13 +2,17 @@
 
 namespace Swapbot\Swap\Processor;
 
+use ArrayObject;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Models\BotEvent;
+use Swapbot\Models\Data\SwapState;
+use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -22,11 +26,12 @@ class SendEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, BotEventLogger $swap_event_logger)
+    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, TransactionRepository $transaction_repository, BotEventLogger $bot_event_logger)
     {
         $this->bot_repository         = $bot_repository;
+        $this->swap_repository        = $swap_repository;
         $this->transaction_repository = $transaction_repository;
-        $this->swap_event_logger      = $swap_event_logger;
+        $this->bot_event_logger       = $bot_event_logger;
     }
 
 
@@ -36,96 +41,169 @@ class SendEventProcessor {
         if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
-        $should_update_bot_balance = null;
-        $bot = DB::transaction(function() use ($xchain_notification, $bot, &$should_update_bot_balance) {
+        DB::transaction(function() use ($xchain_notification, $bot) {
 
             // load or create a new transaction from the database
-            $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
+            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
-            $is_confirmed = $xchain_notification['confirmed'];
+            // initialize a DTO (data transfer object) to hold all the variables
+            $tx_process = new ArrayObject([
+                'transaction'                  => $transaction_model,
+                'xchain_notification'          => $xchain_notification,
+                'bot'                          => $bot,
 
-            // setup variables
-            $should_process            = true;
-            $should_update_transaction = false;
-            $should_update_bot_balance = ($is_confirmed ? true : false);
+                'confirmations'                => $xchain_notification['confirmations'],
+                'is_confirmed'                 => $xchain_notification['confirmed'],
+                'destination'                  => $xchain_notification['sources'][0],
 
-
-            // previously processed
-            if ($should_process AND $transaction_model['processed']) {
-                $this->swap_event_logger->logToBotEvents($bot, 'send.previous', BotEvent::LEVEL_DEBUG, [
-                    'msg'  => "Send transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
-                    'txid' => $xchain_notification['txid']
-                ]);
-                $should_process = false;
-            }
-
-
-            // just log it
-            if ($should_process) {
-                // determine the number of confirmations
-                $confirmations = $xchain_notification['confirmations'];
-                $quantity = $xchain_notification['quantity'];
-                $asset = $xchain_notification['asset'];
-                $destination = $xchain_notification['destinations'][0];
-
-                if ($is_confirmed AND !$transaction_model['processed']) {
-                    $this->swap_event_logger->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
-                    $should_update_transaction = true;
-                } else {
-                    $this->swap_event_logger->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
-                }
-
-                if ($should_update_transaction) {
-                    // mark the transaction as processed
-                    $update_vars = [];
-                    $update_vars['processed'] = true;
-                    $update_vars['confirmations'] = $confirmations;
-
-                    $this->transaction_repository->update($transaction_model, $update_vars);
-                }
-            }
+                'tx_is_handled'                => false,
+                'transaction_update_vars'      => [],
+                'should_update_bot_balance'    => ($xchain_notification['confirmed'] ? true : false),
+                'bot_balance_deltas'           => [],
+            ]);
 
 
-            return $bot;
 
+            // previously processed transaction
+            $this->handlePreviouslyProcessedTransaction($tx_process);
+
+            // check unconfirmed transaction
+            $this->handleUnconfirmedTransaction($tx_process);
+
+            // check confirmed transaction
+            $this->handleConfirmedTransaction($tx_process);
+
+            // process all swaps
+            $this->processSwaps($tx_process);
+
+            // done going through swaps - update the transaction
+            $this->updateTransaction($tx_process);
         });
 
 
         // bot balance update must be done outside of the transaction
-        if ($should_update_bot_balance) {
-            $this->updateBotBalance($bot);
-        }
+        // if ($should_update_bot_balance) {
+        //     $this->updateBotBalance($bot);
+        // }
 
         return $bot;
     }
 
     ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    // Desc
-    
-    protected function updateBotBalance($bot) {
-        try {
-            $this->dispatch(new UpdateBotBalances($bot));
-        } catch (Exception $e) {
-            // log any failure
-            EventLog::logError('balanceupdate.failed', $e);
-            $this->swap_event_logger->logBalanceUpdateFailed($bot, $e);
+
+    protected function handlePreviouslyProcessedTransaction($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        $transaction_model = $tx_process['transaction'];
+        if ($transaction_model['processed']) {
+            $xchain_notification = $tx_process['xchain_notification'];
+            $bot = $tx_process['bot'];
+            $this->bot_event_logger->logToBotEvents($bot, 'send.previous', BotEvent::LEVEL_DEBUG, [
+                'msg'  => "Send transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
+                'txid' => $xchain_notification['txid']
+            ]);
+            $tx_process['tx_is_handled'] = true;
+        }
+    }
+
+    protected function handleUnconfirmedTransaction($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        if (!$tx_process['is_confirmed']) {
+            // just log it
+            $xchain_notification = $tx_process['xchain_notification'];
+            $destination = $xchain_notification['destinations'][0];
+            $quantity = $xchain_notification['quantity'];
+            $asset = $xchain_notification['asset'];
+            $bot = $tx_process['bot'];
+            $this->bot_event_logger->logUnconfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset);
+
+            $tx_process['tx_is_handled'] = true;
+        }
+    }
+
+    protected function handleConfirmedTransaction($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        if ($tx_process['is_confirmed']) {
+            $xchain_notification = $tx_process['xchain_notification'];
+            $destination = $xchain_notification['destinations'][0];
+            $quantity = $xchain_notification['quantity'];
+            $asset = $xchain_notification['asset'];
+            $confirmations = $xchain_notification['confirmations'];
+            $bot = $tx_process['bot'];
+
+            $this->bot_event_logger->logConfirmedSendTx($bot, $xchain_notification, $destination, $quantity, $asset, $confirmations);
+        }
+    }
+
+    protected function processSwaps($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        $bot = $tx_process['bot'];
+
+        // get all swaps that are in state sent
+        $txid = $tx_process['xchain_notification']['txid'];
+        $states = [SwapState::SENT];
+        $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
+        foreach($swaps as $swap) {
+            Log::debug('processSwaps swap='.json_encode($swap, 192));
+            if ($swap['receipt']['txid'] == $txid) {
+                // we found the transaction
+                //   move the swap into state completed
+                $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
+                $tx_process['tx_is_handled'] = true;
+
+                // this transaction was processed
+                $tx_process['transaction_update_vars']['processed']     = true;
+                $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
+            }
         }
     }
 
 
+    protected function updateTransaction($tx_process) {
+        if ($tx_process['transaction_update_vars']) {
+
+            $update_vars = $tx_process['transaction_update_vars'];
+            $this->transaction_repository->update($tx_process['transaction'], $update_vars);
+        }
+    }
+
+
+
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
-    // Desc
+    // Balance
     
-    protected function findOrCreateTransaction($txid, $bot_id) {
-        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($txid, $bot_id);
+    // protected function updateBotBalance($bot) {
+    //     try {
+    //         $this->dispatch(new UpdateBotBalances($bot));
+    //     } catch (Exception $e) {
+    //         // log any failure
+    //         EventLog::logError('balanceupdate.failed', $e);
+    //         $this->bot_event_logger->logBalanceUpdateFailed($bot, $e);
+    //     }
+    // }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Transaction
+    
+    protected function findOrCreateTransaction($xchain_notification, $bot_id) {
+        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($xchain_notification['txid'], $bot_id);
         if ($transaction_model) { return $transaction_model; }
 
         // create a new transaction
-        return $this->transaction_repository->create(['bot_id' => $bot_id, 'txid' => $txid]);
+        return $this->transaction_repository->create([
+            'txid'                => $xchain_notification['txid'],
+            'bot_id'              => $bot_id,
+            'xchain_notification' => $xchain_notification,
+        ]);
     }
+
 
 
 

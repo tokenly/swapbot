@@ -83,7 +83,7 @@ class SwapProcessor {
 
                 'swap_update_vars'    => [],
                 'bot_balance_deltas'  => [],
-                'state_trigger'       => [],
+                'state_trigger'       => false,
             ]);
 
             // calculate the receipient's quantity and asset
