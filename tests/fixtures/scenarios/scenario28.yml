@@ -1,7 +1,5 @@
-# UNIMPLEMENTED - CHECK OUT OF STOCK
-# UNIMPLEMENTED - CHECK RESTOCK
-# UNIMPLEMENTED - CHECK COMPLETED STATE FOR SWAP
-# 
+# after a swap is completed and the send transaction is detected
+#   the swap goes to final state of completed
 
 ############################
 # setup bots
@@ -12,17 +10,27 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
 
 
 ############################
 # validate the expected results
-expectedXChainCalls: none
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+expectedTransactionModels:
   - 
-    meta: { baseFilename: unconfirmed.tx.yml }
-
-
+    meta: { baseFilename: transaction_model_01.yml }

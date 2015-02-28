@@ -27,8 +27,8 @@ xchainNotifications:
 expectedXChainCalls:
 
 expectedBotEvents:
-  - 
+  - #### unknown asset received
     meta: { baseFilename: receive.unknown.yml }
     confirmations: 0
-  - 
+  - #### transaction handled previously
     meta: { baseFilename: tx.previous.yml }

@@ -22,6 +22,6 @@ xchainNotifications:
 expectedXChainCalls:
 
 expectedBotEvents:
-  - 
+  - #### unknown asset received
     meta: { baseFilename: receive.unknown.yml }
 

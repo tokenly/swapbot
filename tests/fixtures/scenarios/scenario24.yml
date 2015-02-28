@@ -23,14 +23,13 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.found.yml }
-  - 
+  - #### swap sent
     meta: { baseFilename: swap.sent.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - 
-    # pay a transaction fee
+  - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
     msg: Paid a transaction fee of 0.0005.
     fee: 0.0005

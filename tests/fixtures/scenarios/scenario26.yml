@@ -29,14 +29,13 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - 
-    # pay a transaction fee
+  - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
 ############## Transaction #2 ##############
@@ -44,8 +43,8 @@ expectedBotEvents:
   - 
     # swap moved to out of stock state
     meta: { baseFilename: swap.stateChange-outofstock.yml }
-  - 
-    meta: { baseFilename: swap.notReady.yml }
+  - #### OUT OF STOCK
+    meta: { baseFilename: swap.stateChange-outofstock.yml }
 
 expectedBotLedgerEntries:
   - 

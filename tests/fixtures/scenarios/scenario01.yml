@@ -19,7 +19,7 @@ expectedXChainCalls: none
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### unconfirmed transaction found
     meta: { baseFilename: unconfirmed.tx.yml }
 
 

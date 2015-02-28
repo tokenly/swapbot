@@ -20,10 +20,10 @@ xchainNotifications:
 expectedXChainCalls: []
 
 expectedBotEvents:
-  - 
+  - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
-  - 
-    meta: { baseFilename: swap.notReady.yml }
+  - #### OUT OF STOCK
+    meta: { baseFilename: swap.stateChange-outofstock.yml }
 
 expectedBotLedgerEntries: []
 

@@ -22,6 +22,5 @@ expectedXChainCalls: []
 
 
 expectedBotEvents:
-  - 
-    # bot should be in the lowfuel state
+  - #### unconfirmed payment received
     meta: { baseFilename: payment.unconfirmed.yml }

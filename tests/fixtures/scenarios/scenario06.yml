@@ -50,14 +50,14 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.found.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 1000 LTBCOIN to SENDER01.
     inQty: 0.001
     inAsset: BTC
     outQty: 1000
     outAsset: LTBCOIN
-  - 
+  - #### swap sent
     meta: { baseFilename: swap.sent.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 1000 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
     inQty: 0.001
@@ -69,14 +69,14 @@ expectedBotEvents:
 
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - 
+  - #### swap found
     meta: { baseFilename: swap.found.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.
     inQty: 0.001
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
-  - 
+  - #### swap sent
     meta: { baseFilename: swap.sent.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 5000 SOUP to SENDER01 with transaction ID 0000000000000000000000000000001111.
     inQty: 0.001
@@ -85,8 +85,7 @@ expectedBotEvents:
     outAsset: SOUP
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - 
-    # pay a transaction fee
+  - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:

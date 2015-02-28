@@ -18,7 +18,7 @@ xchainNotifications:
 expectedXChainCalls: none
 
 expectedBotEvents:
-  - 
+  - #### found an unconfirmed send transaction
     meta: { baseFilename: send.unconfirmed.yml }
 
 expectedTransactionModels:

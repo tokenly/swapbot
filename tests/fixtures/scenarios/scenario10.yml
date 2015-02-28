@@ -23,11 +23,11 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
-  - 
+  - #### found an unconfirmed send transaction
     meta: { baseFilename: send.unconfirmed.yml }
-  - 
+  - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed.yml }
-  - 
+  - #### found a previously processed send transaction
     meta: { baseFilename: send.previous.yml }
 
 expectedTransactionModels:

@@ -26,17 +26,17 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
-  - 
+  - #### unconfirmed payment received
     meta: { baseFilename: payment.unconfirmed.yml }
-  - 
+  - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
-  - 
+  - #### move fuel transaction created
     meta: { baseFilename: payment.moveFuelCreated.yml }
-  - 
+  - #### creation fee paid
     meta: { baseFilename: payment.creationFeePaid.yml }
-  - 
+  - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
-  - 
+  - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
 
 

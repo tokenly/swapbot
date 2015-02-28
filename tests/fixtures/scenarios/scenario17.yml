@@ -20,7 +20,7 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
-  - 
+  - #### transaction sent to brand new bot
     meta: { baseFilename: bot.brandnew.yml }
 
 
