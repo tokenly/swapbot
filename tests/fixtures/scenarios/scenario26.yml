@@ -40,11 +40,10 @@ expectedBotEvents:
 
 ############## Transaction #2 ##############
 
-  - 
-    # swap moved to out of stock state
-    meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - #### NOT READY
+    meta: { baseFilename: swap.notReady.yml }
 
 expectedBotLedgerEntries:
   - 

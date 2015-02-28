@@ -22,8 +22,8 @@ expectedXChainCalls: []
 expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
-  - #### OUT OF STOCK
-    meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - #### NOT READY
+    meta: { baseFilename: swap.notReady.yml }
 
 expectedBotLedgerEntries: []
 
