@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
@@ -39,17 +40,17 @@ class ReceivePaymentProcessor {
 
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
-                'bot'                       => $bot,
-                'transaction'               => $transaction_model,
-                'xchain_notification'       => $xchain_notification,
+                'bot'                        => $bot,
+                'transaction'                => $transaction_model,
+                'xchain_notification'        => $xchain_notification,
 
-                'confirmations'             => $xchain_notification['confirmations'],
-                'is_confirmed'              => $xchain_notification['confirmed'],
+                'confirmations'              => $xchain_notification['confirmations'],
+                'is_confirmed'               => $xchain_notification['confirmed'],
 
-                'should_update_transaction' => false,
-                'any_processing_errors'     => false,
+                'should_update_transaction'  => false,
+                'should_reconcile_bot_state' => true,
 
-                'should_process_payment'    => true,
+                'should_process_payment'     => true,
             ]);
 
             // handle an unconfirmed TX
@@ -126,12 +127,17 @@ class ReceivePaymentProcessor {
         if ($tx_process['should_update_transaction']) {
             $update_vars = [
                 'confirmations' => $tx_process['confirmations'],
+                'processed'     => true,
             ];
 
-            // mark the transaction as processed only if there were no errros
-            if (!$tx_process['any_processing_errors']) { $update_vars['processed'] = true; }
-
             $this->transaction_repository->update($tx_process['transaction'], $update_vars);
+        }
+    }
+
+    protected function handleReconcileBotState($tx_process) {
+        if ($tx_process['should_reconcile_bot_state']) {
+            // the bot state might have changed, so check it now
+            $this->dispatch(new ReconcileBotState($tx_process['bot']));
         }
     }
 

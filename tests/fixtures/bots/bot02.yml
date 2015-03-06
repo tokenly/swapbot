@@ -35,3 +35,6 @@ swaps:
     out_qty: 1
     in: LTBCOIN
     out: EARLY
+
+payments:
+  - {credit: true, amount: 1.0}

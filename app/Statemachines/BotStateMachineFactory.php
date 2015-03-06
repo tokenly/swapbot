@@ -8,8 +8,10 @@ use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStateEvent;
 use Swapbot\Statemachines\BotCommand\CreationFeePaid;
+use Swapbot\Statemachines\BotCommand\FuelExhausted;
 use Swapbot\Statemachines\BotCommand\Fueled;
-use Swapbot\Statemachines\BotCommand\Unfueled;
+use Swapbot\Statemachines\BotCommand\Paid;
+use Swapbot\Statemachines\BotCommand\PaymentExhausted;
 use Swapbot\Statemachines\StateMachineFactory;
 
 /*
@@ -32,6 +34,7 @@ class BotStateMachineFactory extends StateMachineFactory {
             BotState::LOW_FUEL  => new BotState(BotState::LOW_FUEL),
             BotState::ACTIVE    => new BotState(BotState::ACTIVE),
             BotState::INACTIVE  => new BotState(BotState::INACTIVE),
+            BotState::UNPAID    => new BotState(BotState::UNPAID),
         ];
 
     }
@@ -48,7 +51,13 @@ class BotStateMachineFactory extends StateMachineFactory {
         $this->addTransitionToStates($states, BotState::LOW_FUEL, BotState::ACTIVE, BotStateEvent::FUELED, new Fueled());
 
         // BotState::ACTIVE => BotState::LOW_FUEL
-        $this->addTransitionToStates($states, BotState::ACTIVE, BotState::LOW_FUEL, BotStateEvent::UNFUELED, new Unfueled());
+        $this->addTransitionToStates($states, BotState::ACTIVE, BotState::LOW_FUEL, BotStateEvent::FUEL_EXHAUSTED, new FuelExhausted());
+
+        // BotState::ACTIVE => BotState::UNPAID
+        $this->addTransitionToStates($states, BotState::ACTIVE, BotState::UNPAID, BotStateEvent::PAYMENT_EXHAUSTED, new PaymentExhausted());
+
+        // BotState::UNPAID => BotState::ACTIVE
+        $this->addTransitionToStates($states, BotState::UNPAID, BotState::ACTIVE, BotStateEvent::PAID, new Paid());
 
         return $states;
     }

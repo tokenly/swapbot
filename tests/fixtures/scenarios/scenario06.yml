@@ -1,7 +1,7 @@
 # a bot can vend 2 tokens at once
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     swaps:

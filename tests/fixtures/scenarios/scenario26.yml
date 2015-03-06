@@ -2,7 +2,7 @@
 #   the second swap goes into out of stock state
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     balances:
@@ -46,6 +46,7 @@ expectedBotEvents:
     meta: { baseFilename: swap.notReady.yml }
 
 expectedBotLedgerEntries:
+  - meta: { baseFilename: bot_ledger_entry_model_TEST_SETUP.yml }
   - 
     meta: { baseFilename: bot_ledger_entry_model_TX_DEBIT.yml }
 

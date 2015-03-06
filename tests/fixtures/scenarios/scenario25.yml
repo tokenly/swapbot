@@ -1,7 +1,7 @@
 # swap is moved to outofstock state if token is not available to vend
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     balances:
@@ -25,7 +25,6 @@ expectedBotEvents:
   - #### NOT READY
     meta: { baseFilename: swap.notReady.yml }
 
-expectedBotLedgerEntries: []
 
 expectedBotModels:
   - 

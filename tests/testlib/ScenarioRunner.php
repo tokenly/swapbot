@@ -24,7 +24,7 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -33,6 +33,7 @@ class ScenarioRunner
         $this->bot_event_repository        = $bot_event_repository;
         $this->bot_repository              = $bot_repository;
         $this->swap_repository             = $swap_repository;
+        $this->bot_ledger_entry_helper     = $bot_ledger_entry_helper;
         $this->mock_builder                = $mock_builder;
 
     }
@@ -117,9 +118,31 @@ class ScenarioRunner
             $bot_attributes = $this->loadBaseFilename($bot_entry, "bots");
             unset($bot_entry['meta']);
             $bot_attributes = array_replace_recursive($bot_attributes, $bot_entry);
-            $this->bot_models[] = $this->bot_helper->newSampleBot($this->getSampleUser(), $bot_attributes);
+            $payments = isset($bot_attributes['payments']) ? $bot_attributes['payments'] : null;
+            unset($bot_attributes['payments']);
+            $bot = $this->bot_helper->newSampleBot($this->getSampleUser(), $bot_attributes);
+            $this->bot_models[] = $bot;
+
+            if ($payments) {
+                foreach($payments as $payment) {
+                    $this->addPayment($bot, $payment);
+                }
+            }
         }
         return $this->bot_models;
+    }
+
+    protected function addPayment($bot, $payment) {
+        $is_credit = isset($payment['credit']) ? $payment['credit'] : true;
+        $amount = $payment['amount'];
+
+        $bot_event = app('BotEventHelper')->newSampleBotEvent($bot, ['event' => ['name' => 'test.payment.setup', 'msg' => 'scenario starting payment']]);
+
+        if ($is_credit) {
+            $this->bot_ledger_entry_repository->addCredit($bot, $amount, $bot_event);
+        } else {
+            $this->bot_ledger_entry_repository->addDebit($bot, $amount, $bot_event);
+        }
     }
 
     protected function getSampleUser() {
@@ -162,7 +185,10 @@ class ScenarioRunner
     protected function validateExpectedBotEvents($expected_bot_events) {
         $actual_bot_events = [];
         foreach ($this->bot_event_repository->findAll() as $bot_event) {
-            $actual_bot_events[] = $bot_event->toArray()['event'];
+            $event_vars = $bot_event->toArray()['event'];
+            // ignore the test payment setup
+            if ($event_vars['name'] == 'test.payment.setup') { continue; }
+            $actual_bot_events[] = $event_vars;
         }
         // Log::debug("\$actual_bot_events=".json_encode($actual_bot_events, 192));
 

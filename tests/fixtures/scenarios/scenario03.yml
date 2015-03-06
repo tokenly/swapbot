@@ -1,7 +1,7 @@
 # a second confirmation does not send another swap
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
 

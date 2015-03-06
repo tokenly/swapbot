@@ -51,10 +51,24 @@ class BotStateTest extends TestCase {
 
 
         // fuel is exhausted
-        $state_machine->triggerEvent(BotStateEvent::UNFUELED);
-
-        // bot is now active
+        $state_machine->triggerEvent(BotStateEvent::FUEL_EXHAUSTED);
         PHPUnit::assertEquals(BotState::LOW_FUEL, $state_machine->getCurrentState()->getName());
+
+        // receive fuel
+        $state_machine->triggerEvent(BotStateEvent::FUELED);
+        PHPUnit::assertEquals(BotState::ACTIVE, $state_machine->getCurrentState()->getName());
+
+        
+        // go to unpaid state
+        $state_machine->triggerEvent(BotStateEvent::PAYMENT_EXHAUSTED);
+        PHPUnit::assertEquals(BotState::UNPAID, $state_machine->getCurrentState()->getName());
+
+
+        // pay up
+        $state_machine->triggerEvent(BotStateEvent::PAID);
+        PHPUnit::assertEquals(BotState::ACTIVE, $state_machine->getCurrentState()->getName());
+
+
 
     }
 

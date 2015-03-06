@@ -2,10 +2,11 @@
 #   move the bot to an active state
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
+    payments: ~
     balances:
         LTBCOIN: 0
         BTC: 0

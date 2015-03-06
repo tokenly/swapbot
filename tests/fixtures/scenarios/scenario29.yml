@@ -1,7 +1,7 @@
 # An unrecognized send transaction gets logged
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
 

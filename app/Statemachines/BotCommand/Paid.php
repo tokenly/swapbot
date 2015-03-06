@@ -3,22 +3,25 @@
 namespace Swapbot\Statemachines\BotCommand;
 
 use Exception;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Statemachines\BotCommand\BotCommand;
 
 
 /*
-* Unfueled
+* Paid
 */
-class Unfueled extends BotCommand {
+class Paid extends BotCommand {
 
     /**
      */
     public function __invoke(Bot $bot)
     {
         // update the bot state in the database
-        $this->updateBotState($bot, BotState::LOW_FUEL);
+        $this->updateBotState($bot, BotState::ACTIVE);
 
     }
 
@@ -28,7 +31,7 @@ class Unfueled extends BotCommand {
      */
     public function __toString()
     {
-        return 'Fuel Exhausted';
+        return 'Payment Received';
     }
 
 

@@ -2,7 +2,7 @@
 # simple live transaction received
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot02.yml }
 

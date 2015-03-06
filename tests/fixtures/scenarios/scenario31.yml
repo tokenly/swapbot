@@ -3,7 +3,7 @@
 
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     blacklist_addresses: [RESTOCKING_SENDER01]

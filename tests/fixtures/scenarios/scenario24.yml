@@ -2,7 +2,7 @@
 #   tests that payment account is debited (txfee0002)
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     payment_plan: txfee002
@@ -35,6 +35,7 @@ expectedBotEvents:
     fee: 0.0005
 
 expectedBotLedgerEntries:
+  - meta: { baseFilename: bot_ledger_entry_model_TEST_SETUP.yml }
   - 
     meta: { baseFilename: bot_ledger_entry_model_TX_DEBIT.yml }
     amount: 50000 # 0.0005

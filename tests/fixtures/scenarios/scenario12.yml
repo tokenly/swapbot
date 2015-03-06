@@ -1,7 +1,7 @@
 # handle an unexpected receive (only once)
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
 

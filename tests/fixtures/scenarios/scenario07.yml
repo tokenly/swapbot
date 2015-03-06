@@ -2,7 +2,7 @@
 #   failing to vend the second token will succeed after a second attempt
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     swaps:

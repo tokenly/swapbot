@@ -48,6 +48,8 @@ class ReconcileBotStateHandler {
                         if ($this->paymentAddressHasEnoughForCreationFee($bot)) {
                             // update the state
                             $bot->stateMachine()->triggerEvent(BotStateEvent::CREATION_FEE_PAID);
+
+                            // loop again to allow the low fuel state to be processed once
                             $done = false;
                         }
                         break;
@@ -56,13 +58,30 @@ class ReconcileBotStateHandler {
                         if ($this->publicAddressHasEnoughFuel($bot)) {
                             // update the state
                             $bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
+
+                            // loop again
+                            $done = false;
                         }
                         break;
 
                     case BotState::ACTIVE:
+                        if (!$this->paymentAddressHasEnoughForNextTransaction($bot)) {
+                            // update the state to unpaid
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::PAYMENT_EXHAUSTED);
+                        }
                         if (!$this->publicAddressHasEnoughFuel($bot)) {
                             // update the state to unfueled
-                            $bot->stateMachine()->triggerEvent(BotStateEvent::UNFUELED);
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::FUEL_EXHAUSTED);
+                        }
+                        break;
+
+                    case BotState::UNPAID:
+                        if ($this->paymentAddressHasEnoughForNextTransaction($bot)) {
+                            // update the state
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::PAID);
+
+                            // loop again
+                            $done = false;
                         }
                         break;
                 }
@@ -76,6 +95,16 @@ class ReconcileBotStateHandler {
         $balance = $this->bot_ledger_entry_repository->sumCreditsAndDebits($bot);
         $fuel_needed = $bot->getStartingBTCFuel();
         $required = $bot->getCreationFee() + $fuel_needed;
+        if ($balance >= $required) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function paymentAddressHasEnoughForNextTransaction($bot) {
+        $balance = $this->bot_ledger_entry_repository->sumCreditsAndDebits($bot);
+        $required = $bot->getTXFee();
         if ($balance >= $required) {
             return true;
         }

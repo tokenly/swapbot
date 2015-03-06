@@ -2,7 +2,7 @@
 #   all the unresolved transactions should then be processed
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     balances:

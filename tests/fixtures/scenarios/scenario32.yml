@@ -1,18 +1,17 @@
-# after a swap is completed and the send transaction is detected
-#   the swap goes to final state of completed
+# when bot is unpaid, swaps stop
 
 ############################
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
-
+    payments: # just enough for one swap
+      - {credit: true, amount: 0.001}
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
-  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
-    txid: "0000000000000000000000000000001111"
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_02.yml }
 
 
 ############################
@@ -33,15 +32,32 @@ expectedBotEvents:
   - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
-  - #### found a confirmed send transaction
-    meta: { baseFilename: send.confirmed-BTC.yml }
-    msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
-  - #### COMPLETE
-    meta: { baseFilename: swap.stateChange-complete.yml }
+  #### now the bot is out of payment
+
+  - #### UNPAID
+    meta: { baseFilename: bot.stateChange-unpaid.yml }
+  - #### unpaid bot
+    meta: { baseFilename: bot.unpaid.yml }
+    msg: Ignored transaction 00000000000000000000000000000000000000000000000000000xcptx222222 because this bot is unpaid.
+    txid: '00000000000000000000000000000000000000000000000000000xcptx222222'
+
 
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_01.yml }
+    processed: 1
   - 
     meta: { baseFilename: transaction_model_01.yml }
-    txid: "0000000000000000000000000000001111"
+    txid: '00000000000000000000000000000000000000000000000000000xcptx222222'
+    processed: 1
+
+
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
+    state: sent
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
+    state: brandnew
+    receipt: ~

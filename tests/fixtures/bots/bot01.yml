@@ -31,3 +31,6 @@ swaps:
     out: BTC
     strategy: rate
     rate: 0.00000100
+
+payments:
+  - {credit: true, amount: 1.0}

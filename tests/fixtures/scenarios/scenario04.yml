@@ -1,7 +1,7 @@
 # inactive bots don't vend tokens, but transactions are marked as processed
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - 
     meta: { baseFilename: bot01.yml }

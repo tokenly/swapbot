@@ -2,7 +2,7 @@
 # Low Fee
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     return_fee: 0.00005

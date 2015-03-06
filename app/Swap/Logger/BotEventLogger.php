@@ -132,6 +132,13 @@ class BotEventLogger {
                     'state' => $state_name,
                 ]);
 
+            case BotState::UNPAID:
+                return $this->logToBotEvents($bot, 'bot.unpaid', BotEvent::LEVEL_WARNING, [
+                    'msg'   => "Ignored transaction {$xchain_notification['txid']} because this bot is unpaid.",
+                    'txid'  => $xchain_notification['txid'],
+                    'state' => $state_name,
+                ]);
+
             default:
                 return $this->logToBotEvents($bot, 'bot.inactive', BotEvent::LEVEL_WARNING, [
                     'msg'   => "Ignored transaction {$xchain_notification['txid']} because this bot is in unknown state ({$state_name}).",

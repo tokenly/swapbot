@@ -2,7 +2,7 @@
 #   the swap goes from out of stock back to ready
 
 ############################
-# setup bots
+# setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
     blacklist_addresses: [RESTOCKING_SENDER01]
@@ -52,7 +52,6 @@ expectedBotEvents:
   - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
-expectedBotLedgerEntries:
 
 expectedBotModels:
   - 

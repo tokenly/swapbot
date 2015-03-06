@@ -134,39 +134,7 @@ class ReceiveEventProcessor {
         });
 
 
-        // // bot balance update must be done outside of the transaction
-        // if ($tx_process['should_update_bot_balance']) {
-        //     $this->updateBotBalance($tx_process['bot']);
-        // }
     }
-
-    public function handlePaymentAddressReceive($xchain_notification, $bot) {
-        DB::transaction(function() use ($xchain_notification, $bot) {
-            // initialize a DTO (data transfer object) to hold all the variables
-            $receive_process = new ArrayObject([
-                'xchain_notification' => $xchain_notification,
-                'bot'                 => $bot,
-            ]);
-
-            return $receive_process;
-        });
-
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    // balance
-    
-    // protected function updateBotBalance($bot) {
-    //     try {
-    //         $this->dispatch(new UpdateBotBalances($bot));
-    //     } catch (Exception $e) {
-    //         // log any failure
-    //         EventLog::logError('balanceupdate.failed', $e);
-    //         $this->bot_event_logger->logBalanceUpdateFailed($bot, $e);
-    //     }
-    // }
-
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
