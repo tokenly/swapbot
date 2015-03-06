@@ -1,0 +1,72 @@
+# bot is out of fuel for longer than 6 confirmations and then is refueled
+#   all the unresolved transactions should then be processed
+
+############################
+# setup bots
+bots:
+  - meta: { baseFilename: bot01.yml }
+    balances:
+      LTBCOIN: 1000000
+      BTC: 0
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # try to swap a when out of fuel
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.0001
+
+  # many blocks later, the bot is refueled
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.025
+    txid: 00000000000000000000000000000000000000000000000000000BTCtx333333
+    blockId: 300007
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+
+expectedBotEvents:
+  - #### LOWFUEL
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+
+  - # first transaction ignored due to lowfuel state
+    meta: { baseFilename: bot.lowfuel.yml }
+    msg: 'Ignored transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 because this bot is low on BTC fuel.'
+    txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+
+
+  - #### ACTIVE
+    meta: { baseFilename: bot.stateChange-active.yml }
+
+  ####
+  # the original swap should now be found and handled
+
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN-0001.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN-0001.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+  ####
+  # the second swap should now be handled
+
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN-025.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN-025.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+

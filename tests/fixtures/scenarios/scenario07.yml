@@ -58,19 +58,9 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
-    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 1000 LTBCOIN to SENDER01.
-    inQty: 0.001
-    inAsset: BTC
-    outQty: 1000
-    outAsset: LTBCOIN
+    meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
-    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 1000 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
-    inQty: 0.001
-    inAsset: BTC
-    outQty: 1000
-    outAsset: LTBCOIN
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -86,17 +76,29 @@ expectedBotEvents:
 
   - 
     meta: { baseFilename: swap.failed.yml }
+  - #### ERROR
+    meta: { baseFilename: swap.stateChange-error.yml }
+
+
+  # #########################################################
+  # Notification #2
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous.yml }
+    msg: Transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 has already been processed.  Ignoring it.
+    txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
 
   # - 
-  #   meta: { baseFilename: balanceupdate.failed.yml }
+  #   meta: { baseFilename: swap.processed.previous.yml }
+  #   inQty: 0.001
+  #   inAsset: BTC
+  #   outQty: 1000
+  #   outAsset: LTBCOIN
 
-  - 
-    meta: { baseFilename: swap.processed.previous.yml }
-    inQty: 0.001
-    inAsset: BTC
-    outQty: 1000
-    outAsset: LTBCOIN
-
+  - #### retry
+    meta: { baseFilename: swap.retry.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found.yml }
     msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.

@@ -20,6 +20,7 @@ return_fee: 0.0001
 balances:
     LTBCOIN: 50000
     EARLY: 10
+    BTC: 0.25
 
 swaps:
   -

@@ -6,8 +6,10 @@ use ArrayObject;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\BillBotForTransaction;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Data\SwapConfig;
+use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Models\Swap;
 use Swapbot\Repositories\BotRepository;
@@ -43,15 +45,19 @@ class SwapProcessor {
     }
 
 
-    public function processSwapConfig(SwapConfig $swap_config, $bot_id, $transaction_id) {
+    public function getSwapFromSwapConfig(SwapConfig $swap_config, $bot_id, $transaction_id) {
         // load or create the swap from the database
-        $swap = $this->findOrCreateSwap($swap_config, $bot_id, $transaction_id);
-
-        return $this->processSwap($swap);
+        return $this->findOrCreateSwap($swap_config, $bot_id, $transaction_id);
     }
 
     public function processSwap(Swap $swap) {
         try {
+
+            // start by checking the status of the bot
+            //   if the bot is not active, don't process anything else
+            $bot = $swap->bot;
+            if (!$this->botIsActive($bot)) { return $swap; }
+
             // start by reconciling the swap state
             $this->dispatch(new ReconcileSwapState($swap));
 
@@ -59,7 +65,6 @@ class SwapProcessor {
 
             // get the transaction, bot and the xchain notification
             $transaction         = $swap->transaction;
-            $bot                 = $swap->bot;
             $xchain_notification = $transaction['xchain_notification'];
 
             // initialize a DTO (data transfer object) to hold all the variables for this swap
@@ -84,11 +89,14 @@ class SwapProcessor {
                 'swap_update_vars'    => [],
                 'bot_balance_deltas'  => [],
                 'state_trigger'       => false,
+                'swap_was_sent'       => false,
             ]);
 
             // calculate the receipient's quantity and asset
             list($swap_process['quantity'], $swap_process['asset']) = $swap_process['swap_config']->getStrategy()->buildSwapOutputQuantityAndAsset($swap_process['swap_config'], $swap_process['in_quantity']);
 
+            // check the swap state
+            $this->resetSwapStateForProcessing($swap_process);
 
             // handle an unconfirmed TX
             $this->handleUnconfirmedTX($swap_process);
@@ -98,9 +106,7 @@ class SwapProcessor {
 
             // if all the checks above passed
             //   then we should process this swap
-            if (!$swap_process['swap_was_handled']) {
-                $this->doSwap($swap_process);
-            }
+            $this->doSwap($swap_process);
 
             // if anything was updated, then update the swap
             $this->handleUpdateSwapModel($swap_process);
@@ -119,6 +125,13 @@ class SwapProcessor {
             }
         }
 
+        // if a state change was triggered, then update the swap state
+        //   this can happen even if there was an error
+        $this->handleUpdateSwapState($swap_process);
+
+        // if the swaps are finished, then bill the bot
+        $this->handleBotBilling($swap_process);
+
         // processed this swap
         return $swap;
     }
@@ -126,6 +139,26 @@ class SwapProcessor {
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
+
+    protected function resetSwapStateForProcessing($swap_process) {
+        if ($swap_process['swap_was_handled']) { return; }
+
+        $swap = $swap_process['swap'];
+        switch ($swap['state']) {
+            case SwapState::ERROR:
+                // the swap errored last time
+                //   switch the swap back to the ready state
+                //   in order to try again
+                $this->bot_event_logger->logSwapRetry($swap_process['bot'], $swap_process['swap']);
+                $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::SWAP_RETRY);
+                break;
+        }
+    }
+
+    protected function botIsActive($bot) {
+        return  $bot->statemachine()->getCurrentState()->isActive();
+        // $this->bot_event_logger->logBotNotReadyForSwap($swap_process['bot'], $swap_process['swap'], $bot_state->getName());
+    }
 
     protected function handleUnconfirmedTX($swap_process) {
         if ($swap_process['swap_was_handled']) { return; }
@@ -154,6 +187,8 @@ class SwapProcessor {
     }
     
     protected function doSwap($swap_process) {
+        if ($swap_process['swap_was_handled']) { return; }
+
         if (!$swap_process['swap']->isReady()) {
             $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['transaction']['id'], $swap_process['swap']['name'], $swap_process['swap']['id']);
             return;
@@ -166,6 +201,9 @@ class SwapProcessor {
         try {
             $send_result = $this->sendAssets($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
         } catch (Exception $e) {
+            // move the swap into an error state
+            $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
+
             throw $e;
         }
 
@@ -181,7 +219,11 @@ class SwapProcessor {
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
 
+        // log it
         $this->bot_event_logger->logSendResult($swap_process['bot'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
+
+        // mark the swap as sent
+        $swap_process['swap_was_sent'] = true;
     }
 
     protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas) {
@@ -205,12 +247,24 @@ class SwapProcessor {
         if ($swap_process['swap_update_vars']) {
             $this->swap_repository->update($swap_process['swap'], $swap_process['swap_update_vars']);
         }
+    }
 
+    protected function handleUpdateSwapState($swap_process) {
         // also trigger a state change
         if ($swap_process['state_trigger']) {
             $swap_process['swap']->stateMachine()->triggerEvent($swap_process['state_trigger']);
         }
 
+    }
+
+    protected function handleBotBilling($swap_process) {
+        // billing only happens when the last swap is sent
+        if (!$swap_process['swap_was_sent']) { return; }
+
+        // bill the bot if all the swaps are now complete for this transaction
+        if ($this->allSwapsAreComplete($swap_process['transaction'])) {
+            $this->billBot($swap_process['bot'], $swap_process['transaction']);
+        }
     }
 
     protected function handleUpdateBotBalances($swap_process) {
@@ -248,5 +302,31 @@ class SwapProcessor {
 
         return $new_swap;
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Bill Bot
+
+    protected function allSwapsAreComplete($transaction) {
+        $all_swaps = $this->swap_repository->findByTransactionID($transaction['id']);
+        $all_complete = true;
+        if (count($all_swaps) == 0) { $all_complete = false; }
+
+        foreach($all_swaps as $swap) {
+            if (!$swap->wasSent()) {
+                $all_complete = false;
+                break;
+            }
+        }
+
+        return $all_complete;
+    }
+
+    protected function billBot($bot, $transaction) {
+        $this->dispatch(new BillBotForTransaction($bot, $transaction));
+    }
+
+    
+    
 
 }

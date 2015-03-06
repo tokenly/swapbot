@@ -30,6 +30,7 @@ class BalanceUpdater {
         // add the BTC amount
         if ($asset != 'BTC') {
             $btc_amount = 0; // need to calculate BTC dust here
+            
             if (!isset($balance_deltas['BTC'])) { $balance_deltas['BTC'] = 0; }
             $balance_deltas['BTC'] = $balance_deltas['BTC'] + $btc_amount;
         }
@@ -44,7 +45,7 @@ class BalanceUpdater {
 
                 $balances_in_memory = $bot['balances'];
 
-                $locked_bot = $this->bot_repository->findByIDWithLock($bot['id']);
+                $locked_bot = $this->bot_repository->getLockedBot($bot);
                 $balances = $locked_bot['balances'];
 
                 // build the new balances

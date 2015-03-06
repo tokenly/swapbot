@@ -7,7 +7,7 @@ bots:
   - meta: { baseFilename: bot01.yml }
     balances:
         LTBCOIN: 1000
-        BTC: 0.001
+        BTC: 0.01
 
 
 ############################

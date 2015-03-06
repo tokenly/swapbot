@@ -9,6 +9,7 @@ use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStateEvent;
 use Swapbot\Statemachines\BotCommand\CreationFeePaid;
 use Swapbot\Statemachines\BotCommand\Fueled;
+use Swapbot\Statemachines\BotCommand\Unfueled;
 use Swapbot\Statemachines\StateMachineFactory;
 
 /*
@@ -38,15 +39,16 @@ class BotStateMachineFactory extends StateMachineFactory {
     // add transitions
     public function addTransitionsToStates($states) {
         // BotState::BRAND_NEW => BotState::LOW_FUEL
-        $states[BotState::BRAND_NEW]->addTransition(new Transition($states[BotState::LOW_FUEL], BotStateEvent::CREATION_FEE_PAID));
-        $states[BotState::BRAND_NEW]->getEvent(BotStateEvent::CREATION_FEE_PAID)->attach(new CreationFeePaid());
+        $this->addTransitionToStates($states, BotState::BRAND_NEW, BotState::LOW_FUEL, BotStateEvent::CREATION_FEE_PAID, new CreationFeePaid());
 
         // BotState::LOW_FUEL => BotState::LOW_FUEL
-        $states[BotState::LOW_FUEL]->addTransition(new Transition($states[BotState::LOW_FUEL], BotStateEvent::CREATION_FEE_PAID));
+        $this->addTransitionToStates($states, BotState::LOW_FUEL, BotState::LOW_FUEL, BotStateEvent::CREATION_FEE_PAID, null);
 
         // BotState::LOW_FUEL => BotState::ACTIVE
-        $states[BotState::LOW_FUEL]->addTransition(new Transition($states[BotState::ACTIVE], BotStateEvent::FUELED));
-        $states[BotState::LOW_FUEL]->getEvent(BotStateEvent::FUELED)->attach(new Fueled());
+        $this->addTransitionToStates($states, BotState::LOW_FUEL, BotState::ACTIVE, BotStateEvent::FUELED, new Fueled());
+
+        // BotState::ACTIVE => BotState::LOW_FUEL
+        $this->addTransitionToStates($states, BotState::ACTIVE, BotState::LOW_FUEL, BotStateEvent::UNFUELED, new Unfueled());
 
         return $states;
     }

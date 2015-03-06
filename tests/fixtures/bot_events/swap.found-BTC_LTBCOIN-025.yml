@@ -1,0 +1,8 @@
+name: swap.found
+msg: Received 0.025 BTC from SENDER01 with 1 confirmation. Will vend 25000 LTBCOIN to SENDER01.
+inQty: 0.025
+inAsset: BTC
+outQty: 25000
+outAsset: LTBCOIN
+source: SENDER01
+destination: SENDER01

@@ -11,5 +11,11 @@ class SwapState extends State {
     const READY        = 'ready';
     const SENT         = 'sent';
     const COMPLETE     = 'complete';
+    const ERROR        = 'error';
+
+    // states that are not final
+    public static function allPendingStates() {
+        return [self::BRAND_NEW, self::OUT_OF_STOCK, self::READY, self::ERROR];
+    }
 
 }

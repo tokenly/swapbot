@@ -81,6 +81,55 @@ class SwapRepositoryTest extends TestCase {
     }
 
 
+    public function testFindSwapByStates()
+    {
+        $helper = $this->createRepositoryTestHelper();
+
+        $bot = app('BotHelper')->newSampleBot();
+        $bot2 = app('BotHelper')->newSampleBot();
+        $transaction = app('TransactionHelper')->newSampleTransaction($bot);
+
+        $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
+        $swap2 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar']);
+        $swap3 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar', 'name' => 'BTC:SOUP']);
+        $swap4 = app('SwapHelper')->newSampleSwap($bot2, $transaction, ['state' => 'foobar']);
+        $swap5 = app('SwapHelper')->newSampleSwap($bot2, $transaction, ['state' => 'bar', 'name' => 'BTC:SOUP']);
+        $swap6 = app('SwapHelper')->newSampleSwap($bot2, $transaction, ['state' => 'baz', 'name' => 'BTC:EARLY']);
+
+        $loaded_models = app('Swapbot\Repositories\SwapRepository')->findByStates(['foobar', 'bar']);
+        PHPUnit::assertNotEmpty($loaded_models);
+        PHPUnit::assertCount(4, $loaded_models);
+        PHPUnit::assertEquals($swap2->toArray(), $loaded_models[0]->toArray());
+        PHPUnit::assertEquals($swap3->toArray(), $loaded_models[1]->toArray());
+        PHPUnit::assertEquals($swap4->toArray(), $loaded_models[2]->toArray());
+        PHPUnit::assertEquals($swap5->toArray(), $loaded_models[3]->toArray());
+    }
+
+    public function testFindSwapByTransactionID()
+    {
+        $helper = $this->createRepositoryTestHelper();
+
+        $bot = app('BotHelper')->newSampleBot();
+        $bot2 = app('BotHelper')->newSampleBot();
+        $transaction = app('TransactionHelper')->newSampleTransaction($bot);
+        $transaction2 = app('TransactionHelper')->newSampleTransaction($bot2);
+
+        $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
+        $swap2 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar']);
+        $swap3 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar', 'name' => 'BTC:SOUP']);
+        $swap4 = app('SwapHelper')->newSampleSwap($bot2, $transaction2, ['state' => 'foobar']);
+        $swap5 = app('SwapHelper')->newSampleSwap($bot2, $transaction2, ['state' => 'bar', 'name' => 'BTC:SOUP']);
+        $swap6 = app('SwapHelper')->newSampleSwap($bot2, $transaction2, ['state' => 'baz', 'name' => 'BTC:EARLY']);
+
+        $loaded_models = app('Swapbot\Repositories\SwapRepository')->findByTransactionID($transaction2['id']);
+        PHPUnit::assertNotEmpty($loaded_models);
+        PHPUnit::assertCount(3, $loaded_models);
+        PHPUnit::assertEquals($swap4->toArray(), $loaded_models[0]->toArray());
+        PHPUnit::assertEquals($swap5->toArray(), $loaded_models[1]->toArray());
+        PHPUnit::assertEquals($swap6->toArray(), $loaded_models[2]->toArray());
+    }
+
+
 
     protected function createRepositoryTestHelper() {
         $create_model_fn = function() {

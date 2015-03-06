@@ -164,6 +164,7 @@ class ScenarioRunner
         foreach ($this->bot_event_repository->findAll() as $bot_event) {
             $actual_bot_events[] = $bot_event->toArray()['event'];
         }
+        // Log::debug("\$actual_bot_events=".json_encode($actual_bot_events, 192));
 
         foreach ($expected_bot_events as $offset => $raw_expected_bot_event) {
             $actual_bot_event = isset($actual_bot_events[$offset]) ? $actual_bot_events[$offset] : null;

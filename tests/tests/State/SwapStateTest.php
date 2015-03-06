@@ -68,11 +68,36 @@ class SwapStateTest extends TestCase {
         $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
         $this->checkState($swap, SwapState::READY);
 
+
+        ////////////////////////////////////////////////////////////////////////
+        
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition to ready
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to error
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_ERRORED);
+        $this->checkState($swap, SwapState::ERROR);
+        
+        // transition back to ready
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_RETRY);
+        $this->checkState($swap, SwapState::READY);
+        
+
     }
 
 
     protected function checkState($swap, $expected_state) {
         PHPUnit::assertEquals($expected_state, $swap->stateMachine()->getCurrentState()->getName(), "Unexpected state");
+
+        // reload the swap from the DB
+        $db_swap = app('Swapbot\Repositories\SwapRepository')->findByID($swap['id']);
+        PHPUnit::assertEquals($expected_state, $db_swap->stateMachine()->getCurrentState()->getName(), "Unexpected state");
+        
+
     }
 
 }

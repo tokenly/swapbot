@@ -121,7 +121,6 @@ class SendEventProcessor {
 
         $any_swap_matched = false;
         foreach($swaps as $swap) {
-            Log::debug("txid=$txid receipt={$swap['receipt']['txid']}");
             if ($swap['receipt']['txid'] == $txid) {
                 $any_swap_matched = true;
 

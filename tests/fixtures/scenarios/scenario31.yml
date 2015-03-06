@@ -1,5 +1,6 @@
-# When a restocking transaction is received, 
-#   the swap goes from out of stock back to ready
+# bot is out of stock for longer than 6 confirmations and then is restocked
+#   all the unresolved transactions should then be processed
+
 
 ############################
 # setup bots
@@ -8,34 +9,37 @@ bots:
     blacklist_addresses: [RESTOCKING_SENDER01]
     balances:
         LTBCOIN: 0
-        BTC: 0.1
+        BTC: 1
 
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+
+  # many blocks later, the bot is restocked
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
-    quantity: 1000
+    quantity: 10000
     txid: 0000000000000000000000000000000000000000000000000LTBCOINtx222222
     sources: [RESTOCKING_SENDER01]
-    blockId: 300001
+    blockId: 300010
+
 
 
 ############################
 # validate the expected results
 expectedXChainCalls:
 
-
 expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
     meta: { baseFilename: swap.notReady.yml }
+
   - #### blacklist
     meta: { baseFilename: swap.ignored.blacklist.yml }
-    msg: Ignored transaction of 1000 LTBCOIN from RESTOCKING_SENDER01 because sender address was blacklisted.
-    inQty: 1000
+    msg: Ignored transaction of 10000 LTBCOIN from RESTOCKING_SENDER01 because sender address was blacklisted.
+    inQty: 10000
     txid: 0000000000000000000000000000000000000000000000000LTBCOINtx222222
     source: RESTOCKING_SENDER01
 
@@ -52,14 +56,9 @@ expectedBotEvents:
   - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
-expectedBotLedgerEntries:
-
 expectedBotModels:
   - 
     state: active
-    balances:
-        LTBCOIN: 0
-        BTC: 0.1009
 
 expectedSwapModels:
   -

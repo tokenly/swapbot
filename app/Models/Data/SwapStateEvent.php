@@ -7,8 +7,11 @@ class SwapStateEvent {
 
     const STOCK_CHECKED  = 'stockChecked';
     const STOCK_DEPLETED = 'stockDepleted';
+    const SWAP_ERRORED   = 'swapErrored';
     const SWAP_SENT      = 'swapSent';
     const SWAP_COMPLETED = 'swapCompleted';
+
+    const SWAP_RETRY     = 'swapRetry';
 
 
 }

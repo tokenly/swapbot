@@ -13,6 +13,8 @@ use Swapbot\Statemachines\StateMachineFactory;
 use Swapbot\Statemachines\SwapCommand\StockChecked;
 use Swapbot\Statemachines\SwapCommand\StockDepleted;
 use Swapbot\Statemachines\SwapCommand\SwapCompleted;
+use Swapbot\Statemachines\SwapCommand\SwapErrored;
+use Swapbot\Statemachines\SwapCommand\SwapRetry;
 use Swapbot\Statemachines\SwapCommand\SwapSent;
 
 /*
@@ -36,6 +38,7 @@ class SwapStateMachineFactory extends StateMachineFactory {
             SwapState::OUT_OF_STOCK => new SwapState(SwapState::OUT_OF_STOCK),
             SwapState::SENT         => new SwapState(SwapState::SENT),
             SwapState::COMPLETE     => new SwapState(SwapState::COMPLETE),
+            SwapState::ERROR        => new SwapState(SwapState::ERROR),
         ];
 
     }
@@ -62,6 +65,12 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::SENT => SwapState::COMPLETE with SwapStateEvent::SWAP_COMPLETED via Command
         $this->addTransitionToStates($states, SwapState::SENT, SwapState::COMPLETE, SwapStateEvent::SWAP_COMPLETED, new SwapCompleted());
+
+        // SwapState::READY => SwapState::ERROR with SwapStateEvent::SWAP_ERRORED via SwapErrored
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::ERROR, SwapStateEvent::SWAP_ERRORED, new SwapErrored());
+
+        // SwapState::ERROR => SwapState::READY with SwapStateEvent::SWAP_RETRY via SwapRetry
+        $this->addTransitionToStates($states, SwapState::ERROR, SwapState::READY, SwapStateEvent::SWAP_RETRY, new SwapRetry());
 
 
         return $states;

@@ -42,9 +42,11 @@ abstract class StateMachineFactory {
     abstract public function addTransitionsToStates($states);
 
 
-    protected function addTransitionToStates($states, $starting_state, $ending_state, $state_event, $transition_command) {
+    protected function addTransitionToStates($states, $starting_state, $ending_state, $state_event, $transition_command=null) {
         $states[$starting_state]->addTransition(new Transition($states[$ending_state], $state_event));
-        $states[$starting_state]->getEvent($state_event)->attach($transition_command);
+        if ($transition_command !== null) {
+            $states[$starting_state]->getEvent($state_event)->attach($transition_command);
+        }
     }
 
 }

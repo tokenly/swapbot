@@ -34,6 +34,11 @@ class Swap extends Model {
         return SwapConfig::createFromSerialized($this['definition']);
     }
 
+    // pending swaps are those that have not been processed yet
+    public function isPending() {
+        return in_array($this['state'], SwapState::allPendingStates());
+    }
+
     public function isReady() {
         return ($this['state'] == SwapState::READY);
     }
@@ -49,7 +54,6 @@ class Swap extends Model {
 
         return false;
     }
-
 
     public function stateMachine() {
         if (!isset($this->state_machine)) {

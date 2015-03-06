@@ -1,0 +1,3 @@
+name: swap.stateChange
+msg: Swap entered state error
+state: error

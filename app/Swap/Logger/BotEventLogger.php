@@ -141,19 +141,6 @@ class BotEventLogger {
         }
     }
 
-    public function logPreviouslyProcessedSwap(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
-        return $this->logToBotEvents($bot, 'swap.processed.previous', BotEvent::LEVEL_DEBUG, [
-            'msg'         => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Did not vend {$asset} to {$destination} because this swap has already been sent.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-        ]);
-    }
-
     public function logSendFromBlacklistedAddress(Bot $bot, $xchain_notification, $is_confirmed) {
         return $this->logToBotEvents($bot, 'swap.ignored.blacklist', BotEvent::LEVEL_INFO, [
             'msg'         => "Ignored ".($is_confirmed?'':'unconfirmed ')."transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} because sender address was blacklisted.",
@@ -187,16 +174,6 @@ class BotEventLogger {
     //         'txid'          => $xchain_notification['txid'],
     //     ]);
     // }
-
-    public function logSwapFailed(Bot $bot, $xchain_notification, $e) {
-        return $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
-            'msg'   => "Failed to swap asset.",
-            'error' => $e->getMessage(),
-            'txid'  => $xchain_notification['txid'],
-            'file'  => $e->getFile(),
-            'line'  => $e->getLine(),
-        ]);
-    }
 
     public function logBalanceUpdateFailed(Bot $bot, $e) {
         return $this->logToBotEventsWithoutEventLog($bot, 'balanceupdate.failed', BotEvent::LEVEL_WARNING, [
@@ -268,6 +245,20 @@ class BotEventLogger {
 
     }
 
+    public function logPreviouslyProcessedSwap(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
+        return $this->logToBotEvents($bot, 'swap.processed.previous', BotEvent::LEVEL_DEBUG, [
+            'msg'         => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Did not vend {$asset} to {$destination} because this swap has already been sent.",
+            'txid'        => $xchain_notification['txid'],
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+            'destination' => $destination,
+            'outQty'      => $quantity,
+            'outAsset'    => $asset,
+        ]);
+    }
+
+
     public function logSwapNotReady(Bot $bot, $transaction_id, $name, $swap_id) {
         return $this->logToBotEvents($bot, 'swap.notReady', BotEvent::LEVEL_WARNING, [
             'msg'           => "The swap {$name} could not be processed because it was not ready.",
@@ -275,6 +266,35 @@ class BotEventLogger {
             'transactionId' => $transaction_id,
         ]);
     }
+
+    // public function logBotNotReadyForSwap(Bot $bot, Swap $swap, $state_name) {
+    //     $swap_name = $swap['name'];
+
+    //     return $this->logToBotEvents($bot, 'swap.botNotReady', BotEvent::LEVEL_WARNING, [
+    //         'msg'    => "The swap {$swap_name} could not be processed because this swapbot was not in a ready state.",
+    //         'swapId' => $swap['id'],
+    //         'state'  => $state_name,
+    //     ]);
+    // }
+
+    public function logSwapFailed(Bot $bot, $xchain_notification, $e) {
+        return $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
+            'msg'   => "Failed to swap asset.",
+            'error' => $e->getMessage(),
+            'txid'  => $xchain_notification['txid'],
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine(),
+        ]);
+    }
+
+    public function logSwapRetry(Bot $bot, Swap $swap) {
+        $swap_name = $swap['name'];
+        return $this->logToBotEventsWithoutEventLog($bot, 'swap.retry', BotEvent::LEVEL_DEBUG, [
+            'msg'    => "Retrying previously errored swap {$swap_name}.",
+            'swapId' => $swap['id'],
+        ]);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////
     // payments

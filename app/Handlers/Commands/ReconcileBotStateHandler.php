@@ -51,11 +51,18 @@ class ReconcileBotStateHandler {
                             $done = false;
                         }
                         break;
-                    
+
                     case BotState::LOW_FUEL:
                         if ($this->publicAddressHasEnoughFuel($bot)) {
                             // update the state
                             $bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
+                        }
+                        break;
+
+                    case BotState::ACTIVE:
+                        if (!$this->publicAddressHasEnoughFuel($bot)) {
+                            // update the state to unfueled
+                            $bot->stateMachine()->triggerEvent(BotStateEvent::UNFUELED);
                         }
                         break;
                 }
@@ -78,7 +85,7 @@ class ReconcileBotStateHandler {
 
     protected function publicAddressHasEnoughFuel($bot) {
         // Log::debug("BTC balance: {$bot['balances']['BTC']}");
-        return $bot['balances']['BTC'] >= $bot->getMinimumBTCFuel();
+        return isset($bot['balances']['BTC']) AND $bot['balances']['BTC'] >= $bot->getMinimumBTCFuel();
     }
 
 }
