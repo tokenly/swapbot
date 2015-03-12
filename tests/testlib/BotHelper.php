@@ -7,6 +7,7 @@ use Swapbot\Commands\CreateBot;
 use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
 
@@ -53,6 +54,15 @@ class BotHelper  {
                     'rate'     => 0.00000150,
                 ],
             ],
+
+            'income_rules'               => [
+                [
+                    'asset'         => 'BTC',
+                    'minThreshold'  => 10.0,
+                    'paymentAmount' => 2.0,
+                    'address'       => '1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B',
+                ],
+            ],
         ];
     }
 
@@ -74,9 +84,10 @@ class BotHelper  {
             }
         }
 
-        // add swaps and blacklist addresses
-        $out['swaps'] = $sample_bot_vars['swaps'];
+        // add swaps, blacklist addresses and income rules
+        $out['swaps']              = $sample_bot_vars['swaps'];
         $out['blacklistAddresses'] = $sample_bot_vars['blacklist_addresses'];
+        $out['incomeRules']        = $sample_bot_vars['income_rules'];
         
         return $out;
     }
@@ -112,6 +123,14 @@ class BotHelper  {
                     $swap_configs[] = SwapConfig::createFromSerialized($swap_config_data);
                 }
                 $attributes['swaps'] = $swap_configs;
+            }
+
+            if (isset($attributes['income_rules'])) {
+                $swap_configs = [];
+                foreach ($attributes['income_rules'] as $income_rule_data) {
+                    $income_rules[] = IncomeRuleConfig::createFromSerialized($income_rule_data);
+                }
+                $attributes['income_rules'] = $income_rules;
             }
 
             $bot_model = $this->bot_repository->create($attributes);

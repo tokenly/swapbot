@@ -5,20 +5,21 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateBotsTable extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
-	public function up()
-	{
-		Schema::create('bots', function(Blueprint $table)
-		{
-			$table->increments('id');
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('bots', function(Blueprint $table)
+        {
+            $table->increments('id');
             $table->char('uuid', 36)->unique();
-			$table->string('name');
-			$table->text('description');
-			$table->text('swaps');
+            $table->string('name');
+            $table->text('description');
+            $table->text('swaps');
+            $table->text('income_rules');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
 
@@ -56,18 +57,18 @@ class CreateBotsTable extends Migration {
             $table->boolean('active')->default(0);
             $table->text('status_details')->nullable();
 
-			$table->timestamps();
-		});
-	}
+            $table->timestamps();
+        });
+    }
 
-	/**
-	 * Reverse the migrations.
-	 *
-	 * @return void
-	 */
-	public function down()
-	{
-		Schema::drop('bots');
-	}
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::drop('bots');
+    }
 
 }

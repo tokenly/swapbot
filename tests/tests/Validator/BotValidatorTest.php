@@ -113,6 +113,52 @@ class BotValidatorTest extends TestCase {
         $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
     }
 
+    public function testBotIncomeRulesValidation()
+    {
+        // sample bot
+        $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
+
+        $test_specs = [
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['asset' => '',]]]),
+                'error' => 'Please specify an asset for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['asset' => 'AXX',]]]),
+                'error' => 'The asset name for Income Rule #1 was not valid',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['minThreshold' => '',]]]),
+                'error' => 'Please specify a minimum threshold for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['minThreshold' => -1,]]]),
+                'error' => 'Please specify a minimum threshold for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['paymentAmount' => '',]]]),
+                'error' => 'Please specify a payment amount for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['paymentAmount' => -1,]]]),
+                'error' => 'Please specify a payment amount for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['address' => '',]]]),
+                'error' => 'Please specify a payment address for Income Rule #1',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['address' => 'abadaddress2',]]]),
+                'error' => 'The payment address abadaddress2 was not a valid bitcoin address.',
+            ],
+
+        ];
+
+        $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
+
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
+    }
+
 
     public function testBotUpdateValidator() {
         $test_specs = [

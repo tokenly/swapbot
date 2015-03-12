@@ -6,13 +6,14 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\BotStatusDetails;
+use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Tokenly\CurrencyLib\CurrencyUtil;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', ];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -37,6 +38,8 @@ class Bot extends APIModel {
     public function setStatusDetailsAttribute($status_details) { $this->attributes['status_details'] = json_encode($this->serializeStatusDetails($status_details)); }
     public function getStatusDetailsAttribute() { return $this->unSerializeStatusDetails($this->attributes['status_details'] ? json_decode($this->attributes['status_details'], true) : []); }
 
+    public function setIncomeRulesAttribute($income_rules) { $this->attributes['income_rules'] = json_encode($this->serializeIncomeRules($income_rules)); }
+    public function getIncomeRulesAttribute() { return $this->unSerializeIncomeRules(json_decode($this->attributes['income_rules'], true)); }
 
 
     public function getCreationFee() {
@@ -97,6 +100,9 @@ class Bot extends APIModel {
         return $deserialized_swaps;
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
 
     public function serializeStatusDetails($status_details) {
         if ($status_details === null) { return []; }
@@ -128,6 +134,29 @@ class Bot extends APIModel {
         if (!is_array($serialized_blacklist_addresses)) { return []; }
         return $serialized_blacklist_addresses;
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
+    public function serializeIncomeRules($income_rules) {
+        $serialized_income_rules = [];
+        foreach($income_rules as $income_rule) {
+            if (!($income_rule instanceof IncomeRuleConfig)) {
+                throw new Exception("Invalid IncomeRule Type of ".(is_object($income_rule) ? get_class($income_rule) : (is_array($income_rule) ? 'array' : 'unknown')), 1);
+            }
+            $serialized_income_rules[] = $income_rule->serialize();
+        }
+        return $serialized_income_rules;
+    }
+
+    public function unSerializeIncomeRules($serialized_income_rules) {
+        $deserialized_income_rules = [];
+        foreach($serialized_income_rules as $serialized_income_rule_data) {
+            $deserialized_income_rules[] = IncomeRuleConfig::createFromSerialized($serialized_income_rule_data);
+        }
+        return $deserialized_income_rules;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

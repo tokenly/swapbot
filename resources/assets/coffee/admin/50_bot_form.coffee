@@ -58,6 +58,48 @@ do ()->
     swapGroup = (number, swapProp)->
         return swapGroupRenderers[swapProp().strategy()](number, swapProp())
 
+    # ################################################
+
+    buildIncomeRulesGroup = ()->
+        return sbAdmin.formGroup.newGroup({
+            id: 'incomerules'
+            fields: [
+                {name: 'asset', }
+                {name: 'minThreshold', }
+                {name: 'paymentAmount', }
+                {name: 'address', }
+            ]
+            addLabel: "Add Another Income Forwarding Rule"
+            buildItemRow: (builder, number, item)->
+                return [
+                    builder.header("Income Forwarding Rule ##{number}"),
+                    builder.row([
+                        builder.field("Asset Received", 'asset', 'BTC', 3), 
+                        builder.field("Trigger Threshold", 'minThreshold', {type: "number", step: "any", min: "0", placeholder: "1.0"}), 
+                        builder.field("Payment Amount", 'paymentAmount', {type: "number", step: "any", min: "0", placeholder: "0.5"}), 
+                        builder.field("Payment Address", 'address', "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 4), 
+                    ]),
+                ]
+        })
+
+    # ################################################
+
+    buildBlacklistAddressesGroup = ()->
+        return sbAdmin.formGroup.newGroup({
+            id: 'blacklist'
+            fields: [
+                {name: 'address', }
+            ]
+            addLabel: " Add Another Blacklist Address"
+            buildItemRow: (builder, number, item)->
+                return [
+                    builder.row([
+                        builder.field(null, 'address', "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 4), 
+                    ]),
+                ]
+            translateFieldToNumberedValues: 'address'
+            useCompactNumberedLayout: true
+        })
 
     # ################################################
 
@@ -98,7 +140,9 @@ do ()->
             vm.paymentPlan = m.prop('')
             vm.returnFee = m.prop(0.0001)
             vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
-            vm.blacklistAddresses = m.prop([m.prop('')])
+            
+            vm.incomeRulesGroup = buildIncomeRulesGroup()
+            vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -113,8 +157,10 @@ do ()->
                         vm.description(botData.description)
                         vm.paymentPlan(botData.paymentPlan)
                         vm.swaps(buildSwapsPropValue(botData.swaps))
-                        vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses))
                         vm.returnFee(botData.returnFee or 0.0001)
+
+                        vm.incomeRulesGroup.unserialize(botData.incomeRules)
+                        vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
 
                         return
                     , (errorResponse)->
@@ -137,20 +183,6 @@ do ()->
                     vm.swaps(newSwaps)
                     return
 
-            vm.addBlacklistAddress = (e)->
-                e.preventDefault()
-                vm.blacklistAddresses().push(m.prop(''))
-                return
-
-            vm.buildRemoveBlacklistAddress = (number)->
-                return (e)->
-                    e.preventDefault()
-
-                    # filter newBlacklistAddresses
-                    newBlacklistAddresses = vm.blacklistAddresses().filter (blacklistAddress, index)->
-                        return (index != number - 1)
-                    vm.blacklistAddresses(newBlacklistAddresses)
-                    return
 
             vm.save = (e)->
                 e.preventDefault()
@@ -159,9 +191,10 @@ do ()->
                     name: vm.name()
                     description: vm.description()
                     paymentPlan: vm.paymentPlan()
-                    blacklistAddresses: vm.blacklistAddresses()
                     swaps: vm.swaps()
                     returnFee: vm.returnFee()
+                    incomeRules: vm.incomeRulesGroup.serialize()
+                    blacklistAddresses: vm.blacklistAddressesGroup.serialize()
                 }
 
                 if vm.resourceId().length > 0
@@ -211,29 +244,9 @@ do ()->
                         m("h4", "Settings"),
                         m("h5", "Blacklisted Addresses"),
                         m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]),
-                        vm.blacklistAddresses().map((address, offset)->
-                            number = offset+1
-                            return m("div", {class: "form-group"}, [
-                                m("div", { class: "row"}, [
-                                    m("div", {class: "col-md-5"}, [
-                                        sbAdmin.form.mInputEl({id: "blacklist_address_#{number}", 'placeholder': "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", }, address),
-                                    ]),
-                                    m("div", {class: "col-md-1"}, [
-                                        m("a", {class: "remove-link remove-link-compact", href: '#remove', onclick: vm.buildRemoveBlacklistAddress(number), style: if number == 1 then {display: 'none'} else ""}, [
-                                            m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Address #{number}"}, ''),
-                                        ]),
-                                    ]),
-                                ]),
-                            ])
-                        ),
+                        vm.blacklistAddressesGroup.buildInputs(),
 
-                        # add blacklist address
-                        m("div", {class: "form-group"}, [
-                                m("a", {class: "", href: '#add-address', onclick: vm.addBlacklistAddress}, [
-                                    m("span", {class: "glyphicon glyphicon-plus"}, ''),
-                                    m("span", {}, ' Add Another Blacklist Address'),
-                                ]),
-                        ]),
+
 
                         # return fee
                         m("div", {class: "spacer1"}),
@@ -242,6 +255,14 @@ do ()->
                                 sbAdmin.form.mFormField("Return Transaction Fee", {id: 'name', 'placeholder': "0.0001", required: true, }, vm.returnFee),
                             ]),
                         ]),
+
+                        m("hr"),
+
+                        # overflow/income address
+                        m("h4", "Income Forwarding"),
+                        m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]),
+                        vm.incomeRulesGroup.buildInputs(),
+
 
                         m("hr"),
 
@@ -264,7 +285,7 @@ do ()->
                         m("div", {class: "form-group"}, [
                                 m("a", {class: "", href: '#add', onclick: vm.addSwap}, [
                                     m("span", {class: "glyphicon glyphicon-plus"}, ''),
-                                    m("span", {}, ' Add Another Asset'),
+                                    m("span", {}, ' Add Another Swap'),
                                 ]),
                         ]),
 

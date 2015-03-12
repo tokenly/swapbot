@@ -54,6 +54,54 @@ do ()->
         out.push(swap)
         return out
 
+    # ################################################
+
+    buildIncomeRulesGroup = ()->
+        return sbAdmin.formGroup.newGroup({
+            id: 'incomerules'
+            fields: [
+                {name: 'asset', }
+                {name: 'minThreshold', }
+                {name: 'paymentAmount', }
+                {name: 'address', }
+            ]
+            buildItemRow: (builder, number, item)->
+                return [
+                    builder.header("Income Forwarding Rule ##{number}"),
+                    builder.row([
+                        builder.value("Asset Received", 'asset', {}, 3), 
+                        builder.value("Trigger Threshold", 'minThreshold', {}), 
+                        builder.value("Payment Amount", 'paymentAmount', {}), 
+                        builder.value("Payment Address", 'address', {}, 4), 
+                    ]),
+                ]
+            displayOnly: true
+        })
+
+    # ################################################
+
+    buildBlacklistAddressesGroup = ()->
+        return sbAdmin.formGroup.newGroup({
+            id: 'blacklist'
+            fields: [
+                {name: 'address', }
+            ]
+            buildAllItemRows: (items)->
+                addressList = ""
+                for item, offset in items
+                    addressList += (if offset > 0 then ", " else "")+item.address()
+
+                return m("div", {class: "item-group"}, [
+                    m("div", { class: "row"}, m("div", {class: "col-md-12 form-control-static"}, addressList)),
+                ])
+
+                
+            translateFieldToNumberedValues: 'address'
+            useCompactNumberedLayout: true
+            displayOnly: true
+        })
+
+    # ################################################
 
 
     handleBotEventMessage = (data)->
@@ -176,6 +224,9 @@ do ()->
             vm.balances = m.prop(buildBalancesPropValue([]))
             vm.paymentBalance = m.prop('')
 
+            vm.incomeRulesGroup = buildIncomeRulesGroup()
+            vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
+
             # if there is an id, then load it from the api
             id = m.route.param('id')
             # load the bot info from the api
@@ -192,6 +243,9 @@ do ()->
                     vm.description(botData.description)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
                     vm.balances(buildBalancesPropValue(botData.balances))
+
+                    vm.incomeRulesGroup.unserialize(botData.incomeRules)
+                    vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
 
                     return
                 , (errorResponse)->
@@ -291,6 +345,18 @@ do ()->
                             sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, buildBalancesMElement(vm.balances())),
                         ]),
                     ]),
+
+
+                    m("hr"),
+
+                    m("h4", "Blacklisted Addresses"),
+                    vm.blacklistAddressesGroup.buildValues(),
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    # overflow/income address
+                    # m("h4", "Income Forwarding"),
+                    vm.incomeRulesGroup.buildValues(),
 
 
                     m("hr"),

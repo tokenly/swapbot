@@ -3,6 +3,7 @@
 namespace Swapbot\Http\Requests\Bot\Transformers;
 
 use Illuminate\Support\Facades\Log;
+use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
 
 class BotTransformer {
@@ -33,8 +34,16 @@ class BotTransformer {
             $out['blacklist_addresses'] = $this->sanitizeBlacklistAddresses($attributes['blacklistAddresses']);
         }
 
+        // santize incomeRules
+        if (isset($attributes['incomeRules'])) {
+            $out['income_rules'] = $this->sanitizeIncomeRules($attributes['incomeRules']);
+        }
+
         return $out;
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Swaps
 
     protected function sanitizeSwaps($swaps) {
         $swaps_out = [];
@@ -52,6 +61,8 @@ class BotTransformer {
         return SwapConfig::createFromSerialized($swap);
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Blacklist Addresses
 
     protected function sanitizeBlacklistAddresses($blacklist_addresses) {
         $blacklist_addresses_out = [];
@@ -65,6 +76,25 @@ class BotTransformer {
         }
 
         return $blacklist_addresses_out;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Income Rules
+
+    protected function sanitizeIncomeRules($income_rules) {
+        $income_rules_out = [];
+
+        if ($income_rules) {
+            foreach(array_values($income_rules) as $offset => $income_rule) {
+                $income_rules_out[] = $this->sanitizeIncomeRule($income_rule);
+            }
+        }
+
+        return $income_rules_out;
+    }
+
+    protected function sanitizeIncomeRule($income_rule) {
+        return IncomeRuleConfig::createFromSerialized($income_rule);
     }
 
 

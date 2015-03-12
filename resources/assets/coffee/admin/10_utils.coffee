@@ -26,5 +26,66 @@ sbAdmin.utils = do ()->
             return false  if hasOwnProperty.call(obj, key)
         true
 
+    # returns an array of colum lengths
+    #   example: utils.splitColumns(3, 11) returns [3,4,4]
+    utils.splitColumns = (elementsCount, totalColumns)->
+        baseColSize = Math.floor(totalColumns / elementsCount)
+        remainder = (totalColumns % elementsCount)
+
+        cumRemainder = 0
+        totalColsUsed = 0
+
+        cols = []
+        for i in [0...elementsCount]
+            isLast = (i == elementsCount-1)
+            if isLast
+                colSize = totalColumns - totalColsUsed
+            else
+                colSize = baseColSize
+
+                cumRemainder += remainder
+                if cumRemainder >= elementsCount
+                    cumRemainder -= elementsCount
+                    ++colSize
+
+                totalColsUsed += colSize
+
+            cols.push(colSize)
+
+        return cols
+
+
+    utils.splitColumnsWithOverrides = (elementsCount, totalColumns, overrides)->
+        # build the overrides
+        #   and use -1 if not defined
+        overrideCols = []
+        elsToSplit = elementsCount
+        colsToSplit = totalColumns
+        for i in [0...elementsCount]
+            if overrides?[i]
+                overrideCols.push(overrides[i])
+                colsToSplit -= overrides[i]
+                elsToSplit -= 1
+            else
+                overrideCols.push(-1)
+
+        # split the remaining columns
+        splitColumns = utils.splitColumns(elsToSplit, colsToSplit)
+        
+        # merge the overrides and splits
+        cols = []
+        nextSplitColumnOffset = 0
+        for overrideCol in overrideCols
+            if overrideCol == -1
+                cols.push(splitColumns[nextSplitColumnOffset])
+                ++nextSplitColumnOffset
+            else
+                cols.push(overrideCol)
+        return cols
+
+
+
 
     return utils
+
+window.utils = sbAdmin.utils

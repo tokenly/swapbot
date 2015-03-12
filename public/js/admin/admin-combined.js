@@ -172,6 +172,242 @@
     return currencyutils;
   })();
 
+  sbAdmin.formGroup = (function() {
+    var buildGroupProp, buildNewItem, buildRemoveItemFn, groupBuilder;
+    groupBuilder = {};
+    buildGroupProp = function(config) {
+      var emptyItem;
+      emptyItem = buildNewItem(config);
+      return m.prop([emptyItem]);
+    };
+    buildNewItem = function(config, defaultValues) {
+      var emptyItem, fieldDef, value, _i, _len, _ref;
+      if (defaultValues == null) {
+        defaultValues = null;
+      }
+      emptyItem = {};
+      _ref = config.fields;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        fieldDef = _ref[_i];
+        value = '';
+        if (defaultValues != null ? defaultValues[fieldDef.name] : void 0) {
+          value = defaultValues[fieldDef.name];
+        }
+        emptyItem[fieldDef.name] = m.prop(value);
+      }
+      return emptyItem;
+    };
+    buildRemoveItemFn = function(number, groupProp) {
+      return function(e) {
+        var newItems;
+        e.preventDefault();
+        newItems = groupProp().filter(function(item, index) {
+          return index !== number - 1;
+        });
+        groupProp(newItems);
+      };
+    };
+    groupBuilder.newGroup = function(config) {
+      var formGroup, idPrefix, newRowBuilder, numberOfColumns;
+      formGroup = {};
+      idPrefix = config.id || "group";
+      config.displayOnly = config.displayOnly || false;
+      numberOfColumns = config.displayOnly ? 12 : 11;
+      newRowBuilder = function(number, item) {
+        var rowBuilder;
+        rowBuilder = {};
+        rowBuilder.field = function(labelText, propName, placeholder_or_attributes, overrideColumnWidth) {
+          var attrs, el, id, prop;
+          if (placeholder_or_attributes == null) {
+            placeholder_or_attributes = null;
+          }
+          if (overrideColumnWidth == null) {
+            overrideColumnWidth = null;
+          }
+          prop = item[propName];
+          id = "" + idPrefix + "_" + propName + "_" + number;
+          if (typeof placeholder_or_attributes === 'object') {
+            attrs = placeholder_or_attributes;
+            attrs.id = attrs.id || id;
+          } else {
+            attrs = {
+              id: id
+            };
+            if (placeholder_or_attributes) {
+              attrs.placeholder = placeholder_or_attributes;
+            }
+          }
+          if (labelText === null) {
+            el = sbAdmin.form.mInputEl(attrs, prop);
+          } else {
+            el = sbAdmin.form.mFormField(labelText, attrs, prop);
+          }
+          return {
+            colWidth: overrideColumnWidth,
+            el: el
+          };
+        };
+        rowBuilder.value = function(labelText, propName, attributes, overrideColumnWidth) {
+          var attrs, el, id, prop;
+          if (attributes == null) {
+            attributes = null;
+          }
+          if (overrideColumnWidth == null) {
+            overrideColumnWidth = null;
+          }
+          prop = item[propName];
+          id = "" + idPrefix + "_" + propName + "_" + number;
+          if (typeof attributes === 'object') {
+            attrs = attributes;
+            attrs.id = attrs.id || id;
+          } else {
+            attrs = {
+              id: id
+            };
+          }
+          if (labelText === null) {
+            el = m("span", {}, prop());
+          } else {
+            el = sbAdmin.form.mValueDisplay(labelText, attrs, prop());
+          }
+          return {
+            colWidth: overrideColumnWidth,
+            el: el
+          };
+        };
+        rowBuilder.header = function(headerText) {
+          return m("h4", headerText);
+        };
+        rowBuilder.row = function(rowBuilderFieldDefs) {
+          var colEls, colSizes, overrides, rowBuilderFieldDef, rowBuilderFieldDefsCount;
+          rowBuilderFieldDefsCount = rowBuilderFieldDefs.length;
+          overrides = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = rowBuilderFieldDefs.length; _i < _len; _i++) {
+              rowBuilderFieldDef = rowBuilderFieldDefs[_i];
+              _results.push(rowBuilderFieldDef.colWidth);
+            }
+            return _results;
+          })();
+          colSizes = sbAdmin.utils.splitColumnsWithOverrides(rowBuilderFieldDefsCount, numberOfColumns, overrides);
+          colEls = rowBuilderFieldDefs.map(function(rowBuilderFieldDef, offset) {
+            return m("div", {
+              "class": "col-md-" + colSizes[offset]
+            }, rowBuilderFieldDef.el);
+          });
+          if (!config.displayOnly) {
+            colEls.push(m("div", {
+              "class": "col-md-1"
+            }, [
+              m("a", {
+                "class": "remove-link" + (config.useCompactNumberedLayout != null ? " remove-link-compact" : ""),
+                href: '#remove',
+                onclick: buildRemoveItemFn(number, formGroup.prop),
+                style: number === 1 ? {
+                  display: 'none'
+                } : ""
+              }, [
+                m("span", {
+                  "class": "glyphicon glyphicon-remove-circle",
+                  title: "Remove Item " + number
+                }, '')
+              ])
+            ]));
+          }
+          return m("div", {
+            "class": "item-group" + (config.useCompactNumberedLayout != null ? " form-group" : "")
+          }, [
+            m("div", {
+              "class": "row"
+            }, colEls)
+          ]);
+        };
+        return rowBuilder;
+      };
+      formGroup.prop = buildGroupProp(config);
+      formGroup.buildInputs = function() {
+        var inputs;
+        if (config.buildAllItemRows != null) {
+          return config.buildAllItemRows(formGroup.prop());
+        }
+        inputs = formGroup.prop().map(function(item, offset) {
+          var number, row;
+          number = offset + 1;
+          row = config.buildItemRow(newRowBuilder(number, item), number, item);
+          return row;
+        });
+        inputs.push(m("div", {
+          "class": "form-group"
+        }, [
+          m("a", {
+            "class": "",
+            href: '#add',
+            onclick: formGroup.addItem
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-plus"
+            }, ''), m("span", {}, " " + (config.addLabel || "Add Another Item"))
+          ])
+        ]));
+        return inputs;
+      };
+      formGroup.buildValues = function() {
+        var values;
+        if (config.buildAllItemRows != null) {
+          return config.buildAllItemRows(formGroup.prop());
+        }
+        values = formGroup.prop().map(function(item, offset) {
+          var number, row;
+          number = offset + 1;
+          row = config.buildItemRow(newRowBuilder(number, item), number, item);
+          return row;
+        });
+        return values;
+      };
+      formGroup.addItem = function(e) {
+        var emptyItem;
+        e.preventDefault();
+        emptyItem = buildNewItem(config);
+        formGroup.prop().push(emptyItem);
+      };
+      formGroup.unserialize = function(itemsData) {
+        var itemData, newItems, rawItemData, _i, _len;
+        newItems = [];
+        for (_i = 0, _len = itemsData.length; _i < _len; _i++) {
+          rawItemData = itemsData[_i];
+          if (config.translateFieldToNumberedValues != null) {
+            itemData = {};
+            itemData[config.translateFieldToNumberedValues] = rawItemData;
+          } else {
+            itemData = rawItemData;
+          }
+          newItems.push(buildNewItem(config, itemData));
+        }
+        if (!itemsData || !itemsData.length) {
+          newItems.push(buildNewItem(config));
+        }
+        formGroup.prop(newItems);
+      };
+      formGroup.serialize = function() {
+        var prop, serializedData, _i, _len, _ref;
+        if (config.translateFieldToNumberedValues != null) {
+          serializedData = [];
+          _ref = formGroup.prop();
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            prop = _ref[_i];
+            serializedData.push(prop[config.translateFieldToNumberedValues]());
+          }
+        } else {
+          serializedData = formGroup.prop();
+        }
+        return serializedData;
+      };
+      return formGroup;
+    };
+    return groupBuilder;
+  })();
+
   sbAdmin.form = (function() {
     var form;
     form = {};
@@ -654,11 +890,65 @@
       }
       return true;
     };
+    utils.splitColumns = function(elementsCount, totalColumns) {
+      var baseColSize, colSize, cols, cumRemainder, i, isLast, remainder, totalColsUsed, _i;
+      baseColSize = Math.floor(totalColumns / elementsCount);
+      remainder = totalColumns % elementsCount;
+      cumRemainder = 0;
+      totalColsUsed = 0;
+      cols = [];
+      for (i = _i = 0; 0 <= elementsCount ? _i < elementsCount : _i > elementsCount; i = 0 <= elementsCount ? ++_i : --_i) {
+        isLast = i === elementsCount - 1;
+        if (isLast) {
+          colSize = totalColumns - totalColsUsed;
+        } else {
+          colSize = baseColSize;
+          cumRemainder += remainder;
+          if (cumRemainder >= elementsCount) {
+            cumRemainder -= elementsCount;
+            ++colSize;
+          }
+          totalColsUsed += colSize;
+        }
+        cols.push(colSize);
+      }
+      return cols;
+    };
+    utils.splitColumnsWithOverrides = function(elementsCount, totalColumns, overrides) {
+      var cols, colsToSplit, elsToSplit, i, nextSplitColumnOffset, overrideCol, overrideCols, splitColumns, _i, _j, _len;
+      overrideCols = [];
+      elsToSplit = elementsCount;
+      colsToSplit = totalColumns;
+      for (i = _i = 0; 0 <= elementsCount ? _i < elementsCount : _i > elementsCount; i = 0 <= elementsCount ? ++_i : --_i) {
+        if (overrides != null ? overrides[i] : void 0) {
+          overrideCols.push(overrides[i]);
+          colsToSplit -= overrides[i];
+          elsToSplit -= 1;
+        } else {
+          overrideCols.push(-1);
+        }
+      }
+      splitColumns = utils.splitColumns(elsToSplit, colsToSplit);
+      cols = [];
+      nextSplitColumnOffset = 0;
+      for (_j = 0, _len = overrideCols.length; _j < _len; _j++) {
+        overrideCol = overrideCols[_j];
+        if (overrideCol === -1) {
+          cols.push(splitColumns[nextSplitColumnOffset]);
+          ++nextSplitColumnOffset;
+        } else {
+          cols.push(overrideCol);
+        }
+      }
+      return cols;
+    };
     return utils;
   })();
 
+  window.utils = sbAdmin.utils;
+
   (function() {
-    var swapGroup, swapGroupRenderers, vm;
+    var buildBlacklistAddressesGroup, buildIncomeRulesGroup, swapGroup, swapGroupRenderers, vm;
     sbAdmin.ctrl.botForm = {};
     swapGroupRenderers = {};
     swapGroupRenderers.rate = function(number, swap) {
@@ -792,6 +1082,56 @@
     swapGroup = function(number, swapProp) {
       return swapGroupRenderers[swapProp().strategy()](number, swapProp());
     };
+    buildIncomeRulesGroup = function() {
+      return sbAdmin.formGroup.newGroup({
+        id: 'incomerules',
+        fields: [
+          {
+            name: 'asset'
+          }, {
+            name: 'minThreshold'
+          }, {
+            name: 'paymentAmount'
+          }, {
+            name: 'address'
+          }
+        ],
+        addLabel: "Add Another Income Forwarding Rule",
+        buildItemRow: function(builder, number, item) {
+          return [
+            builder.header("Income Forwarding Rule #" + number), builder.row([
+              builder.field("Asset Received", 'asset', 'BTC', 3), builder.field("Trigger Threshold", 'minThreshold', {
+                type: "number",
+                step: "any",
+                min: "0",
+                placeholder: "1.0"
+              }), builder.field("Payment Amount", 'paymentAmount', {
+                type: "number",
+                step: "any",
+                min: "0",
+                placeholder: "0.5"
+              }), builder.field("Payment Address", 'address', "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 4)
+            ])
+          ];
+        }
+      });
+    };
+    buildBlacklistAddressesGroup = function() {
+      return sbAdmin.formGroup.newGroup({
+        id: 'blacklist',
+        fields: [
+          {
+            name: 'address'
+          }
+        ],
+        addLabel: " Add Another Blacklist Address",
+        buildItemRow: function(builder, number, item) {
+          return [builder.row([builder.field(null, 'address', "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 4)])];
+        },
+        translateFieldToNumberedValues: 'address',
+        useCompactNumberedLayout: true
+      });
+    };
     vm = sbAdmin.ctrl.botForm.vm = (function() {
       var buildBlacklistAddressesPropValue, buildSwapsPropValue;
       buildSwapsPropValue = function(swaps) {
@@ -829,7 +1169,8 @@
         vm.paymentPlan = m.prop('');
         vm.returnFee = m.prop(0.0001);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
-        vm.blacklistAddresses = m.prop([m.prop('')]);
+        vm.incomeRulesGroup = buildIncomeRulesGroup();
+        vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
         id = m.route.param('id');
         vm.isNew = id === 'new';
         if (!vm.isNew) {
@@ -839,8 +1180,9 @@
             vm.description(botData.description);
             vm.paymentPlan(botData.paymentPlan);
             vm.swaps(buildSwapsPropValue(botData.swaps));
-            vm.blacklistAddresses(buildBlacklistAddressesPropValue(botData.blacklistAddresses));
             vm.returnFee(botData.returnFee || 0.0001);
+            vm.incomeRulesGroup.unserialize(botData.incomeRules);
+            vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -859,20 +1201,6 @@
             vm.swaps(newSwaps);
           };
         };
-        vm.addBlacklistAddress = function(e) {
-          e.preventDefault();
-          vm.blacklistAddresses().push(m.prop(''));
-        };
-        vm.buildRemoveBlacklistAddress = function(number) {
-          return function(e) {
-            var newBlacklistAddresses;
-            e.preventDefault();
-            newBlacklistAddresses = vm.blacklistAddresses().filter(function(blacklistAddress, index) {
-              return index !== number - 1;
-            });
-            vm.blacklistAddresses(newBlacklistAddresses);
-          };
-        };
         vm.save = function(e) {
           var apiArgs, apiCall, attributes;
           e.preventDefault();
@@ -880,9 +1208,10 @@
             name: vm.name(),
             description: vm.description(),
             paymentPlan: vm.paymentPlan(),
-            blacklistAddresses: vm.blacklistAddresses(),
             swaps: vm.swaps(),
-            returnFee: vm.returnFee()
+            returnFee: vm.returnFee(),
+            incomeRules: vm.incomeRulesGroup.serialize(),
+            blacklistAddresses: vm.blacklistAddressesGroup.serialize()
           };
           if (vm.resourceId().length > 0) {
             apiCall = sbAdmin.api.updateBot;
@@ -929,54 +1258,7 @@
                 id: 'description',
                 'placeholder': "Bot Description",
                 required: true
-              }, vm.description), m("hr"), m("h4", "Settings"), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddresses().map(function(address, offset) {
-                var number;
-                number = offset + 1;
-                return m("div", {
-                  "class": "form-group"
-                }, [
-                  m("div", {
-                    "class": "row"
-                  }, [
-                    m("div", {
-                      "class": "col-md-5"
-                    }, [
-                      sbAdmin.form.mInputEl({
-                        id: "blacklist_address_" + number,
-                        'placeholder': "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                      }, address)
-                    ]), m("div", {
-                      "class": "col-md-1"
-                    }, [
-                      m("a", {
-                        "class": "remove-link remove-link-compact",
-                        href: '#remove',
-                        onclick: vm.buildRemoveBlacklistAddress(number),
-                        style: number === 1 ? {
-                          display: 'none'
-                        } : ""
-                      }, [
-                        m("span", {
-                          "class": "glyphicon glyphicon-remove-circle",
-                          title: "Remove Address " + number
-                        }, '')
-                      ])
-                    ])
-                  ])
-                ]);
-              }), m("div", {
-                "class": "form-group"
-              }, [
-                m("a", {
-                  "class": "",
-                  href: '#add-address',
-                  onclick: vm.addBlacklistAddress
-                }, [
-                  m("span", {
-                    "class": "glyphicon glyphicon-plus"
-                  }, ''), m("span", {}, ' Add Another Blacklist Address')
-                ])
-              ]), m("div", {
+              }, vm.description), m("hr"), m("h4", "Settings"), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddressesGroup.buildInputs(), m("div", {
                 "class": "spacer1"
               }), m("div", {
                 "class": "row"
@@ -990,7 +1272,7 @@
                     required: true
                   }, vm.returnFee)
                 ])
-              ]), m("hr"), m("h4", "Payment"), m("div", {
+              ]), m("hr"), m("h4", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("hr"), m("h4", "Payment"), m("div", {
                 "class": "row"
               }, [
                 m("div", {
@@ -1016,7 +1298,7 @@
                 }, [
                   m("span", {
                     "class": "glyphicon glyphicon-plus"
-                  }, ''), m("span", {}, ' Add Another Asset')
+                  }, ''), m("span", {}, ' Add Another Swap')
                 ])
               ]), m("div", {
                 "class": "spacer1"
@@ -1172,7 +1454,7 @@
   })();
 
   (function() {
-    var buildBalancesMElement, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
+    var buildBalancesMElement, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
     sbAdmin.ctrl.botView = {};
     swapGroupRenderers = {};
     swapGroupRenderers.rate = function(number, swap) {
@@ -1262,6 +1544,56 @@
       out = [];
       out.push(swap);
       return out;
+    };
+    buildIncomeRulesGroup = function() {
+      return sbAdmin.formGroup.newGroup({
+        id: 'incomerules',
+        fields: [
+          {
+            name: 'asset'
+          }, {
+            name: 'minThreshold'
+          }, {
+            name: 'paymentAmount'
+          }, {
+            name: 'address'
+          }
+        ],
+        buildItemRow: function(builder, number, item) {
+          return [builder.header("Income Forwarding Rule #" + number), builder.row([builder.value("Asset Received", 'asset', {}, 3), builder.value("Trigger Threshold", 'minThreshold', {}), builder.value("Payment Amount", 'paymentAmount', {}), builder.value("Payment Address", 'address', {}, 4)])];
+        },
+        displayOnly: true
+      });
+    };
+    buildBlacklistAddressesGroup = function() {
+      return sbAdmin.formGroup.newGroup({
+        id: 'blacklist',
+        fields: [
+          {
+            name: 'address'
+          }
+        ],
+        buildAllItemRows: function(items) {
+          var addressList, item, offset, _i, _len;
+          addressList = "";
+          for (offset = _i = 0, _len = items.length; _i < _len; offset = ++_i) {
+            item = items[offset];
+            addressList += (offset > 0 ? ", " : "") + item.address();
+          }
+          return m("div", {
+            "class": "item-group"
+          }, [
+            m("div", {
+              "class": "row"
+            }, m("div", {
+              "class": "col-md-12 form-control-static"
+            }, addressList))
+          ]);
+        },
+        translateFieldToNumberedValues: 'address',
+        useCompactNumberedLayout: true,
+        displayOnly: true
+      });
     };
     handleBotEventMessage = function(data) {
       var _ref;
@@ -1404,6 +1736,8 @@
         vm.swaps = m.prop(buildSwapsPropValue([]));
         vm.balances = m.prop(buildBalancesPropValue([]));
         vm.paymentBalance = m.prop('');
+        vm.incomeRulesGroup = buildIncomeRulesGroup();
+        vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           vm.resourceId(botData.id);
@@ -1415,6 +1749,8 @@
           vm.description(botData.description);
           vm.swaps(buildSwapsPropValue(botData.swaps));
           vm.balances(buildBalancesPropValue(botData.balances));
+          vm.incomeRulesGroup.unserialize(botData.incomeRules);
+          vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
@@ -1500,7 +1836,9 @@
                 id: 'balances'
               }, buildBalancesMElement(vm.balances()))
             ])
-          ]), m("hr"), vm.swaps().map(function(swap, offset) {
+          ]), m("hr"), m("h4", "Blacklisted Addresses"), vm.blacklistAddressesGroup.buildValues(), m("div", {
+            "class": "spacer1"
+          }), m("hr"), vm.incomeRulesGroup.buildValues(), m("hr"), vm.swaps().map(function(swap, offset) {
             return swapGroup(offset + 1, swap);
           }), m("hr"), m("div", {
             "class": "bot-events"
