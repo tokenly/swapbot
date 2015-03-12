@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b180bc9b4aa3d51596beed0a22107082",
+    "hash": "ed80405c49cf1613d8381698ef688d58",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -966,16 +966,16 @@
         },
         {
             "name": "metabor/statemachine",
-            "version": "dev-master",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Metabor/Statemachine.git",
-                "reference": "dfae2a24228e09af648fd89fc049414c98c93205"
+                "reference": "a578e8a36b82403ea1d982ef2429b3b379e60dbd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Metabor/Statemachine/zipball/dfae2a24228e09af648fd89fc049414c98c93205",
-                "reference": "dfae2a24228e09af648fd89fc049414c98c93205",
+                "url": "https://api.github.com/repos/Metabor/Statemachine/zipball/a578e8a36b82403ea1d982ef2429b3b379e60dbd",
+                "reference": "a578e8a36b82403ea1d982ef2429b3b379e60dbd",
                 "shasum": ""
             },
             "require": {
@@ -1021,7 +1021,7 @@
                 "statemachine",
                 "status"
             ],
-            "time": "2015-01-28 07:55:21"
+            "time": "2015-03-12 19:14:16"
         },
         {
             "name": "monolog/monolog",
@@ -3906,8 +3906,7 @@
         "tokenly/token-generator": 20,
         "tokenly/pusher-client": 20,
         "tokenly/laravel-event-log": 20,
-        "tokenly/laravel-api-provider": 20,
-        "metabor/statemachine": 20
+        "tokenly/laravel-api-provider": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
