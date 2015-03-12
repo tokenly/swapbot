@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
 use Swapbot\Commands\ProcessPendingSwaps;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
@@ -71,6 +72,9 @@ class ReceiveEventProcessor {
         // process any swaps that are pending (including those just created)
         $this->dispatch(new ProcessPendingSwaps());
         
+        // process any payments that are pending
+        $this->dispatch(new ProcessIncomeForwardingForAllBots());
+        
     }
 
     public function handlePublicAddressReceive($xchain_notification, $bot) {
@@ -82,22 +86,22 @@ class ReceiveEventProcessor {
 
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
-                'transaction'                  => $transaction_model,
-                'xchain_notification'          => $xchain_notification,
-                'bot'                          => $bot,
-                'statemachine'                 => $bot->stateMachine(),
+                'transaction'                      => $transaction_model,
+                'xchain_notification'              => $xchain_notification,
+                'bot'                              => $bot,
+                'statemachine'                     => $bot->stateMachine(),
 
-                'confirmations'                => $xchain_notification['confirmations'],
-                'is_confirmed'                 => $xchain_notification['confirmed'],
-                'destination'                  => $xchain_notification['sources'][0],
+                'confirmations'                    => $xchain_notification['confirmations'],
+                'is_confirmed'                     => $xchain_notification['confirmed'],
+                'destination'                      => $xchain_notification['sources'][0],
 
-                'tx_is_handled'                => false,
-                'transaction_update_vars'      => [],
-                'should_update_bot_balance'    => ($xchain_notification['confirmed'] ? true : false),
+                'tx_is_handled'                    => false,
+                'transaction_update_vars'          => [],
+                'should_update_bot_balance'        => ($xchain_notification['confirmed'] ? true : false),
 
-                'any_processing_errors'        => false,
-                'should_reconcile_bot_state'   => true,
-                'should_reconcile_swap_states' => true,
+                'any_processing_errors'            => false,
+                'should_reconcile_bot_state'       => true,
+                'should_reconcile_swap_states'     => true,
             ]);
 
             // previously processed transactions
@@ -171,8 +175,8 @@ class ReceiveEventProcessor {
             $tx_process['tx_is_handled']                = true;
 
             // do not reconcile the bot and swap states
-            $tx_process['should_reconcile_bot_state']   = false;
-            $tx_process['should_reconcile_swap_states'] = false;
+            $tx_process['should_reconcile_bot_state']       = false;
+            $tx_process['should_reconcile_swap_states']     = false;
         }
     }    
 

@@ -1,0 +1,55 @@
+# Test basic income forwarding failure
+
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    balances:
+        LTBCOIN: 1000000
+        BTC: 9.9001
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta:
+      baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml
+      xchainFailAfterRequests: 1
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+    data:
+      quantity: 100000
+  # - 
+  #   meta: { baseFilename: send_BTC_TO_FORWARDING_ADDRESS.yml }
+
+expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN-100.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN-100.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+  - #### income forwarded failed
+    meta: { baseFilename: income.forward.failed.yml }
+
+expectedBotModels:
+  - 
+    state: active
+    balances:
+        LTBCOIN: 900000
+        BTC: 10
+
+

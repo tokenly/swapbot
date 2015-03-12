@@ -32,5 +32,12 @@ swaps:
     strategy: rate
     rate: 0.00000100
 
+income_rules:
+  -
+    asset: BTC
+    minThreshold: 10
+    paymentAmount: 2
+    address: INCOME_FORWARDING_ADDRESS_0000001
+
 payments:
   - {credit: true, amount: 1.0}

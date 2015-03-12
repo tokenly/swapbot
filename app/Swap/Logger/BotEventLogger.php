@@ -374,6 +374,31 @@ class BotEventLogger {
         ]);
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // income forwarding
+
+    
+    // ($bot, $send_result, $destination, $quantity, $asset)
+    public function logIncomeForwardingResult(Bot $bot, $send_result, $destination, $quantity, $asset) {
+        // log the send
+        return $this->logToBotEvents($bot, 'income.forwarded', BotEvent::LEVEL_INFO, [
+            'msg'         => "Sent an income forwarding payment of {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
+            'destination' => $destination,
+            'outQty'      => $quantity,
+            'outAsset'    => $asset,
+            'sentTxID'    => $send_result['txid'],
+        ]);
+
+    }
+
+    public function logIncomeForwardingFailed(Bot $bot, $e) {
+        return $this->logToBotEventsWithoutEventLog($bot, 'income.forward.failed', BotEvent::LEVEL_WARNING, [
+            'msg'   => "Failed to forward income.",
+            'error' => $e->getMessage(),
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine(),
+        ]);
+    }
 
 
     ////////////////////////////////////////////////////////////////////////
