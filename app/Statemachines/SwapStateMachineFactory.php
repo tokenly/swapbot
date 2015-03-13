@@ -72,6 +72,9 @@ class SwapStateMachineFactory extends StateMachineFactory {
         // SwapState::ERROR => SwapState::READY with SwapStateEvent::SWAP_RETRY via SwapRetry
         $this->addTransitionToStates($states, SwapState::ERROR, SwapState::READY, SwapStateEvent::SWAP_RETRY, new SwapRetry());
 
+        // SwapState::READY => SwapState::OUT_OF_STOCK with SwapStateEvent::STOCK_DEPLETED via StockDepleted
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::OUT_OF_STOCK, SwapStateEvent::STOCK_DEPLETED, new StockDepleted());
+
 
         return $states;
     }
