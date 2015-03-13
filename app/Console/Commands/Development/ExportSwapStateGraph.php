@@ -8,24 +8,25 @@ use Graphp\GraphViz\GraphViz;
 use Illuminate\Console\Command;
 use Metabor\Statemachine\Graph\GraphBuilder;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Models\Data\SwapState;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ExportBotStateGraph extends Command {
+class ExportSwapStateGraph extends Command {
 
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'swapbotdev:export-bot-state-graph';
+    protected $name = 'swapbotdev:export-swap-state-graph';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Builds an SVG of the bot state machine.';
+    protected $description = 'Builds an SVG of the swap state machine.';
 
     /**
      * Create a new command instance.
@@ -44,18 +45,18 @@ class ExportBotStateGraph extends Command {
      */
     public function fire()
     {
-        $this->comment('exporting bot graph');
+        $this->comment('exporting swap graph');
 
         $graph = new Graph();
         $builder = new GraphBuilder($graph);
 
-        $process = app('Swapbot\Statemachines\BotStateMachineFactory')->buildStateMachineProcess(BotState::BRAND_NEW, "SwapBot State");
+        $process = app('Swapbot\Statemachines\SwapStateMachineFactory')->buildStateMachineProcess(SwapState::BRAND_NEW, "Swap State");
 
         $builder->addStateCollection($process);
         $viz = new GraphViz($graph);
         $viz->setFormat('svg');
 
-        copy($viz->createImageFile($graph), 'bot-graph.'.Carbon::create()->format("Ymd_His").'.svg');
+        copy($viz->createImageFile($graph), 'swap-graph.'.Carbon::create()->format("Ymd_His").'.svg');
     }
 
     /**

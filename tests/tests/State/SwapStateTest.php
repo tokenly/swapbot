@@ -64,7 +64,7 @@ class SwapStateTest extends TestCase {
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
 
-        // transition with stock depleted
+        // transition with stock checked
         $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
         $this->checkState($swap, SwapState::READY);
 
@@ -86,6 +86,21 @@ class SwapStateTest extends TestCase {
         $state_machine->triggerEvent(SwapStateEvent::SWAP_RETRY);
         $this->checkState($swap, SwapState::READY);
         
+
+        ////////////////////////////////////////////////////////////////////////
+        
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // go to out of stock
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+        $this->checkState($swap, SwapState::OUT_OF_STOCK);
+
 
     }
 
