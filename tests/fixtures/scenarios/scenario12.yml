@@ -18,6 +18,7 @@ xchainNotifications:
     asset: FOOBAR
     quantity: 1000
     blockId: 300001
+    confirmations: 2
 
 
 

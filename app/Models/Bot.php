@@ -13,7 +13,7 @@ use Tokenly\CurrencyLib\CurrencyUtil;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', ];
+    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', ];
 
     protected $dates = ['balances_updated_at'];
 

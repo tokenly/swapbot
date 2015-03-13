@@ -10,6 +10,8 @@ class SwapStateEvent {
     const SWAP_ERRORED   = 'swapErrored';
     const SWAP_SENT      = 'swapSent';
     const SWAP_COMPLETED = 'swapCompleted';
+    const CONFIRMING     = 'confirming';
+    const CONFIRMED      = 'confirmed';
 
     const SWAP_RETRY     = 'swapRetry';
 

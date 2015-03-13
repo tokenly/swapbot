@@ -35,9 +35,8 @@ xchainNotifications:
         baseFilename: confirmed_BTC_RECEIVE_notification_01.yml
         xchainFailAfterRequests: 1
   -
-    meta:
-        baseFilename: confirmed_BTC_RECEIVE_notification_01.yml
-        confirmations: 2
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
 
 
 
@@ -85,7 +84,7 @@ expectedBotEvents:
 
   - #### transaction handled previously
     meta: { baseFilename: tx.previous.yml }
-    msg: Transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 has already been processed.  Ignoring it.
+    msg: Transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 was confirmed with 2 confirmations.
     txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
 
   # - 
@@ -101,14 +100,14 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found.yml }
-    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Will vend 5000 SOUP to SENDER01.
+    msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Will vend 5000 SOUP to SENDER01.
     inQty: 0.001
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
   - #### swap sent
     meta: { baseFilename: swap.sent.yml }
-    msg: Received 0.001 BTC from SENDER01 with 1 confirmation. Sent 5000 SOUP to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Sent 5000 SOUP to SENDER01 with transaction ID 0000000000000000000000000000001111.
     inQty: 0.001
     inAsset: BTC
     outQty: 5000
@@ -127,7 +126,7 @@ expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_EMPTY.yml }
     txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
-    confirmations: '1'
+    confirmations: 2
     processed: '1'
     # swap_receipts: 
     #     "BTC:LTBCOIN":
@@ -143,3 +142,5 @@ expectedSwapModels:
     meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
   -
     meta: { baseFilename: swap_model_BTC_SOUP.yml }
+    receipt:
+      confirmations: 2

@@ -41,6 +41,12 @@ class ReconcileSwapStateHandler {
                         $swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
                     }
                     break;
+
+                // case SwapState::CONFIRMING:
+                //     if (!$this->swapHasBeenConfirmed($swap)) {
+                //         $swap->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
+                //     }
+                //     break;
                 
                 case SwapState::READY:
                     if (!$this->swapBalanceIsSufficient($swap)) {

@@ -42,6 +42,7 @@ class BotHelper  {
             'balances_updated_at'        => null,
             'blacklist_addresses'        => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
             'return_fee'                 => 0.0001,
+            'confirmations_required'     => 1,
             'state'                      => BotState::BRAND_NEW,
 
             'status_details'             => null,

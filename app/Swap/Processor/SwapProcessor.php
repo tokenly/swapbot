@@ -79,7 +79,7 @@ class SwapProcessor {
                 'xchain_notification' => $xchain_notification,
                 'in_quantity'         => $xchain_notification['quantity'],
                 'destination'         => $xchain_notification['sources'][0],
-                'confirmations'       => $xchain_notification['confirmations'],
+                'confirmations'       => $transaction['confirmations'],
                 'is_confirmed'        => $xchain_notification['confirmed'],
 
                 'quantity'            => null,
@@ -103,6 +103,9 @@ class SwapProcessor {
 
             // see if the swap has already been handled
             $this->handlePreviouslyProcessedSwap($swap_process);
+
+            // see if the swap is still confirming
+            $this->handleUnconfirmedSwap($swap_process);
 
             // if all the checks above passed
             //   then we should process this swap
@@ -184,6 +187,29 @@ class SwapProcessor {
             // log as previously processed
             $this->bot_event_logger->logPreviouslyProcessedSwap($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
         }
+    }
+    
+    protected function handleUnconfirmedSwap($swap_process) {
+        if ($swap_process['swap_was_handled']) { return; }
+
+        if ($swap_process['confirmations'] < $swap_process['bot']['confirmations_required']) {
+            // move the swap into the confirming state
+            $swap_process['state_trigger'] = SwapStateEvent::CONFIRMING;
+            
+            // don't process it any further
+            $swap_process['swap_was_handled'] = true;
+
+            // log as confirming
+            $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+        } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
+            if ($swap_process['swap']->isConfirming()) {
+                // the swap just became confirmed
+                //   update the state right now
+                $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+                $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
+            }
+        }
+
     }
     
     protected function doSwap($swap_process) {

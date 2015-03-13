@@ -42,6 +42,9 @@ class Swap extends Model {
     public function isReady() {
         return ($this['state'] == SwapState::READY);
     }
+    public function isConfirming() {
+        return ($this['state'] == SwapState::CONFIRMING);
+    }
     public function isComplete() {
         return ($this['state'] == SwapState::COMPLETE);
     }

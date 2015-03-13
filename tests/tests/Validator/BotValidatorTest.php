@@ -84,6 +84,14 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [1 => ['in' => 'FOOC','out' => 'BOOC','rate'=>1,]]]),
                 'error' => 'Please specify a swap strategy for swap #2',
             ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => '']),
+                'error' => 'The confirmations required field is required.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => 0]),
+                'error' => 'The confirmations required must be at least 1.',
+            ],
         ];
 
         // fixed
@@ -185,6 +193,14 @@ class BotValidatorTest extends TestCase {
             [
                 'vars' => ['swaps' => [0 => ['in' => '', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,'strategy' => 'rate']]],
                 'error' => 'specify an asset to receive for swap #1',
+            ],
+            [
+                'vars' => ['confirmations_required' => 0],
+                'error' => 'The confirmations required must be at least 1.',
+            ],
+            [
+                'vars' => ['confirmations_required' => -1],
+                'error' => 'The confirmations required must be at least 1.',
             ],
         ];
 

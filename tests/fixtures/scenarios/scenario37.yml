@@ -1,0 +1,64 @@
+# 3 confirmations are required
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 3
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 3
+    blockId: 300002
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC.yml }
+
+expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-BTC-1of3.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-BTC-2of3.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous-3.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-BTC-3.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-3confirmations.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent-3confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }
+    confirmations: 3

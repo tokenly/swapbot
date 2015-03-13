@@ -13,6 +13,8 @@ use Swapbot\Statemachines\StateMachineFactory;
 use Swapbot\Statemachines\SwapCommand\StockChecked;
 use Swapbot\Statemachines\SwapCommand\StockDepleted;
 use Swapbot\Statemachines\SwapCommand\SwapCompleted;
+use Swapbot\Statemachines\SwapCommand\SwapConfirmed;
+use Swapbot\Statemachines\SwapCommand\SwapConfirming;
 use Swapbot\Statemachines\SwapCommand\SwapErrored;
 use Swapbot\Statemachines\SwapCommand\SwapRetry;
 use Swapbot\Statemachines\SwapCommand\SwapSent;
@@ -35,6 +37,7 @@ class SwapStateMachineFactory extends StateMachineFactory {
         return [
             SwapState::BRAND_NEW    => new SwapState(SwapState::BRAND_NEW),
             SwapState::READY        => new SwapState(SwapState::READY),
+            SwapState::CONFIRMING   => new SwapState(SwapState::CONFIRMING),
             SwapState::OUT_OF_STOCK => new SwapState(SwapState::OUT_OF_STOCK),
             SwapState::SENT         => new SwapState(SwapState::SENT),
             SwapState::COMPLETE     => new SwapState(SwapState::COMPLETE),
@@ -59,6 +62,15 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::OUT_OF_STOCK => SwapState::READY with SwapStateEvent::STOCK_CHECKED via StockChecked
         $this->addTransitionToStates($states, SwapState::OUT_OF_STOCK, SwapState::READY, SwapStateEvent::STOCK_CHECKED, new StockChecked());
+
+        // SwapState::READY => SwapState::CONFIRMING with SwapStateEvent::CONFIRMING via SwapConfirming
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::CONFIRMING, SwapStateEvent::CONFIRMING, new SwapConfirming());
+
+        // SwapState::CONFIRMING => SwapState::READY with SwapStateEvent::CONFIRMED via SwapConfirmed
+        $this->addTransitionToStates($states, SwapState::CONFIRMING, SwapState::READY, SwapStateEvent::CONFIRMED, new SwapConfirmed());
+
+        // SwapState::CONFIRMING => SwapState::CONFIRMING with SwapStateEvent::CONFIRMING via SwapConfirming
+        $this->addTransitionToStates($states, SwapState::CONFIRMING, SwapState::CONFIRMING, SwapStateEvent::CONFIRMING, new SwapConfirming());
 
         // SwapState::READY => SwapState::SENT with SwapStateEvent::SWAP_SENT via SwapSent
         $this->addTransitionToStates($states, SwapState::READY, SwapState::SENT, SwapStateEvent::SWAP_SENT, new SwapSent());

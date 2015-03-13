@@ -9,9 +9,10 @@ class UpdateBotValidator extends BotValidator {
     protected $swaps_required = false;
 
     protected $rules = [
-        'name'        => 'sometimes|required',
-        'description' => 'sometimes|required',
-        'return_fee'  => 'sometimes|numeric|min:0.00001',
+        'name'                   => 'sometimes|required',
+        'description'            => 'sometimes|required',
+        'return_fee'             => 'sometimes|numeric|min:0.00001',
+        'confirmations_required' => 'sometimes|integer|min:1',
     ];
 
 }

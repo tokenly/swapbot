@@ -83,6 +83,7 @@ class ReceiveEventProcessor {
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
+            Log::debug("xchain notification received: {$xchain_notification['confirmations']}");
 
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
@@ -167,21 +168,26 @@ class ReceiveEventProcessor {
         if ($tx_process['tx_is_handled']) { return; }
 
         if ($tx_process['transaction']['processed']) {
-            $this->bot_event_logger->logToBotEvents($tx_process['bot'], 'tx.previous', BotEvent::LEVEL_DEBUG, [
-                'msg'  => "Transaction {$tx_process['xchain_notification']['txid']} has already been processed.  Ignoring it.",
-                'txid' => $tx_process['xchain_notification']['txid']
-            ]);
+            $this->bot_event_logger->logPreviousTransaction($tx_process['bot'], $tx_process['xchain_notification']['txid'], $tx_process['confirmations']);
 
-            $tx_process['tx_is_handled']                = true;
+            // update the notification and the confirmations
+            $tx_process['transaction_update_vars']['xchain_notification'] = $tx_process['xchain_notification'];
+            $tx_process['transaction_update_vars']['confirmations']       = $tx_process['confirmations'];
 
-            // do not reconcile the bot and swap states
-            $tx_process['should_reconcile_bot_state']       = false;
-            $tx_process['should_reconcile_swap_states']     = false;
+            // the bot state may have changed
+            $tx_process['should_reconcile_bot_state']   = false;
+
+            // and we do need to reconcile swap states
+            $tx_process['should_reconcile_swap_states'] = false;
+
+            // mark the transaction as handled
+            $tx_process['tx_is_handled'] = true;
         }
     }    
 
     protected function updateBotBalances($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
+        if ($tx_process['transaction']['processed']) { return; }
 
         if ($tx_process['is_confirmed']) {
             // update the bot's balance
@@ -195,6 +201,7 @@ class ReceiveEventProcessor {
     // is this a fuel top-up?
     protected function checkForIncomingFuelTransaction($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
+        if ($tx_process['transaction']['processed']) { return; }
 
         if ($tx_process['xchain_notification']['asset'] == 'BTC' AND in_array($tx_process['bot']['payment_address'], $tx_process['xchain_notification']['sources'])) {
             // this is a fuel transaction
@@ -212,6 +219,7 @@ class ReceiveEventProcessor {
     // check for blacklisted sources
     protected function checkForBlacklistedAddresses($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
+        if ($tx_process['transaction']['processed']) { return; }
 
         $blacklist_addresses = $tx_process['bot']['blacklist_addresses'];
 
