@@ -105,6 +105,7 @@ do ()->
     sbAdmin.ctrl.botPaymentsView.view = ()->
 
         # console.log "vm.balances()=",vm.balances()
+        # console.log "vm.payments().length=",vm.payments().length
 
         mEl = m("div", [
                 m("h2", "SwapBot #{vm.name()}"),
@@ -131,6 +132,7 @@ do ()->
                     m("div", {class: "bot-payments"}, [
                         m("small", {class: "pull-right"}, "newest first"),
                         m("h3", "Payment History"),
+                        if vm.payments().length == 0 then m("div", {class:"no-payments", }, "No Payments Yet") else null,
                         m("ul", {class: "list-unstyled striped-list bot-list payment-list"}, [
                             vm.payments().map (botPaymentObj)->
                                 dateObj = window.moment(botPaymentObj.createdAt)

@@ -42,7 +42,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                         $asset = $income_rule_config['asset'];
                         $destination = $income_rule_config['address'];
                         $quantity = $income_rule_config['paymentAmount'];
-                        $fee = Config::get('swapbot.defaultFee');
+                        $fee = $bot['return_fee'];
                         $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee);
 
                         // log the event

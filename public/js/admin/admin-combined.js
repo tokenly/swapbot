@@ -1168,6 +1168,7 @@
         vm.description = m.prop('');
         vm.paymentPlan = m.prop('');
         vm.returnFee = m.prop(0.0001);
+        vm.confirmationsRequired = m.prop(2);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
@@ -1180,7 +1181,8 @@
             vm.description(botData.description);
             vm.paymentPlan(botData.paymentPlan);
             vm.swaps(buildSwapsPropValue(botData.swaps));
-            vm.returnFee(botData.returnFee || 0.0001);
+            vm.returnFee(botData.returnFee || "0.0001");
+            vm.confirmationsRequired(botData.confirmationsRequired || "2");
             vm.incomeRulesGroup.unserialize(botData.incomeRules);
             vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
           }, function(errorResponse) {
@@ -1209,9 +1211,10 @@
             description: vm.description(),
             paymentPlan: vm.paymentPlan(),
             swaps: vm.swaps(),
-            returnFee: vm.returnFee(),
+            returnFee: vm.returnFee() + "",
             incomeRules: vm.incomeRulesGroup.serialize(),
-            blacklistAddresses: vm.blacklistAddressesGroup.serialize()
+            blacklistAddresses: vm.blacklistAddressesGroup.serialize(),
+            confirmationsRequired: vm.confirmationsRequired() + ""
           };
           if (vm.resourceId().length > 0) {
             apiCall = sbAdmin.api.updateBot;
@@ -1258,7 +1261,7 @@
                 id: 'description',
                 'placeholder': "Bot Description",
                 required: true
-              }, vm.description), m("hr"), m("h4", "Settings"), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddressesGroup.buildInputs(), m("div", {
+              }, vm.description), m("hr"), m("h4", "Settings"), m("div", {
                 "class": "spacer1"
               }), m("div", {
                 "class": "row"
@@ -1266,13 +1269,27 @@
                 m("div", {
                   "class": "col-md-5"
                 }, [
+                  sbAdmin.form.mFormField("Confirmations", {
+                    id: 'confirmations_required',
+                    'placeholder': "2",
+                    type: "number",
+                    step: "1",
+                    min: "1",
+                    required: true
+                  }, vm.confirmationsRequired)
+                ]), m("div", {
+                  "class": "col-md-5"
+                }, [
                   sbAdmin.form.mFormField("Return Transaction Fee", {
-                    id: 'name',
+                    id: 'return_fee',
                     'placeholder': "0.0001",
+                    type: "number",
+                    step: "any",
+                    min: "0.00001",
                     required: true
                   }, vm.returnFee)
                 ])
-              ]), m("hr"), m("h4", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("hr"), m("h4", "Payment"), m("div", {
+              ]), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddressesGroup.buildInputs(), m("hr"), m("h4", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("hr"), m("h4", "Payment"), m("div", {
                 "class": "row"
               }, [
                 m("div", {
@@ -1418,7 +1435,9 @@
           }, [
             m("small", {
               "class": "pull-right"
-            }, "newest first"), m("h3", "Payment History"), m("ul", {
+            }, "newest first"), m("h3", "Payment History"), vm.payments().length === 0 ? m("div", {
+              "class": "no-payments"
+            }, "No Payments Yet") : null, m("ul", {
               "class": "list-unstyled striped-list bot-list payment-list"
             }, [
               vm.payments().map(function(botPaymentObj) {
@@ -1735,6 +1754,8 @@
         vm.state = m.prop('');
         vm.swaps = m.prop(buildSwapsPropValue([]));
         vm.balances = m.prop(buildBalancesPropValue([]));
+        vm.confirmationsRequired = m.prop('');
+        vm.returnFee = m.prop('');
         vm.paymentBalance = m.prop('');
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
@@ -1749,6 +1770,8 @@
           vm.description(botData.description);
           vm.swaps(buildSwapsPropValue(botData.swaps));
           vm.balances(buildBalancesPropValue(botData.balances));
+          vm.confirmationsRequired(botData.confirmationsRequired);
+          vm.returnFee(botData.returnFee);
           vm.incomeRulesGroup.unserialize(botData.incomeRules);
           vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
         }, function(errorResponse) {
@@ -1822,6 +1845,22 @@
                 "class": "row"
               }, [
                 m("div", {
+                  "class": "col-md-4"
+                }, [
+                  sbAdmin.form.mValueDisplay("Return Transaction Fee", {
+                    id: 'return_fee'
+                  }, vm.returnFee() + ' BTC')
+                ]), m("div", {
+                  "class": "col-md-4"
+                }, [
+                  sbAdmin.form.mValueDisplay("Confirmations", {
+                    id: 'confirmations_required'
+                  }, vm.confirmationsRequired())
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
                   "class": "col-md-12"
                 }, [
                   sbAdmin.form.mValueDisplay("Bot Description", {
@@ -1836,11 +1875,11 @@
                 id: 'balances'
               }, buildBalancesMElement(vm.balances()))
             ])
-          ]), m("hr"), m("h4", "Blacklisted Addresses"), vm.blacklistAddressesGroup.buildValues(), m("div", {
-            "class": "spacer1"
-          }), m("hr"), vm.incomeRulesGroup.buildValues(), m("hr"), vm.swaps().map(function(swap, offset) {
+          ]), m("hr"), vm.swaps().map(function(swap, offset) {
             return swapGroup(offset + 1, swap);
-          }), m("hr"), m("div", {
+          }), m("hr"), m("h4", "Blacklisted Addresses"), vm.blacklistAddressesGroup.buildValues(), m("div", {
+            "class": "spacer1"
+          }), m("hr"), vm.incomeRulesGroup.buildValues(), m("hr"), m("div", {
             "class": "bot-events"
           }, [
             m("div", {
@@ -1857,7 +1896,9 @@
               }), m("div", {
                 "class": "rect5"
               })
-            ]), m("h3", "Events"), m("ul", {
+            ]), m("h3", "Events"), vm.botEvents().length === 0 ? m("div", {
+              "class": "no-events"
+            }, "No Events Yet") : null, m("ul", {
               "class": "list-unstyled striped-list bot-list event-list"
             }, [
               vm.botEvents().map(function(botEventObj) {

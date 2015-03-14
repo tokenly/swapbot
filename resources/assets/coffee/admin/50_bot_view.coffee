@@ -222,6 +222,8 @@ do ()->
             vm.state = m.prop('')
             vm.swaps = m.prop(buildSwapsPropValue([]))
             vm.balances = m.prop(buildBalancesPropValue([]))
+            vm.confirmationsRequired = m.prop('')
+            vm.returnFee = m.prop('')
             vm.paymentBalance = m.prop('')
 
             vm.incomeRulesGroup = buildIncomeRulesGroup()
@@ -243,6 +245,8 @@ do ()->
                     vm.description(botData.description)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
                     vm.balances(buildBalancesPropValue(botData.balances))
+                    vm.confirmationsRequired(botData.confirmationsRequired)
+                    vm.returnFee(botData.returnFee)
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
@@ -332,6 +336,15 @@ do ()->
                             ]),
 
                             m("div", { class: "row"}, [
+                                m("div", {class: "col-md-4"}, [
+                                    sbAdmin.form.mValueDisplay("Return Transaction Fee", {id: 'return_fee',  }, vm.returnFee()+' BTC'),
+                                ]),
+                                m("div", {class: "col-md-4"}, [
+                                    sbAdmin.form.mValueDisplay("Confirmations", {id: 'confirmations_required', }, vm.confirmationsRequired()),
+                                ]),
+                            ]),
+
+                            m("div", { class: "row"}, [
                                 m("div", {class: "col-md-12"}, [
                                     sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
                                 ]),
@@ -349,27 +362,27 @@ do ()->
 
                     m("hr"),
 
-                    m("h4", "Blacklisted Addresses"),
-                    vm.blacklistAddressesGroup.buildValues(),
-                    m("div", {class: "spacer1"}),
-                    m("hr"),
-
-                    # overflow/income address
-                    # m("h4", "Income Forwarding"),
-                    vm.incomeRulesGroup.buildValues(),
-
-
-                    m("hr"),
-
                     vm.swaps().map (swap, offset)->
                         return swapGroup(offset+1, swap)
 
+                    m("hr"),
+
+                    m("h4", "Blacklisted Addresses"),
+                    vm.blacklistAddressesGroup.buildValues(),
+                    m("div", {class: "spacer1"}),
+
+
+                    m("hr"),
+
+                    # overflow/income address
+                    vm.incomeRulesGroup.buildValues(),
 
                     m("hr"),
 
                     m("div", {class: "bot-events"}, [
                         m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
                         m("h3", "Events"),
+                        if vm.botEvents().length == 0 then m("div", {class:"no-events", }, "No Events Yet") else null,
                         m("ul", {class: "list-unstyled striped-list bot-list event-list"}, [
                             vm.botEvents().map (botEventObj)->
                                 if not vm.showDebug and botEventObj.level <= 100
