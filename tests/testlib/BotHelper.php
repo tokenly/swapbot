@@ -53,6 +53,7 @@ class BotHelper  {
                     'out'      => 'LTBCOIN',
                     'strategy' => 'rate',
                     'rate'     => 0.00000150,
+                    'min'      => 0,
                 ],
             ],
 

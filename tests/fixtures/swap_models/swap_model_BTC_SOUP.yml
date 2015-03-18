@@ -3,3 +3,4 @@ state: sent
 receipt:
     txid: "0000000000000000000000000000001111"
     confirmations: 1
+    type: swap

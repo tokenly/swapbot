@@ -39,6 +39,14 @@ class IncomeRuleConfig extends ArrayObject implements APISerializeable {
 
     public function serializeForAPI() { return $this->serialize(); }
 
+    public function isEmpty() {
+        return (
+            !strlen($this['asset'])
+            AND !strlen($this['minThreshold'])
+            AND !strlen($this['paymentAmount'])
+            AND !strlen($this['address'])
+        );
+    }
 
 
 }

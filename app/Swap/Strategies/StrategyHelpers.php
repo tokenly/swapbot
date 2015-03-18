@@ -48,9 +48,17 @@ class StrategyHelpers {
         return true;
     }
 
-    public static function isValidQuantity($quantity) {
+    public static function isValidQuantityOrZero($quantity) {
+        return self::isValidQuantity($quantity, true);
+    }
+
+    public static function isValidQuantity($quantity, $allow_zero=false) {
         $quantity = floatval($quantity);
-        if ($quantity <= 0) { return false; }
+        if ($allow_zero) {
+            if ($quantity < 0) { return false; }
+        } else {
+            if ($quantity <= 0) { return false; }
+        }
 
         return true;
     }

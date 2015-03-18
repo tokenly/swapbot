@@ -16,6 +16,7 @@ use Swapbot\Statemachines\SwapCommand\SwapCompleted;
 use Swapbot\Statemachines\SwapCommand\SwapConfirmed;
 use Swapbot\Statemachines\SwapCommand\SwapConfirming;
 use Swapbot\Statemachines\SwapCommand\SwapErrored;
+use Swapbot\Statemachines\SwapCommand\SwapRefund;
 use Swapbot\Statemachines\SwapCommand\SwapRetry;
 use Swapbot\Statemachines\SwapCommand\SwapSent;
 
@@ -40,6 +41,7 @@ class SwapStateMachineFactory extends StateMachineFactory {
             SwapState::CONFIRMING   => new SwapState(SwapState::CONFIRMING),
             SwapState::OUT_OF_STOCK => new SwapState(SwapState::OUT_OF_STOCK),
             SwapState::SENT         => new SwapState(SwapState::SENT),
+            SwapState::REFUNDED     => new SwapState(SwapState::REFUNDED),
             SwapState::COMPLETE     => new SwapState(SwapState::COMPLETE),
             SwapState::ERROR        => new SwapState(SwapState::ERROR),
         ];
@@ -86,6 +88,13 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::READY => SwapState::OUT_OF_STOCK with SwapStateEvent::STOCK_DEPLETED via StockDepleted
         $this->addTransitionToStates($states, SwapState::READY, SwapState::OUT_OF_STOCK, SwapStateEvent::STOCK_DEPLETED, new StockDepleted());
+
+
+        // SwapState::READY => SwapState::REFUNDED with SwapStateEvent::SWAP_REFUND via SwapRefund
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::REFUNDED, SwapStateEvent::SWAP_REFUND, new SwapRefund());
+
+        // SwapState::REFUNDED => SwapState::COMPLETE with SwapStateEvent::SWAP_COMPLETED via Command
+        $this->addTransitionToStates($states, SwapState::REFUNDED, SwapState::COMPLETE, SwapStateEvent::SWAP_COMPLETED, new SwapCompleted());
 
 
         return $states;

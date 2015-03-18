@@ -1,0 +1,7 @@
+name: swap.refunded
+msg: Received 500 LTBCOIN from SENDER01 with 1 confirmation. Refunded 500 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
+destination: SENDER01
+outQty: 500
+outAsset: LTBCOIN
+sentTxID: '0000000000000000000000000000001111'
+confirmations: 1

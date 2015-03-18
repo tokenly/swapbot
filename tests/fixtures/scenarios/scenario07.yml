@@ -105,6 +105,7 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
+    confirmations: 2
   - #### swap sent
     meta: { baseFilename: swap.sent.yml }
     msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Sent 5000 SOUP to SENDER01 with transaction ID 0000000000000000000000000000001111.
@@ -112,6 +113,7 @@ expectedBotEvents:
     inAsset: BTC
     outQty: 5000
     outAsset: SOUP
+    confirmations: 2
 
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }

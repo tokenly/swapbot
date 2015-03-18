@@ -15,9 +15,9 @@ use Swapbot\Models\Swap;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Exception\SwapStrategyException;
-use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Swapbot\Swap\Processor\Util\BalanceUpdater;
+use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 
@@ -34,12 +34,11 @@ class SwapProcessor {
      *
      * @return void
      */
-    public function __construct(Client $xchain_client, SwapRepository $swap_repository, BotRepository $bot_repository, StrategyFactory $strategy_factory, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
+    public function __construct(Client $xchain_client, SwapRepository $swap_repository, BotRepository $bot_repository, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
     {
         $this->xchain_client    = $xchain_client;
         $this->swap_repository  = $swap_repository;
         $this->bot_repository   = $bot_repository;
-        $this->strategy_factory = $strategy_factory;
         $this->bot_event_logger = $bot_event_logger;
         $this->balance_updater  = $balance_updater;
     }
@@ -77,6 +76,7 @@ class SwapProcessor {
                 'bot'                 => $bot,
 
                 'xchain_notification' => $xchain_notification,
+                'in_asset'            => $xchain_notification['asset'],
                 'in_quantity'         => $xchain_notification['quantity'],
                 'destination'         => $xchain_notification['sources'][0],
                 'confirmations'       => $transaction['confirmations'],
@@ -220,12 +220,23 @@ class SwapProcessor {
             return;
         }
 
+        // do we need to refund
+        $is_refunding = $swap_process['swap_config']->getStrategy()->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+        if ($is_refunding) {
+            // refund
+            $this->doRefund($swap_process);
+        } else {
+            $this->doForwardSwap($swap_process);
+        }
+    }
+
+    protected function doForwardSwap($swap_process) {
         // log the attempt to send
         $this->bot_event_logger->logSendAttempt($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
 
         // send it
         try {
-            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
         } catch (Exception $e) {
             // move the swap into an error state
             $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
@@ -236,7 +247,8 @@ class SwapProcessor {
         // update the swap receipts
         $swap_process['swap_update_vars']['receipt'] = [
             'txid'          => $send_result['txid'],
-            'confirmations' => $swap_process['confirmations']
+            'confirmations' => $swap_process['confirmations'],
+            'type'          => 'swap',
         ];
 
         // update the local balance
@@ -250,6 +262,48 @@ class SwapProcessor {
 
         // mark the swap as sent
         $swap_process['swap_was_sent'] = true;
+    }
+
+    protected function doRefund($swap_process) {
+        // log the attempt to refund
+        $this->bot_event_logger->logRefundAttempt($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $swap_process['confirmations']);
+
+        // send the refund
+        try {
+            list($fee, $dust_size) = $this->buildRefundFeeAndDustSize($swap_process['xchain_notification']);
+            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $fee, $dust_size);
+        } catch (Exception $e) {
+            // move the swap into an error state
+            $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
+
+            throw $e;
+        }
+
+        // update the swap receipts
+        $swap_process['swap_update_vars']['receipt'] = [
+            'txid'          => $send_result['txid'],
+            'confirmations' => $swap_process['confirmations'],
+            'type'          => 'refund',
+        ];
+
+        // update the local balance
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);
+
+        // move the swap into the sent state
+        $swap_process['state_trigger'] = SwapStateEvent::SWAP_REFUND;
+
+        // log it
+        $this->bot_event_logger->logRefundResult($swap_process['bot'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $swap_process['confirmations']);
+
+        // mark the swap as sent
+        $swap_process['swap_was_sent'] = true;
+    }
+
+    protected function buildRefundFeeAndDustSize($xchain_notification) {
+        $input_dust_size_sat = $xchain_notification['counterpartyTx']['dustSizeSat'];
+        $fee_sat = floor($input_dust_size_sat * 0.2);
+        $dust_size_sat = $input_dust_size_sat - $fee_sat;
+        return [CurrencyUtil::satoshisToValue($fee_sat), CurrencyUtil::satoshisToValue($dust_size_sat)];
     }
 
     protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas) {
@@ -299,10 +353,10 @@ class SwapProcessor {
         }
     }
 
-    protected function sendAssets($bot, $xchain_notification, $destination, $quantity, $asset) {
+    protected function sendAssets($bot, $destination, $quantity, $asset, $fee=null, $dust_size=null) {
         // call xchain
-        $fee = $bot['return_fee'];
-        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee);
+        if ($fee === null) { $fee = $bot['return_fee']; }
+        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee, $dust_size);
 
         return $send_result;
     }

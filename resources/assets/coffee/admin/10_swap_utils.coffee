@@ -12,11 +12,12 @@ sbAdmin.swaputils = do ()->
             rate    : m.prop(swap.rate     or '')
             in_qty  : m.prop(swap.in_qty   or '')
             out_qty : m.prop(swap.out_qty  or '')
+            min     : m.prop(swap.min      or '')
         })
 
     swaputils.allStrategyOptions = ()->
         return [
-            {k: "By Rate", v: 'rate'}
+            {k: "By Rate",          v: 'rate'}
             {k: "By Fixed Amounts", v: 'fixed'}
         ]
 

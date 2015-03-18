@@ -6,3 +6,4 @@ inAsset: LTBCOIN
 destination: SENDER01
 outQty: 0.0005
 outAsset: BTC
+confirmations: 2

@@ -7,3 +7,4 @@ outAsset: LTBCOIN
 source: SENDER01
 destination: SENDER01
 sentTxID: '0000000000000000000000000000001111'
+confirmations: 1

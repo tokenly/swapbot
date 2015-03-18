@@ -3,6 +3,7 @@ description: Just a Sample Bot
 active: true
 state: active
 payment_plan: txfee001
+confirmations_required: 1
 
 address: botaddress000000000000000000000001
 public_address_id: PUBLIC_ADDRESS_ID_01
@@ -26,11 +27,13 @@ swaps:
     out: LTBCOIN
     strategy: rate
     rate: 1000000
+    min: 0
   -
     in: LTBCOIN
     out: BTC
     strategy: rate
     rate: 0.00000100
+    min: 0
 
 income_rules:
   -

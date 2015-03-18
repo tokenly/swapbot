@@ -11,14 +11,17 @@ do ()->
                 m("div", {class: "col-md-3"}, [
                     sbAdmin.form.mFormField("Swap Type", {id: "swap_strategy_#{number}", type: 'select', options: sbAdmin.swaputils.allStrategyOptions()}, swap.strategy),
                 ]),
-                m("div", {class: "col-md-3"}, [
+                m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
                 ]),
-                m("div", {class: "col-md-3"}, [
+                m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
                 ]),
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("At Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swap.rate),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mFormField("Minimum", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swap.min),
                 ]),
                 m("div", {class: "col-md-1"}, [
                     m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [

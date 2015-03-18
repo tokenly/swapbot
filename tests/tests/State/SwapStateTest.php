@@ -13,6 +13,9 @@ class SwapStateTest extends TestCase {
         // install xchain mocks
         app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
 
+        ////////////////////////////////////////////////////////////////////////
+        // BRAND_NEW -> OUT_OF_STOCK -> READY -> SENT -> COMPLETE
+
         // make a sample swap and state machine
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
@@ -28,7 +31,7 @@ class SwapStateTest extends TestCase {
         $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
         $this->checkState($swap, SwapState::READY);
 
-        // transition to sent
+        // transition to sent (directly from ready)
         $state_machine->triggerEvent(SwapStateEvent::SWAP_SENT);
         $this->checkState($swap, SwapState::SENT);
 
@@ -36,30 +39,10 @@ class SwapStateTest extends TestCase {
         $state_machine->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
         $this->checkState($swap, SwapState::COMPLETE);
 
-        // transition to ready state
-        // $state_machine->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
-
-
-        // // bot state is updated in the db
-        // PHPUnit::assertEquals(SwapState::LOW_FUEL, $swap['state']);
-        // PHPUnit::assertEquals(SwapState::LOW_FUEL, app('Swapbot\Repositories\SwapRepository')->findByID($swap['id'])['state']);
-
-        // // receive payment again (OK)
-        // $state_machine->triggerEvent(SwapStateEvent::CREATION_FEE_PAID);
-
-        // // still low fuel
-        // PHPUnit::assertEquals(SwapState::LOW_FUEL, $state_machine->getCurrentState()->getName());
-
-
-        // // receive fuel
-        // $state_machine->triggerEvent(SwapStateEvent::FUELED);
-
-        // // bot is now active
-        // PHPUnit::assertEquals(SwapState::ACTIVE, $state_machine->getCurrentState()->getName());
-
 
         ////////////////////////////////////////////////////////////////////////
-        
+        // READY
+
         // make a sample swap and state machine
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
@@ -70,7 +53,8 @@ class SwapStateTest extends TestCase {
 
 
         ////////////////////////////////////////////////////////////////////////
-        
+        // READY -> ERROR -> READY
+
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
 
@@ -88,7 +72,8 @@ class SwapStateTest extends TestCase {
         
 
         ////////////////////////////////////////////////////////////////////////
-        
+        // READY -> OUT_OF_STOCK
+
         // make a sample swap and state machine
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
@@ -103,7 +88,8 @@ class SwapStateTest extends TestCase {
 
 
         ////////////////////////////////////////////////////////////////////////
-        
+        // READY -> CONFIRMING -> CONFIRMING -> READY
+
         // make a sample swap and state machine
         $swap = app('SwapHelper')->newSampleSwap();
         $state_machine = $swap->statemachine();
@@ -123,6 +109,29 @@ class SwapStateTest extends TestCase {
         // confirmed
         $state_machine->triggerEvent(SwapStateEvent::CONFIRMED);
         $this->checkState($swap, SwapState::READY);
+
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // READY -> REFUNDED -> COMPLETE
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to refunded
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_REFUND);
+        $this->checkState($swap, SwapState::REFUNDED);
+
+        // transition to complete
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
+        $this->checkState($swap, SwapState::COMPLETE);
+
+
 
 
     }

@@ -85,8 +85,12 @@ class BotTransformer {
         $income_rules_out = [];
 
         if ($income_rules) {
-            foreach(array_values($income_rules) as $offset => $income_rule) {
-                $income_rules_out[] = $this->sanitizeIncomeRule($income_rule);
+            foreach(array_values($income_rules) as $offset => $income_rule_vars) {
+                $income_rule = $this->sanitizeIncomeRule($income_rule_vars);
+                
+                if ($income_rule) {
+                    $income_rules_out[] = $income_rule;
+                }
             }
         }
 
@@ -94,7 +98,9 @@ class BotTransformer {
     }
 
     protected function sanitizeIncomeRule($income_rule) {
-        return IncomeRuleConfig::createFromSerialized($income_rule);
+        $config = IncomeRuleConfig::createFromSerialized($income_rule);
+        if ($config->isEmpty()) { return null; }
+        return $config;
     }
 
 

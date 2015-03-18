@@ -7,3 +7,4 @@ destination: SENDER01
 outQty: 0.0005
 outAsset: BTC
 sentTxID: '0000000000000000000000000000001111'
+confirmations: 1

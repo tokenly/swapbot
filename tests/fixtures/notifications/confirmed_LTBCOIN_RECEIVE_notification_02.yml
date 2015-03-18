@@ -12,3 +12,12 @@ confirmations: 1
 asset: LTBCOIN
 quantity: 500
 blockId: 300001
+counterpartyTx:
+  type: send
+  sources: [SENDER01]
+  destinations: [SWAPBOTADDR01]
+  quantity: 500
+  quantitySat: 50000000000
+  asset: LTBCOIN
+  dustSize: 0.00001
+  dustSizeSat: 1000

@@ -35,6 +35,7 @@ class BotEventLogger {
             'destination' => $destination,
             'outQty'      => $quantity,
             'outAsset'    => $asset,
+            'confirmations' => $confirmations,
         ]);
     }
     
@@ -42,15 +43,16 @@ class BotEventLogger {
         // log the send
         return $this->logToBotEvents($bot, 'swap.sent', BotEvent::LEVEL_INFO, [
             // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
-            'msg'         => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-            'sentTxID'    => $send_result['txid'],
+            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
+            'txid'          => $xchain_notification['txid'],
+            'source'        => $xchain_notification['sources'][0],
+            'inQty'         => $xchain_notification['quantity'],
+            'inAsset'       => $xchain_notification['asset'],
+            'destination'   => $destination,
+            'outQty'        => $quantity,
+            'outAsset'      => $asset,
+            'sentTxID'      => $send_result['txid'],
+            'confirmations' => $confirmations,
         ]);
 
     }
@@ -435,6 +437,37 @@ class BotEventLogger {
             'line'  => $e->getLine(),
         ]);
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Refund
+
+    public function logRefundAttempt(Bot $bot, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
+        // log the send
+        return $this->logToBotEvents($bot, 'swap.refundFound', BotEvent::LEVEL_DEBUG, [
+            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunding {$quantity} {$asset} to {$destination}.",
+            'txid'          => $xchain_notification['txid'],
+            'destination'   => $destination,
+            'outQty'        => $quantity,
+            'outAsset'      => $asset,
+            'confirmations' => $confirmations,
+        ]);
+    }
+    
+    public function logRefundResult(Bot $bot, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
+        // log the send
+        return $this->logToBotEvents($bot, 'swap.refunded', BotEvent::LEVEL_INFO, [
+            // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
+            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunded {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
+            'txid'          => $xchain_notification['txid'],
+            'destination'   => $destination,
+            'outQty'        => $quantity,
+            'outAsset'      => $asset,
+            'sentTxID'      => $send_result['txid'],
+            'confirmations' => $confirmations,
+        ]);
+
+    }    
+    
 
 
     ////////////////////////////////////////////////////////////////////////

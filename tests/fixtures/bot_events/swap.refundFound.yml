@@ -1,0 +1,6 @@
+name: swap.refundFound
+msg: Received 500 LTBCOIN from SENDER01 with 1 confirmation. Refunding 500 LTBCOIN to SENDER01.
+destination: SENDER01
+outQty: 500
+outAsset: LTBCOIN
+confirmations: 1

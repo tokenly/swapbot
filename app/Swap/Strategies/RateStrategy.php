@@ -9,6 +9,16 @@ use Swapbot\Swap\Strategies\StrategyHelpers;
 
 class RateStrategy implements Strategy {
 
+    public function shouldRefundTransaction(SwapConfig $swap, $in_quantity) {
+        // if there is a minimum and the input is below this minimum
+        //   then it should be refunded
+        if ($in_quantity < $swap['min']) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function buildSwapOutputQuantityAndAsset($swap, $in_quantity) {
         $quantity = $in_quantity * $swap['rate'];
         $asset = $swap['out'];
@@ -22,6 +32,7 @@ class RateStrategy implements Strategy {
         $swap['in']   = isset($data['in'])   ? $data['in']   : null;
         $swap['out']  = isset($data['out'])  ? $data['out']  : null;
         $swap['rate'] = isset($data['rate']) ? $data['rate'] : null;
+        $swap['min']  = isset($data['min'])  ? $data['min']  : 0;
     }
 
     public function serializeSwap(SwapConfig $swap) {
@@ -30,6 +41,7 @@ class RateStrategy implements Strategy {
             'in'       => $swap['in'],
             'out'      => $swap['out'],
             'rate'     => $swap['rate'],
+            'min'      => $swap['min'],
         ];
     }
 
@@ -37,6 +49,7 @@ class RateStrategy implements Strategy {
         $in_value   = isset($swap['in'])   ? $swap['in']   : null;
         $out_value  = isset($swap['out'])  ? $swap['out']  : null;
         $rate_value = isset($swap['rate']) ? $swap['rate'] : null;
+        $min_value  = isset($swap['min'])  ? $swap['min']  : null;
 
         $exists = (strlen($in_value) OR strlen($out_value) OR strlen($rate_value));
         if ($exists) {
@@ -54,6 +67,16 @@ class RateStrategy implements Strategy {
             } else {
                 $errors->add('rate', "Please specify a valid rate for swap #{$swap_number}");
             }
+
+            // min
+            if (strlen($min_value)) {
+                if (!StrategyHelpers::isValidQuantityOrZero($min_value)) {
+                    $errors->add('min', "The minimum value for swap #{$swap_number} was not valid.");
+                }
+            } else {
+                $errors->add('min', "Please specify a valid minimum value for swap #{$swap_number}");
+            }
+
 
             // make sure assets aren't the same
             if ($assets_are_valid AND $in_value == $out_value) {

@@ -11,6 +11,7 @@ class SwapState extends State {
     const READY        = 'ready';
     const CONFIRMING   = 'confirming';
     const SENT         = 'sent';
+    const REFUNDED     = 'refunded';
     const COMPLETE     = 'complete';
     const ERROR        = 'error';
 

@@ -92,6 +92,15 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => 0]),
                 'error' => 'The confirmations required must be at least 1.',
             ],
+
+            [
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['min' => '-1',]]]),
+                'error' => 'The minimum value for swap #1 was not valid',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['min' => '',]]]),
+                'error' => 'Please specify a valid minimum value for swap #1',
+            ],
         ];
 
         // fixed
@@ -113,6 +122,14 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['in' => 'BAD',]]]),
                 'error' => 'The receive asset name for swap #1 was not valid.',
             ],
+            // [
+            //     'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['min' => '-1',]]]),
+            //     'error' => 'The minimum value for swap #1 was not valid',
+            // ],
+            // [
+            //     'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [0 => ['min' => '',]]]),
+            //     'error' => 'Please specify a valid minimum value for swap #1',
+            // ],
         ]);
 
 
@@ -121,12 +138,27 @@ class BotValidatorTest extends TestCase {
         $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
     }
 
+    public function testBotBlankIncomeRulesValidation() {
+        $validator = app('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
+        $transformer = app('Swapbot\Http\Requests\Bot\Transformers\BotTransformer');
+        $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
+        $attributes = array_replace_recursive($sample_vars, ['incomeRules' => [0 => ['asset' => '','minThreshold' => '','paymentAmount' => '','address' => '',]]]);
+        $sanitized_attributes = $transformer->santizeAttributes($attributes, $validator->getRules());
+        PHPUnit::assertEmpty($sanitized_attributes['income_rules']);
+    }
+
+
     public function testBotIncomeRulesValidation()
     {
         // sample bot
         $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
 
         $test_specs = [
+            [
+                // blank income rules are ok 
+                'vars' => array_replace_recursive($sample_vars, ['income_rules' => []]),
+                'error' => null,
+            ],
             [
                 'vars' => array_replace_recursive($sample_vars, ['income_rules' => [0 => ['asset' => '',]]]),
                 'error' => 'Please specify an asset for Income Rule #1',
@@ -202,6 +234,20 @@ class BotValidatorTest extends TestCase {
                 'vars' => ['confirmations_required' => -1],
                 'error' => 'The confirmations required must be at least 1.',
             ],
+
+            [
+                'vars' => ['swaps' => [0 => ['in' => 'BTC', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,'strategy' => 'rate', 'min' => '-1',]]],
+                'error' => 'The minimum value for swap #1 was not valid',
+            ],
+            [
+                'vars' => ['swaps' => [0 => ['in' => 'BTC', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,'strategy' => 'rate', 'min' => '',]]],
+                'error' => 'Please specify a valid minimum value for swap #1',
+            ],
+            [
+                'vars' => ['swaps' => [0 => ['in' => 'BTC', 'out'  => 'LTBCOIN', 'rate' => 0.00000150,'strategy' => 'rate', 'min' => '0.5',]]],
+                'error' => null, // valid
+            ],
+
         ];
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\UpdateBotValidator');

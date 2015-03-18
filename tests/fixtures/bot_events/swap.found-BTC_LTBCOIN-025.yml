@@ -6,3 +6,4 @@ outQty: 25000
 outAsset: LTBCOIN
 source: SENDER01
 destination: SENDER01
+confirmations: 1

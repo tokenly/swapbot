@@ -1,0 +1,52 @@
+# A minumum amount triggers a refund
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    swaps:
+      -
+        in: LTBCOIN
+        out: BTC
+        strategy: rate
+        rate: 0.00000100
+        min: 6000
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN-refund.yml }
+
+expectedBotEvents:
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap refundFound
+    meta: { baseFilename: swap.refundFound.yml }
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-refunded.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }
+
+expectedBotModels:
+  - 
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
+    state: refunded
+    receipt:
+      txid: "0000000000000000000000000000001111"
+      confirmations: 1
+      type: refund

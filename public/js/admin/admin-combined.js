@@ -829,7 +829,8 @@
         out: m.prop(swap.out || ''),
         rate: m.prop(swap.rate || ''),
         in_qty: m.prop(swap.in_qty || ''),
-        out_qty: m.prop(swap.out_qty || '')
+        out_qty: m.prop(swap.out_qty || ''),
+        min: m.prop(swap.min || '')
       });
     };
     swaputils.allStrategyOptions = function() {
@@ -967,14 +968,14 @@
               options: sbAdmin.swaputils.allStrategyOptions()
             }, swap.strategy)
           ]), m("div", {
-            "class": "col-md-3"
+            "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("Receives Asset", {
               id: "swap_in_" + number,
               'placeholder': "BTC"
             }, swap["in"])
           ]), m("div", {
-            "class": "col-md-3"
+            "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("Sends Asset", {
               id: "swap_out_" + number,
@@ -990,6 +991,16 @@
               id: "swap_rate_" + number,
               'placeholder': "0.000001"
             }, swap.rate)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Minimum", {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_rate_" + number,
+              'placeholder': "0.000001"
+            }, swap.min)
           ]), m("div", {
             "class": "col-md-1"
           }, [
