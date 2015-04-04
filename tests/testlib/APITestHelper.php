@@ -99,7 +99,7 @@ class APITestHelper  {
         return $loaded_resource_model;
     }
 
-    public function testIndex($url_extension=null) {
+    public function testIndex($url_extension=null, $sort_ascending=true) {
         $this->cleanup();
 
         // create 2 models
@@ -107,6 +107,8 @@ class APITestHelper  {
         $created_models[] = $this->newModel();
         $created_models[] = $this->newModel();
         
+        // reverse order if needed
+        if (!$sort_ascending) { $created_models = array_reverse($created_models); }
 
         // now call the API
         $url = $this->extendURL($this->url_base, $url_extension);
@@ -117,22 +119,25 @@ class APITestHelper  {
 
         // populate the $expected_created_resource
         $expected_api_response = [$created_models[0]->serializeForAPI(), $created_models[1]->serializeForAPI()];
-        $expected_created_resource = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
+        $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
 
         // check response
-        PHPUnit::assertEquals($expected_created_resource, $actual_response_from_api);
+        PHPUnit::assertEquals($expected_api_response, $actual_response_from_api);
 
         // return the models
         return $created_models;
     }
 
-    public function testPublicIndex($public_url_base, $url_extension) {
+    public function testPublicIndex($public_url_base, $url_extension, $sort_ascending=true) {
         $this->cleanup();
 
         // create 2 models
         $created_models = [];
         $created_models[] = $this->newModel();
         $created_models[] = $this->newModel();
+
+        // reverse order if needed
+        if (!$sort_ascending) { $created_models = array_reverse($created_models); }
         
         // now call the API
         $url = $this->extendURL(rtrim($public_url_base, '/'), '/'.$url_extension);

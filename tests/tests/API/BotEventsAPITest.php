@@ -19,10 +19,10 @@ class BotEventsAPITest extends TestCase {
         $tester->testRequiresUser();
         
         // index
-        $tester->testIndex($sample_bot['uuid']);
+        $tester->testIndex($sample_bot['uuid'], false);
 
         // test public
-        $tester->testPublicIndex('/api/v1/public/botevents/', $sample_bot['uuid']);
+        $tester->testPublicIndex('/api/v1/public/botevents/', $sample_bot['uuid'], false);
     }
 
 
