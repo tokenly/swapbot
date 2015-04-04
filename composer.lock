@@ -2537,12 +2537,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "04240037fd3e8b33c574cc6ff6ecec38c01e34e9"
+                "reference": "06c72896209dcd7a364aacbf2425c8d7dd6abd7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/04240037fd3e8b33c574cc6ff6ecec38c01e34e9",
-                "reference": "04240037fd3e8b33c574cc6ff6ecec38c01e34e9",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/06c72896209dcd7a364aacbf2425c8d7dd6abd7d",
+                "reference": "06c72896209dcd7a364aacbf2425c8d7dd6abd7d",
                 "shasum": ""
             },
             "require": {
@@ -2737,7 +2737,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-02-26 01:29:36"
+            "time": "2015-03-18 12:42:53"
         },
         {
             "name": "vlucas/phpdotenv",
