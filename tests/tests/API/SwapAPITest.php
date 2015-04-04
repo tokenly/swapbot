@@ -19,7 +19,6 @@ class SwapAPITest extends TestCase {
         $user_helper = $this->app->make('UserHelper');
         $user = $user_helper->getSampleUser();
         $bot = $bot_helper->getSampleBot($user);
-        echo "\$bot: ".$bot['uuid']."\n";
         
         $tester->testPublicIndex('/api/v1/public/swaps/', $bot['uuid']);
     }
