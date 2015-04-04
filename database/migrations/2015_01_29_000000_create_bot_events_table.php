@@ -25,7 +25,7 @@ class CreateBotEventsTable extends Migration {
             $table->longText('event');
 
 			$table->timestamp('created_at');
-			$table->bigInt('serial')->unsigned()->index();
+			$table->bigInteger('serial')->unsigned()->index();
 		});
 	}
 
