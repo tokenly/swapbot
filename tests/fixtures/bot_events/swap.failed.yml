@@ -1,3 +1,4 @@
 name: swap.failed
 msg: Failed to swap asset.
 error: Test Exception Triggered
+destination: SENDER01
