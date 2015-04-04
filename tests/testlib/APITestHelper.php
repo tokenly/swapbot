@@ -190,7 +190,7 @@ class APITestHelper  {
         PHPUnit::assertNotEmpty($actual_response_from_api);
 
         // populate the $expected_created_resource
-        $expected_api_response = $created_model->serializeForAPI();
+        $expected_api_response = $created_model->serializeForAPI('public');
         $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
 
         // check response
