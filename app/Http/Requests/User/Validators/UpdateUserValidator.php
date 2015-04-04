@@ -9,8 +9,9 @@ class UpdateUserValidator extends UserValidator {
     protected $swaps_required = false;
 
     protected $rules = [
-        'name'  => 'sometimes|required',
-        'email' => 'email|sometimes|required',
+        'name'     => 'sometimes|required',
+        'email'    => 'email|sometimes|required',
+        'username' => 'sometimes|required',
     ];
 
 }

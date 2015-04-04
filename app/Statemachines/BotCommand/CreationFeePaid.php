@@ -53,10 +53,14 @@ class CreationFeePaid extends BotCommand {
         $quantity = $bot->getStartingBTCFuel();
         $asset = 'BTC';
         $fee = Config::get('swapbot.defaultFee');
-        $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee);
+        try {
+            $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee);
 
-        // log event
-        $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);
+            // log event
+            $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);
+        } catch (Exception $e) {
+            $this->getBotEventLogger()->logMoveInitialFuelTXFailed($bot, $e);
+        }
     }
 
 }

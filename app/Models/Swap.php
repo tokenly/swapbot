@@ -2,11 +2,14 @@
 
 namespace Swapbot\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
 
-class Swap extends Model {
+class Swap extends APIModel {
+
+    protected $api_attributes = ['id', 'txid', 'state', 'receipt', 'address', ];
+
 
     protected $state_machine        = null;
 
@@ -15,11 +18,17 @@ class Swap extends Model {
         'receipt'    => 'json',
     ];
 
-    protected static $unguarded = true;
-
     public function setInQtyAttribute($in_qty) { $this->attributes['in_qty'] = CurrencyUtil::valueToSatoshis($in_qty); }
     public function getInQtyAttribute() { return isset($this->attributes['in_qty']) ? CurrencyUtil::satoshisToValue($this->attributes['in_qty']) : 0; }
 
+    public function getAddressAttribute() {
+        $xchain_notification = $this->transaction['xchain_notification'];
+        return $xchain_notification['sources'][0];
+    }
+    public function getTxidAttribute() {
+        $xchain_notification = $this->transaction['xchain_notification'];
+        return $xchain_notification['txid'];
+    }
 
     public function transaction() {
         return $this->belongsTo('Swapbot\Models\Transaction');

@@ -103,6 +103,14 @@ do ()->
 
     # ################################################
 
+    botPublicAddress = (vm)->
+        return swapbot.addressUtils.publicBotAddress(vm.username(), vm.resourceId(), window.location)
+
+    poupupBotAddress = (vm)->
+        return swapbot.addressUtils.poupupBotAddress(vm.username(), vm.resourceId(), window.location)
+
+    # ################################################
+
 
     handleBotEventMessage = (data)->
         # console.log "pusher received:", data
@@ -174,6 +182,9 @@ do ()->
 
     # ################################################
 
+
+    # ################################################
+
     vm = sbAdmin.ctrl.botView.vm = do ()->
         buildSwapsPropValue = (swaps)->
             out = []
@@ -216,6 +227,7 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
+            vm.username = m.prop('')
             vm.address = m.prop('')
             vm.paymentAddress = m.prop('')
             vm.paymentPlan = m.prop('')
@@ -243,6 +255,7 @@ do ()->
                     vm.paymentPlan(botData.paymentPlan)
                     vm.state(botData.state)
                     vm.description(botData.description)
+                    vm.username(botData.username)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
                     vm.balances(buildBalancesPropValue(botData.balances))
                     vm.confirmationsRequired(botData.confirmationsRequired)
@@ -270,9 +283,9 @@ do ()->
             # and get the bot balance
             updateBotAccountBalance(id)
 
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_events_#{id}", handleBotEventMessage))
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_balances_#{id}", handleBotBalancesMessage))
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_#{id}", handleBotEventMessage))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_#{id}", handleBotBalancesMessage))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
             # console.log "vm.pusherClient=",vm.pusherClient()
 
             # and send a balance refresh on each reload
@@ -294,7 +307,7 @@ do ()->
         # bind unload event
         this.onunload = (e)->
             # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
-            sbAdmin.pusherutils.closePusherChannel(vm.pusherClient())
+            sbAdmin.pusherutils.closePusherChanel(vm.pusherClient())
             return
 
         vm.init()
@@ -348,8 +361,21 @@ do ()->
                                 m("div", {class: "col-md-12"}, [
                                     sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
                                 ]),
+                            ]),
 
-
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-12"}, [
+                                    sbAdmin.form.mValueDisplay("Public Bot Address", {id: 'description',  }, [
+                                        m("a", {href: botPublicAddress(vm)}, botPublicAddress(vm))
+                                    ]),
+                                ]),
+                            ]),
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-12"}, [
+                                    sbAdmin.form.mValueDisplay("Bot Popup Address", {id: 'description',  }, [
+                                        m("a", {href: poupupBotAddress(vm), target: "_blank"}, poupupBotAddress(vm))
+                                    ]),
+                                ]),
                             ]),
                         ]),
 

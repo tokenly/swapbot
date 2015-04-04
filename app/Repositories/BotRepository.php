@@ -22,21 +22,35 @@ class BotRepository extends APIRepository
         return $this->findByUserID($user['id']);
     }
 
+    public function findByUuidAndUserID($uuid, $user_id) {
+        return $this->prototype_model
+            ->where('uuid', $uuid)
+            ->where('user_id', $user_id)
+            ->first();
+    }
+
+
+
     public function findByUserID($user_id) {
-        return call_user_func([$this->model_type, 'where'], 'user_id', $user_id)->get();
+        return $this->prototype_model->where('user_id', $user_id)->get();
     }
 
     public function findByPublicMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'public_receive_monitor_id', $monitor_id)->first();
+        return $this->prototype_model->where('public_receive_monitor_id', $monitor_id)->first();
     }
 
     public function findByPaymentMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'payment_receive_monitor_id', $monitor_id)->first();
+        return $this->prototype_model->where('payment_receive_monitor_id', $monitor_id)->first();
     }
 
     public function findBySendMonitorID($monitor_id) {
-        return call_user_func([$this->model_type, 'where'], 'public_send_monitor_id', $monitor_id)->first();
+        return $this->prototype_model->where('public_send_monitor_id', $monitor_id)->first();
     }
+
+    public function findByPaymentSendMonitorID($monitor_id) {
+        return $this->prototype_model->where('payment_send_monitor_id', $monitor_id)->first();
+    }
+
 
     public function getLockedBot(Bot $bot) {
         return $this->prototype_model->where('id', $bot['id'])->lockForUpdate()->first();

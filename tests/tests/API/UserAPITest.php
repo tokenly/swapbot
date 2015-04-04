@@ -21,7 +21,9 @@ class UserAPITest extends TestCase {
         
         // test create
         $user_helper = $this->app->make('UserHelper');
-        $tester->testCreate($user_helper->sampleVars(['email' => $user_helper->randomEmail()]));
+        $email = $user_helper->randomEmail();
+        $username = $user_helper->usernameFromEmail($email);
+        $tester->testCreate($user_helper->sampleVars(['email' => $email, 'username' => $username, ]));
 
         // test show
         $tester->testShow();
@@ -106,8 +108,10 @@ class UserAPITest extends TestCase {
             ->createModelWith(function($user) use ($user_helper) {
                 $email = $user_helper->randomEmail();
                 $api_token = $user_helper->testingTokenFromEmail($email);
+                $username = $user_helper->usernameFromEmail($email);
                 return $user_helper->newSampleUser([
                     'email'      => $email,
+                    'username'   => $username,
                     'apitoken'   => $api_token,
                     'user_id'    => $user['id'],
                     'privileges' => []

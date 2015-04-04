@@ -126,6 +126,32 @@ class APITestHelper  {
         return $created_models;
     }
 
+    public function testPublicIndex($public_url_base, $url_extension) {
+        $this->cleanup();
+
+        // create 2 models
+        $created_models = [];
+        $created_models[] = $this->newModel();
+        $created_models[] = $this->newModel();
+        
+        // now call the API
+        $url = $this->extendURL(rtrim($public_url_base, '/'), '/'.$url_extension);
+        $response = $this->callAPIWithoutAuthentication('GET', $url);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        $actual_response_from_api = json_decode($response->getContent(), true);
+        PHPUnit::assertNotEmpty($actual_response_from_api);
+
+        // populate the $expected_created_resource
+        $expected_api_response = [$created_models[0]->serializeForAPI(), $created_models[1]->serializeForAPI()];
+        $expected_created_resource = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
+
+        // check response
+        PHPUnit::assertEquals($expected_created_resource, $actual_response_from_api);
+
+        // return the models
+        return $created_models;
+    }
+
     public function testShow() {
         $this->cleanup();
 
@@ -135,6 +161,30 @@ class APITestHelper  {
         // call the API
         $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
         $response = $this->callAPIWithAuthentication('GET', $url);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        $actual_response_from_api = json_decode($response->getContent(), true);
+        PHPUnit::assertNotEmpty($actual_response_from_api);
+
+        // populate the $expected_created_resource
+        $expected_api_response = $created_model->serializeForAPI();
+        $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
+
+        // check response
+        PHPUnit::assertEquals($expected_api_response, $actual_response_from_api);
+
+        // return the model
+        return $created_model;
+    }
+
+    public function testPublicShow($public_url_base) {
+        $this->cleanup();
+
+        // create a model
+        $created_model = $this->newModel();
+
+        // call the API
+        $url = $this->extendURL(rtrim($public_url_base, '/'), '/'.$created_model['uuid']);
+        $response = $this->callAPIWithoutAuthentication('GET', $url);
         PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
         $actual_response_from_api = json_decode($response->getContent(), true);
         PHPUnit::assertNotEmpty($actual_response_from_api);
@@ -215,6 +265,11 @@ class APITestHelper  {
         $api_token = $user['apitoken'];
         $secret    = $user['apisecretkey'];
         $generator->addSignatureToSymfonyRequest($request, $api_token, $secret);
+        return $this->sendRequest($request);
+    }
+
+    public function callAPIWithoutAuthentication($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
+        $request = $this->createAPIRequest($method, $uri, $parameters, $cookies, $files, $server, $content);
         return $this->sendRequest($request);
     }
 

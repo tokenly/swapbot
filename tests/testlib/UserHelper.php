@@ -13,11 +13,12 @@ class UserHelper
         $this->user_repository = $user_repository;
     }
 
-    public function getSampleUser($email='sample@tokenly.co', $token=null, $owner_user_id=null) {
+    public function getSampleUser($email='sample@tokenly.co', $token=null, $owner_user_id=null, $username=null) {
         $user = $this->user_repository->findByEmail($email);
         if (!$user) {
             if ($token === null) { $token = $this->testingTokenFromEmail($email); }
-            $user = $this->newSampleUser(['email' => $email, 'apitoken' => $token, 'user_id' => $owner_user_id]);
+            if ($username === null) { $username = $this->usernameFromEmail($email); }
+            $user = $this->newSampleUser(['email' => $email, 'username' => $username, 'apitoken' => $token, 'user_id' => $owner_user_id]);
         }
         return $user;
     }
@@ -28,12 +29,13 @@ class UserHelper
 
     public function sampleVars($override_vars=[]) {
         return array_merge([
-            'name'     => 'Sample User',
-            'email'    => 'sample@tokenly.co',
-            'password' => 'foopass',
+            'name'         => 'Sample User',
+            'email'        => 'sample@tokenly.co',
+            'username'     => 'leroyjenkins',
+            'password'     => 'foopass',
 
-            'apitoken'         => 'TESTAPITOKEN',
-            'apisecretkey'     => 'TESTAPISECRET',
+            'apitoken'     => 'TESTAPITOKEN',
+            'apisecretkey' => 'TESTAPISECRET',
         ], $override_vars);
     }
 
@@ -45,6 +47,10 @@ class UserHelper
                 return substr('TEST'.strtoupper(preg_replace('!^[^a-z0-9]$!i', '', $email)), 0, 16);
         }
         // code
+    }
+
+    public function usernameFromEmail($email) {
+        return substr('t_'.strtoupper(preg_replace('!^[^a-z0-9]$!i', '', $email)), 0, 16);
     }
 
     public function randomEmail() {

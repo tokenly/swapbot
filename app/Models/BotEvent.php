@@ -18,7 +18,7 @@ class BotEvent extends APIModel {
     const LEVEL_ALERT     = 550;
     const LEVEL_EMERGENCY = 600;
 
-    protected $api_attributes = ['id', 'level', 'event', 'created_at'];
+    protected $api_attributes = ['id', 'level', 'event', 'created_at', 'serial', ];
 
     public function setEventAttribute($event) { $this->attributes['event'] = json_encode($event); }
     public function getEventAttribute() { return json_decode($this->attributes['event'], true); }

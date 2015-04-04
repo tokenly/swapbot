@@ -82,7 +82,7 @@ do ()->
                     return
             )
 
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
+            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
             updateAllAccountPayments(id)
 
             return
@@ -95,7 +95,7 @@ do ()->
         # bind unload event
         this.onunload = (e)->
             # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
-            sbAdmin.pusherutils.closePusherChannel(vm.pusherClient())
+            sbAdmin.pusherutils.closePusherChanel(vm.pusherClient())
             return
 
         vm.init()

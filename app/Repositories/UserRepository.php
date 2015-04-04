@@ -33,6 +33,10 @@ class UserRepository extends APIRepository implements APIUserRepositoryContract
         return User::where('email', $email)->first();
     }
 
+    public function findByUsername($username) {
+        return User::where('username', $username)->first();
+    }
+
     public function findByAPIToken($api_token) {
         return User::where('apitoken', $api_token)->first();
     }

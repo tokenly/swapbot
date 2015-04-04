@@ -20,6 +20,8 @@
     "moment": "~2.9.0",
     "accounting.js": "git@github.com:openexchangerates/accounting.js.git#9b73d760f20fb5bd87a570f7b7ecf9af9cf5b76c",
     "prettyFloat.js": "git@github.com:dperish/prettyFloat.js.git#e8337df8dcff0de2e67a80295468fc1ef9cab349",
-    "numeral": "~1.5.3"
+    "numeral": "~1.5.3",
+    "director": "~1.2.8",
+    "es6-promise": "git@github.com:jakearchibald/es6-promise#2.0.1"
   }
 }

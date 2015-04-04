@@ -213,7 +213,7 @@ do ()->
                     apiArgs = [attributes]
 
                 sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(()->
-                    console.log "submit complete - routing to dashboard"
+                    # console.log "submit complete - routing to dashboard"
                     # back to dashboard
                     m.route('/admin/dashboard')
                     return

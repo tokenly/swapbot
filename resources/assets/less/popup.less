@@ -1,0 +1,376 @@
+// @import "bootstrap/bootstrap";
+// @import "imports/spinners";
+
+// spacers
+@spacerHeight: 14px;
+@import "shared/spacers";
+
+// font
+@font-family-sans-serif: "Source Sans Pro", Helvetica, Arial, sans-serif;
+;
+// // body
+// body {
+// 	font-weight: 300;
+// }
+
+
+@import "shared/common.less";
+
+/* Global varibles */
+@background-color: #f7f7f7;
+
+@wide-list-background: #eeeeee;
+@wide-list-border: #dddddd;
+
+@primary-font-color: #121212;
+@secondary-font-color: #8e8e8e;
+
+@content-width: 484px;
+
+.content-width {
+    width: @content-width;
+}
+
+.swapbot-background {
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    position: fixed;
+    background-color: black;
+    opacity: 0.2;
+}
+
+.swapbot-container {
+    width: @content-width;
+    position: absolute;
+    min-height: @content-width / 2;
+    left: 50%;
+    top: 36px;
+    margin-left: 0 - @content-width / 2;
+    // margin-top: 0 - @content-width / 1.5;
+    background:white;
+    border-radius: 4px;
+    box-shadow: 00px 0px 38px rgba(0, 0, 0, 0.3);
+    padding: 0px;
+    // font-family: SourceSans;
+    font-family: 'Source Sans Pro', sans-serif;
+    .header {
+        color:white;
+        height: 44px;
+        width: 100%;
+        margin: 0;
+        float:left;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        background: #044f95 linear-gradient(to right, #001e3d, #044f95);
+        border-bottom: #262626 1px solid;
+        vertical-align: middle;
+        div, h1 {
+            float:left;
+            display: inline-block;
+        }
+        h1 {
+            font-size: 18px;
+            // font-weight: bold;
+        }
+        h1 > a {
+            color: white;
+        }
+        h1 > a:hover {
+            opacity:0.9;
+        }
+        h1 > a:hover:after {
+            content:"\f08b";
+            font-family: 'FontAwesome';
+            font-size: 0.8em;
+            padding-left: 12px;
+            opacity:0.8;
+        }
+        .status-dot {
+            margin: 18px;
+        }
+        .avatar {
+            background-color: white;
+            width: 100px;
+            height: 100px;
+            border-top-right-radius: 50px;
+            border-top-left-radius: 50px;
+            border-color: #262626;
+            margin-left: 10px;
+            margin-top: -22px;
+
+            img {
+                height: 90px;
+                width: 90px;
+                padding: 5px;
+            }
+        }
+    }
+    .content {
+        text-align: center;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        color: #161616;
+
+        h2 {
+            font-weight: lighter;
+            padding-top: 44px;
+            font-size: 1.4em;
+        }
+        p.description {
+            padding-top: 14px;
+            padding-left: 16px;
+            padding-right: 16px;
+            .more-link {
+                padding-left: 10px;
+                color: @secondary-font-color;
+                :hover {
+                    color: @primary-font-color;
+                }
+            }
+        }
+        .segment-control {
+            padding: 8px;
+            padding-top: 4px;
+        }
+        .pulse-spinner {
+            padding: 28px;
+        }
+        .icon-success {
+            padding: 38px;
+        }
+        .fieldset {
+            padding: 24px;
+            padding-bottom: 0px;
+            width: 100%;
+            input {
+                background-color: @wide-list-background;
+                border: 1px solid @wide-list-border;
+                border-radius: 2px;
+                height: 14px;
+                padding: 6px;
+                font-size: 13px;
+            }
+        }
+        .fieldset-other {
+            width: 60%;
+            margin: auto;
+            padding-bottom: 40px;
+            .icon-next:hover {
+                background-color: saturate(@flat-green, 18%);
+                cursor: pointer;
+            }
+        }
+        .wide-list {
+            margin-top: 24px;
+            margin-bottom: 10px;
+        }
+    }
+    .footer {
+        color: #8e8e8e;
+        font-size: 10px;
+        float:right;
+        padding: 8px;
+        a {
+            color: inherit;
+        }
+    }
+}
+
+.segment-control {
+    margin: 0 auto;
+    line-height: 0px;
+    div.dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
+        background-color: lighten(@secondary-font-color, 30%);
+    }
+    div.dot.selected {
+        box-shadow: inset 0px 0px 0px 2px @secondary-font-color;
+    }
+    div.dot + div.dot {
+        margin-left: 27px;
+    }
+    div.line {
+        display: inline-block;
+        height:0px;
+        border-top: 2px solid lighten(@secondary-font-color, 36%);
+        width: 130px;
+        margin-bottom: -6px;
+    }
+}
+
+.wide-list {
+    width: 100%;
+    background-color: @wide-list-background;
+    border-top: 1px solid @wide-list-border;
+    border-bottom: 1px solid @wide-list-border;
+    list-style: none;
+    li {
+        margin-left: 30px;
+        margin-right: 30px;
+        text-align: left;
+        a {
+            color: black;
+        }
+    }
+    p {
+        color: gray;
+        font-size: 12px;
+        margin-top: 0px;
+        padding-left: 16px;
+        margin-bottom: 22px;
+    }
+    .item-header {
+        font-weight: bold;
+        font-size: 20px;
+        padding-left: 16px;
+        padding-right: 16px;
+        margin-top: 20px;
+        small {
+            font-weight: normal;
+            font-size: 16px;
+            color: darken(@secondary-font-color, 10%);
+            margin-bottom: 2px;
+            line-height: 20px;
+        }
+    }
+    li + li {
+        border-top: 1px solid #dddddd;
+    }
+    a:hover .icon-next {
+        background-color: saturate(@flat-green, 18%);
+    }
+    a:hover .icon-denied {
+        background-color: saturate(@flat-red, 18%);
+    }
+    .icon-next, .icon-denied, .icon-wallet, .icon-qr {
+        float:right;
+        margin-top: -60px;
+        margin-right: 14px;
+        cursor: pointer;
+    }
+    .icon-wallet:hover {
+        background-color: saturate(@flat-green, 18%);
+    }
+    .icon-qr {
+        margin-right: 72px;
+    }
+    .icon-qr:hover {
+        opacity: 0.6;
+    }
+}
+
+/* BUTTONS */
+
+button {
+    border:0px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-action {
+    height: 46px;
+    width: 180px;
+    font-weight: bold;
+    font-size: 13px;
+    color: white;
+}
+
+.btn-stick-right {
+    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0px;
+    margin-right: 0px;
+}
+
+.btn-stick-left {
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+    margin-left: 0px;
+}
+
+.button-question {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    margin-left: 10px;
+    color:white;
+    font-size: 10px;
+    background-color: rgba(200, 200, 200, 0.2);
+    font-weight: bold;
+    margin-top: -8px;
+}
+
+.button-question:after {
+    content:"?";
+}
+
+.button-load-more {
+    // float:left;
+    // margin: 0 auto;
+    margin-top:40px;
+    margin-bottom:40px;
+    width: 240px;
+    height: 50px;
+    font-size: 15px;
+    background-color: white;// lighten(@flat-blue, 50%);
+    color:@flat-blue;
+}
+
+.button-load-more:hover {
+    background-color: lighten(@flat-blue, 42%);
+}
+
+.qr-code-image {
+    float:left;
+    width: 320px;
+    height: 320px;
+    padding: 10px;
+    padding-top: 0px;
+    padding-left: 46px;
+}
+
+.shadow-link {
+    color: #9c9b9b;
+    text-decoration: underline;
+    font-size: 12px;
+}
+
+.shadow-link:hover {
+    color: black;
+}
+
+.details-link {
+    color: @primary-font-color;
+    font-size: 14px;
+    .fa {
+        margin-left: 4px;
+        color: @flat-blue;
+    }
+}
+
+.details-link:hover {
+    color: lighten(@primary-font-color, 20%);
+}
+
+#token-available {
+    font-weight: bold;
+}
+
+
+.swap-step {
+    p.msg {
+        font-size: 12px;
+        color: lighten(@primary-font-color, 25%);
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+
+
+// import unsemantic
+@import (inline) "imports/unsemantic.css";

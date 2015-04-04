@@ -3,7 +3,10 @@ var elixir = require('laravel-elixir');
 var gulp = require("gulp");
 var concat = require("gulp-concat");
 var coffee = require("gulp-coffee");
+var cjsx = require('gulp-cjsx');
 var Notification = require('laravel-elixir/ingredients/commands/Notification');
+var es = require('event-stream');
+var uglify = require('gulp-uglify');
 
 /*
  |--------------------------------------------------------------------------
@@ -24,33 +27,97 @@ var onError = function(e) {
 };
 
 
- elixir.extend("combineAdmin", function() {
+// combine admin
+elixir.extend("combineAdmin", function() {
     gulp.task('combineAdmin', function() {
-      gulp.src('resources/assets/coffee/admin/*.coffee')
+        es.merge(
+            gulp.src('resources/assets/coffee/admin/*.coffee'),
+            gulp.src('resources/assets/coffee/shared/*.coffee')
+        )
+      // gulp.src('resources/assets/coffee/admin/*.coffee')
         .pipe(concat('admin-combined.coffee'))
         .pipe(coffee({}).on('error', onError))
         .pipe(gulp.dest('public/js/admin'))
     });
 
-    this.registerWatcher("combineAdmin", "resources/assets/coffee/admin/**/*.coffee");
+    this.registerWatcher("combineAdmin", [
+        "resources/assets/coffee/shared/*.coffee",
+        "resources/assets/coffee/admin/**/*.coffee"
+    ]);
 
     return this.queueTask("combineAdmin");
- });
+});
 
+
+// combine popup
+elixir.extend("combinePopup", function() {
+    gulp.task('combinePopup', function() {
+        es.merge(
+            gulp.src('resources/assets/coffee/popup/*.cjsx'),
+            gulp.src('resources/assets/coffee/popup/*.coffee'),
+            gulp.src('resources/assets/coffee/shared/*.coffee')
+        )
+        .pipe(concat('popup-combined.cjsx'))
+        .pipe(cjsx().on('error', onError))
+        .pipe(gulp.dest('public/js/popup'))
+    });
+
+
+    this.registerWatcher("combinePopup", [
+        "resources/assets/coffee/shared/*.coffee",
+        "resources/assets/coffee/popup/**/*.coffee",
+        "resources/assets/coffee/popup/**/*.cjsx",
+    ]);
+
+    return this.queueTask("combinePopup");
+});
+
+
+// combine bot
+elixir.extend("combinePublicBotApp", function() {
+    gulp.task('combinePublicBotApp', function() {
+        es.merge(
+            gulp.src('resources/assets/coffee/bot/*.cjsx'),
+            gulp.src('resources/assets/coffee/bot/*.coffee'),
+            gulp.src('resources/assets/coffee/shared/*.coffee')
+        )
+        .pipe(concat('bot-combined.cjsx'))
+        .pipe(cjsx().on('error', onError))
+        .pipe(gulp.dest('public/js/bot'))
+    });
+
+
+    this.registerWatcher("combinePublicBotApp", [
+        "resources/assets/coffee/shared/*.coffee",
+        "resources/assets/coffee/bot/**/*.coffee",
+        "resources/assets/coffee/bot/**/*.cjsx",
+    ]);
+
+    return this.queueTask("combinePublicBotApp");
+});
+
+
+// 
 elixir(function(mix) {
     del('/tmp/elixir-admin-build/*', {force: true});
 
     // less
     mix
-        .less('app.less')
+        .less('admin.less')
+        .less('bot.less')
+        .less('popup.less')
 
-    // development build
-        // .coffee('*.coffee')
-        // .coffee('resources/assets/coffee/admin/*.coffee', 'public/js/admin')
-
-    // combined build
+        // admin
         .combineAdmin()
-        // .coffee('/tmp/elixir-admin-build/admin.coffee', 'public/js/admin/admin-combined.js')
+
+        // popup
+        .combinePopup()
+
+        // bot
+        .combinePublicBotApp()
+
+        // public
+        .coffee('public/asyncLoad.coffee', 'public/js/public')
 
 
         ;

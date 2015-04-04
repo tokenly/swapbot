@@ -19,11 +19,28 @@ $router->get('/', 'WelcomeController@index');
 
 // admin
 $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
-$router->get('/public/{userid}/{botid}', 'PublicBotController@showBot');
+$router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
+$router->get('/public/{username}/{botid}/popup', 'PublicBotController@showBotPopup');
 
 
 ////////////////////////////////////////////////////////////////////////
-// API
+// Public API
+
+// Bot API
+$router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
+
+// Bot Events API
+$router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
+
+// Swaps API
+$router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+// Protected API
 
 // Bot API
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);

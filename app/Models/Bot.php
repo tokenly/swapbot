@@ -5,6 +5,7 @@ namespace Swapbot\Models;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Base\APIModel;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStatusDetails;
 use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
@@ -13,7 +14,8 @@ use Tokenly\CurrencyLib\CurrencyUtil;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -40,7 +42,21 @@ class Bot extends APIModel {
 
     public function setIncomeRulesAttribute($income_rules) { $this->attributes['income_rules'] = json_encode($this->serializeIncomeRules($income_rules)); }
     public function getIncomeRulesAttribute() { return $this->unSerializeIncomeRules(json_decode($this->attributes['income_rules'], true)); }
+    
+    public function getUsernameAttribute() {
+        // get username
+        return $this->user['username'];
+    }
 
+    public function isActive() {
+        switch ($this['state']) {
+            case BotState::ACTIVE:
+                return true;
+        }
+
+        return false;
+
+    }
 
     public function getCreationFee() {
         return $this->paymentPlanDetails()['setupFee'];
@@ -65,6 +81,11 @@ class Bot extends APIModel {
         }
         return 0;
     }
+
+    public function user() {
+        return $this->belongsTo('Swapbot\Models\User');
+    }
+
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

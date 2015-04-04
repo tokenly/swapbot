@@ -11,7 +11,7 @@ use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 
 class User extends APIModel implements AuthenticatableContract, CanResetPasswordContract, APIUserContract {
 
-    protected $api_attributes = ['id', 'name', 'email', 'apitoken', 'apisecretkey', 'privileges',];
+    protected $api_attributes = ['id', 'name', 'username', 'email', 'apitoken', 'apisecretkey', 'privileges',];
 
     use Authenticatable, CanResetPassword;
 
@@ -21,20 +21,6 @@ class User extends APIModel implements AuthenticatableContract, CanResetPassword
      * @var string
      */
     protected $table = 'users';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = ['name', 'email', 'password'];
-
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = ['password', 'remember_token'];
 
     public function hasPermission($privilege) {
         $privileges = $this['privileges'];

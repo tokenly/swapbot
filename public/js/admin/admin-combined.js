@@ -1,5 +1,5 @@
 (function() {
-  var sbAdmin;
+  var sbAdmin, swapbot;
 
   sbAdmin = {
     ctrl: {}
@@ -9,9 +9,9 @@
     var api, newNonce, signRequest, signURLParameters;
     api = {};
     signRequest = function(xhr, xhrOptions) {
-      var credentials, nonce, paramsBody, signature, url, _ref;
+      var credentials, nonce, paramsBody, ref, signature, url;
       credentials = sbAdmin.auth.getCredentials();
-      if (!((_ref = credentials.apiToken) != null ? _ref.length : void 0)) {
+      if (!((ref = credentials.apiToken) != null ? ref.length : void 0)) {
         return;
       }
       nonce = newNonce();
@@ -107,6 +107,38 @@
     return api;
   })();
 
+  if (typeof swapbot === "undefined" || swapbot === null) {
+    swapbot = {};
+  }
+
+  swapbot.addressUtils = (function() {
+    var exports;
+    exports = {};
+    exports.publicBotAddress = function(username, botId, location) {
+      return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
+    };
+    exports.poupupBotAddress = function(username, botId, location) {
+      return exports.publicBotAddress(username, botId, location) + "/popup";
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.botUtils = (function() {
+    var exports;
+    exports = {};
+    exports.confirmationsProse = function(bot) {
+      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    };
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    };
+    return exports;
+  })();
+
   sbAdmin.auth = (function() {
     var auth;
     auth = {};
@@ -116,9 +148,9 @@
       }
     };
     auth.isLoggedIn = function() {
-      var credentials, _ref, _ref1;
+      var credentials, ref, ref1;
       credentials = auth.getCredentials();
-      if (((_ref = credentials.apiToken) != null ? _ref.length : void 0) > 0 && ((_ref1 = credentials.apiSecretKey) != null ? _ref1.length : void 0) > 0) {
+      if (((ref = credentials.apiToken) != null ? ref.length : void 0) > 0 && ((ref1 = credentials.apiSecretKey) != null ? ref1.length : void 0) > 0) {
         return true;
       }
       return false;
@@ -153,6 +185,63 @@
     return auth;
   })();
 
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 / swap.rate;
+      inAmount = 1;
+      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount * swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
+  })();
+
   sbAdmin.currencyutils = (function() {
     var SATOSHI, currencyutils;
     currencyutils = {};
@@ -181,14 +270,14 @@
       return m.prop([emptyItem]);
     };
     buildNewItem = function(config, defaultValues) {
-      var emptyItem, fieldDef, value, _i, _len, _ref;
+      var emptyItem, fieldDef, j, len, ref, value;
       if (defaultValues == null) {
         defaultValues = null;
       }
       emptyItem = {};
-      _ref = config.fields;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        fieldDef = _ref[_i];
+      ref = config.fields;
+      for (j = 0, len = ref.length; j < len; j++) {
+        fieldDef = ref[j];
         value = '';
         if (defaultValues != null ? defaultValues[fieldDef.name] : void 0) {
           value = defaultValues[fieldDef.name];
@@ -225,7 +314,7 @@
             overrideColumnWidth = null;
           }
           prop = item[propName];
-          id = "" + idPrefix + "_" + propName + "_" + number;
+          id = idPrefix + "_" + propName + "_" + number;
           if (typeof placeholder_or_attributes === 'object') {
             attrs = placeholder_or_attributes;
             attrs.id = attrs.id || id;
@@ -256,7 +345,7 @@
             overrideColumnWidth = null;
           }
           prop = item[propName];
-          id = "" + idPrefix + "_" + propName + "_" + number;
+          id = idPrefix + "_" + propName + "_" + number;
           if (typeof attributes === 'object') {
             attrs = attributes;
             attrs.id = attrs.id || id;
@@ -282,13 +371,13 @@
           var colEls, colSizes, overrides, rowBuilderFieldDef, rowBuilderFieldDefsCount;
           rowBuilderFieldDefsCount = rowBuilderFieldDefs.length;
           overrides = (function() {
-            var _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = rowBuilderFieldDefs.length; _i < _len; _i++) {
-              rowBuilderFieldDef = rowBuilderFieldDefs[_i];
-              _results.push(rowBuilderFieldDef.colWidth);
+            var j, len, results;
+            results = [];
+            for (j = 0, len = rowBuilderFieldDefs.length; j < len; j++) {
+              rowBuilderFieldDef = rowBuilderFieldDefs[j];
+              results.push(rowBuilderFieldDef.colWidth);
             }
-            return _results;
+            return results;
           })();
           colSizes = sbAdmin.utils.splitColumnsWithOverrides(rowBuilderFieldDefsCount, numberOfColumns, overrides);
           colEls = rowBuilderFieldDefs.map(function(rowBuilderFieldDef, offset) {
@@ -372,10 +461,10 @@
         formGroup.prop().push(emptyItem);
       };
       formGroup.unserialize = function(itemsData) {
-        var itemData, newItems, rawItemData, _i, _len;
+        var itemData, j, len, newItems, rawItemData;
         newItems = [];
-        for (_i = 0, _len = itemsData.length; _i < _len; _i++) {
-          rawItemData = itemsData[_i];
+        for (j = 0, len = itemsData.length; j < len; j++) {
+          rawItemData = itemsData[j];
           if (config.translateFieldToNumberedValues != null) {
             itemData = {};
             itemData[config.translateFieldToNumberedValues] = rawItemData;
@@ -390,12 +479,12 @@
         formGroup.prop(newItems);
       };
       formGroup.serialize = function() {
-        var prop, serializedData, _i, _len, _ref;
+        var j, len, prop, ref, serializedData;
         if (config.translateFieldToNumberedValues != null) {
           serializedData = [];
-          _ref = formGroup.prop();
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            prop = _ref[_i];
+          ref = formGroup.prop();
+          for (j = 0, len = ref.length; j < len; j++) {
+            prop = ref[j];
             serializedData.push(prop[config.translateFieldToNumberedValues]());
           }
         } else {
@@ -581,8 +670,8 @@
       }
     };
     buildUsersNavLink = function(user) {
-      var _ref;
-      if ((_ref = user.privileges) != null ? _ref.createUser : void 0) {
+      var ref;
+      if ((ref = user.privileges) != null ? ref.createUser : void 0) {
         return m("li", {
           "class": ""
         }, [
@@ -656,8 +745,8 @@
     var planutils;
     planutils = {};
     planutils.paymentPlanDesc = function(planID) {
-      var _ref;
-      return ((_ref = planutils.planData(planID)) != null ? _ref.name : void 0) || 'unknown';
+      var ref;
+      return ((ref = planutils.planData(planID)) != null ? ref.name : void 0) || 'unknown';
     };
     planutils.planData = function(planID) {
       var plans;
@@ -697,17 +786,17 @@
     planutils.allPlanOptions = function() {
       var k, opts, v;
       opts = (function() {
-        var _ref, _results;
-        _ref = planutils.allPlansData();
-        _results = [];
-        for (k in _ref) {
-          v = _ref[k];
-          _results.push({
+        var ref, results;
+        ref = planutils.allPlansData();
+        results = [];
+        for (k in ref) {
+          v = ref[k];
+          results.push({
             k: v.name,
             v: v.id
           });
         }
-        return _results;
+        return results;
       })();
       return opts;
     };
@@ -717,15 +806,15 @@
   sbAdmin.pusherutils = (function() {
     var pusherutils;
     pusherutils = {};
-    pusherutils.subscribeToPusherChannel = function(channelName, callbackFn) {
+    pusherutils.subscribeToPusherChanel = function(chanelName, callbackFn) {
       var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + channelName, function(data) {
+      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
         callbackFn(data);
       });
       return client;
     };
-    pusherutils.closePusherChannel = function(client) {
+    pusherutils.closePusherChanel = function(client) {
       client.disconnect();
     };
     return pusherutils;
@@ -892,13 +981,13 @@
       return true;
     };
     utils.splitColumns = function(elementsCount, totalColumns) {
-      var baseColSize, colSize, cols, cumRemainder, i, isLast, remainder, totalColsUsed, _i;
+      var baseColSize, colSize, cols, cumRemainder, i, isLast, j, ref, remainder, totalColsUsed;
       baseColSize = Math.floor(totalColumns / elementsCount);
       remainder = totalColumns % elementsCount;
       cumRemainder = 0;
       totalColsUsed = 0;
       cols = [];
-      for (i = _i = 0; 0 <= elementsCount ? _i < elementsCount : _i > elementsCount; i = 0 <= elementsCount ? ++_i : --_i) {
+      for (i = j = 0, ref = elementsCount; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
         isLast = i === elementsCount - 1;
         if (isLast) {
           colSize = totalColumns - totalColsUsed;
@@ -916,11 +1005,11 @@
       return cols;
     };
     utils.splitColumnsWithOverrides = function(elementsCount, totalColumns, overrides) {
-      var cols, colsToSplit, elsToSplit, i, nextSplitColumnOffset, overrideCol, overrideCols, splitColumns, _i, _j, _len;
+      var cols, colsToSplit, elsToSplit, i, j, l, len, nextSplitColumnOffset, overrideCol, overrideCols, ref, splitColumns;
       overrideCols = [];
       elsToSplit = elementsCount;
       colsToSplit = totalColumns;
-      for (i = _i = 0; 0 <= elementsCount ? _i < elementsCount : _i > elementsCount; i = 0 <= elementsCount ? ++_i : --_i) {
+      for (i = j = 0, ref = elementsCount; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
         if (overrides != null ? overrides[i] : void 0) {
           overrideCols.push(overrides[i]);
           colsToSplit -= overrides[i];
@@ -932,8 +1021,8 @@
       splitColumns = utils.splitColumns(elsToSplit, colsToSplit);
       cols = [];
       nextSplitColumnOffset = 0;
-      for (_j = 0, _len = overrideCols.length; _j < _len; _j++) {
-        overrideCol = overrideCols[_j];
+      for (l = 0, len = overrideCols.length; l < len; l++) {
+        overrideCol = overrideCols[l];
         if (overrideCol === -1) {
           cols.push(splitColumns[nextSplitColumnOffset]);
           ++nextSplitColumnOffset;
@@ -1146,10 +1235,10 @@
     vm = sbAdmin.ctrl.botForm.vm = (function() {
       var buildBlacklistAddressesPropValue, buildSwapsPropValue;
       buildSwapsPropValue = function(swaps) {
-        var out, swap, _i, _len;
+        var j, len, out, swap;
         out = [];
-        for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-          swap = swaps[_i];
+        for (j = 0, len = swaps.length; j < len; j++) {
+          swap = swaps[j];
           out.push(sbAdmin.swaputils.newSwapProp(swap));
         }
         if (!out.length) {
@@ -1158,10 +1247,10 @@
         return out;
       };
       buildBlacklistAddressesPropValue = function(addresses) {
-        var address, out, _i, _len;
+        var address, j, len, out;
         out = [];
-        for (_i = 0, _len = addresses.length; _i < _len; _i++) {
-          address = addresses[_i];
+        for (j = 0, len = addresses.length; j < len; j++) {
+          address = addresses[j];
           out.push(m.prop(address));
         }
         if (!out.length) {
@@ -1235,7 +1324,6 @@
             apiArgs = [attributes];
           }
           return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
-            console.log("submit complete - routing to dashboard");
             m.route('/admin/dashboard');
           });
         };
@@ -1399,7 +1487,7 @@
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
         updateAllAccountPayments(id);
       };
       return vm;
@@ -1407,7 +1495,7 @@
     sbAdmin.ctrl.botPaymentsView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        sbAdmin.pusherutils.closePusherChannel(vm.pusherClient());
+        sbAdmin.pusherutils.closePusherChanel(vm.pusherClient());
       };
       vm.init();
     };
@@ -1484,7 +1572,7 @@
   })();
 
   (function() {
-    var buildBalancesMElement, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
+    var botPublicAddress, buildBalancesMElement, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, poupupBotAddress, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
     sbAdmin.ctrl.botView = {};
     swapGroupRenderers = {};
     swapGroupRenderers.rate = function(number, swap) {
@@ -1604,9 +1692,9 @@
           }
         ],
         buildAllItemRows: function(items) {
-          var addressList, item, offset, _i, _len;
+          var addressList, item, j, len, offset;
           addressList = "";
-          for (offset = _i = 0, _len = items.length; _i < _len; offset = ++_i) {
+          for (offset = j = 0, len = items.length; j < len; offset = ++j) {
             item = items[offset];
             addressList += (offset > 0 ? ", " : "") + item.address();
           }
@@ -1625,9 +1713,15 @@
         displayOnly: true
       });
     };
+    botPublicAddress = function(vm) {
+      return swapbot.addressUtils.publicBotAddress(vm.username(), vm.resourceId(), window.location);
+    };
+    poupupBotAddress = function(vm) {
+      return swapbot.addressUtils.poupupBotAddress(vm.username(), vm.resourceId(), window.location);
+    };
     handleBotEventMessage = function(data) {
-      var _ref;
-      if (data != null ? (_ref = data.event) != null ? _ref.msg : void 0 : void 0) {
+      var ref;
+      if (data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) {
         vm.botEvents().unshift(data);
         m.redraw(true);
       }
@@ -1721,10 +1815,10 @@
     vm = sbAdmin.ctrl.botView.vm = (function() {
       var buildBalancesPropValue, buildSwapsPropValue;
       buildSwapsPropValue = function(swaps) {
-        var out, swap, _i, _len;
+        var j, len, out, swap;
         out = [];
-        for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-          swap = swaps[_i];
+        for (j = 0, len = swaps.length; j < len; j++) {
+          swap = swaps[j];
           out.push(sbAdmin.swaputils.newSwapProp(swap));
         }
         return out;
@@ -1759,6 +1853,7 @@
         vm.showDebug = false;
         vm.name = m.prop('');
         vm.description = m.prop('');
+        vm.username = m.prop('');
         vm.address = m.prop('');
         vm.paymentAddress = m.prop('');
         vm.paymentPlan = m.prop('');
@@ -1779,6 +1874,7 @@
           vm.paymentPlan(botData.paymentPlan);
           vm.state(botData.state);
           vm.description(botData.description);
+          vm.username(botData.username);
           vm.swaps(buildSwapsPropValue(botData.swaps));
           vm.balances(buildBalancesPropValue(botData.balances));
           vm.confirmationsRequired(botData.confirmationsRequired);
@@ -1794,9 +1890,9 @@
           vm.errorMessages(errorResponse.errors);
         });
         updateBotAccountBalance(id);
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_events_" + id, handleBotEventMessage));
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_balances_" + id, handleBotBalancesMessage));
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChannel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_" + id, handleBotBalancesMessage));
+        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
         sbAdmin.api.refreshBalances(id).then(function(apiResponse) {}, function(errorResponse) {
           console.log("ERROR: " + errorResponse.msg);
         });
@@ -1806,7 +1902,7 @@
     sbAdmin.ctrl.botView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        sbAdmin.pusherutils.closePusherChannel(vm.pusherClient());
+        sbAdmin.pusherutils.closePusherChanel(vm.pusherClient());
       };
       vm.init();
     };
@@ -1878,6 +1974,35 @@
                     id: 'description'
                   }, vm.description())
                 ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  sbAdmin.form.mValueDisplay("Public Bot Address", {
+                    id: 'description'
+                  }, [
+                    m("a", {
+                      href: botPublicAddress(vm)
+                    }, botPublicAddress(vm))
+                  ])
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  sbAdmin.form.mValueDisplay("Bot Popup Address", {
+                    id: 'description'
+                  }, [
+                    m("a", {
+                      href: poupupBotAddress(vm),
+                      target: "_blank"
+                    }, poupupBotAddress(vm))
+                  ])
+                ])
               ])
             ]), m("div", {
               "class": "col-md-4"
@@ -1913,7 +2038,7 @@
               "class": "list-unstyled striped-list bot-list event-list"
             }, [
               vm.botEvents().map(function(botEventObj) {
-                var dateObj, _ref;
+                var dateObj, ref;
                 if (!vm.showDebug && botEventObj.level <= 100) {
                   return;
                 }
@@ -1928,7 +2053,7 @@
                     title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
                   }, dateObj.format('MMM D h:mm a')), m("span", {
                     "class": "msg"
-                  }, (_ref = botEventObj.event) != null ? _ref.msg : void 0)
+                  }, (ref = botEventObj.event) != null ? ref.msg : void 0)
                 ]);
               })
             ]), m("div", {
@@ -2181,13 +2306,13 @@
     formatPrivileges = function(privileges) {
       var out, privilege, set;
       out = (function() {
-        var _results;
-        _results = [];
+        var results;
+        results = [];
         for (privilege in privileges) {
           set = privileges[privilege];
-          _results.push(privilege);
+          results.push(privilege);
         }
-        return _results;
+        return results;
       })();
       if (out.length) {
         return out.join(", ");

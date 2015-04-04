@@ -121,10 +121,12 @@ class SwapProcessor {
             // log any failure
             if ($e instanceof SwapStrategyException) {
                 EventLog::logError('swap.failed', $e);
+                $data = $e->getErrorData();
+                $data['swapId'] = $swap['uuid'];
                 $this->bot_event_logger->logToBotEventsWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
             } else {
                 EventLog::logError('swap.failed', $e);
-                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap_process['xchain_notification'], $e);
+                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $swap_process['xchain_notification'], $e);
             }
         }
 
@@ -169,7 +171,7 @@ class SwapProcessor {
         // is this an unconfirmed tx?
         if (!$swap_process['is_confirmed']) {
             $swap_process['swap_was_handled'] = true;
-            $this->bot_event_logger->logUnconfirmedTx($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+            $this->bot_event_logger->logUnconfirmedTx($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
         }
     }
 
@@ -200,12 +202,12 @@ class SwapProcessor {
             $swap_process['swap_was_handled'] = true;
 
             // log as confirming
-            $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+            $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
         } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
             if ($swap_process['swap']->isConfirming()) {
                 // the swap just became confirmed
                 //   update the state right now
-                $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+                $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
                 $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
             }
         }
@@ -216,7 +218,7 @@ class SwapProcessor {
         if ($swap_process['swap_was_handled']) { return; }
 
         if (!$swap_process['swap']->isReady()) {
-            $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['transaction']['id'], $swap_process['swap']['name'], $swap_process['swap']['id']);
+            $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['swap'], $swap_process['transaction']['id'], $swap_process['swap']['name']);
             return;
         }
 
@@ -232,7 +234,7 @@ class SwapProcessor {
 
     protected function doForwardSwap($swap_process) {
         // log the attempt to send
-        $this->bot_event_logger->logSendAttempt($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
+        $this->bot_event_logger->logSendAttempt($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
 
         // send it
         try {
@@ -258,7 +260,7 @@ class SwapProcessor {
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
 
         // log it
-        $this->bot_event_logger->logSendResult($swap_process['bot'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
+        $this->bot_event_logger->logSendResult($swap_process['bot'], $swap_process['swap'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
 
         // mark the swap as sent
         $swap_process['swap_was_sent'] = true;

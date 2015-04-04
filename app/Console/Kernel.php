@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\TestCreateBotEventCommand',
 		'Swapbot\Console\Commands\Development\TestCreateBotBalancesUpdateCommand',
 		'Swapbot\Console\Commands\Development\TestConfigCommand',
+		'Swapbot\Console\Commands\Development\TestReceiveXChainNotificationCommand',
 
 		'Swapbot\Console\Commands\Development\ExportBotStateGraph',
 		'Swapbot\Console\Commands\Development\ExportSwapStateGraph',

@@ -54,7 +54,22 @@ EOF
     public function fire()
     {
         $bot_id = $this->input->getArgument('bot-id');
-        $event = json_decode($this->input->getArgument('event'));
+
+        // try a file
+        $event_arg = $this->input->getArgument('event');
+        if (strstr($event_arg, '{')) {
+            // interpret as raw JSON
+            $event = json_decode($event_arg);
+        } else {
+            // assume file
+            if (file_exists($event_arg)) {
+                $event = json_decode(file_get_contents($event_arg), true);
+            } else {
+                $this->error("File $event_arg not found");
+                return;
+            }
+        }
+
         if (!$event) {
             throw new Exception("Unable to decode event", 1);
         }
@@ -71,7 +86,7 @@ EOF
 
         $this->info("Creating event for bot ".$bot['name']." ({$bot['uuid']})");
         $level = $this->input->getOption('level');
-        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot['id'], $level, $event);
+        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot, $level, $event);
         $this->info("done");
     }
 

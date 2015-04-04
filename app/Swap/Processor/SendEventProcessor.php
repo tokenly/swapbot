@@ -36,9 +36,25 @@ class SendEventProcessor {
 
 
     public function handleSend($xchain_notification) {
+        $found = false;
+
         // find the bot related to this notification
         $bot = $this->bot_repository->findBySendMonitorID($xchain_notification['notifiedAddressId']);
-        if (!$bot) { throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}", 1); }
+        if ($bot) {
+            $found = true;
+        }
+
+
+        // could be a payment send
+        if (!$found) {
+            $bot = $this->bot_repository->findByPaymentSendMonitorID($xchain_notification['notifiedAddressId']);
+            if ($bot) {
+                $found = true;
+            }
+        }
+        
+
+        if (!$found) { throw new Exception("Unable to find bot for send monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
         DB::transaction(function() use ($xchain_notification, $bot) {

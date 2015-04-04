@@ -33,6 +33,24 @@ class BotRepositoryTest extends TestCase {
 
     }
 
+    public function testFindBotByUserIDAndUUID() {
+        $bot_helper = app('BotHelper');
+        $user = app('UserHelper')->newSampleUser();
+        $actual_bot = $bot_helper->newSampleBot($user);
+
+        $repo = app('Swapbot\Repositories\BotRepository');
+
+        // load with bad user id
+        $loaded_bot = $repo->findByUuidAndUserID($actual_bot['uuid'], 'baduser');
+        PHPUnit::assertNull($loaded_bot);
+
+        // load with good user id
+        $loaded_bot = $repo->findByUuidAndUserID($actual_bot['uuid'], $user['id']);
+        PHPUnit::assertNotNull($loaded_bot);
+        PHPUnit::assertEquals($actual_bot, $loaded_bot);
+
+    }
+
     public function testBadBotUUID() {
         $empty = $this->app->make('Swapbot\Repositories\BotRepository')->findByUuid('foo');
         PHPUnit::assertEmpty($empty);

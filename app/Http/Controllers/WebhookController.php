@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests;
@@ -21,7 +22,7 @@ class WebhookController extends Controller {
         } catch (Exception $e) {
             EventLog::logError('webhook.error', $e);
             if ($e instanceof HttpResponseException) { throw $e; }
-            throw new HttpResponseException("An error occurred", 500);
+            throw new HttpResponseException(new Response("An error occurred"), 500);
         }
 
         return 'ok';

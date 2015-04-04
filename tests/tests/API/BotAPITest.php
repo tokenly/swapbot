@@ -34,6 +34,9 @@ class BotAPITest extends TestCase {
 
         // test delete
         $tester->testDelete();
+
+        // test public
+        $tester->testPublicShow('/api/v1/public/bot/');
     }
 
     public function testBotBelongsToUser() {

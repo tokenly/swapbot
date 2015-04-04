@@ -24,51 +24,6 @@ class BotEventLogger {
         $this->bot_repository       = $bot_repository;
     }
 
-    public function logSendAttempt(Bot $bot, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        // log the send
-        return $this->logToBotEvents($bot, 'swap.found', BotEvent::LEVEL_DEBUG, [
-            'msg'         => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Will vend {$quantity} {$asset} to {$destination}.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-            'confirmations' => $confirmations,
-        ]);
-    }
-    
-    public function logSendResult(Bot $bot, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        // log the send
-        return $this->logToBotEvents($bot, 'swap.sent', BotEvent::LEVEL_INFO, [
-            // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
-            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
-            'txid'          => $xchain_notification['txid'],
-            'source'        => $xchain_notification['sources'][0],
-            'inQty'         => $xchain_notification['quantity'],
-            'inAsset'       => $xchain_notification['asset'],
-            'destination'   => $destination,
-            'outQty'        => $quantity,
-            'outAsset'      => $asset,
-            'sentTxID'      => $send_result['txid'],
-            'confirmations' => $confirmations,
-        ]);
-
-    }
-
-    public function logUnconfirmedTx(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
-        return $this->logToBotEvents($bot, 'unconfirmed.tx', BotEvent::LEVEL_INFO, [
-            'msg'         => "Received an unconfirmed transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Will vend {$quantity} {$asset} to {$destination} when it confirms.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-        ]);
-    }
 
     public function logUnconfirmedPaymentTx(Bot $bot, $xchain_notification) {
         return $this->logToBotEvents($bot, 'payment.unconfirmed', BotEvent::LEVEL_INFO, [
@@ -213,6 +168,14 @@ class BotEventLogger {
 
     }
 
+    public function logMoveInitialFuelTXFailed(Bot $bot, Exception $e) {
+        return $this->logToBotEvents($bot, 'payment.moveFuelCreated.failed', BotEvent::LEVEL_WARNING, [
+            'msg'   => "Failed to move initial swapbot fuel.",
+            'error' => $e->getMessage(),
+        ]);
+
+    }
+
     public function logFuelTXReceived(Bot $bot, $xchain_notification) {
         $quantity = $xchain_notification['quantity'];
         $asset    = $xchain_notification['asset'];
@@ -249,12 +212,114 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // swap
 
+    public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
+        return $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
+            'msg'         => "Failed to swap asset.",
+            'swapId'      => $swap['uuid'],
+            'error'       => $e->getMessage(),
+            'txid'        => $xchain_notification['txid'],
+            'destination' => $xchain_notification['sources'][0],
+            // 'file'     => $e->getFile(),
+            // 'line'     => $e->getLine(),
+        ]);
+    }
+
+    public function logSwapRetry(Bot $bot, Swap $swap) {
+        $swap_name = $swap['name'];
+        return $this->logToBotEventsWithoutEventLog($bot, 'swap.retry', BotEvent::LEVEL_DEBUG, [
+            'msg'    => "Retrying previously errored swap {$swap_name}.",
+            'swapId' => $swap['uuid'],
+        ]);
+    }
+
+    public function logConfirmingSwap(Bot $bot, Swap $swap, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
+        return $this->logToBotEvents($bot, 'swap.confirming', BotEvent::LEVEL_INFO, [
+            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations confirmation".($confirmations==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination} after $confirmations_required confirmations.",
+            'confirmations'         => $confirmations,
+            'confirmationsRequired' => $confirmations_required,
+            'txid'                  => $xchain_notification['txid'],
+            'source'                => $xchain_notification['sources'][0],
+            'inQty'                 => $xchain_notification['quantity'],
+            'inAsset'               => $xchain_notification['asset'],
+            'destination'           => $destination,
+            'outQty'                => $quantity,
+            'outAsset'              => $asset,
+            'swapId'                => $swap['uuid'],
+        ]);
+    }
+
+    public function logConfirmedSwap(Bot $bot, Swap $swap, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
+        return $this->logToBotEvents($bot, 'swap.confirmed', BotEvent::LEVEL_INFO, [
+            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations of $confirmations_required confirmation".($confirmations_required==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination}.",
+            'confirmations'         => $confirmations,
+            'confirmationsRequired' => $confirmations_required,
+            'txid'                  => $xchain_notification['txid'],
+            'source'                => $xchain_notification['sources'][0],
+            'inQty'                 => $xchain_notification['quantity'],
+            'inAsset'               => $xchain_notification['asset'],
+            'destination'           => $destination,
+            'outQty'                => $quantity,
+            'outAsset'              => $asset,
+            'swapId'                => $swap['uuid'],
+        ]);
+    }
+
+    public function logUnconfirmedTx(Bot $bot, Swap $swap, $xchain_notification, $destination, $quantity, $asset) {
+        return $this->logToBotEvents($bot, 'unconfirmed.tx', BotEvent::LEVEL_INFO, [
+            'msg'         => "Received an unconfirmed transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Will vend {$quantity} {$asset} to {$destination} when it confirms.",
+            'txid'        => $xchain_notification['txid'],
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+            'destination' => $destination,
+            'outQty'      => $quantity,
+            'outAsset'    => $asset,
+            'swapId'      => $swap['uuid'],
+        ]);
+    }
+
+    public function logSendAttempt(Bot $bot, Swap $swap, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
+        // log the send
+        return $this->logToBotEvents($bot, 'swap.found', BotEvent::LEVEL_DEBUG, [
+            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Will vend {$quantity} {$asset} to {$destination}.",
+            'txid'          => $xchain_notification['txid'],
+            'source'        => $xchain_notification['sources'][0],
+            'inQty'         => $xchain_notification['quantity'],
+            'inAsset'       => $xchain_notification['asset'],
+            'destination'   => $destination,
+            'outQty'        => $quantity,
+            'outAsset'      => $asset,
+            'confirmations' => $confirmations,
+            'swapId'        => $swap['uuid'],
+        ]);
+    }
+    
+    public function logSendResult(Bot $bot, Swap $swap, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
+        // log the send
+        return $this->logToBotEvents($bot, 'swap.sent', BotEvent::LEVEL_INFO, [
+            // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
+            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
+            'txid'          => $xchain_notification['txid'],
+            'source'        => $xchain_notification['sources'][0],
+            'inQty'         => $xchain_notification['quantity'],
+            'inAsset'       => $xchain_notification['asset'],
+            'destination'   => $destination,
+            'outQty'        => $quantity,
+            'outAsset'      => $asset,
+            'sentTxID'      => $send_result['txid'],
+            'confirmations' => $confirmations,
+            'swapId'        => $swap['uuid'],
+        ]);
+
+    }
+
+
     public function logSwapStateChange(Swap $swap, $new_state) {
         $bot = $this->bot_repository->findByID($swap['bot_id']);
 
         return $this->logToBotEvents($bot, 'swap.stateChange', BotEvent::LEVEL_DEBUG, [
             'msg'    => "Swap entered state {$new_state}",
-            'swapId' => $swap['id'],
+            'swapId' => $swap['uuid'],
             'state'  => $new_state,
         ]);
 
@@ -274,71 +339,14 @@ class BotEventLogger {
     }
 
 
-    public function logSwapNotReady(Bot $bot, $transaction_id, $name, $swap_id) {
+    public function logSwapNotReady(Bot $bot, Swap $swap, $transaction_id, $name) {
         return $this->logToBotEvents($bot, 'swap.notReady', BotEvent::LEVEL_WARNING, [
             'msg'           => "The swap {$name} could not be processed because it was not ready.",
-            'swapId'        => $swap_id,
+            'swapId'        => $swap['uuid'],
             'transactionId' => $transaction_id,
         ]);
     }
 
-    // public function logBotNotReadyForSwap(Bot $bot, Swap $swap, $state_name) {
-    //     $swap_name = $swap['name'];
-
-    //     return $this->logToBotEvents($bot, 'swap.botNotReady', BotEvent::LEVEL_WARNING, [
-    //         'msg'    => "The swap {$swap_name} could not be processed because this swapbot was not in a ready state.",
-    //         'swapId' => $swap['id'],
-    //         'state'  => $state_name,
-    //     ]);
-    // }
-
-    public function logSwapFailed(Bot $bot, $xchain_notification, $e) {
-        return $this->logToBotEventsWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
-            'msg'   => "Failed to swap asset.",
-            'error' => $e->getMessage(),
-            'txid'  => $xchain_notification['txid'],
-            'file'  => $e->getFile(),
-            'line'  => $e->getLine(),
-        ]);
-    }
-
-    public function logSwapRetry(Bot $bot, Swap $swap) {
-        $swap_name = $swap['name'];
-        return $this->logToBotEventsWithoutEventLog($bot, 'swap.retry', BotEvent::LEVEL_DEBUG, [
-            'msg'    => "Retrying previously errored swap {$swap_name}.",
-            'swapId' => $swap['id'],
-        ]);
-    }
-
-    public function logConfirmingSwap(Bot $bot, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
-        return $this->logToBotEvents($bot, 'swap.confirming', BotEvent::LEVEL_INFO, [
-            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations confirmation".($confirmations==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination} after $confirmations_required confirmations.",
-            'confirmations'         => $confirmations,
-            'confirmationsRequired' => $confirmations_required,
-            'txid'                  => $xchain_notification['txid'],
-            'source'                => $xchain_notification['sources'][0],
-            'inQty'                 => $xchain_notification['quantity'],
-            'inAsset'               => $xchain_notification['asset'],
-            'destination'           => $destination,
-            'outQty'                => $quantity,
-            'outAsset'              => $asset,
-        ]);
-    }
-
-    public function logConfirmedSwap(Bot $bot, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
-        return $this->logToBotEvents($bot, 'swap.confirmed', BotEvent::LEVEL_INFO, [
-            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations of $confirmations_required confirmation".($confirmations_required==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination}.",
-            'confirmations'         => $confirmations,
-            'confirmationsRequired' => $confirmations_required,
-            'txid'                  => $xchain_notification['txid'],
-            'source'                => $xchain_notification['sources'][0],
-            'inQty'                 => $xchain_notification['quantity'],
-            'inAsset'               => $xchain_notification['asset'],
-            'destination'           => $destination,
-            'outQty'                => $quantity,
-            'outAsset'              => $asset,
-        ]);
-    }
 
 
     ////////////////////////////////////////////////////////////////////////
