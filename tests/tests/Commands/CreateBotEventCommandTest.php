@@ -29,6 +29,7 @@ class CreateBotEventCommandTest extends TestCase {
             'level'     => $level,
             'event'     => $event_data,
             'createdAt' => $loaded_events[0]['created_at']->toIso8601String(),
+            'serial'    => $loaded_events[0]['serial'],
         ];
         PHPUnit::assertEquals($expected_event, $loaded_events[0]->serializeForAPI());
     }
