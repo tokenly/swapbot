@@ -1,0 +1,4 @@
+# receive a payment of 0.1 BTC
+is_credit: true
+amount: 10000000
+

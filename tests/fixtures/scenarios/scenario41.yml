@@ -1,4 +1,5 @@
-# confirmed payment received
+# when payment is received and fuel is forwarded
+#   the payment balance is debited for the fuel
 
 ############################
 # setup bots and payment
@@ -6,16 +7,27 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    balances:
+        LTBCOIN: 0
+        BTC: 0
+
 
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
+
   # receive a payment
   - meta: { baseFilename: mempool_BTC_RECEIVE_PAYMENT_notification_01.yml }
+
   # receive a confirmed payment
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300001
+
+  # confirm that the fuel was received
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
 
 
 
@@ -37,15 +49,23 @@ expectedBotEvents:
     meta: { baseFilename: payment.creationFeePaid.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### fuel transaction confirmed
+    meta: { baseFilename: payment.moveFuelConfirmed.yml }
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
 
 
 expectedBotLedgerEntries:
-  - 
-    meta: { baseFilename: bot_ledger_entry_model_01.yml }
+  ### No Setup
+  - ### Credit - Receive Payment
+    meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT.yml }
   - ### Debit - Sent Fuel
     meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
   - ### Debit - Paid Creation Fee
     meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
 
+
+expectedBotModels:
+  - 
+    # bot should be in state active when done
+    state: active

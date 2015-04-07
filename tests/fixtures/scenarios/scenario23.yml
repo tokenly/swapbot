@@ -56,8 +56,11 @@ expectedBotEvents:
 expectedBotLedgerEntries:
   - 
     meta: { baseFilename: bot_ledger_entry_model_01.yml }
-  - 
+  - ### Debit - Sent Fuel
     meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
+  - ### Debit - Paid Creation Fee
+    meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
+
 
 
 expectedBotModels:

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Statemachines\BotCommand\BotCommand;
 
 
@@ -57,7 +58,11 @@ class CreationFeePaid extends BotCommand {
             $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee);
 
             // log event
-            $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);
+            $bot_event = $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);
+
+            // debit the payment balance
+            $this->getBotLedgerEntryRepository()->addDebit($bot, $quantity + $fee, $bot_event);
+            
         } catch (Exception $e) {
             $this->getBotEventLogger()->logMoveInitialFuelTXFailed($bot, $e);
         }
