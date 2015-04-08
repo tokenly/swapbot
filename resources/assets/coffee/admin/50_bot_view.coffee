@@ -288,14 +288,15 @@ do ()->
             vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
             # console.log "vm.pusherClient=",vm.pusherClient()
 
-            # and send a balance refresh on each reload
-            sbAdmin.api.refreshBalances(id).then(
-                (apiResponse)->
-                    return
-                , (errorResponse)->
-                    console.log "ERROR: "+errorResponse.msg
-                    return
-            )
+            # refresh balances are not needed
+            # # and send a balance refresh on each reload
+            # sbAdmin.api.refreshBalances(id).then(
+            #     (apiResponse)->
+            #         return
+            #     , (errorResponse)->
+            #         console.log "ERROR: "+errorResponse.msg
+            #         return
+            # )
 
             return
         return vm
