@@ -1,0 +1,32 @@
+# sends from blacklisted addresses still update balances
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    blacklist_addresses: [SENDER01]
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+
+expectedBotEvents:
+  - #### unconfirmed send blacklisted
+    meta: { baseFilename: swap.ignored.blacklist-mempool.yml }
+  - #### confirmed send blacklisted
+    meta: { baseFilename: swap.ignored.blacklist.yml }
+
+expectedBotModels:
+  - 
+    balances:
+        BTC: 1
+        LTBCOIN: 1000500
+

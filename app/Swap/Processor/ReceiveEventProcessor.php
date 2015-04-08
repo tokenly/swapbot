@@ -238,9 +238,12 @@ class ReceiveEventProcessor {
             $this->bot_event_logger->logSendFromBlacklistedAddress($tx_process['bot'], $tx_process['xchain_notification'], $tx_process['is_confirmed']);
 
             $tx_process['tx_is_handled']                            = true;
-            $tx_process['transaction_update_vars']['processed']     = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
 
+            if ($tx_process['is_confirmed']) {
+                // only mark as processed when confirmed
+                $tx_process['transaction_update_vars']['processed']     = true;
+            }
         }
 
     }

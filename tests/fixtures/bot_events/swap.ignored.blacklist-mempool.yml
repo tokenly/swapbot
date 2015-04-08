@@ -1,0 +1,6 @@
+name: swap.ignored.blacklist
+msg: Ignored unconfirmed transaction of 500 LTBCOIN from SENDER01 because sender address was blacklisted.
+txid: 00000000000000000000000000000000000000000000000000000xcptx111111
+source: SENDER01
+inQty: 500
+inAsset: LTBCOIN
