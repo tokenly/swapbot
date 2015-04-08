@@ -53,6 +53,9 @@ class ReceivePaymentProcessor {
                 'should_process_payment'     => true,
             ]);
 
+            // previously processed transactions
+            $this->checkForPreviouslyProcessedTransaction($tx_process);
+
             // handle an unconfirmed TX
             $this->handleUnconfirmedTX($tx_process);
 
@@ -85,32 +88,42 @@ class ReceivePaymentProcessor {
         }
     }
 
-    protected function validatePayment($tx_process) {
-        if ($tx_process['should_process_payment']) {
-            // make sure this is BTC
-            if ($tx_process['xchain_notification']['asset'] != 'BTC') {
-                $this->swap_event_logger->logUnknownPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']);
+    protected function checkForPreviouslyProcessedTransaction($tx_process) {
+        if (!$tx_process['should_process_payment']) { return; }
 
-                $tx_process['should_process_payment'] = false;
-                $tx_process['should_update_transaction'] = true;
-            }
+        if ($tx_process['transaction']['processed']) {
+            $this->swap_event_logger->logPreviousPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']['txid'], $tx_process['confirmations']);
+            $tx_process['should_process_payment']    = false;
+            $tx_process['should_update_transaction'] = true;
+        }
+    }    
+
+    protected function validatePayment($tx_process) {
+        if (!$tx_process['should_process_payment']) { return; }
+
+        // make sure this is BTC
+        if ($tx_process['xchain_notification']['asset'] != 'BTC') {
+            $this->swap_event_logger->logUnknownPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']);
+
+            $tx_process['should_process_payment'] = false;
+            $tx_process['should_update_transaction'] = true;
         }
     }
 
     protected function handlePayment($tx_process) {
-        if ($tx_process['should_process_payment']) {
-            // fire off a payment command
+        if (!$tx_process['should_process_payment']) { return; }
 
-            // sanity check
-            if ($tx_process['xchain_notification']['asset'] != 'BTC') { throw new Exception("Only BTC accepted", 1); }
+        // fire off a payment command
 
-            $amount = $tx_process['xchain_notification']['quantity'];
-            $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
-            $is_credit = true;
-            $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $is_credit, $bot_event));
+        // sanity check
+        if ($tx_process['xchain_notification']['asset'] != 'BTC') { throw new Exception("Only BTC accepted", 1); }
 
-            $tx_process['should_update_transaction'] = true;
-        }
+        $amount = $tx_process['xchain_notification']['quantity'];
+        $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
+        $is_credit = true;
+        $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $is_credit, $bot_event));
+
+        $tx_process['should_update_transaction'] = true;
     }
 
 

@@ -1,0 +1,80 @@
+# when payment is received and confirmed multiple times, the balance is only credited once
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+    payments: ~
+    balances:
+        LTBCOIN: 0
+        BTC: 0
+
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+
+  # receive a payment
+  - meta: { baseFilename: mempool_BTC_RECEIVE_PAYMENT_notification_01.yml }
+
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+    blockId: 300001
+
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+    blockId: 300002
+    confirmations: 2
+
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+    blockId: 300003
+    confirmations: 3
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+
+
+expectedBotEvents:
+  - #### unconfirmed payment received
+    meta: { baseFilename: payment.unconfirmed.yml }
+  - #### confirmed payment received
+    meta: { baseFilename: payment.confirmed.yml }
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+  - #### creation fee paid
+    meta: { baseFilename: payment.creationFeePaid.yml }
+  - #### LOWFUEL
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### previous payment confirmed
+    meta: { baseFilename: payment.previous.yml }
+  - #### previous payment confirmed
+    meta: { baseFilename: payment.previous-3.yml }
+
+
+expectedBotLedgerEntries:
+  ### No Setup
+  - ### Credit - Receive Payment
+    meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT.yml }
+  - ### Debit - Sent Fuel
+    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
+  - ### Debit - Paid Creation Fee
+    meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
+
+
+expectedBotModels:
+  - 
+    # bot should be in state active when done
+    state: lowfuel
+    balances:
+        BTC: 0
+        LTBCOIN: 0
+

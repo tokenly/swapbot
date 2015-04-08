@@ -46,6 +46,13 @@ class BotEventLogger {
         ]);
     }
 
+    public function logPreviousPaymentTransaction(Bot $bot, $tx_id, $confirmations) {
+        $this->logToBotEvents($bot, 'payment.previous', BotEvent::LEVEL_DEBUG, [
+            'msg'           => "Payment transaction {$tx_id} was confirmed with $confirmations confirmations.",
+            'txid'          => $tx_id,
+            'confirmations' => $confirmations
+        ]);
+    }
 
     public function logUnknownPaymentTransaction(Bot $bot, $xchain_notification) {
         $confirmations = $xchain_notification['confirmations'];
@@ -117,8 +124,9 @@ class BotEventLogger {
 
     public function logPreviousTransaction(Bot $bot, $tx_id, $confirmations) {
         $this->logToBotEvents($bot, 'tx.previous', BotEvent::LEVEL_DEBUG, [
-            'msg'  => "Transaction {$tx_id} was confirmed with $confirmations confirmations.",
-            'txid' => $tx_id
+            'msg'           => "Transaction {$tx_id} was confirmed with $confirmations confirmations.",
+            'txid'          => $tx_id,
+            'confirmations' => $confirmations
         ]);
     }
 
