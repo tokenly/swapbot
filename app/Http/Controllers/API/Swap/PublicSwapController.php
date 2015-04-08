@@ -23,9 +23,7 @@ class PublicSwapController extends APIController {
     public function index($botuuid, BotRepository $bot_repository, SwapRepository $swap_repository, APIControllerHelper $api_helper)
     {
         // get the bot
-        Log::debug("\$botuuid=$botuuid");
         $bot = $api_helper->requireResource($botuuid, $bot_repository);
-        Log::debug("\$bot=".json_encode($bot, 192));
 
         // get all swaps fot this bot
         $swaps = $swap_repository->findByBotId($bot['id']);

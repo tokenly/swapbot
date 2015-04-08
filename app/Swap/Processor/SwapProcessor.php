@@ -228,6 +228,7 @@ class SwapProcessor {
             // refund
             $this->doRefund($swap_process);
         } else {
+            // do forward swap
             $this->doForwardSwap($swap_process);
         }
     }
