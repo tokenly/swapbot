@@ -9,7 +9,7 @@ swapbot.swapUtils = do ()->
 
     buildDesc = {}
     buildDesc.rate = (swap)->
-        outAmount = 1 / swap.rate
+        outAmount = 1 * swap.rate
         inAmount = 1
         return "#{outAmount} #{swap.out} for #{inAmount} #{swap.in}"
 
@@ -22,7 +22,7 @@ swapbot.swapUtils = do ()->
         if not outAmount? or isNaN(outAmount)
             return 0
 
-        inAmount = outAmount * swap.rate
+        outAmount = inAmount * swap.rate
         return inAmount
     buildInAmountFromOutAmount.fixed = (outAmount, swap)->
         return

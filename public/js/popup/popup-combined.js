@@ -485,7 +485,7 @@
     buildDesc = {};
     buildDesc.rate = function(swap) {
       var inAmount, outAmount;
-      outAmount = 1 / swap.rate;
+      outAmount = 1 * swap.rate;
       inAmount = 1;
       return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
     };
@@ -494,11 +494,10 @@
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount * swap.rate;
+      outAmount = inAmount * swap.rate;
       return inAmount;
     };
     buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};

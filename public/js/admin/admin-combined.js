@@ -5,6 +5,22 @@
     ctrl: {}
   };
 
+  if (typeof swapbot === "undefined" || swapbot === null) {
+    swapbot = {};
+  }
+
+  swapbot.addressUtils = (function() {
+    var exports;
+    exports = {};
+    exports.publicBotAddress = function(username, botId, location) {
+      return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
+    };
+    exports.poupupBotAddress = function(username, botId, location) {
+      return exports.publicBotAddress(username, botId, location) + "/popup";
+    };
+    return exports;
+  })();
+
   sbAdmin.api = (function() {
     var api, newNonce, signRequest, signURLParameters;
     api = {};
@@ -107,22 +123,6 @@
     return api;
   })();
 
-  if (typeof swapbot === "undefined" || swapbot === null) {
-    swapbot = {};
-  }
-
-  swapbot.addressUtils = (function() {
-    var exports;
-    exports = {};
-    exports.publicBotAddress = function(username, botId, location) {
-      return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
-    };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
-    };
-    return exports;
-  })();
-
   if (swapbot == null) {
     swapbot = {};
   }
@@ -206,42 +206,6 @@
     return exports;
   })();
 
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
-    exports = {};
-    buildDesc = {};
-    buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
-      outAmount = 1 / swap.rate;
-      inAmount = 1;
-      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
-    };
-    buildDesc.fixed = function(swap) {
-      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
-    };
-    buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount * swap.rate;
-      return inAmount;
-    };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
-    };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
-    };
-    return exports;
-  })();
-
   sbAdmin.currencyutils = (function() {
     var SATOSHI, currencyutils;
     currencyutils = {};
@@ -259,6 +223,41 @@
       return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
     };
     return currencyutils;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 * swap.rate;
+      inAmount = 1;
+      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      outAmount = inAmount * swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
   })();
 
   sbAdmin.formGroup = (function() {
@@ -1893,9 +1892,6 @@
         vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
         vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_" + id, handleBotBalancesMessage));
         vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
-        sbAdmin.api.refreshBalances(id).then(function(apiResponse) {}, function(errorResponse) {
-          console.log("ERROR: " + errorResponse.msg);
-        });
       };
       return vm;
     })();
