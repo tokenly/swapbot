@@ -1,0 +1,6 @@
+name: payment.unconfirmedMoveFuel
+msg: Received an unconfirmed transaction with swapbot fuel of 0.005 BTC from the payment address with transaction ID 00000000000000000000000000000000000000000000000000000BTCtx333333.
+qty: 0.005
+asset: BTC
+txid: "00000000000000000000000000000000000000000000000000000BTCtx333333"
+confirmations: 0

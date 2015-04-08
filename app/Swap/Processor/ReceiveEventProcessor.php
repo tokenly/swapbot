@@ -204,15 +204,19 @@ class ReceiveEventProcessor {
         if ($tx_process['transaction']['processed']) { return; }
 
         if ($tx_process['xchain_notification']['asset'] == 'BTC' AND in_array($tx_process['bot']['payment_address'], $tx_process['xchain_notification']['sources'])) {
-            // this is a fuel transaction
-            $this->bot_event_logger->logFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
+            $confirmed = $tx_process['is_confirmed'];
 
-            $tx_process['tx_is_handled']                        = true;
-            $tx_process['transaction_update_vars']['processed'] = true;
+            // this is a fuel transaction
+            if ($confirmed) {
+                $this->bot_event_logger->logFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
+                $tx_process['transaction_update_vars']['processed'] = true;
+            } else {
+                $this->bot_event_logger->logUnconfirmedFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
+            }
+
+            $tx_process['tx_is_handled']                            = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
         }
-
-        // 
 
     }
 

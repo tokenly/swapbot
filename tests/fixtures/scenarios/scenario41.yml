@@ -1,5 +1,6 @@
 # when payment is received and fuel is forwarded
 #   the payment balance is debited for the fuel
+#   and the bot should be credited with the fuel BTC
 
 ############################
 # setup bots and payment
@@ -23,6 +24,11 @@ xchainNotifications:
   # receive a confirmed payment
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300001
+
+  # unconfirmed fuel transaction received
+  - meta: { baseFilename: mempool_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
 
   # confirm that the fuel was received
   - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
@@ -49,6 +55,8 @@ expectedBotEvents:
     meta: { baseFilename: payment.creationFeePaid.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### unconfirmed fuel transaction
+    meta: { baseFilename: payment.unconfirmedMoveFuel.yml }
   - #### fuel transaction confirmed
     meta: { baseFilename: payment.moveFuelConfirmed.yml }
   - #### ACTIVE
@@ -69,3 +77,7 @@ expectedBotModels:
   - 
     # bot should be in state active when done
     state: active
+    balances:
+        BTC: 0.005
+        LTBCOIN: 0
+

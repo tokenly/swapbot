@@ -176,6 +176,21 @@ class BotEventLogger {
 
     }
 
+    public function logUnconfirmedFuelTXReceived(Bot $bot, $xchain_notification) {
+        $quantity = $xchain_notification['quantity'];
+        $asset    = $xchain_notification['asset'];
+        $tx_id    = $xchain_notification['txid'];
+        return $this->logToBotEvents($bot, 'payment.unconfirmedMoveFuel', BotEvent::LEVEL_INFO, [
+            'msg'           => "Received an unconfirmed transaction with swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
+            'qty'           => $quantity,
+            'asset'         => $asset,
+            'txid'          => $tx_id,
+            'confirmations' => $xchain_notification['confirmations'],
+        ]);
+
+    }
+
+
     public function logFuelTXReceived(Bot $bot, $xchain_notification) {
         $quantity = $xchain_notification['quantity'];
         $asset    = $xchain_notification['asset'];
@@ -189,6 +204,7 @@ class BotEventLogger {
         ]);
 
     }
+
 
 
     public function logInitialCreationFeePaid(Bot $bot, $quantity, $asset) {

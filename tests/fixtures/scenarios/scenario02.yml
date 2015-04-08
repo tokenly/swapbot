@@ -33,3 +33,14 @@ expectedBotEvents:
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_01.yml }
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done
+    state: active
+    balances:
+      LTBCOIN: 1000500
+      BTC: 0.9994
+
+
