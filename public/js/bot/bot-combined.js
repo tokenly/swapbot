@@ -249,7 +249,7 @@
     },
     applyBotEventToSwaps: function(botEvent) {
       var anyFound, applied, newSwapEventRecords, swap, _i, _len, _ref;
-      if (!this.state.swaps) {
+      if (this.state.swaps == null) {
         return false;
       }
       newSwapEventRecords = this.state.swapEventRecords;

@@ -86,7 +86,7 @@ SwapStatuses = React.createClass
         return
 
     applyBotEventToSwaps: (botEvent)->
-        return false if not this.state.swaps
+        return false if not this.state.swaps?
 
         newSwapEventRecords = this.state.swapEventRecords
         anyFound = false
