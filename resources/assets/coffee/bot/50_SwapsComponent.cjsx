@@ -35,7 +35,7 @@ SwapsList = React.createClass
                         <div>
                             <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
                             <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
-                            <a href="{ bot.id }/popup" target="_blank" className="icon-next"></a>
+                            <a href={bot.id+"/popup"} target="_blank" className="icon-next"></a>
                         </div>
                     </li>
             }

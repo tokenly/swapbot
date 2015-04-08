@@ -190,7 +190,7 @@
             _results.push(React.createElement("li", null, React.createElement("div", null, React.createElement("div", {
               "className": "item-header"
             }, swap.out, " ", React.createElement("small", null, "(", bot.balances[swap.out], " available)")), React.createElement("p", null, "Sends ", swapbot.swapUtils.exchangeDescription(swap), "."), React.createElement("a", {
-              "href": "{ bot.id }/popup",
+              "href": bot.id + "/popup",
               "target": "_blank",
               "className": "icon-next"
             }))));
