@@ -21,6 +21,7 @@ class CreateTransactionsTable extends Migration {
 
             $table->integer('confirmations')->unsigned()->default(0);
             $table->boolean('processed')->default(false);
+            $table->boolean('balances_applied')->default(false);
 
             $table->integer('billed_event_id')->unsigned()->nullable();
             $table->foreign('billed_event_id')->references('id')->on('bot_events');

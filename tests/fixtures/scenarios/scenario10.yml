@@ -56,3 +56,4 @@ expectedTransactionModels:
     txid: "0000000000000000000000000000001111"
     confirmations: '1'
     processed: '1'
+    balances_applied: '0'

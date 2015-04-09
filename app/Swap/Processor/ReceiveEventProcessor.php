@@ -83,7 +83,7 @@ class ReceiveEventProcessor {
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
-            Log::debug("xchain notification received: {$xchain_notification['confirmations']}");
+            // Log::debug("xchain notification received: {$xchain_notification['confirmations']}");
 
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
@@ -105,11 +105,11 @@ class ReceiveEventProcessor {
                 'should_reconcile_swap_states'     => true,
             ]);
 
-            // previously processed transactions
-            $this->checkForPreviouslyProcessedTransaction($tx_process);
-
             // update bot balances
             $this->updateBotBalances($tx_process);
+
+            // previously processed transactions
+            $this->checkForPreviouslyProcessedTransaction($tx_process);
 
             // check for incoming fuel transaction
             $this->checkForIncomingFuelTransaction($tx_process);
@@ -124,7 +124,7 @@ class ReceiveEventProcessor {
             $this->checkBotState($tx_process);
 
             // process all newly created swaps
-            $this->processNewSwaps($tx_process);
+            $this->createNewSwaps($tx_process);
 
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
@@ -187,7 +187,7 @@ class ReceiveEventProcessor {
 
     protected function updateBotBalances($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
-        if ($tx_process['transaction']['processed']) { return; }
+        if ($tx_process['transaction']['balances_applied']) { return; }
 
         if ($tx_process['is_confirmed']) {
             // update the bot's balance
@@ -195,6 +195,8 @@ class ReceiveEventProcessor {
             $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasFromTransactionReceived($bot_balance_deltas, $tx_process['xchain_notification']);
 
             $this->balance_updater->updateBotBalances($tx_process['bot'], $bot_balance_deltas);
+
+            $tx_process['transaction_update_vars']['balances_applied'] = true;
         }
     }
 
@@ -283,7 +285,7 @@ class ReceiveEventProcessor {
         }
     }
 
-    protected function processNewSwaps($tx_process) {
+    protected function createNewSwaps($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
         $bot = $tx_process['bot'];
@@ -310,8 +312,9 @@ class ReceiveEventProcessor {
 
         // mark this transaction as processed (completed)
         $tx_process['transaction_update_vars']['processed']     = true;
-        $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
 
+        // update the confirmations
+        $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
     }
 
     protected function updateTransaction($tx_process) {

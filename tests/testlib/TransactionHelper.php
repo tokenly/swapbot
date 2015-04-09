@@ -13,6 +13,7 @@ class TransactionHelper  {
             'txid'                => 'transactionid0000000000001',
             'confirmations'       => '0',
             'processed'           => '0',
+            'balances_applied'    => '0',
             'billed_event_id'     => null,
             'xchain_notification' => null,
         ];

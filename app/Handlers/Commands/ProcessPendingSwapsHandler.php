@@ -42,7 +42,7 @@ class ProcessPendingSwapsHandler {
             
             foreach($swaps as $swap) {
                 $locked_swap = $this->swap_repository->getLockedSwap($swap);
-                Log::debug('$locked_swap='.$locked_swap['name']);
+                // Log::debug('$locked_swap='.$locked_swap['name']);
                 if ($locked_swap->isPending()) {
                     // handle this swap
                     $this->swap_processor->processSwap($locked_swap);

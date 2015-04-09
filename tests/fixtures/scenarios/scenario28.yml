@@ -45,3 +45,4 @@ expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_01.yml }
     txid: "0000000000000000000000000000001111"
+    balances_applied: '0'

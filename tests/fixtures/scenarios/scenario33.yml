@@ -76,6 +76,7 @@ expectedTransactionModels:
   - # payment
     meta: { baseFilename: transaction_model_01.yml }
     txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+    balances_applied: '0'
 
 
 
