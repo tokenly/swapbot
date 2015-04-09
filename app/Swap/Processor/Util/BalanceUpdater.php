@@ -29,7 +29,7 @@ class BalanceUpdater {
 
         // add the BTC amount
         if ($asset != 'BTC') {
-            $btc_amount = 0; // need to calculate BTC dust here
+            $btc_amount = $xchain_notification['counterpartyTx']['dustSize']; //
             
             if (!isset($balance_deltas['BTC'])) { $balance_deltas['BTC'] = 0; }
             $balance_deltas['BTC'] = $balance_deltas['BTC'] + $btc_amount;

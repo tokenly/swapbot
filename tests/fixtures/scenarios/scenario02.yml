@@ -47,6 +47,6 @@ expectedBotModels:
     state: active
     balances:
       LTBCOIN: 1000500
-      BTC: 0.9994
+      BTC: 0.99941 # + 0.00001 dust
 
 

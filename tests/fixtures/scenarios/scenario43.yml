@@ -27,6 +27,6 @@ expectedBotEvents:
 expectedBotModels:
   - 
     balances:
-        BTC: 1
+        BTC: 1.00001 # + 0.00001 dust
         LTBCOIN: 1000500
 
