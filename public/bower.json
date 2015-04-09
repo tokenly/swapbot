@@ -17,11 +17,10 @@
   "dependencies": {
     "mithril": "0.1.29",
     "cryptojslib": "3.1.2",
-    "moment": "~2.9.0",
+    "moment": "~2.10.2",
     "accounting.js": "git@github.com:openexchangerates/accounting.js.git#9b73d760f20fb5bd87a570f7b7ecf9af9cf5b76c",
     "prettyFloat.js": "git@github.com:dperish/prettyFloat.js.git#e8337df8dcff0de2e67a80295468fc1ef9cab349",
     "numeral": "~1.5.3",
-    "director": "~1.2.8",
-    "es6-promise": "git@github.com:jakearchibald/es6-promise#2.0.1"
+    "director": "~1.2.8"
   }
 }

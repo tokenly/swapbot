@@ -1,6 +1,59 @@
 
+TransactionInfo = React.createClass
+    displayName: 'TransactionInfo'
+    intervalTimer: null
+
+    componentDidMount: ()->
+        this.updateNow()
+
+        this.intervalTimer = setInterval ()=>
+            this.updateNow()
+        , 1000
+
+        return
+
+    updateNow: ()->
+        this.setState({fromNow: moment(this.props.txInfo.createdAt).fromNow()})
+        # this.setState({fromNow: moment().format('MMMM Do YYYY, h:mm:ss a')})
+        return
+
+    componentWillUnmount: ()->
+        if this.intervalTimer?
+            clearInterval(this.intervalTimer)
+        return
+
+    getInitialState: ()->
+        return {
+            fromNow: ''
+        }
+
+    render: ()->
+        txInfo = this.props.txInfo
+        bot = this.props.bot
+
+        return <li>
+            <a onClick={this.props.clickedFn} href="#choose">
+                <div className="item-header" title="{txInfo.name}">Transaction Received</div>
+                <div className="icon-next"></div>
+                <div>
+                    <p className="date">{ this.state.fromNow }</p>
+                    <p>
+                        Received <b>{txInfo.inQty} {txInfo.inAsset}</b> from <br/>
+                        {txInfo.address}.<br/>
+                        This transaction has <b>{txInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.
+                    </p>
+                    <p className="msg">{txInfo.msg}</p>
+                </div>
+            </a>
+        </li>
+
+
+
+
+
 SwapbotWait = React.createClass
     displayName: 'SwapbotWait'
+    intervalTimer: null
 
     componentDidMount: ()->
         bot = this.props.bot
@@ -11,9 +64,6 @@ SwapbotWait = React.createClass
                 for botEvent in data
                     if botEventWatcher.botEventMatchesInAmount(botEvent, this.props.swapDetails.chosenToken.inAmount, this.props.swapDetails.chosenToken.inAsset)
                         this.handleMatchedBotEvent(botEvent)
-                        break
-                
-
             return
 
         # subscribe to pusher
@@ -36,13 +86,19 @@ SwapbotWait = React.createClass
     # matched bot event
     
     handleMatchedBotEvent: (botEvent)->
-        event = botEvent.event
-
         matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent)
+        swapId = matchedTxInfo.swapId
 
         matchedTxs = this.state.matchedTxs
-        matchedTxs[matchedTxInfo.swapId] = matchedTxInfo
+        
+        if matchedTxs[swapId]?
+            if matchedTxs[swapId].serial >= botEvent.serial
+                # this event is older than the one we have - ignore it
+                return
+
+        matchedTxs[swapId] = matchedTxInfo
         this.setState({matchedTxs: matchedTxs, anyMatchedTxs: true})
+        console.log "matchedTxs=",matchedTxs
 
         return
 
@@ -111,21 +167,7 @@ SwapbotWait = React.createClass
                         <ul className="wide-list">
                         {
                             for swapId, txInfo of this.state.matchedTxs
-                                <li>
-                                    <a onClick={this.buildChooseSwapClicked(txInfo)} href="#choose">
-                                        <div className="item-header" title="{txInfo.name}">Transaction Received</div>
-                                        <div className="icon-next"></div>
-                                        <div>
-                                            <p>
-                                                Received <b>{txInfo.inQty} {txInfo.inAsset}</b> from <br/>
-                                                {txInfo.address}.<br/>
-                                                This transaction has <b>{txInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.
-                                            </p>
-                                            <p className="msg">{txInfo.msg}</p>
-                                        </div>
-                                    </a>
-                                </li>
-                            
+                                <TransactionInfo bot={bot} txInfo={txInfo} clickedFn={this.buildChooseSwapClicked(txInfo)} />
                         }
                         </ul>
                         <a id="go-back" onClick={this.goBack} href="#" className="shadow-link">Go Back</a>

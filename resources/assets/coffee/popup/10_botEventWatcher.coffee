@@ -39,6 +39,9 @@ botEventWatcher = do ()->
             outAsset: event.outAsset
             outQty: event.outQty
 
+            serial: botEvent.serial
+            createdAt: botEvent.createdAt
+
             confirmations: exports.confirmationsFromEvent(botEvent)
             status: event.name
         }

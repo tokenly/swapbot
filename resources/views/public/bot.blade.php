@@ -105,6 +105,7 @@
 
 <script src="http://fb.me/react-0.13.1.js"></script>
 {{-- <script src="/bower_components/director/build/director.min.js"></script> --}}
+{{-- <script src="/bower_components/moment/min/moment.min.js"></script> --}}
 
 <!-- pusher -->
 <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>
