@@ -49,7 +49,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                         $this->bot_event_logger->logIncomeForwardingResult($bot, $send_result, $destination, $quantity, $asset);
 
                         // update the balance
-                        $balance_deltas = [$asset => 0 - $quantity];
+                        $balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $fee);
                         $this->balance_updater->updateBotBalances($bot, $balance_deltas);
                     } catch (Exception $e) {
                         // log failure

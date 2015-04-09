@@ -7,7 +7,7 @@ bots:
   - meta: { baseFilename: bot01.yml }
     balances:
         LTBCOIN: 1000000
-        BTC: 9.9001
+        BTC: 9.91
 
 
 ############################
@@ -48,6 +48,6 @@ expectedBotModels:
     state: active
     balances:
         LTBCOIN: 900000
-        BTC: 8
+        BTC: 8.0097457
 
 

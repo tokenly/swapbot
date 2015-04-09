@@ -193,6 +193,7 @@ class ReceiveEventProcessor {
             // update the bot's balance
             $bot_balance_deltas = [];
             $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasFromTransactionReceived($bot_balance_deltas, $tx_process['xchain_notification']);
+            // Log::debug("\$bot_balance_deltas=".json_encode($bot_balance_deltas, 192));
 
             $this->balance_updater->updateBotBalances($tx_process['bot'], $bot_balance_deltas);
 

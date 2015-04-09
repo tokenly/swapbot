@@ -29,6 +29,8 @@ class SwapProcessor {
     // const RESULT_PROCESSED = 1;
     // const RESULT_SENT      = 2;
 
+    const DEFAULT_REGULAR_DUST_SIZE = 0.00005430;
+
     /**
      * Create the command handler.
      *
@@ -290,7 +292,7 @@ class SwapProcessor {
         ];
 
         // update the local balance
-        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $fee);
 
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_REFUND;
@@ -309,19 +311,12 @@ class SwapProcessor {
         return [CurrencyUtil::satoshisToValue($fee_sat), CurrencyUtil::satoshisToValue($dust_size_sat)];
     }
 
-    protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas) {
+    protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas, $btc_fee=null) {
         $asset = $swap_process['asset'];
         $quantity = $swap_process['quantity'];
-        $btc_fee = $swap_process['bot']['return_fee'];
+        if ($btc_fee === null) { $btc_fee = $swap_process['bot']['return_fee']; }
 
-        // deduct the asset balance
-        if (!isset($bot_balance_deltas[$asset])) { $bot_balance_deltas[$asset] = 0; }
-        $bot_balance_deltas[$asset] = $bot_balance_deltas[$asset] - $quantity;
-
-        // deduct the BTC fee
-        if (!isset($bot_balance_deltas['BTC'])) { $bot_balance_deltas['BTC'] = 0; }
-        $bot_balance_deltas['BTC'] = $bot_balance_deltas['BTC'] - $btc_fee;
-
+        $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $btc_fee);
         return $bot_balance_deltas;
     }
 
