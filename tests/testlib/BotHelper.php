@@ -26,6 +26,7 @@ class BotHelper  {
             'name'                       => 'Sample Bot One',
             'description'                => 'The bot description goes here.',
             'active'                     => false,
+            'hash'                       => '',
             'address'                    => null,
             'public_address_id'          => null,
             'public_receive_monitor_id'  => null,

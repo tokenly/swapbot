@@ -25,6 +25,8 @@ class RepositoryTestHelper  {
         $loaded_model = $this->repository->findByID($created_model['id']);
         PHPUnit::assertNotEmpty($loaded_model);
         PHPUnit::assertEquals($created_model->toArray(), $loaded_model->toArray());
+
+        return $loaded_model;
     }
 
     public function testUpdate($update_attributes) {

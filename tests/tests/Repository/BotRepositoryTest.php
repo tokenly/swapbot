@@ -47,13 +47,35 @@ class BotRepositoryTest extends TestCase {
         // load with good user id
         $loaded_bot = $repo->findByUuidAndUserID($actual_bot['uuid'], $user['id']);
         PHPUnit::assertNotNull($loaded_bot);
-        PHPUnit::assertEquals($actual_bot, $loaded_bot);
+        PHPUnit::assertEquals($actual_bot->toArray(), $loaded_bot->toArray());
 
     }
 
     public function testBadBotUUID() {
         $empty = $this->app->make('Swapbot\Repositories\BotRepository')->findByUuid('foo');
         PHPUnit::assertEmpty($empty);
+    }
+
+    public function testBotHashUpdates() {
+        $helper = $this->createRepositoryTestHelper();
+
+        $model = $helper->testLoad();
+        PHPUnit::assertNotEmpty($model['hash']);
+        PHPUnit::assertEquals($model['hash'], $model->buildHash());
+
+        // update a hash
+        $repo = app('Swapbot\Repositories\BotRepository');
+        $old_hash = $model['hash'];
+        $result = $repo->update($model, ['description' => 'foo2']);
+        PHPUnit::assertNotEmpty($model['hash']);
+        PHPUnit::assertNotEquals($old_hash, $model['hash']);
+
+        // update a hash again
+        $repo = app('Swapbot\Repositories\BotRepository');
+        $old_hash = $model['hash'];
+        $result = $repo->update($model, ['description' => 'foo2']);
+        PHPUnit::assertNotEmpty($model['hash']);
+        PHPUnit::assertEquals($old_hash, $model['hash']);
     }
 
     protected function createRepositoryTestHelper() {

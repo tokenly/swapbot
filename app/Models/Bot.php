@@ -11,11 +11,12 @@ use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Tokenly\CurrencyLib\CurrencyUtil;
+use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', ];
-    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -197,4 +198,33 @@ class Bot extends APIModel {
         }
         return $this->payment_plan_details;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
+    public function buildHash() {
+        // these fields can change
+        //  'blacklist_addresses', 'balances', 'payment_plan', 'payment_address', 'state', 'hash'
+        
+        // these fields will affect the robohash
+        $fields = ['uuid', 'name', 'username', 'description', 'swaps', 'address', 'return_fee', 'income_rules', 'confirmations_required', ];
+
+        $source = "";
+        foreach($fields as $field) {
+            $value = $this[$field];
+
+            if (is_array($value)) {
+                $text = json_encode($value);
+            } else {
+                $text = $value;
+            }
+
+            $source .= $field.":".$text."|";
+        }
+        $source = substr($source, 0, strlen($source) - 1);
+
+        return hash("sha256", $source);
+    }
+    
 }

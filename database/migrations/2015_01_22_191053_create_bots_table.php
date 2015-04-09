@@ -25,6 +25,8 @@ class CreateBotsTable extends Migration {
 
             $table->integer('confirmations_required')->unsigned();
 
+            $table->char('hash', 64)->default('');
+
             ////////////////////////////////////
             // public address
 

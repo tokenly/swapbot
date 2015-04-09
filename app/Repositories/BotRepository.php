@@ -2,6 +2,7 @@
 
 namespace Swapbot\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
@@ -59,12 +60,35 @@ class BotRepository extends APIRepository
 
 
 
+    public function create($attributes) {
+        $model = parent::create($attributes);
+
+        // force an update to build the hash
+        $model_clone = clone $model;
+        $this->update($model_clone, []);
+
+        // apply the new hash
+        $model['hash'] = $model_clone['hash'];
+
+        return $model;
+    }
 
     protected function modifyAttributesBeforeCreate($attributes) {
         if (!isset($attributes['active'])) { $attributes['active'] = false; }
 
         // default to the unpaid state
         if (!isset($attributes['state'])) { $attributes['state'] = BotState::BRAND_NEW; }
+
+        return $attributes;
+    }
+
+    protected function modifyAttributesBeforeUpdate($attributes, Model $model) {
+        // fill the attributes to a clone in memory to build the correct hash
+        $model_clone = clone $model;
+        $model_clone->fill($attributes);
+
+        // assign the new hash to the attributes
+        $attributes['hash'] = $model_clone->buildHash($attributes);
 
         return $attributes;
     }
