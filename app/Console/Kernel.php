@@ -11,22 +11,19 @@ class Kernel extends ConsoleKernel {
 	 * @var array
 	 */
 	protected $commands = [
-		// 'Swapbot\Console\Commands\Inspire',
-		// 'Swapbot\Console\Commands\APIUser\APINewUserCommand',
-		// 'Swapbot\Console\Commands\APIUser\APIListUsersCommand',
-
-		'Swapbot\Console\Commands\Bot\UpdateBotBalancesCommand',
 		'Swapbot\Console\Commands\Bot\ActivateBotCommand',
 		'Swapbot\Console\Commands\Bot\ListAllBotsCommand',
-
-		'Swapbot\Console\Commands\Development\TestCreateBotEventCommand',
-		'Swapbot\Console\Commands\Development\TestCreateBotBalancesUpdateCommand',
-		'Swapbot\Console\Commands\Development\TestConfigCommand',
-		'Swapbot\Console\Commands\Development\TestReceiveXChainNotificationCommand',
+		'Swapbot\Console\Commands\Bot\ReconcileBotStateCommand',
+		'Swapbot\Console\Commands\Bot\UpdateBotBalancesCommand',
 
 		'Swapbot\Console\Commands\Development\ExportBotStateGraph',
 		'Swapbot\Console\Commands\Development\ExportSwapStateGraph',
 		'Swapbot\Console\Commands\Development\UpdateBotPaymentAccount',
+
+		'Swapbot\Console\Commands\Development\TestConfigCommand',
+		'Swapbot\Console\Commands\Development\TestCreateBotBalancesUpdateCommand',
+		'Swapbot\Console\Commands\Development\TestCreateBotEventCommand',
+		'Swapbot\Console\Commands\Development\TestReceiveXChainNotificationCommand',
 	];
 
 	/**
