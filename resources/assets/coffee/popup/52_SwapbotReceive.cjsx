@@ -13,7 +13,7 @@ SwapbotSendItem = React.createClass
         inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, swap)
         address = this.props.bot.address
         <li>
-            <div className="item-header">Send <span id="token-value-1">{inAmount}</span> BTC to</div>
+            <div className="item-header">Send <span id="token-value-1">{inAmount}</span> {swap.in} to</div>
             <p><a href={"bitcoin:#{address}?amount=#{inAmount}"} target="_blank">{address}</a></p>
             <a onClick={this.chooseToken} href="#next-step"><div className="icon-wallet"></div></a>
             <div className="icon-qr"></div>
@@ -90,7 +90,7 @@ SwapbotReceive = React.createClass
             </div>
             <table className="fieldset">
                 <tr><td><label htmlFor="token-available">{swap.out} available for purchase: </label></td>
-                <td><span id="token-available">xxx,xxxx {swap.out}</span></td></tr>
+                <td><span id="token-available">{bot.balances[swap.out]} {swap.out}</span></td></tr>
 
                 <tr><td><label htmlFor="token-amount">I would like to purchase: </label></td>
                 <td><input onChange={this.updateAmounts} onKeyUp={this.checkEnter} type="text" id="token-amount" placeholder={'0 '+swap.out} defaultValue={this.props.swapDetails.chosenToken.outAmount} /></td></tr>

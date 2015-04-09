@@ -55,7 +55,7 @@
         "target": "_blank"
       }, ((_ref = this.state.bot) != null ? _ref.name : void 0)))), React.createElement("div", {
         "className": "content"
-      }, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
+      }, (this.state.bot != null ? React.createElement("div", null, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
         "swapDetails": this.state.swapDetails,
         "router": this.state.router,
         "bot": this.state.bot
@@ -71,7 +71,9 @@
         "swapDetails": this.state.swapDetails,
         "router": this.state.router,
         "bot": this.state.bot
-      }) : null), React.createElement("div", {
+      }) : null)) : React.createElement("div", {
+        "class": "loading"
+      }, "Loading...")), React.createElement("div", {
         "className": "footer"
       }, "powered by ", React.createElement("a", {
         "href": "http://swapbot.co/",
@@ -127,57 +129,6 @@
     }
   });
 
-  botEventWatcher = (function() {
-    var exports;
-    exports = {};
-    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          if (event.inQty === inAmount && event.inAsset === inAsset) {
-            return true;
-          }
-      }
-      return false;
-    };
-    exports.confirmationsFromEvent = function(botEvent) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-          return 0;
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          return event.confirmations;
-      }
-      console.warn("unknown event " + event.name);
-      return event.confirmations;
-    };
-    exports.txInfoFromBotEvent = function(botEvent) {
-      var event, txInfo;
-      event = botEvent.event;
-      txInfo = {
-        name: event.name,
-        msg: event.msg,
-        address: event.destination,
-        swapId: event.swapId,
-        inAsset: event.inAsset,
-        inQty: event.inQty,
-        outAsset: event.outAsset,
-        outQty: event.outQty,
-        confirmations: exports.confirmationsFromEvent(botEvent),
-        status: event.name
-      };
-      return txInfo;
-    };
-    return exports;
-  })();
-
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
   }
@@ -201,15 +152,16 @@
       this.props.chooseSwapFn(this.props.swap);
     },
     render: function() {
-      var rateDesc, swap;
+      var bot, rateDesc, swap;
       swap = this.props.swap;
+      bot = this.props.bot;
       rateDesc = swapbot.swapUtils.exchangeDescription(swap);
       return React.createElement("li", null, React.createElement("a", {
         "onClick": this.clickSwap,
         "href": "#choose"
       }, React.createElement("div", {
         "className": "item-header"
-      }, swap.out, " ", React.createElement("small", null, "(x,xxxx available)")), React.createElement("p", null, "Sends ", rateDesc, "."), React.createElement("div", {
+      }, swap.out, " ", React.createElement("small", null, "(", bot.balances[swap.out], " available)")), React.createElement("p", null, "Sends ", rateDesc, "."), React.createElement("div", {
         "className": "icon-next"
       })));
     }
@@ -223,9 +175,10 @@
     },
     componentDidMount: function() {
       this.props.swapDetails.swap = null;
+      console.log("bot=", this.props.bot);
     },
     render: function() {
-      var offset, swap, swaps, _ref, _ref1;
+      var offset, swap, swaps;
       return React.createElement("div", {
         "id": "swap-step-1",
         "className": "swap-step"
@@ -241,59 +194,35 @@
         "className": "dot"
       }), React.createElement("div", {
         "className": "dot"
-      })), React.createElement("p", {
+      })), (this.props.bot ? React.createElement("div", null, React.createElement("p", {
         "className": "description"
-      }, ((_ref = this.props.bot) != null ? _ref.description : void 0), " ", React.createElement("a", {
+      }, this.props.bot.description, " ", React.createElement("a", {
         "className": "more-link",
-        "href": '#' + ((_ref1 = this.props.bot) != null ? _ref1.id : void 0),
+        "href": swapbot.addressUtils.publicBotAddress(this.props.bot.username, this.props.bot.id, window.location),
         "target": "_blank"
       }, React.createElement("i", {
         "className": "fa fa-sign-out"
       }))), React.createElement("ul", {
         "className": "wide-list"
       }, ((function() {
-        var _i, _len, _ref2, _results;
-        swaps = (_ref2 = this.props.bot) != null ? _ref2.swaps : void 0;
+        var _i, _len, _results;
+        swaps = this.props.bot.swaps;
         if (swaps) {
           _results = [];
           for (offset = _i = 0, _len = swaps.length; _i < _len; offset = ++_i) {
             swap = swaps[offset];
             _results.push(React.createElement(SwapbotChooseItem, {
               "key": 'swap' + offset,
+              "bot": this.props.bot,
               "swap": swap,
               "chooseSwapFn": this.chooseSwapFn
             }));
           }
           return _results;
         }
-      }).call(this))));
+      }).call(this)))) : void 0));
     }
   });
-
-  util = (function() {
-    var exports;
-    exports = {};
-    exports.sayHi = function(text) {
-      return console.log("sayHi: " + text);
-    };
-    return exports;
-  })();
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
 
   SwapbotSendItem = React.createClass({
     displayName: 'SwapbotSendItem',
@@ -313,7 +242,7 @@
         "className": "item-header"
       }, "Send ", React.createElement("span", {
         "id": "token-value-1"
-      }, inAmount), " BTC to"), React.createElement("p", null, React.createElement("a", {
+      }, inAmount), " ", swap["in"], " to"), React.createElement("p", null, React.createElement("a", {
         "href": "bitcoin:" + address + "?amount=" + inAmount,
         "target": "_blank"
       }, address)), React.createElement("a", {
@@ -411,7 +340,7 @@
         "htmlFor": "token-available"
       }, swap.out, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
         "id": "token-available"
-      }, "xxx,xxxx ", swap.out))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+      }, bot.balances[swap.out], " ", swap.out))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
         "htmlFor": "token-amount"
       }, "I would like to purchase: ")), React.createElement("td", null, React.createElement("input", {
         "onChange": this.updateAmounts,
@@ -445,31 +374,62 @@
     }
   });
 
-  window.SwapbotApp = {
-    init: function() {
-      return React.render(React.createElement(SwapbotComponent, {
-        "showing": true
-      }), document.getElementById('SwapbotPopup'));
-    }
-  };
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.pusher = (function() {
+  botEventWatcher = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
+    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          if (event.inQty === inAmount && event.inAsset === inAsset) {
+            return true;
+          }
+      }
+      return false;
     };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
+    exports.confirmationsFromEvent = function(botEvent) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+          return 0;
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          return event.confirmations;
+      }
+      console.warn("unknown event " + event.name);
+      return event.confirmations;
+    };
+    exports.txInfoFromBotEvent = function(botEvent) {
+      var event, txInfo;
+      event = botEvent.event;
+      txInfo = {
+        name: event.name,
+        msg: event.msg,
+        address: event.destination,
+        swapId: event.swapId,
+        inAsset: event.inAsset,
+        inQty: event.inQty,
+        outAsset: event.outAsset,
+        outQty: event.outQty,
+        confirmations: exports.confirmationsFromEvent(botEvent),
+        status: event.name
+      };
+      return txInfo;
+    };
+    return exports;
+  })();
+
+  util = (function() {
+    var exports;
+    exports = {};
+    exports.sayHi = function(text) {
+      return console.log("sayHi: " + text);
     };
     return exports;
   })();
@@ -628,38 +588,26 @@
     }
   });
 
+  window.SwapbotApp = {
+    init: function() {
+      return React.render(React.createElement(SwapbotComponent, {
+        "showing": true
+      }), document.getElementById('SwapbotPopup'));
+    }
+  };
+
   if (swapbot == null) {
     swapbot = {};
   }
 
-  swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
+  swapbot.botUtils = (function() {
+    var exports;
     exports = {};
-    buildDesc = {};
-    buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
-      outAmount = 1 * swap.rate;
-      inAmount = 1;
-      return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
-    buildDesc.fixed = function(swap) {
-      return "" + swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
-    };
-    buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount / swap.rate;
-      return inAmount;
-    };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
-    };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     return exports;
   })();
@@ -871,5 +819,62 @@
               </div>
           </div>
    */
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 * swap.rate;
+      inAmount = 1;
+      return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return "" + swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
+  })();
 
 }).call(this);

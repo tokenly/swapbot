@@ -41,11 +41,16 @@ SwapbotComponent = React.createClass
                 <h1><a href="http://raburski.com/swapbot0" target="_blank">{this.state.bot?.name}</a></h1>
             </div>
             <div className="content">
-
-                { if this.state.step == 'choose' then <SwapbotChoose swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
-                { if this.state.step == 'receive' then <SwapbotReceive swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
-                { if this.state.step == 'wait' then <SwapbotWait swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
-                { if this.state.step == 'complete' then <SwapbotComplete swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
+                { if this.state.bot?
+                    <div>
+                    { if this.state.step == 'choose' then <SwapbotChoose swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
+                    { if this.state.step == 'receive' then <SwapbotReceive swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
+                    { if this.state.step == 'wait' then <SwapbotWait swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
+                    { if this.state.step == 'complete' then <SwapbotComplete swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
+                    </div>
+                else
+                    <div class="loading">Loading...</div>
+                }
 
                 <div className="footer">powered by <a href="http://swapbot.co/" target="_blank">Swapbot</a></div>
             </div>
