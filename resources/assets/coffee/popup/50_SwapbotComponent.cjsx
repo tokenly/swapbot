@@ -35,7 +35,7 @@ SwapbotComponent = React.createClass
         <div className={"swapbot-container " + if this.props.showing? then '' else 'hidden'}>
             <div className="header">
                 <div className="avatar">
-                    <img src="http://robohash.org/siemano.png?set=set3" />
+                    <img src={if this.state.bot?.hash then "http://robohash.org/#{this.state.bot.hash}.png?set=set3" else ''} />
                 </div>
                 <div className="status-dot bckg-green"></div>
                 <h1><a href="http://raburski.com/swapbot0" target="_blank">{this.state.bot?.name}</a></h1>

@@ -38,7 +38,11 @@
         <!-- HEAD SECTION -->
         <div id="details">
             <div id="details-avatar">
-                <img src="http://robohash.org/siemano.png?set=set3" class="center">
+                @if ($bot['hash'])
+                <img src="http://robohash.org/{{ $bot['hash'] }}.png?set=set3" class="center">
+                @else
+                <span data-no-image></span>
+                @endif
             </div>
             <div id="details-content">
                 <h1>{{ $bot['name'] }}</h1>
