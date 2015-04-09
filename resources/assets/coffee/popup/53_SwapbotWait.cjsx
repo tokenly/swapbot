@@ -96,9 +96,20 @@ SwapbotWait = React.createClass
                 # this event is older than the one we have - ignore it
                 return
 
+        # apply to the selected matchedTxInfo
+        #   if it exists
+        selectedMatchedTxInfo = this.state.selectedMatchedTxInfo
+        if selectedMatchedTxInfo? and selectedMatchedTxInfo.swapId == swapId
+            # update the selectedMatchedTxInfo
+            selectedMatchedTxInfo = matchedTxInfo
+
+        # also update the list of matchedTxs
         matchedTxs[swapId] = matchedTxInfo
-        this.setState({matchedTxs: matchedTxs, anyMatchedTxs: true})
-        console.log "matchedTxs=",matchedTxs
+        this.setState({
+            selectedMatchedTxInfo: selectedMatchedTxInfo
+            matchedTxs           : matchedTxs
+            anyMatchedTxs        : true
+        })
 
         return
 
@@ -107,18 +118,18 @@ SwapbotWait = React.createClass
             this.props.swapDetails.txInfo = matchedTxInfo
             this.props.router.setRoute('/complete')
         else
-            this.setState({matchedTxInfo: matchedTxInfo})
+            this.setState({selectedMatchedTxInfo: matchedTxInfo})
 
     # ########################################################################
 
 
     getInitialState: ()->
         return {
-            'botEvents'    : [],
-            'pusherClient' : null,
-            'matchedTxInfo': null,
-            'matchedTxs'   : {},
-            'anyMatchedTxs': false,
+            botEvents            : [],
+            pusherClient         : null,
+            selectedMatchedTxInfo: null,
+            matchedTxs           : {},
+            anyMatchedTxs        : false,
         }
 
     goBack: (e)->
@@ -139,7 +150,7 @@ SwapbotWait = React.createClass
     render: ()->
         bot = this.props.bot
         swapDetails = this.props.swapDetails
-        # console.log "this.state.matchedTxInfo="+(this.state.matchedTxInfo?)
+        # console.log "this.state.selectedMatchedTxInfo="+(this.state.selectedMatchedTxInfo?)
 
         <div id="swap-step-3" className="swap-step">
             <h2>Waiting for confirmations</h2>
@@ -153,24 +164,24 @@ SwapbotWait = React.createClass
 
 
             {
-                if this.state.matchedTxInfo?
+                if this.state.selectedMatchedTxInfo?
                     # found a match
                     <p>
-                        Received <b>{this.state.matchedTxInfo.inQty} {this.state.matchedTxInfo.inAsset}</b> from <br/>
-                        {this.state.matchedTxInfo.address}.<br/>
+                        Received <b>{this.state.selectedMatchedTxInfo.inQty} {this.state.selectedMatchedTxInfo.inAsset}</b> from <br/>
+                        {this.state.selectedMatchedTxInfo.address}.<br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>
                 else
                     # no transaction matched yet
                     if this.state.anyMatchedTxs
                         <div>
-                        <ul className="wide-list">
-                        {
-                            for swapId, txInfo of this.state.matchedTxs
-                                <TransactionInfo bot={bot} txInfo={txInfo} clickedFn={this.buildChooseSwapClicked(txInfo)} />
-                        }
-                        </ul>
-                        <a id="go-back" onClick={this.goBack} href="#" className="shadow-link">Go Back</a>
+                            <ul className="wide-list">
+                            {
+                                for swapId, txInfo of this.state.matchedTxs
+                                    <TransactionInfo bot={bot} txInfo={txInfo} clickedFn={this.buildChooseSwapClicked(txInfo)} />
+                            }
+                            </ul>
+                            <a id="go-back" onClick={this.goBack} href="#" className="shadow-link">Go Back</a>
                         </div>
                     else
                         # no matched txs
@@ -192,10 +203,10 @@ SwapbotWait = React.createClass
             </div>
 
             {
-                if this.state.matchedTxInfo?
+                if this.state.selectedMatchedTxInfo?
                     <div>
-                        <p>This transaction has <b>{this.state.matchedTxInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
-                        <p className="msg">{this.state.matchedTxInfo.msg}</p>
+                        <p>This transaction has <b>{this.state.selectedMatchedTxInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
+                        <p className="msg">{this.state.selectedMatchedTxInfo.msg}</p>
                     </div>
                 else
                     <p>

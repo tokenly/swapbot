@@ -49,7 +49,7 @@ SwapbotComponent = React.createClass
                     { if this.state.step == 'complete' then <SwapbotComplete swapDetails={this.state.swapDetails} router={this.state.router} bot={this.state.bot} /> else null }
                     </div>
                 else
-                    <div class="loading">Loading...</div>
+                    <div className="loading">Loading...</div>
                 }
 
                 <div className="footer">powered by <a href="http://swapbot.co/" target="_blank">Swapbot</a></div>

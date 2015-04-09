@@ -72,7 +72,7 @@
         "router": this.state.router,
         "bot": this.state.bot
       }) : null)) : React.createElement("div", {
-        "class": "loading"
+        "className": "loading"
       }, "Loading...")), React.createElement("div", {
         "className": "footer"
       }, "powered by ", React.createElement("a", {
@@ -128,6 +128,59 @@
       return router;
     }
   });
+
+  botEventWatcher = (function() {
+    var exports;
+    exports = {};
+    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          if (event.inQty === inAmount && event.inAsset === inAsset) {
+            return true;
+          }
+      }
+      return false;
+    };
+    exports.confirmationsFromEvent = function(botEvent) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+          return 0;
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          return event.confirmations;
+      }
+      console.warn("unknown event " + event.name);
+      return event.confirmations;
+    };
+    exports.txInfoFromBotEvent = function(botEvent) {
+      var event, txInfo;
+      event = botEvent.event;
+      txInfo = {
+        name: event.name,
+        msg: event.msg,
+        address: event.destination,
+        swapId: event.swapId,
+        inAsset: event.inAsset,
+        inQty: event.inQty,
+        outAsset: event.outAsset,
+        outQty: event.outQty,
+        serial: botEvent.serial,
+        createdAt: botEvent.createdAt,
+        confirmations: exports.confirmationsFromEvent(botEvent),
+        status: event.name
+      };
+      return txInfo;
+    };
+    return exports;
+  })();
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -223,6 +276,15 @@
       }).call(this)))) : void 0));
     }
   });
+
+  util = (function() {
+    var exports;
+    exports = {};
+    exports.sayHi = function(text) {
+      return console.log("sayHi: " + text);
+    };
+    return exports;
+  })();
 
   if (swapbot == null) {
     swapbot = {};
@@ -390,6 +452,35 @@
     }
   });
 
+  window.SwapbotApp = {
+    init: function() {
+      return React.render(React.createElement(SwapbotComponent, {
+        "showing": true
+      }), document.getElementById('SwapbotPopup'));
+    }
+  };
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
+    };
+    return exports;
+  })();
+
   TransactionInfo = React.createClass({
     displayName: 'TransactionInfo',
     intervalTimer: null,
@@ -473,7 +564,7 @@
       })(this));
     },
     handleMatchedBotEvent: function(botEvent) {
-      var matchedTxInfo, matchedTxs, swapId;
+      var matchedTxInfo, matchedTxs, selectedMatchedTxInfo, swapId;
       matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent);
       swapId = matchedTxInfo.swapId;
       matchedTxs = this.state.matchedTxs;
@@ -482,12 +573,16 @@
           return;
         }
       }
+      selectedMatchedTxInfo = this.state.selectedMatchedTxInfo;
+      if ((selectedMatchedTxInfo != null) && selectedMatchedTxInfo.swapId === swapId) {
+        selectedMatchedTxInfo = matchedTxInfo;
+      }
       matchedTxs[swapId] = matchedTxInfo;
       this.setState({
+        selectedMatchedTxInfo: selectedMatchedTxInfo,
         matchedTxs: matchedTxs,
         anyMatchedTxs: true
       });
-      console.log("matchedTxs=", matchedTxs);
     },
     selectMatchedTx: function(matchedTxInfo) {
       if (matchedTxInfo.status === 'swap.sent') {
@@ -495,17 +590,17 @@
         return this.props.router.setRoute('/complete');
       } else {
         return this.setState({
-          matchedTxInfo: matchedTxInfo
+          selectedMatchedTxInfo: matchedTxInfo
         });
       }
     },
     getInitialState: function() {
       return {
-        'botEvents': [],
-        'pusherClient': null,
-        'matchedTxInfo': null,
-        'matchedTxs': {},
-        'anyMatchedTxs': false
+        botEvents: [],
+        pusherClient: null,
+        selectedMatchedTxInfo: null,
+        matchedTxs: {},
+        anyMatchedTxs: false
       };
     },
     goBack: function(e) {
@@ -542,7 +637,7 @@
         "className": "dot selected"
       }), React.createElement("div", {
         "className": "dot"
-      })), (this.state.matchedTxInfo != null ? React.createElement("p", null, "Received ", React.createElement("b", null, this.state.matchedTxInfo.inQty, " ", this.state.matchedTxInfo.inAsset), " from ", React.createElement("br", null), this.state.matchedTxInfo.address, ".", React.createElement("br", null), React.createElement("a", {
+      })), (this.state.selectedMatchedTxInfo != null ? React.createElement("p", null, "Received ", React.createElement("b", null, this.state.selectedMatchedTxInfo.inQty, " ", this.state.selectedMatchedTxInfo.inAsset), " from ", React.createElement("br", null), this.state.selectedMatchedTxInfo.address, ".", React.createElement("br", null), React.createElement("a", {
         "id": "not-my-transaction",
         "onClick": this.notMyTransactionClicked,
         "href": "#",
@@ -584,32 +679,11 @@
         "className": "rect4"
       }), React.createElement("div", {
         "className": "rect5"
-      })), (this.state.matchedTxInfo != null ? React.createElement("div", null, React.createElement("p", null, "This transaction has ", React.createElement("b", null, this.state.matchedTxInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), React.createElement("p", {
+      })), (this.state.selectedMatchedTxInfo != null ? React.createElement("div", null, React.createElement("p", null, "This transaction has ", React.createElement("b", null, this.state.selectedMatchedTxInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), React.createElement("p", {
         "className": "msg"
-      }, this.state.matchedTxInfo.msg)) : React.createElement("p", null, "Waiting for transaction.  This transaction will require ", swapbot.botUtils.confirmationsProse(bot), ".")));
+      }, this.state.selectedMatchedTxInfo.msg)) : React.createElement("p", null, "Waiting for transaction.  This transaction will require ", swapbot.botUtils.confirmationsProse(bot), ".")));
     }
   });
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.pusher = (function() {
-    var exports;
-    exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
-    };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
-    };
-    return exports;
-  })();
 
   if (swapbot == null) {
     swapbot = {};
@@ -854,75 +928,5 @@
               </div>
           </div>
    */
-
-  botEventWatcher = (function() {
-    var exports;
-    exports = {};
-    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          if (event.inQty === inAmount && event.inAsset === inAsset) {
-            return true;
-          }
-      }
-      return false;
-    };
-    exports.confirmationsFromEvent = function(botEvent) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-          return 0;
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          return event.confirmations;
-      }
-      console.warn("unknown event " + event.name);
-      return event.confirmations;
-    };
-    exports.txInfoFromBotEvent = function(botEvent) {
-      var event, txInfo;
-      event = botEvent.event;
-      txInfo = {
-        name: event.name,
-        msg: event.msg,
-        address: event.destination,
-        swapId: event.swapId,
-        inAsset: event.inAsset,
-        inQty: event.inQty,
-        outAsset: event.outAsset,
-        outQty: event.outQty,
-        serial: botEvent.serial,
-        createdAt: botEvent.createdAt,
-        confirmations: exports.confirmationsFromEvent(botEvent),
-        status: event.name
-      };
-      return txInfo;
-    };
-    return exports;
-  })();
-
-  util = (function() {
-    var exports;
-    exports = {};
-    exports.sayHi = function(text) {
-      return console.log("sayHi: " + text);
-    };
-    return exports;
-  })();
-
-  window.SwapbotApp = {
-    init: function() {
-      return React.render(React.createElement(SwapbotComponent, {
-        "showing": true
-      }), document.getElementById('SwapbotPopup'));
-    }
-  };
 
 }).call(this);
