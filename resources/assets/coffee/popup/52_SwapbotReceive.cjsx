@@ -12,7 +12,6 @@ SwapbotSendItem = React.createClass
         swap = this.props.swap
         inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, swap)
         address = this.props.bot.address
-        console.log "this.props.outAmount=",this.props.outAmount," inAmount=",inAmount
         <li>
             <div className="item-header">Send <span id="token-value-1">{inAmount}</span> BTC to</div>
             <p><a href={"bitcoin:#{address}?amount=#{inAmount}"} target="_blank">{address}</a></p>

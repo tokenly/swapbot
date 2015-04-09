@@ -22,7 +22,7 @@ swapbot.swapUtils = do ()->
         if not outAmount? or isNaN(outAmount)
             return 0
 
-        outAmount = inAmount * swap.rate
+        inAmount = outAmount / swap.rate
         return inAmount
     buildInAmountFromOutAmount.fixed = (outAmount, swap)->
         return

@@ -416,10 +416,11 @@
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      outAmount = inAmount * swap.rate;
+      inAmount = outAmount / swap.rate;
       return inAmount;
     };
     buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
