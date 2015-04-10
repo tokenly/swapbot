@@ -2371,6 +2371,7 @@
         vm.formStatus = m.prop('active');
         vm.resourceId = m.prop('');
         vm.name = m.prop('');
+        vm.username = m.prop('');
         vm.email = m.prop('');
         vm.apitoken = m.prop('');
         vm.apisecretkey = m.prop('');
@@ -2380,6 +2381,7 @@
           sbAdmin.api.getUser(id).then(function(userData) {
             vm.resourceId(userData.id);
             vm.name(userData.name);
+            vm.username(userData.username);
             vm.email(userData.email);
             vm.apitoken(userData.apitoken);
             vm.apisecretkey(userData.apisecretkey);
@@ -2393,6 +2395,7 @@
           e.preventDefault();
           attributes = {
             name: vm.name(),
+            username: vm.username(),
             email: vm.email()
           };
           if (vm.resourceId().length > 0) {
@@ -2434,15 +2437,23 @@
                 "class": "row"
               }, [
                 m("div", {
-                  "class": "col-md-5"
+                  "class": "col-md-4"
                 }, [
-                  sbAdmin.form.mFormField("Name", {
+                  sbAdmin.form.mFormField("Public Name", {
                     id: 'name',
-                    'placeholder': "User Name",
+                    'placeholder': "Name",
                     required: true
                   }, vm.name)
                 ]), m("div", {
-                  "class": "col-md-7"
+                  "class": "col-md-3"
+                }, [
+                  sbAdmin.form.mFormField("Username", {
+                    id: 'username',
+                    'placeholder': "Username",
+                    required: true
+                  }, vm.username)
+                ]), m("div", {
+                  "class": "col-md-5"
                 }, [
                   sbAdmin.form.mFormField("Email", {
                     type: 'email',

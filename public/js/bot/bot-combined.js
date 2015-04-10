@@ -155,6 +155,17 @@
     return exports;
   })();
 
+  window.BotApp = {
+    init: function(bot) {
+      React.render(React.createElement(SwapStatuses, {
+        "bot": bot
+      }), document.getElementById('SwapStatuses'));
+      return React.render(React.createElement(SwapsList, {
+        "bot": bot
+      }), document.getElementById('SwapsList'));
+    }
+  };
+
   SwapStatus = React.createClass({
     displayName: 'SwapStatus',
     getInitialState: function() {
@@ -364,17 +375,6 @@
       }, "Load more swaps..."))));
     }
   });
-
-  window.BotApp = {
-    init: function(bot) {
-      React.render(React.createElement(SwapStatuses, {
-        "bot": bot
-      }), document.getElementById('SwapStatuses'));
-      return React.render(React.createElement(SwapsList, {
-        "bot": bot
-      }), document.getElementById('SwapsList'));
-    }
-  };
 
   if (swapbot == null) {
     swapbot = {};

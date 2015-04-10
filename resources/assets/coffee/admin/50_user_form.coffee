@@ -27,6 +27,7 @@ do ()->
 
             # fields
             vm.name         = m.prop('')
+            vm.username     = m.prop('')
             vm.email        = m.prop('')
             vm.apitoken     = m.prop('')
             vm.apisecretkey = m.prop('')
@@ -41,6 +42,7 @@ do ()->
                         vm.resourceId(userData.id)
 
                         vm.name(userData.name)
+                        vm.username(userData.username)
                         vm.email(userData.email)
                         vm.apitoken(userData.apitoken)
                         vm.apisecretkey(userData.apisecretkey)
@@ -58,6 +60,7 @@ do ()->
 
                 attributes = {
                     name: vm.name()
+                    username: vm.username()
                     email: vm.email()
                 }
 
@@ -99,10 +102,13 @@ do ()->
                         sbAdmin.form.mAlerts(vm.errorMessages),
 
                         m("div", { class: "row"}, [
-                            m("div", {class: "col-md-5"}, [
-                                sbAdmin.form.mFormField("Name", {id: 'name', 'placeholder': "User Name", required: true, }, vm.name),
+                            m("div", {class: "col-md-4"}, [
+                                sbAdmin.form.mFormField("Public Name", {id: 'name', 'placeholder': "Name", required: true, }, vm.name),
                             ]),
-                            m("div", {class: "col-md-7"}, [
+                            m("div", {class: "col-md-3"}, [
+                                sbAdmin.form.mFormField("Username", {id: 'username', 'placeholder': "Username", required: true, }, vm.username),
+                            ]),
+                            m("div", {class: "col-md-5"}, [
                                 sbAdmin.form.mFormField("Email", {type: 'email', id: 'email', 'placeholder': "User Email", required: true, }, vm.email),
                             ]),
                         ]),
