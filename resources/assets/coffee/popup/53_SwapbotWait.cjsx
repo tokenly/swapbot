@@ -140,7 +140,6 @@ SwapbotWait = React.createClass
     notMyTransactionClicked: (e)->
         this.setState({
             selectedMatchedTxInfo: null
-            anyMatchedTxs        : false
         })
 
         e.preventDefault()
