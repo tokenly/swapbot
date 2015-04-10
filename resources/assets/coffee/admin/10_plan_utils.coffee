@@ -41,8 +41,10 @@ sbAdmin.planutils = do ()->
 
 
     planutils.allPlanOptions = ()->
-        opts = for k, v of planutils.allPlansData()
-            {k: v.name, v: v.id}    
+        opts = [{k: '- Choose One -', v: ''}]
+        for k, v of planutils.allPlansData()
+            opts.push({k: v.name, v: v.id}    )
+
         return opts
         
 

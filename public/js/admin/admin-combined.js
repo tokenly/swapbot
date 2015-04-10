@@ -5,22 +5,6 @@
     ctrl: {}
   };
 
-  if (typeof swapbot === "undefined" || swapbot === null) {
-    swapbot = {};
-  }
-
-  swapbot.addressUtils = (function() {
-    var exports;
-    exports = {};
-    exports.publicBotAddress = function(username, botId, location) {
-      return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
-    };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
-    };
-    return exports;
-  })();
-
   sbAdmin.api = (function() {
     var api, newNonce, signRequest, signURLParameters;
     api = {};
@@ -123,18 +107,18 @@
     return api;
   })();
 
-  if (swapbot == null) {
+  if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
   }
 
-  swapbot.botUtils = (function() {
+  swapbot.addressUtils = (function() {
     var exports;
     exports = {};
-    exports.confirmationsProse = function(bot) {
-      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    exports.publicBotAddress = function(username, botId, location) {
+      return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    exports.poupupBotAddress = function(username, botId, location) {
+      return exports.publicBotAddress(username, botId, location) + "/popup";
     };
     return exports;
   })();
@@ -189,19 +173,14 @@
     swapbot = {};
   }
 
-  swapbot.pusher = (function() {
+  swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client(window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
+    exports.confirmationsProse = function(bot) {
+      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     return exports;
   })();
@@ -229,34 +208,19 @@
     swapbot = {};
   }
 
-  swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
+  swapbot.pusher = (function() {
+    var exports;
     exports = {};
-    buildDesc = {};
-    buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
-      outAmount = 1 * swap.rate;
-      inAmount = 1;
-      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
     };
-    buildDesc.fixed = function(swap) {
-      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
-    };
-    buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount / swap.rate;
-      return inAmount;
-    };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
-    };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
     };
     return exports;
   })();
@@ -495,6 +459,42 @@
       return formGroup;
     };
     return groupBuilder;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 * swap.rate;
+      inAmount = 1;
+      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
   })();
 
   sbAdmin.form = (function() {
@@ -784,20 +784,21 @@
       };
     };
     planutils.allPlanOptions = function() {
-      var k, opts, v;
-      opts = (function() {
-        var ref, results;
-        ref = planutils.allPlansData();
-        results = [];
-        for (k in ref) {
-          v = ref[k];
-          results.push({
-            k: v.name,
-            v: v.id
-          });
+      var k, opts, ref, v;
+      opts = [
+        {
+          k: '- Choose One -',
+          v: ''
         }
-        return results;
-      })();
+      ];
+      ref = planutils.allPlansData();
+      for (k in ref) {
+        v = ref[k];
+        opts.push({
+          k: v.name,
+          v: v.id
+        });
+      }
       return opts;
     };
     return planutils;
@@ -856,7 +857,7 @@
       }
     };
     stateutils.buildStateDetails = function(stateValue, planName, paymentAddress, botAddress) {
-      var amount, details, planDetails;
+      var amount, details, initialPaymentsAmount, initialPaymentsCount, planDetails;
       details = {
         label: '',
         subtitle: '',
@@ -865,9 +866,11 @@
       switch (stateValue) {
         case 'brandnew':
           planDetails = sbAdmin.planutils.planData(planName);
-          amount = planDetails.creationFee + planDetails.initialFuel;
+          initialPaymentsCount = 20;
+          initialPaymentsAmount = planDetails.txFee * initialPaymentsCount;
+          amount = planDetails.creationFee + planDetails.initialFuel + initialPaymentsAmount;
           details.label = stateutils.buildStateLabel(stateValue);
-          details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of " + (sbAdmin.currencyutils.formatValue(amount)) + " to " + paymentAddress + ".  This is a payment of " + planDetails.creationFee + " BTC for the creation of the bot and " + planDetails.initialFuel + " BTC as fuel to send transactions.";
+          details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of " + (sbAdmin.currencyutils.formatValue(amount)) + " to " + paymentAddress + ".  This is a payment of " + planDetails.creationFee + " BTC for the creation of the bot, " + planDetails.initialFuel + " BTC as fuel to send transactions and " + initialPaymentsAmount + " BTC for your first " + initialPaymentsCount + " transactions.";
           details["class"] = "panel-warning inactive new";
           break;
         case 'lowfuel':

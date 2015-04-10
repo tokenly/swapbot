@@ -37,9 +37,11 @@ sbAdmin.stateutils = do ()->
         switch stateValue
             when 'brandnew'
                 planDetails = sbAdmin.planutils.planData(planName)
-                amount = planDetails.creationFee + planDetails.initialFuel
+                initialPaymentsCount = 20
+                initialPaymentsAmount = planDetails.txFee * initialPaymentsCount
+                amount = planDetails.creationFee + planDetails.initialFuel + initialPaymentsAmount
                 details.label = stateutils.buildStateLabel(stateValue)
-                details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of #{sbAdmin.currencyutils.formatValue(amount)} to #{paymentAddress}.  This is a payment of #{planDetails.creationFee} BTC for the creation of the bot and #{planDetails.initialFuel} BTC as fuel to send transactions."
+                details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of #{sbAdmin.currencyutils.formatValue(amount)} to #{paymentAddress}.  This is a payment of #{planDetails.creationFee} BTC for the creation of the bot, #{planDetails.initialFuel} BTC as fuel to send transactions and #{initialPaymentsAmount} BTC for your first #{initialPaymentsCount} transactions."
                 details.class = "panel-warning inactive new"
             when 'lowfuel'
                 details.label = stateutils.buildStateLabel(stateValue)
