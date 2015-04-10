@@ -215,10 +215,17 @@ do ()->
                     apiCall = sbAdmin.api.newBot
                     apiArgs = [attributes]
 
-                sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(()->
+                sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then((apiResponse)->
                     # console.log "submit complete - routing to dashboard"
-                    # back to dashboard
-                    m.route('/admin/dashboard')
+                    # go to bot display
+
+                    if vm.isNew
+                        console.log "apiResponse=",apiResponse
+                        botId = apiResponse.id
+                    else
+                        botId = vm.resourceId()
+
+                    m.route("/admin/view/bot/#{botId}")
                     return
                 )
 

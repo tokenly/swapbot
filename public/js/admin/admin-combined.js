@@ -1326,8 +1326,15 @@
             apiCall = sbAdmin.api.newBot;
             apiArgs = [attributes];
           }
-          return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
-            m.route('/admin/dashboard');
+          return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function(apiResponse) {
+            var botId;
+            if (vm.isNew) {
+              console.log("apiResponse=", apiResponse);
+              botId = apiResponse.id;
+            } else {
+              botId = vm.resourceId();
+            }
+            m.route("/admin/view/bot/" + botId);
           });
         };
       };
