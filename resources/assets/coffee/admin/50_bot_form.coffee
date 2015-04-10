@@ -140,6 +140,7 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
+            vm.hash = m.prop('')
             vm.paymentPlan = m.prop('')
             vm.returnFee = m.prop(0.0001)
             vm.confirmationsRequired = m.prop(2)
@@ -159,6 +160,7 @@ do ()->
 
                         vm.name(botData.name)
                         vm.description(botData.description)
+                        vm.hash(botData.hash)
                         vm.paymentPlan(botData.paymentPlan)
                         vm.swaps(buildSwapsPropValue(botData.swaps))
                         vm.returnFee(botData.returnFee or "0.0001")
@@ -195,6 +197,7 @@ do ()->
                 attributes = {
                     name: vm.name()
                     description: vm.description()
+                    hash: vm.hash()
                     paymentPlan: vm.paymentPlan()
                     swaps: vm.swaps()
                     returnFee: vm.returnFee() + ""
@@ -233,7 +236,16 @@ do ()->
         mEl = m("div", [
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-12"}, [
-                    m("h2", if vm.resourceId() then "Edit SwapBot #{vm.name()}" else "Create a New Swapbot"),
+
+                    m("div", { class: "row"}, [
+                        m("div", {class: "col-md-10"}, [
+                            m("h2", if vm.resourceId() then "Edit SwapBot #{vm.name()}" else "Create a New Swapbot"),
+                        ]),
+                        m("div", {class: "col-md-2 text-right"}, [
+                            if vm.hash().length then m("img", {class: 'mediumRoboHead', src: "http://robohash.org/#{vm.hash()}.png?set=set3"}) else null,
+                        ]),
+                    ]),
+
 
                     m("div", {class: "spacer1"}),
 

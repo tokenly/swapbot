@@ -30,8 +30,20 @@ body {
 // dashboard
 // 
 
+img.tinyRoboHead {
+    width: 40px;
+}
+
+div.emptyRoboHead {
+    width: 40px;
+    height: 20px;
+    margin-right: 12px;
+    display: inline-block;
+}
+
 .dashboard-edit-link {
     margin-left: 18px;
+    margin-right: 12px;
     .glyphicon {
         font-size: 1.2rem;
     }
@@ -40,6 +52,14 @@ ul.striped-list {
     li {
         border-bottom: 1px dashed #ccc;
         padding: 2px 6px;
+        min-height: 40px;
+
+        a {
+            line-height: 40px;
+            img {
+                margin-right: 12px;
+            }
+        }
     }
 
     li:nth-child(even) {
@@ -49,6 +69,11 @@ ul.striped-list {
 
 
 // bot view
+
+img.mediumRoboHead {
+    width: 90px;
+}
+
 
 .yes {
     color: @brand-success;

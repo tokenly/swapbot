@@ -1266,6 +1266,7 @@
         vm.resourceId = m.prop('');
         vm.name = m.prop('');
         vm.description = m.prop('');
+        vm.hash = m.prop('');
         vm.paymentPlan = m.prop('');
         vm.returnFee = m.prop(0.0001);
         vm.confirmationsRequired = m.prop(2);
@@ -1279,6 +1280,7 @@
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
+            vm.hash(botData.hash);
             vm.paymentPlan(botData.paymentPlan);
             vm.swaps(buildSwapsPropValue(botData.swaps));
             vm.returnFee(botData.returnFee || "0.0001");
@@ -1309,6 +1311,7 @@
           attributes = {
             name: vm.name(),
             description: vm.description(),
+            hash: vm.hash(),
             paymentPlan: vm.paymentPlan(),
             swaps: vm.swaps(),
             returnFee: vm.returnFee() + "",
@@ -1343,7 +1346,20 @@
           m("div", {
             "class": "col-md-12"
           }, [
-            m("h2", vm.resourceId() ? "Edit SwapBot " + (vm.name()) : "Create a New Swapbot"), m("div", {
+            m("div", {
+              "class": "row"
+            }, [
+              m("div", {
+                "class": "col-md-10"
+              }, [m("h2", vm.resourceId() ? "Edit SwapBot " + (vm.name()) : "Create a New Swapbot")]), m("div", {
+                "class": "col-md-2 text-right"
+              }, [
+                vm.hash().length ? m("img", {
+                  "class": 'mediumRoboHead',
+                  src: "http://robohash.org/" + (vm.hash()) + ".png?set=set3"
+                }) : null
+              ])
+            ]), m("div", {
               "class": "spacer1"
             }), sbAdmin.form.mForm({
               errors: vm.errorMessages,
@@ -1853,6 +1869,7 @@
         vm.showDebug = false;
         vm.name = m.prop('');
         vm.description = m.prop('');
+        vm.hash = m.prop('');
         vm.username = m.prop('');
         vm.address = m.prop('');
         vm.paymentAddress = m.prop('');
@@ -1874,6 +1891,7 @@
           vm.paymentPlan(botData.paymentPlan);
           vm.state(botData.state);
           vm.description(botData.description);
+          vm.hash(botData.hash);
           vm.username(botData.username);
           vm.swaps(buildSwapsPropValue(botData.swaps));
           vm.balances(buildBalancesPropValue(botData.balances));
@@ -1906,7 +1924,20 @@
     sbAdmin.ctrl.botView.view = function() {
       var mEl;
       mEl = m("div", [
-        m("h2", "SwapBot " + (vm.name())), m("div", {
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-10"
+          }, [m("h2", "SwapBot " + (vm.name()))]), m("div", {
+            "class": "col-md-2 text-right"
+          }, [
+            vm.hash().length ? m("img", {
+              "class": 'mediumRoboHead',
+              src: "http://robohash.org/" + (vm.hash()) + ".png?set=set3"
+            }) : null
+          ])
+        ]), m("div", {
           "class": "spacer1"
         }), m("div", {
           "class": "bot-status"
@@ -2155,7 +2186,16 @@
               vm.bots().map(function(bot) {
                 return m("li", {}, [
                   m("div", {}, [
-                    m("a[href='/admin/view/bot/" + bot.id + "']", {
+                    bot.hash.length ? m("a[href='/admin/view/bot/" + bot.id + "']", {
+                      config: m.route
+                    }, [
+                      m("img", {
+                        "class": 'tinyRoboHead',
+                        src: "http://robohash.org/" + bot.hash + ".png?set=set3"
+                      })
+                    ]) : m('div', {
+                      "class": 'emptyRoboHead'
+                    }, ''), m("a[href='/admin/view/bot/" + bot.id + "']", {
                       "class": "",
                       config: m.route
                     }, "" + bot.name), " ", m("a[href='/admin/edit/bot/" + bot.id + "']", {

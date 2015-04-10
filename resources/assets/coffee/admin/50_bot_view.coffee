@@ -227,6 +227,7 @@ do ()->
             # fields
             vm.name = m.prop('')
             vm.description = m.prop('')
+            vm.hash = m.prop('')
             vm.username = m.prop('')
             vm.address = m.prop('')
             vm.paymentAddress = m.prop('')
@@ -255,6 +256,7 @@ do ()->
                     vm.paymentPlan(botData.paymentPlan)
                     vm.state(botData.state)
                     vm.description(botData.description)
+                    vm.hash(botData.hash)
                     vm.username(botData.username)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
                     vm.balances(buildBalancesPropValue(botData.balances))
@@ -320,7 +322,19 @@ do ()->
         # console.log "vm.balances()=",vm.balances()
 
         mEl = m("div", [
-                m("h2", "SwapBot #{vm.name()}"),
+
+
+                m("div", { class: "row"}, [
+                    m("div", {class: "col-md-10"}, [
+                        m("h2", "SwapBot #{vm.name()}"),
+                    ]),
+                    m("div", {class: "col-md-2 text-right"}, [
+                        if vm.hash().length then m("img", {class: 'mediumRoboHead', src: "http://robohash.org/#{vm.hash()}.png?set=set3"}) else null,
+                    ]),
+                ]),
+
+
+                
 
                 m("div", {class: "spacer1"}),
 

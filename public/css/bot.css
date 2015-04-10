@@ -672,8 +672,7 @@ ul.swaps-list li p {
   width: 180px;
 }
 /* BUTTONS */
-button,
-a.btn {
+button {
   border: 0px;
   border-radius: 4px;
   cursor: pointer;

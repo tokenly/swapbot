@@ -49,6 +49,7 @@ do ()->
                         vm.bots().map((bot)->
                             return m("li", {}, [
                                 m("div", {}, [
+                                    if bot.hash.length then m("a[href='/admin/view/bot/#{bot.id}']", {config: m.route}, [m("img", {class: 'tinyRoboHead', src: "http://robohash.org/#{bot.hash}.png?set=set3"})]) else m('div', {class: 'emptyRoboHead'}, ''),
                                     m("a[href='/admin/view/bot/#{bot.id}']", {class: "", config: m.route}, "#{bot.name}"),
                                     " ",
                                     m("a[href='/admin/edit/bot/#{bot.id}']", {class: "dashboard-edit-link pull-right", config: m.route}, [

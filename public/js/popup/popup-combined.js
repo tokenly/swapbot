@@ -1,6 +1,22 @@
 (function() {
   var SwapbotChoose, SwapbotChooseItem, SwapbotComplete, SwapbotComponent, SwapbotReceive, SwapbotSendItem, SwapbotWait, TransactionInfo, botEventWatcher, swapbot, util;
 
+  if (typeof swapbot === "undefined" || swapbot === null) {
+    swapbot = {};
+  }
+
+  swapbot.addressUtils = (function() {
+    var exports;
+    exports = {};
+    exports.publicBotAddress = function(username, botId, location) {
+      return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
+    };
+    exports.poupupBotAddress = function(username, botId, location) {
+      return exports.publicBotAddress(username, botId, location) + "/popup";
+    };
+    return exports;
+  })();
+
   SwapbotComponent = React.createClass({
     displayName: 'SwapbotComponent',
     getInitialState: function() {
@@ -129,18 +145,18 @@
     }
   });
 
-  if (typeof swapbot === "undefined" || swapbot === null) {
+  if (swapbot == null) {
     swapbot = {};
   }
 
-  swapbot.addressUtils = (function() {
+  swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.publicBotAddress = function(username, botId, location) {
-      return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     return exports;
   })();
@@ -281,31 +297,6 @@
     swapbot = {};
   }
 
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
-
-  util = (function() {
-    var exports;
-    exports = {};
-    exports.sayHi = function(text) {
-      return console.log("sayHi: " + text);
-    };
-    return exports;
-  })();
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
   swapbot.pusher = (function() {
     var exports;
     exports = {};
@@ -322,14 +313,6 @@
     };
     return exports;
   })();
-
-  window.SwapbotApp = {
-    init: function() {
-      return React.render(React.createElement(SwapbotComponent, {
-        "showing": true
-      }), document.getElementById('SwapbotPopup'));
-    }
-  };
 
   SwapbotSendItem = React.createClass({
     displayName: 'SwapbotSendItem',
@@ -480,6 +463,15 @@
       }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.botUtils.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), "."));
     }
   });
+
+  util = (function() {
+    var exports;
+    exports = {};
+    exports.sayHi = function(text) {
+      return console.log("sayHi: " + text);
+    };
+    return exports;
+  })();
 
   if (swapbot == null) {
     swapbot = {};
@@ -720,6 +712,14 @@
       }, this.state.selectedMatchedTxInfo.msg)) : React.createElement("p", null, "Waiting for transaction.  This transaction will require ", swapbot.botUtils.confirmationsProse(bot), ".")));
     }
   });
+
+  window.SwapbotApp = {
+    init: function() {
+      return React.render(React.createElement(SwapbotComponent, {
+        "showing": true
+      }), document.getElementById('SwapbotPopup'));
+    }
+  };
 
   SwapbotComplete = React.createClass({
     displayName: 'SwapbotComplete',

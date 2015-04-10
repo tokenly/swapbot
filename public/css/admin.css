@@ -6306,8 +6306,18 @@ body {
 .spacer8 {
   height: 112px;
 }
+img.tinyRoboHead {
+  width: 40px;
+}
+div.emptyRoboHead {
+  width: 40px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 12px;
+}
 .dashboard-edit-link {
   margin-left: 18px;
+  margin-right: 12px;
 }
 .dashboard-edit-link .glyphicon {
   font-size: 1.2rem;
@@ -6315,9 +6325,19 @@ body {
 ul.striped-list li {
   border-bottom: 1px dashed #ccc;
   padding: 2px 6px;
+  min-height: 40px;
+}
+ul.striped-list li a {
+  line-height: 40px;
+}
+ul.striped-list li a img {
+  margin-right: 12px;
 }
 ul.striped-list li:nth-child(even) {
   background-color: #f6f6f6;
+}
+img.mediumRoboHead {
+  width: 90px;
 }
 .yes {
   color: #5cb85c;
@@ -6418,3 +6438,5 @@ footer {
   color: #333;
   font-size: 1.2rem;
 }
+
+/*# sourceMappingURL=admin.css.map */

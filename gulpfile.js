@@ -99,13 +99,11 @@ elixir.extend("combinePublicBotApp", function() {
 
 // 
 elixir(function(mix) {
-    del('/tmp/elixir-admin-build/*', {force: true});
+    // del('/tmp/elixir-admin-build/*', {force: true});
 
     // less
     mix
-        .less('admin.less')
-        .less('bot.less')
-        .less('popup.less')
+        .less(['admin.less', 'bot.less', 'popup.less'])
 
         // admin
         .combineAdmin()
@@ -118,7 +116,5 @@ elixir(function(mix) {
 
         // public
         .coffee('public/asyncLoad.coffee', 'public/js/public')
-
-
         ;
 });
