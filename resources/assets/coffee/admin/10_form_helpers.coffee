@@ -41,7 +41,7 @@ sbAdmin.form = do ()->
                 delete inputProps.type
                 options = inputProps.options or {'': '- None -'}
                 inputEl = m("select", inputProps, options.map((opt)->
-                    return m("option", {value: opt.v, label: opt.k})
+                    return m("option", {value: opt.v, label: opt.k}, opt.k)
                 ))
             else
                 inputEl = m("input", inputProps)
