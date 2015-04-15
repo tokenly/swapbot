@@ -78,6 +78,37 @@ class BotRepositoryTest extends TestCase {
         PHPUnit::assertEquals($old_hash, $model['hash']);
     }
 
+    public function testBotIncomeForwardingAddresses() {
+        $bot = app('BotHelper')->newSampleBot();
+        PHPUnit::assertEquals(['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'], $bot->getAllIncomeForwardingAddresses());
+
+        $bot = app('BotHelper')->newSampleBot(null, [
+            'income_rules'               => [
+                [
+                    'asset'         => 'BTC',
+                    'minThreshold'  => 10.0,
+                    'paymentAmount' => 2.0,
+                    'address'       => '1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B',
+                ],
+                [
+                    'asset'         => 'LTBCOIN',
+                    'minThreshold'  => 10000,
+                    'paymentAmount' => 2000,
+                    'address'       => '1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B',
+                ],
+                [
+                    'asset'         => 'XCP',
+                    'minThreshold'  => 50,
+                    'paymentAmount' => 10,
+                    'address'       => 'address000000000000000000000000002',
+                ],
+            ],
+        ]);
+        PHPUnit::assertEquals(['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B', 'address000000000000000000000000002'], $bot->getAllIncomeForwardingAddresses());
+
+    }
+
+
     protected function createRepositoryTestHelper() {
         $create_model_fn = function() {
             return $this->app->make('BotHelper')->newSampleBot();

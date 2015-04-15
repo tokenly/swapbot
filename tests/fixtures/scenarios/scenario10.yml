@@ -53,7 +53,8 @@ expectedTransactionModels:
     txid: "00000000000000000000000000000000000000000000000000000BTCtx222222"
   - 
     meta: { baseFilename: transaction_model_EMPTY.yml }
+    type: send
     txid: "0000000000000000000000000000001111"
-    confirmations: '1'
+    confirmations: '2'
     processed: '1'
     balances_applied: '0'

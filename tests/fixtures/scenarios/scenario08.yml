@@ -25,6 +25,7 @@ expectedBotEvents:
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_EMPTY.yml }
+    type: receive
     txid: "00000000000000000000000000000000000000000000000000000xcptx111111"
     confirmations: '1'
     processed: '1'

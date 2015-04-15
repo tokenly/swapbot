@@ -63,7 +63,7 @@ class SendEventProcessor {
         DB::transaction(function() use ($xchain_notification, $bot) {
 
             // load or create a new transaction from the database
-            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
+            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'send');
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
             // initialize a DTO (data transfer object) to hold all the variables
@@ -87,8 +87,11 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
-            // process fuell send
+            // process fuel send
             $this->processFuelSend($tx_process);
+
+            // process income forwarding send
+            $this->processIncomingForwardingSend($tx_process);
 
             // process all swaps
             $this->processSwaps($tx_process);
@@ -117,6 +120,7 @@ class SendEventProcessor {
             $bot = $tx_process['bot'];
             $this->bot_event_logger->logPreviousSendTx($bot, $xchain_notification);
             $tx_process['tx_is_handled'] = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
         }
     }
 
@@ -126,7 +130,7 @@ class SendEventProcessor {
 
         // see if this is a BTC send from the payment address
         //   to the public address
-        $bot = $tx_process['bot'];
+        $bot                 = $tx_process['bot'];
         $xchain_notification = $tx_process['xchain_notification'];
 
         if (
@@ -136,6 +140,31 @@ class SendEventProcessor {
         ) {
             $this->bot_event_logger->logFuelTXSent($bot, $xchain_notification);
             $tx_process['tx_is_handled'] = true;
+
+            if ($tx_process['is_confirmed']) {
+                $tx_process['transaction_update_vars']['processed'] = true;
+            }
+        }
+    }
+
+    protected function processIncomingForwardingSend($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        // see if this is a send from the public address
+        //   to the forwarding address
+        $bot                 = $tx_process['bot'];
+        $xchain_notification = $tx_process['xchain_notification'];
+
+        if (
+            in_array($bot['address'], $xchain_notification['sources'])
+            AND in_array($xchain_notification['destinations'][0], $bot->getAllIncomeForwardingAddresses())
+        ) {
+            $this->bot_event_logger->logIncomeForwardingTxSent($bot, $xchain_notification);
+            $tx_process['tx_is_handled'] = true;
+
+            if ($tx_process['is_confirmed']) {
+                $tx_process['transaction_update_vars']['processed'] = true;
+            }
         }
     }
 
@@ -214,19 +243,9 @@ class SendEventProcessor {
     ////////////////////////////////////////////////////////////////////////
     // Transaction
     
-    protected function findOrCreateTransaction($xchain_notification, $bot_id) {
-        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($xchain_notification['txid'], $bot_id);
-        if ($transaction_model) { return $transaction_model; }
-
-        // create a new transaction
-        return $this->transaction_repository->create([
-            'txid'                => $xchain_notification['txid'],
-            'bot_id'              => $bot_id,
-            'xchain_notification' => $xchain_notification,
-        ]);
+    protected function findOrCreateTransaction($xchain_notification, $bot_id, $type) {
+        return $this->transaction_repository->findOrCreateTransaction($xchain_notification['txid'], $bot_id, $type, ['xchain_notification' => $xchain_notification]);
     }
-
-
 
 
 

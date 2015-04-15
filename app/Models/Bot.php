@@ -179,6 +179,14 @@ class Bot extends APIModel {
         return $deserialized_income_rules;
     }
 
+    public function getAllIncomeForwardingAddresses() {
+        $addresses_map = [];
+        foreach ($this['income_rules'] as $income_rule) {
+            $addresses_map[$income_rule['address']] = true;
+        }
+        return array_keys($addresses_map);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

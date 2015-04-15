@@ -61,7 +61,7 @@ class TransactionRepositoryTest extends TestCase {
 
         DB::transaction(function() use ($bot) {
             $tx_repository = $this->app->make('Swapbot\Repositories\TransactionRepository');
-            $loaded_tx1 = $tx_repository->findByTransactionIDAndBotIDWithLock('tx001', $bot['id']);
+            $loaded_tx1 = $tx_repository->findByTransactionIDAndBotIDWithLock('tx001', $bot['id'], 'receive');
             sleep(getenv('SLEEP') ?: 0);
         });
 

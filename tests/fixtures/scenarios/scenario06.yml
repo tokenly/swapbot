@@ -81,10 +81,11 @@ expectedBotEvents:
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_EMPTY.yml }
+    type: receive
     txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
-    confirmations: 1
-    processed: 1
-    balances_applied: 1
+    confirmations: '1'
+    processed: '1'
+    balances_applied: '1'
     # swap_receipts: 
     #     "BTC:LTBCOIN":
     #         txid: "0000000000000000000000000000001111"

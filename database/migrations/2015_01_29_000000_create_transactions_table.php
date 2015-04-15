@@ -18,6 +18,7 @@ class CreateTransactionsTable extends Migration {
 
             $table->char('txid', 64)->index();
             $table->longText('xchain_notification')->nullable();
+            $table->string('type')->default('receive');
 
             $table->integer('confirmations')->unsigned()->default(0);
             $table->boolean('processed')->default(false);
@@ -29,7 +30,7 @@ class CreateTransactionsTable extends Migration {
             $table->integer('bot_id')->unsigned()->index();
             $table->foreign('bot_id')->references('id')->on('bots');
 
-            $table->index(['txid', 'bot_id']);
+            $table->unique(['txid', 'bot_id', 'type']);
 
             $table->timestamps();
         });

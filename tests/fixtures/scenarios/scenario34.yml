@@ -13,8 +13,13 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  -
-    meta: { baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml }
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml }
+
+  - # send income to the forwarding address (mempool)
+    meta: { baseFilename: mempool_BTC_SEND_INCOME_notification_01.yml }
+
+  - # send income to the forwarding address (confirmed)
+    meta: { baseFilename: confirmed_BTC_SEND_INCOME_notification_01.yml }
 
 
 
@@ -42,6 +47,12 @@ expectedBotEvents:
     meta: { baseFilename: fee.transaction.yml }
   - #### income forwarded
     meta: { baseFilename: income.forwarded.yml }
+
+  - #### income forward sent (mempool)
+    meta: { baseFilename: income.forwardSent-mempool.yml }
+
+  - #### income forward sent (confirmed)
+    meta: { baseFilename: income.forwardSent-confirmed.yml }
 
 expectedBotModels:
   - 

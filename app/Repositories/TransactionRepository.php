@@ -22,8 +22,13 @@ class TransactionRepository
         return call_user_func([$this->model_type, 'where'], 'txid', $txid)->where('bot_id', $bot_id)->first();
     }
 
-    public function findByTransactionIDAndBotIDWithLock($txid, $bot_id) {
-        return call_user_func([$this->model_type, 'where'], 'txid', $txid)->where('bot_id', $bot_id)->lockForUpdate()->first();
+    public function findByTransactionIDAndBotIDWithLock($txid, $bot_id, $type) {
+        return 
+            call_user_func([$this->model_type, 'where'], 'txid', $txid)
+            ->where('bot_id', $bot_id)
+            ->where('type', $type)
+            ->lockForUpdate()
+            ->first();
     }
 
     public function update(Transaction $model, $attributes) {
@@ -42,6 +47,17 @@ class TransactionRepository
 
     public function findAll() {
         return call_user_func([$this->model_type, 'all']);
+    }
+
+
+    public function findOrCreateTransaction($txid, $bot_id, $type, $other_vars=null) {
+        $transaction_model = $this->findByTransactionIDAndBotIDWithLock($txid, $bot_id, $type);
+        if ($transaction_model) { return $transaction_model; }
+
+        // create a new transaction model
+        $create_vars = ['bot_id' => $bot_id, 'txid' => $txid, 'type' => $type];
+        if ($other_vars !== null) { $create_vars = array_merge($other_vars, $create_vars); }
+        return $this->create($create_vars);
     }
 
     ////////////////////////////////////////////////////////////////////////

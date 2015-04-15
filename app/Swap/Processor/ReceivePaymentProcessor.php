@@ -35,7 +35,7 @@ class ReceivePaymentProcessor {
     public function handlePaymentAddressReceive($xchain_notification, $bot) {
         DB::transaction(function() use ($xchain_notification, $bot) {
             // load or create a new transaction from the database
-            $transaction_model = $this->findOrCreateTransaction($xchain_notification['txid'], $bot['id']);
+            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'receive');
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
             // initialize a DTO (data transfer object) to hold all the variables
@@ -128,12 +128,8 @@ class ReceivePaymentProcessor {
 
 
 
-    protected function findOrCreateTransaction($txid, $bot_id) {
-        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($txid, $bot_id);
-        if ($transaction_model) { return $transaction_model; }
-
-        // create a new transaction
-        return $this->transaction_repository->create(['bot_id' => $bot_id, 'txid' => $txid]);
+    protected function findOrCreateTransaction($xchain_notification, $bot_id, $type) {
+        return $this->transaction_repository->findOrCreateTransaction($xchain_notification['txid'], $bot_id, $type, ['xchain_notification' => $xchain_notification]);
     }
 
     protected function updateTransaction($tx_process) {

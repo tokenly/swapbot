@@ -81,7 +81,7 @@ class ReceiveEventProcessor {
         $tx_process = DB::transaction(function() use ($xchain_notification, $bot) {
 
             // load or create a new transaction from the database
-            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id']);
+            $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'receive');
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
             // Log::debug("xchain notification received: {$xchain_notification['confirmations']}");
 
@@ -145,16 +145,8 @@ class ReceiveEventProcessor {
     ////////////////////////////////////////////////////////////////////////
     // Transaction
     
-    protected function findOrCreateTransaction($xchain_notification, $bot_id) {
-        $transaction_model = $this->transaction_repository->findByTransactionIDAndBotIDWithLock($xchain_notification['txid'], $bot_id);
-        if ($transaction_model) { return $transaction_model; }
-
-        // create a new transaction
-        return $this->transaction_repository->create([
-            'txid'                => $xchain_notification['txid'],
-            'bot_id'              => $bot_id,
-            'xchain_notification' => $xchain_notification,
-        ]);
+    protected function findOrCreateTransaction($xchain_notification, $bot_id, $type) {
+        return $this->transaction_repository->findOrCreateTransaction($xchain_notification['txid'], $bot_id, $type, ['xchain_notification' => $xchain_notification]);
     }
 
 

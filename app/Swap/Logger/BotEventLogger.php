@@ -492,6 +492,21 @@ class BotEventLogger {
         ]);
     }
 
+    public function logIncomeForwardingTxSent($bot, $xchain_notification) {
+        $quantity    = $xchain_notification['quantity'];
+        $asset       = $xchain_notification['asset'];
+        $tx_id       = $xchain_notification['txid'];
+        $destination = $xchain_notification['destinations'][0];
+        return $this->logToBotEvents($bot, 'income.forwardSent', BotEvent::LEVEL_INFO, [
+            'msg'           => "Forwarded income of {$quantity} {$asset} to {$destination} with transaction ID {$tx_id}.",
+            'qty'           => $quantity,
+            'asset'         => $asset,
+            'txid'          => $tx_id,
+            'destination'   => $destination,
+            'confirmations' => $xchain_notification['confirmations'],
+        ]);
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Refund
 
