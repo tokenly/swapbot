@@ -38,14 +38,17 @@ class SendEventProcessor {
     public function handleSend($xchain_notification) {
         $found = false;
 
-        // find the bot related to this notification
+        // find the bot 
+        //   if this is a send from the the public address
         $bot = $this->bot_repository->findBySendMonitorID($xchain_notification['notifiedAddressId']);
         if ($bot) {
             $found = true;
         }
 
 
-        // could be a payment send
+        // find the bot 
+        //   if this is a send from the payment address 
+        //   this could be an initial fuel transaction, or an income forwarding transaction
         if (!$found) {
             $bot = $this->bot_repository->findByPaymentSendMonitorID($xchain_notification['notifiedAddressId']);
             if ($bot) {
@@ -84,6 +87,9 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
+            // process fuell send
+            $this->processFuelSend($tx_process);
+
             // process all swaps
             $this->processSwaps($tx_process);
 
@@ -109,14 +115,29 @@ class SendEventProcessor {
         if ($transaction_model['processed']) {
             $xchain_notification = $tx_process['xchain_notification'];
             $bot = $tx_process['bot'];
-            $this->bot_event_logger->logToBotEvents($bot, 'send.previous', BotEvent::LEVEL_DEBUG, [
-                'msg'  => "Send transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
-                'txid' => $xchain_notification['txid']
-            ]);
+            $this->bot_event_logger->logPreviousSendTx($bot, $xchain_notification);
             $tx_process['tx_is_handled'] = true;
         }
     }
 
+
+    protected function processFuelSend($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        // see if this is a BTC send from the payment address
+        //   to the public address
+        $bot = $tx_process['bot'];
+        $xchain_notification = $tx_process['xchain_notification'];
+
+        if (
+            $xchain_notification['asset'] == 'BTC'
+            AND in_array($bot['payment_address'], $xchain_notification['sources'])
+            AND in_array($bot['address'], $xchain_notification['destinations'])
+        ) {
+            $this->bot_event_logger->logFuelTXSent($bot, $xchain_notification);
+            $tx_process['tx_is_handled'] = true;
+        }
+    }
 
     protected function processSwaps($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }

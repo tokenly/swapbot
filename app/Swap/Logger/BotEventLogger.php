@@ -213,6 +213,20 @@ class BotEventLogger {
 
     }
 
+    public function logFuelTXSent(Bot $bot, $xchain_notification) {
+        $quantity = $xchain_notification['quantity'];
+        $asset    = $xchain_notification['asset'];
+        $tx_id    = $xchain_notification['txid'];
+        return $this->logToBotEvents($bot, 'payment.moveFuelSent', BotEvent::LEVEL_DEBUG, [
+            'msg'           => "Sent swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
+            'qty'           => $quantity,
+            'asset'         => $asset,
+            'txid'          => $tx_id,
+            'confirmations' => $xchain_notification['confirmations'],
+        ]);
+
+    }
+
 
 
     public function logInitialCreationFeePaid(Bot $bot, $quantity, $asset) {
@@ -404,6 +418,14 @@ class BotEventLogger {
 
     ////////////////////////////////////////////////////////////////////////
     // sends
+
+    public function logPreviousSendTx(Bot $bot, $xchain_notification) {
+        return $this->logToBotEvents($bot, 'send.previous', BotEvent::LEVEL_DEBUG, [
+            'msg'  => "Send transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
+            'txid' => $xchain_notification['txid']
+        ]);
+    }
+
 
     public function logUnconfirmedSendTx(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
         return $this->logToBotEvents($bot, 'send.unconfirmed', BotEvent::LEVEL_DEBUG, [

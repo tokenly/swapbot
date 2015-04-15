@@ -24,10 +24,27 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300001
 
+  # mempool fuel sent
+  - meta: { baseFilename: mempool_BTC_SEND_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
+
+  # mempool fuel received
+  - meta: { baseFilename: mempool_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
+
+
+  # confirm that the fuel was sent
+  - meta: { baseFilename: confirmed_BTC_SEND_FUEL_notification_01.yml }
+    quantity: 0.005
+    blockId: 300002
+
   # confirm that the fuel was received
   - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
     quantity: 0.005
     blockId: 300002
+
 
 
 
@@ -49,10 +66,22 @@ expectedBotEvents:
     meta: { baseFilename: payment.creationFeePaid.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
-  - #### fuel transaction confirmed
+
+  - #### fuel send (mempool)
+    meta: { baseFilename: payment.moveFuelSent.yml }
+    confirmations: 0
+
+  - #### fuel received (mempool)
+    meta: { baseFilename: payment.unconfirmedMoveFuel.yml }
+
+  - #### fuel send (confirmed)
+    meta: { baseFilename: payment.moveFuelSent.yml }
+
+  - #### fuel transaction (confirmed)
     meta: { baseFilename: payment.moveFuelConfirmed.yml }
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
+
 
 
 expectedBotLedgerEntries:
