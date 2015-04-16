@@ -1,59 +1,6 @@
 (function() {
   var SwapbotChoose, SwapbotChooseItem, SwapbotComplete, SwapbotComponent, SwapbotReceive, SwapbotSendItem, SwapbotWait, TransactionInfo, botEventWatcher, swapbot, util;
 
-  botEventWatcher = (function() {
-    var exports;
-    exports = {};
-    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          if (event.inQty === inAmount && event.inAsset === inAsset) {
-            return true;
-          }
-      }
-      return false;
-    };
-    exports.confirmationsFromEvent = function(botEvent) {
-      var event;
-      event = botEvent.event;
-      switch (event.name) {
-        case 'unconfirmed.tx':
-          return 0;
-        case 'swap.confirming':
-        case 'swap.confirmed':
-        case 'swap.sent':
-          return event.confirmations;
-      }
-      console.warn("unknown event " + event.name);
-      return event.confirmations;
-    };
-    exports.txInfoFromBotEvent = function(botEvent) {
-      var event, txInfo;
-      event = botEvent.event;
-      txInfo = {
-        name: event.name,
-        msg: event.msg,
-        address: event.destination,
-        swapId: event.swapId,
-        inAsset: event.inAsset,
-        inQty: event.inQty,
-        outAsset: event.outAsset,
-        outQty: event.outQty,
-        serial: botEvent.serial,
-        createdAt: botEvent.createdAt,
-        confirmations: exports.confirmationsFromEvent(botEvent),
-        status: event.name
-      };
-      return txInfo;
-    };
-    return exports;
-  })();
-
   SwapbotComponent = React.createClass({
     displayName: 'SwapbotComponent',
     getInitialState: function() {
@@ -198,6 +145,75 @@
     return exports;
   })();
 
+  botEventWatcher = (function() {
+    var exports;
+    exports = {};
+    exports.botEventMatchesInAmount = function(botEvent, inAmount, inAsset) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          if (event.inQty === inAmount && event.inAsset === inAsset) {
+            return true;
+          }
+      }
+      return false;
+    };
+    exports.confirmationsFromEvent = function(botEvent) {
+      var event;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'unconfirmed.tx':
+          return 0;
+        case 'swap.confirming':
+        case 'swap.confirmed':
+        case 'swap.sent':
+          return event.confirmations;
+      }
+      console.warn("unknown event " + event.name);
+      return event.confirmations;
+    };
+    exports.txInfoFromBotEvent = function(botEvent) {
+      var event, txInfo;
+      event = botEvent.event;
+      txInfo = {
+        name: event.name,
+        msg: event.msg,
+        address: event.destination,
+        swapId: event.swapId,
+        inAsset: event.inAsset,
+        inQty: event.inQty,
+        outAsset: event.outAsset,
+        outQty: event.outQty,
+        serial: botEvent.serial,
+        createdAt: botEvent.createdAt,
+        confirmations: exports.confirmationsFromEvent(botEvent),
+        status: event.name
+      };
+      return txInfo;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.botUtils = (function() {
+    var exports;
+    exports = {};
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    };
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    };
+    return exports;
+  })();
+
   SwapbotChooseItem = React.createClass({
     displayName: 'SwapbotChooseItem',
     clickSwap: function(e) {
@@ -277,27 +293,32 @@
     }
   });
 
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
-
   util = (function() {
     var exports;
     exports = {};
     exports.sayHi = function(text) {
       return console.log("sayHi: " + text);
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
     };
     return exports;
   })();
@@ -452,26 +473,13 @@
     }
   });
 
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.pusher = (function() {
-    var exports;
-    exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
-    };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
-    };
-    return exports;
-  })();
+  window.SwapbotApp = {
+    init: function() {
+      return React.render(React.createElement(SwapbotComponent, {
+        "showing": true
+      }), document.getElementById('SwapbotPopup'));
+    }
+  };
 
   if (swapbot == null) {
     swapbot = {};
@@ -715,14 +723,6 @@
       }, this.state.selectedMatchedTxInfo.msg)) : React.createElement("p", null, "Waiting for transaction.  This transaction will require ", swapbot.botUtils.confirmationsProse(bot), ".")));
     }
   });
-
-  window.SwapbotApp = {
-    init: function() {
-      return React.render(React.createElement(SwapbotComponent, {
-        "showing": true
-      }), document.getElementById('SwapbotPopup'));
-    }
-  };
 
   SwapbotComplete = React.createClass({
     displayName: 'SwapbotComplete',

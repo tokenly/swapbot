@@ -90,7 +90,15 @@ class BotValidatorTest extends TestCase {
             ],
             [
                 'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => 0]),
-                'error' => 'The confirmations required must be at least 1.',
+                'error' => 'The confirmations required must be at least 2.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => 1]),
+                'error' => 'The confirmations required must be at least 2.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['confirmations_required' => 7]),
+                'error' => 'The confirmations required may not be greater than 6.',
             ],
 
             [

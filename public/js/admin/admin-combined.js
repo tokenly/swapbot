@@ -1,6 +1,10 @@
 (function() {
   var sbAdmin, swapbot;
 
+  sbAdmin = {
+    ctrl: {}
+  };
+
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
   }
@@ -17,10 +21,6 @@
     return exports;
   })();
 
-  sbAdmin = {
-    ctrl: {}
-  };
-
   if (swapbot == null) {
     swapbot = {};
   }
@@ -33,27 +33,6 @@
     };
     exports.confirmationsWord = function(bot) {
       return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.pusher = (function() {
-    var exports;
-    exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client(window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
-    };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
     };
     return exports;
   })();
@@ -164,34 +143,19 @@
     swapbot = {};
   }
 
-  swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
+  swapbot.pusher = (function() {
+    var exports;
     exports = {};
-    buildDesc = {};
-    buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
-      outAmount = 1 * swap.rate;
-      inAmount = 1;
-      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
     };
-    buildDesc.fixed = function(swap) {
-      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
-    };
-    buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount / swap.rate;
-      return inAmount;
-    };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
-    };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
     };
     return exports;
   })();
@@ -240,6 +204,42 @@
       };
     };
     return auth;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 * swap.rate;
+      inAmount = 1;
+      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
   })();
 
   sbAdmin.currencyutils = (function() {
@@ -1399,7 +1399,8 @@
                     'placeholder': "2",
                     type: "number",
                     step: "1",
-                    min: "1",
+                    min: "2",
+                    max: "6",
                     required: true
                   }, vm.confirmationsRequired)
                 ]), m("div", {

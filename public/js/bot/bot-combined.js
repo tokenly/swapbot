@@ -1,60 +1,18 @@
 (function() {
   var SwapStatus, SwapStatuses, SwapsList, swapEventRenderer, swapEventWatcher, swapbot;
 
-  swapEventRenderer = (function() {
-    var exports, renderers;
+  if (typeof swapbot === "undefined" || swapbot === null) {
+    swapbot = {};
+  }
+
+  swapbot.addressUtils = (function() {
+    var exports;
     exports = {};
-    renderers = {};
-    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+    exports.publicBotAddress = function(username, botId, location) {
+      return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
-    renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
-    };
-    renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "failed"
-      }, React.createElement("div", {
-        "className": "status-icon icon-failed"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination));
-    };
-    renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "confirmed"
-      }, React.createElement("div", {
-        "className": "status-icon icon-confirmed"
-      }), event.msg);
-    };
-    exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
-      var name;
-      if (swapEventRecord != null) {
-        name = swapEventRecord.event.name;
-        if (renderers[name] != null) {
-          return renderers[name](bot, swap, swapEventRecord);
-        }
-      }
-      console.log("renderSwapStatus swap=" + swap.id + " swapEventRecord=", swapEventRecord);
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"));
+    exports.poupupBotAddress = function(username, botId, location) {
+      return exports.publicBotAddress(username, botId, location) + "/popup";
     };
     return exports;
   })();
@@ -123,18 +81,76 @@
     return exports;
   })();
 
-  if (typeof swapbot === "undefined" || swapbot === null) {
+  swapEventRenderer = (function() {
+    var exports, renderers;
+    exports = {};
+    renderers = {};
+    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+    };
+    renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+    };
+    renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "failed"
+      }, React.createElement("div", {
+        "className": "status-icon icon-failed"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination));
+    };
+    renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "confirmed"
+      }, React.createElement("div", {
+        "className": "status-icon icon-confirmed"
+      }), event.msg);
+    };
+    exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
+      var name;
+      if (swapEventRecord != null) {
+        name = swapEventRecord.event.name;
+        if (renderers[name] != null) {
+          return renderers[name](bot, swap, swapEventRecord);
+        }
+      }
+      console.log("renderSwapStatus swap=" + swap.id + " swapEventRecord=", swapEventRecord);
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"));
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
     swapbot = {};
   }
 
-  swapbot.addressUtils = (function() {
+  swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.publicBotAddress = function(username, botId, location) {
-      return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     return exports;
   })();
@@ -359,22 +375,6 @@
       }), document.getElementById('SwapsList'));
     }
   };
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
 
   if (swapbot == null) {
     swapbot = {};
