@@ -11,7 +11,7 @@ class UpdateBotValidator extends BotValidator {
     protected $rules = [
         'name'                   => 'sometimes|required',
         'description'            => 'sometimes|required',
-        'return_fee'             => 'sometimes|numeric|min:0.00001',
+        'return_fee'             => 'sometimes|numeric|min:0.00001|max:0.001',
         'confirmations_required' => 'sometimes|integer|min:2|max:6',
     ];
 

@@ -21,22 +21,6 @@
     return exports;
   })();
 
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
-
   sbAdmin.api = (function() {
     var api, newNonce, signRequest, signURLParameters;
     api = {};
@@ -143,19 +127,14 @@
     swapbot = {};
   }
 
-  swapbot.pusher = (function() {
+  swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client(window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
+    exports.confirmationsProse = function(bot) {
+      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     return exports;
   })();
@@ -210,6 +189,46 @@
     swapbot = {};
   }
 
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
+    };
+    return exports;
+  })();
+
+  sbAdmin.currencyutils = (function() {
+    var SATOSHI, currencyutils;
+    currencyutils = {};
+    SATOSHI = 100000000;
+    currencyutils.satoshisToValue = function(amount, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return currencyutils.formatValue(amount / SATOSHI, currencyPostfix);
+    };
+    currencyutils.formatValue = function(value, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
+    };
+    return currencyutils;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
   swapbot.swapUtils = (function() {
     var buildDesc, buildInAmountFromOutAmount, exports;
     exports = {};
@@ -240,25 +259,6 @@
       return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
     };
     return exports;
-  })();
-
-  sbAdmin.currencyutils = (function() {
-    var SATOSHI, currencyutils;
-    currencyutils = {};
-    SATOSHI = 100000000;
-    currencyutils.satoshisToValue = function(amount, currencyPostfix) {
-      if (currencyPostfix == null) {
-        currencyPostfix = 'BTC';
-      }
-      return currencyutils.formatValue(amount / SATOSHI, currencyPostfix);
-    };
-    currencyutils.formatValue = function(value, currencyPostfix) {
-      if (currencyPostfix == null) {
-        currencyPostfix = 'BTC';
-      }
-      return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
-    };
-    return currencyutils;
   })();
 
   sbAdmin.formGroup = (function() {
@@ -1410,8 +1410,9 @@
                     id: 'return_fee',
                     'placeholder': "0.0001",
                     type: "number",
-                    step: "any",
+                    step: "0.00001",
                     min: "0.00001",
+                    max: "0.001",
                     required: true
                   }, vm.returnFee)
                 ])

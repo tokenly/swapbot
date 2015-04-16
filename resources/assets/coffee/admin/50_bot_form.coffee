@@ -275,7 +275,7 @@ do ()->
                                 sbAdmin.form.mFormField("Confirmations", {id: 'confirmations_required', 'placeholder': "2", type: "number", step: "1", min: "2", max: "6", required: true, }, vm.confirmationsRequired),
                             ]),
                             m("div", {class: "col-md-5"}, [
-                                sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0001", type: "number", step: "any", min: "0.00001", required: true, }, vm.returnFee),
+                                sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0001", type: "number", step: "0.00001", min: "0.00001", max: "0.001", required: true, }, vm.returnFee),
                             ]),
                         ]),
 

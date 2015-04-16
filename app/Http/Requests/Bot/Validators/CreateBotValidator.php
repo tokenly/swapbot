@@ -12,7 +12,7 @@ class CreateBotValidator extends BotValidator {
         'name'                   => 'required',
         'description'            => 'required',
         'user_id'                => 'numeric',
-        'return_fee'             => 'required|numeric|min:0.00001',
+        'return_fee'             => 'required|numeric|min:0.00001|max:0.001',
         'payment_plan'           => 'required',
         'confirmations_required' => 'required|integer|min:2|max:6',
     ];

@@ -43,6 +43,10 @@ class BotValidatorTest extends TestCase {
                 'error' => 'The return fee must be at least 0.00001.',
             ],
             [
+                'vars' => array_merge($sample_vars, ['return_fee' => 0.002]),
+                'error' => 'The return fee may not be greater than 0.001.',
+            ],
+            [
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['in' => '',]]]),
                 'error' => 'specify an asset to receive for swap #1',
             ],
@@ -227,6 +231,10 @@ class BotValidatorTest extends TestCase {
                 'error' => 'The return fee must be at least 0.00001.',
             ],
             [
+                'vars' => ['return_fee' => 0.003],
+                'error' => 'The return fee may not be greater than 0.001.',
+            ],
+            [
                 'vars' => ['swaps' => []],
                 'error' => 'at least one swap',
             ],
@@ -236,11 +244,15 @@ class BotValidatorTest extends TestCase {
             ],
             [
                 'vars' => ['confirmations_required' => 0],
-                'error' => 'The confirmations required must be at least 1.',
+                'error' => 'The confirmations required must be at least 2.',
             ],
             [
                 'vars' => ['confirmations_required' => -1],
-                'error' => 'The confirmations required must be at least 1.',
+                'error' => 'The confirmations required must be at least 2.',
+            ],
+            [
+                'vars' => ['confirmations_required' => 7],
+                'error' => 'The confirmations required may not be greater than 6.',
             ],
 
             [
