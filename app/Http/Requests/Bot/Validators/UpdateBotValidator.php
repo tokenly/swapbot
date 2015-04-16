@@ -12,7 +12,7 @@ class UpdateBotValidator extends BotValidator {
         'name'                   => 'sometimes|required',
         'description'            => 'sometimes|required',
         'return_fee'             => 'sometimes|numeric|min:0.00001',
-        'confirmations_required' => 'sometimes|integer|min:1',
+        'confirmations_required' => 'sometimes|integer|min:2|max:6',
     ];
 
 }
