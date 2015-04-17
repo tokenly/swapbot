@@ -24,8 +24,15 @@ swapbot.swapUtils = do ()->
 
         inAmount = outAmount / swap.rate
         return inAmount
+
+    # this needs to be refined further
     buildInAmountFromOutAmount.fixed = (outAmount, swap)->
-        return
+        if not outAmount? or isNaN(outAmount)
+            return 0
+
+        inAmount = outAmount / (swap.out_qty / swap.in_qty)
+
+        return inAmount
 
 
 

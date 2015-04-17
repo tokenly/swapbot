@@ -423,7 +423,14 @@
       inAmount = outAmount / swap.rate;
       return inAmount;
     };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {};
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / (swap.out_qty / swap.in_qty);
+      return inAmount;
+    };
     exports.exchangeDescription = function(swap) {
       return buildDesc[swap.strategy](swap);
     };
