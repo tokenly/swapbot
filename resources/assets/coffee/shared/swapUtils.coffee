@@ -14,7 +14,7 @@ swapbot.swapUtils = do ()->
         return "#{outAmount} #{swap.out} for #{inAmount} #{swap.in}"
 
     buildDesc.fixed = (swap)->
-        return "#{swap.out_qty} #{swap.out} for #{in_qty} #{swap.in}"
+        return "#{swap.out_qty} #{swap.out} for #{swap.in_qty} #{swap.in}"
 
 
     buildInAmountFromOutAmount = {}

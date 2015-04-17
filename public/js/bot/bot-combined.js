@@ -17,6 +17,64 @@
     return exports;
   })();
 
+  swapEventRenderer = (function() {
+    var exports, renderers;
+    exports = {};
+    renderers = {};
+    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+    };
+    renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+    };
+    renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "failed"
+      }, React.createElement("div", {
+        "className": "status-icon icon-failed"
+      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination));
+    };
+    renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
+      var event;
+      event = swapEventRecord.event;
+      return React.createElement("li", {
+        "className": "confirmed"
+      }, React.createElement("div", {
+        "className": "status-icon icon-confirmed"
+      }), event.msg);
+    };
+    exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
+      var name;
+      if (swapEventRecord != null) {
+        name = swapEventRecord.event.name;
+        if (renderers[name] != null) {
+          return renderers[name](bot, swap, swapEventRecord);
+        }
+      }
+      console.log("renderSwapStatus swap=" + swap.id + " swapEventRecord=", swapEventRecord);
+      return React.createElement("li", {
+        "className": "pending"
+      }, React.createElement("div", {
+        "className": "status-icon icon-pending"
+      }), "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"));
+    };
+    return exports;
+  })();
+
   swapEventWatcher = (function() {
     var exports, isActive, shouldProcessSwapEvent;
     exports = {};
@@ -77,64 +135,6 @@
         }
       }
       return false;
-    };
-    return exports;
-  })();
-
-  swapEventRenderer = (function() {
-    var exports, renderers;
-    exports = {};
-    renderers = {};
-    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
-    };
-    renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
-    };
-    renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "failed"
-      }, React.createElement("div", {
-        "className": "status-icon icon-failed"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination));
-    };
-    renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
-      var event;
-      event = swapEventRecord.event;
-      return React.createElement("li", {
-        "className": "confirmed"
-      }, React.createElement("div", {
-        "className": "status-icon icon-confirmed"
-      }), event.msg);
-    };
-    exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
-      var name;
-      if (swapEventRecord != null) {
-        name = swapEventRecord.event.name;
-        if (renderers[name] != null) {
-          return renderers[name](bot, swap, swapEventRecord);
-        }
-      }
-      console.log("renderSwapStatus swap=" + swap.id + " swapEventRecord=", swapEventRecord);
-      return React.createElement("li", {
-        "className": "pending"
-      }, React.createElement("div", {
-        "className": "status-icon icon-pending"
-      }), "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"));
     };
     return exports;
   })();
@@ -412,7 +412,7 @@
       return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
     };
     buildDesc.fixed = function(swap) {
-      return "" + swap.out_qty + " " + swap.out + " for " + in_qty + " " + swap["in"];
+      return "" + swap.out_qty + " " + swap.out + " for " + swap.in_qty + " " + swap["in"];
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swap) {
