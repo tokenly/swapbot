@@ -5,6 +5,8 @@
 bots:
   - meta: { baseFilename: bot01.yml }
 
+consumers:
+  - meta: { baseFilename: consumer01.yml }
 
 ############################
 # receive notifications from xchain
@@ -12,6 +14,10 @@ xchainNotifications:
   - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
 
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addConsumer, baseFilename: consumer01.yml, data: {} }
+  - {type: xchainNotification, offset: 1}
 
 ############################
 # validate the expected results
@@ -48,5 +54,9 @@ expectedBotModels:
     balances:
       LTBCOIN: 1000500
       BTC: 0.99941 # + 0.00001 dust
+
+
+expectedEmails:
+  - meta: { baseFilename: received01.yml }
 
 

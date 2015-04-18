@@ -2,7 +2,9 @@
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Event;
 use Swapbot\Commands\ReceiveWebhook;
+use Swapbot\Events\ConsumerAddedToSwap;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
@@ -13,6 +15,7 @@ use Symfony\Component\Yaml\parse;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\XChainClient\Mock\MockBuilder;
 use \PHPUnit_Framework_Assert as PHPUnit;
+use Mockery as m;
 
 /**
 *  ScenarioRunner
@@ -24,10 +27,11 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, ConsumerHelper $consumer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
+        $this->consumer_helper             = $consumer_helper;
         $this->transaction_repository      = $transaction_repository;
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->bot_event_repository        = $bot_event_repository;
@@ -44,6 +48,9 @@ class ScenarioRunner
 
             // setup mock xchain
             $this->xchain_mock_recorder = $this->mock_builder->installXChainMockClient($test_case);
+
+            // setup mock mailer
+            $this->mock_mailer_recorder = $this->installMockMailer();
 
             // clear bot events
             $this->clearBotEvents();
@@ -71,10 +78,57 @@ class ScenarioRunner
     public function runScenario($scenario_data) {
         // set up the scenario
         $bots = $this->addBots($scenario_data['bots']);
-        // echo "\$bots:\n".json_encode($bots, 192)."\n";
 
+        $events = $this->normalizeScenarioEvents($scenario_data);
+        foreach($events as $event) {
+            $this->executeScenarioEvent($event, $scenario_data);
+        }
+    }
+
+    public function validateScenario($scenario_data) {
+        if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls']); }
+        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
+        if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
+        if (isset($scenario_data['expectedBotLedgerEntries'])) { $this->validateExpectedBotLedgerEntryModels($scenario_data['expectedBotLedgerEntries']); }
+        if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
+        if (isset($scenario_data['expectedSwapModels'])) { $this->validateExpectedSwapModels($scenario_data['expectedSwapModels']); }
+        if (isset($scenario_data['expectedEmails'])) { $this->validateExpectedEmails($scenario_data['expectedEmails']); }
+    }
+
+
+
+
+    
+    ////////////////////////////////////////////////////////////////////////
+    // Scenario Events
+
+    protected function normalizeScenarioEvents($scenario_data) {
+        if (isset($scenario_data['events'])) {
+            return $scenario_data['events'];
+        } else {
+            // just do all xchain notifications by default
+            $events = [['type' => 'xchainNotification', 'startOffset' => 0, ]];
+            return $events;
+        }
+
+    }
+
+    protected function executeScenarioEvent($event, $scenario_data) {
+        $type = $event['type'];
+        $method = "executeScenarioEvent_{$type}";
+        if (method_exists($this, $method)) {
+            call_user_func([$this, $method], $event, $scenario_data);
+        } else {
+            throw new Exception("Method not found: $method", 1);
+        }
+    }
+
+    protected function executeScenarioEvent_xchainNotification($event, $scenario_data) {
         // process notifications
-        foreach ($scenario_data['xchainNotifications'] as $raw_notification) {
+        $all_xchain_notifications = $scenario_data['xchainNotifications'];
+        $xchain_notifications = $this->resolveOffset($all_xchain_notifications, $event);
+
+        foreach ($xchain_notifications as $raw_notification) {
             $notification = $raw_notification;
             $meta = $raw_notification['meta'];
             unset($notification['meta']);
@@ -96,19 +150,36 @@ class ScenarioRunner
         }
     }
 
-    public function validateScenario($scenario_data) {
-        if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls']); }
-        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
-        if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
-        if (isset($scenario_data['expectedBotLedgerEntries'])) { $this->validateExpectedBotLedgerEntryModels($scenario_data['expectedBotLedgerEntries']); }
-        if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
-        if (isset($scenario_data['expectedSwapModels'])) { $this->validateExpectedSwapModels($scenario_data['expectedSwapModels']); }
+    protected function resolveOffset($all_xchain_notifications, $event) {
+        if (isset($event['offset'])) {
+            return [$all_xchain_notifications[$event['offset']]];
+        }
+        if (isset($event['startOffset'])) {
+            $xchain_notifications = array_slice($all_xchain_notifications, $event['startOffset'], isset($event['length']) ? $event['length'] : null);
+            return $xchain_notifications;
+        }
+
+        throw new Exception("Unable to resolve offset for event: ".json_encode($event, 192), 1);
+    }
+
+    protected function executeScenarioEvent_addConsumer($event, $scenario_data) {
+        $consumer_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "consumers"), isset($event['data']) ? $event['data'] : []);
+        $swap = $this->resolveSwap($event, $scenario_data);
+
+        $consumer = $this->consumer_helper->newSampleConsumer($swap, $consumer_attributes);
+        Event::fire(new ConsumerAddedToSwap($consumer, $swap));
+    }
+
+    protected function resolveSwap($event, $scenario_data) {
+        // find the first available swap
+        $all_swaps = $this->swap_repository->findAll();
+        if (count($all_swaps) > 1) {
+            throw new Exception("Multiple swaps found.  Don't know which to attach to.", 1);
+        }
+        return $all_swaps[0];
     }
 
 
-
-
-    
     ////////////////////////////////////////////////////////////////////////
     // Bots
 
@@ -145,6 +216,7 @@ class ScenarioRunner
         }
     }
 
+
     protected function getSampleUser() {
         if (!isset($this->sample_user)) {
             $this->sample_user = $this->user_helper->getSampleUser();
@@ -155,10 +227,13 @@ class ScenarioRunner
     protected function loadBaseFilename($entry, $fixtures_folder) {
         if (isset($entry['meta']) AND isset($entry['meta']['baseFilename'])) {
             $base_filename = $entry['meta']['baseFilename'];
+            return $this->loadDataByBaseFilename($base_filename, $fixtures_folder);
         } else {
             return [];
         }
+    }
 
+    protected function loadDataByBaseFilename($base_filename, $fixtures_folder) {
         $directory = base_path().'/tests/fixtures/'.trim($fixtures_folder, '/');
         $filepath = $directory.'/'.$base_filename;
         PHPUnit::assertTrue(file_exists($filepath), "Filepath did not exist: {$filepath}.  Files were: ".json_encode(scandir($directory), 192));
@@ -658,6 +733,130 @@ class ScenarioRunner
     }
 
 
+
+    ////////////////////////////////////////////////////////////////////////
+    // expectedEmails
+
+    protected function validateExpectedEmails($expected_emails) {
+        $actual_emails = $this->mock_mailer_recorder->emails;
+
+        foreach ($expected_emails as $offset => $raw_expected_email_model) {
+            $actual_email_model = isset($actual_emails[$offset]) ? $actual_emails[$offset] : null;
+
+            $expected_email_model = $raw_expected_email_model;
+            unset($expected_email_model['meta']);
+            $expected_email_model = array_replace_recursive($this->loadBaseFilename($raw_expected_email_model, "emails"), $expected_email_model);
+
+            $expected_email_model = $this->normalizeExpectedEmailRecord($expected_email_model, $actual_email_model);
+            
+            $this->validateExpectedEmailRecord($expected_email_model, $actual_email_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_emails), $actual_emails, "Did not find the correct number of Email models");
+
+    }
+
+    protected function validateExpectedEmailRecord($expected_email_model, $actual_email_model) {
+        PHPUnit::assertNotEmpty($actual_email_model, "Missing email model ".json_encode($expected_email_model, 192));
+        PHPUnit::assertEquals($expected_email_model, $actual_email_model, "ExpectedEmailRecord mismatch");
+    }
+
+
+
+
+    protected function normalizeExpectedEmailRecord($expected_email_model, $actual_email_model) {
+        $normalized_expected_email_model = [];
+
+        // placeholder
+        $normalized_expected_email_model = $expected_email_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_email_model[$field])) { $normalized_expected_email_model[$field] = $expected_email_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = [];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_email_model[$field])) { $normalized_expected_email_model[$field] = $expected_email_model[$field]; }
+                else if (isset($actual_email_model[$field])) { $normalized_expected_email_model[$field] = $actual_email_model[$field]; }
+        }
+        ///////////////////
+
+        ///////////////////
+        // JUST NEEDS TO MATCH
+        $must_match_fields = ['body'];
+        foreach ($must_match_fields as $field) {
+            if (isset($actual_email_model[$field])) {
+                if (stristr($actual_email_model[$field], $normalized_expected_email_model[$field]) !== false) {
+                    $normalized_expected_email_model[$field] = $actual_email_model[$field];
+                }
+            }
+        }
+        ///////////////////
+
+        ///////////////////
+        // JUST NEEDS TO EXIST
+        $must_exist_fields = [];
+        foreach ($must_exist_fields as $field) {
+            if (isset($actual_email_model[$field])) { $normalized_expected_email_model[$field] = $actual_email_model[$field]; }
+        }
+        ///////////////////
+
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_email_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_email_model['quantity']);
+        // // blockhash
+        // if (isset($expected_email_model['blockhash'])) {
+        //     $normalized_expected_email_model['bitcoinTx']['blockhash'] = $expected_email_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_email_model;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Mock Mailer
+
+    protected function installMockMailer() {
+        // don't background emails
+        Mail::setQueue(Queue::getFacadeRoot()->connection('sync'));
+
+        // mock
+        $mock = m::mock('Swift_Mailer');
+        app('mailer')->setSwiftMailer($mock);
+
+        // expect
+        $mailer_recorder = new \stdClass();
+        $mailer_recorder->emails = [];
+        $mock
+            ->shouldReceive('send')
+            ->andReturnUsing(function(\Swift_Message $msg) use ($mailer_recorder) {
+                $email = [
+                    'subject' => $msg->getSubject(),
+                    'to'      => $msg->getTo(),
+                    'from'    => $msg->getFrom(),
+                    'body'    => $msg->getBody(),
+                ];
+                $mailer_recorder->emails[] = $email;
+            });
+
+        return $mailer_recorder;
+    }    
+    
 
 
 }
