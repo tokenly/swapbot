@@ -128,7 +128,7 @@ return [
 		'Illuminate\Mail\MailServiceProvider',
 		'Illuminate\Pagination\PaginationServiceProvider',
 		'Illuminate\Pipeline\PipelineServiceProvider',
-		'Illuminate\Queue\QueueServiceProvider',
+		// 'Illuminate\Queue\QueueServiceProvider',  <-- Overridden
 		'Illuminate\Redis\RedisServiceProvider',
 		'Illuminate\Auth\Passwords\PasswordResetServiceProvider',
 		'Illuminate\Session\SessionServiceProvider',
@@ -149,6 +149,7 @@ return [
 		/*
 		 * Vendor Service Providers...
 		 */
+		'Tokenly\LaravelBlockingBeanstalkd\BlockingBeanstalkServiceProvider',
 		'Tokenly\LaravelEventLog\EventLogServiceProvider',
 		'Tokenly\LaravelApiProvider\APIServiceProvider',
 		'Tokenly\XChainClient\XChainServiceProvider',

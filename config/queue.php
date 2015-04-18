@@ -42,6 +42,14 @@ return [
 			'expire' => 60,
 		],
 
+        'blockingbeanstalkd' => [
+            'driver' => env('BEANSTALK_DRIVER', 'blockingbeanstalkd'),
+            'host'   => env('BEANSTALK_HOST', '127.0.0.1'),
+            'queue'  => 'default',
+            'port'   => env('BEANSTALK_PORT', 11300),
+            'ttr'    => 60,
+        ],
+
 		'beanstalkd' => [
 			'driver' => 'beanstalkd',
 			'host'   => 'localhost',

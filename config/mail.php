@@ -15,7 +15,8 @@ return [
 	|
 	*/
 
-	'driver' => 'smtp',
+	// 'driver' => 'mandrill',
+	'driver' => 'log',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -54,7 +55,7 @@ return [
 	|
 	*/
 
-	'from' => ['address' => null, 'name' => null],
+	'from' => ['address' => env('EMAIL_FROM_EMAIL', 'no-reply@tokenly.co'), 'name' => env('EMAIL_FROM_NAME', 'Tokenly Bot')],
 
 	/*
 	|--------------------------------------------------------------------------
@@ -119,6 +120,6 @@ return [
 	|
 	*/
 
-	'pretend' => false,
+	'pretend' => env('EMAIL_PRETEND', false),
 
 ];

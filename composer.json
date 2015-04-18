@@ -15,19 +15,23 @@
 		"tokenly/laravel-event-log": "dev-master",
 		"tokenly/laravel-api-provider": "dev-master",
 		"linusu/bitcoin-address-validator": "~0",
-		"metabor/statemachine": "1.1.*"
+		"metabor/statemachine": "1.1.*",
+		"pda/pheanstalk": "~3",
+		"guzzlehttp/guzzle": "~5.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",
 		"graphp/graphviz": "~0.2.0",
-		"phpspec/phpspec": "~2.1"
+		"phpspec/phpspec": "~2.1",
+		"mockery/mockery": "0.9.*@dev"
 	},
 	"autoload": {
 		"classmap": [
 			"database"
 		],
 		"psr-4": {
-			"Swapbot\\": "app/"
+			"Swapbot\\": "app/",
+			"Tokenly\\LaravelBlockingBeanstalkd\\": "vendor/tokenly/laravel-blocking-beanstalkd/src/Tokenly/LaravelBlockingBeanstalkd"
 		}
 	},
 	"autoload-dev": {
