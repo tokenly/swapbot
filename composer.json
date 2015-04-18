@@ -14,6 +14,7 @@
 		"tokenly/pusher-client": "dev-master",
 		"tokenly/laravel-event-log": "dev-master",
 		"tokenly/laravel-api-provider": "dev-master",
+		"tokenly/laravel-blocking-beanstalkd": "dev-master",
 		"linusu/bitcoin-address-validator": "~0",
 		"metabor/statemachine": "1.1.*",
 		"pda/pheanstalk": "~3",
@@ -30,8 +31,7 @@
 			"database"
 		],
 		"psr-4": {
-			"Swapbot\\": "app/",
-			"Tokenly\\LaravelBlockingBeanstalkd\\": "vendor/tokenly/laravel-blocking-beanstalkd/src/Tokenly/LaravelBlockingBeanstalkd"
+			"Swapbot\\": "app/"
 		}
 	},
 	"autoload-dev": {
