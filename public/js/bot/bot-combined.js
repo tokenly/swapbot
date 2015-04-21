@@ -1,5 +1,5 @@
 (function() {
-  var SwapStatus, SwapStatuses, SwapsList, swapEventRenderer, swapEventWatcher, swapbot;
+  var BotStatus, SwapStatus, SwapStatuses, SwapsList, swapEventRenderer, swapEventWatcher, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -13,6 +13,172 @@
     };
     exports.poupupBotAddress = function(username, botId, location) {
       return exports.publicBotAddress(username, botId, location) + "/popup";
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.botUtils = (function() {
+    var exports;
+    exports = {};
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    };
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    };
+    exports.getStatusFromBot = function(bot) {
+      if (bot.state === 'active') {
+        return 'active';
+      } else {
+        return 'inactive';
+      }
+    };
+    exports.newBotStatusFromEvent = function(oldState, botEvent) {
+      var event, state;
+      state = oldState;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'bot.stateChange':
+          if (event.state === 'active') {
+            state = 'active';
+          } else {
+            state = 'inactive';
+          }
+      }
+      return state;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.pusher = (function() {
+    var exports;
+    exports = {};
+    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+      var client;
+      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
+      client.subscribe("/" + chanelName, function(data) {
+        callbackFn(data);
+      });
+      return client;
+    };
+    exports.closePusherChanel = function(client) {
+      client.disconnect();
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.swapUtils = (function() {
+    var buildDesc, buildInAmountFromOutAmount, exports;
+    exports = {};
+    buildDesc = {};
+    buildDesc.rate = function(swap) {
+      var inAmount, outAmount;
+      outAmount = 1 * swap.rate;
+      inAmount = 1;
+      return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+    };
+    buildDesc.fixed = function(swap) {
+      return "" + swap.out_qty + " " + swap.out + " for " + swap.in_qty + " " + swap["in"];
+    };
+    buildInAmountFromOutAmount = {};
+    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / swap.rate;
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {
+      var inAmount;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      inAmount = outAmount / (swap.out_qty / swap.in_qty);
+      return inAmount;
+    };
+    exports.exchangeDescription = function(swap) {
+      return buildDesc[swap.strategy](swap);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swap) {
+      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.botEventsService = (function() {
+    var exports, loadBotEvents, subscribeToPusher;
+    exports = {};
+    loadBotEvents = function(bot, onBotEventData) {
+      var botId;
+      botId = bot.id;
+      $.get("/api/v1/public/botevents/" + botId, (function(_this) {
+        return function(data) {
+          var botEvent, _i, _len;
+          for (_i = 0, _len = data.length; _i < _len; _i++) {
+            botEvent = data[_i];
+            onBotEventData(botEvent);
+          }
+        };
+      })(this));
+    };
+    subscribeToPusher = function(bot, onBotEventData) {
+      return swapbot.pusher.subscribeToPusherChanel("swapbot_events_" + bot.id, function(botEvent) {
+        return onBotEventData(botEvent);
+      });
+    };
+    exports.buildEventSubscriberForBot = function(bot) {
+      var allEvents, clients, loaded, myExports, pusherClient;
+      loaded = false;
+      pusherClient = null;
+      allEvents = {};
+      clients = [];
+      myExports = {};
+      myExports.subscribe = function(clientOnBotEventData) {
+        var localOnBotEventData, pushAllEventsToClient;
+        pushAllEventsToClient = function(clientFn) {
+          var k, v;
+          for (k in allEvents) {
+            v = allEvents[k];
+            clientFn(v);
+          }
+        };
+        localOnBotEventData = function(botEvent) {
+          var clientFn, _i, _len;
+          if (allEvents[botEvent.serial] != null) {
+            return;
+          }
+          allEvents[botEvent.serial] = botEvent;
+          for (_i = 0, _len = clients.length; _i < _len; _i++) {
+            clientFn = clients[_i];
+            clientFn(botEvent);
+          }
+        };
+        clients.push(clientOnBotEventData);
+        if (!loaded) {
+          loadBotEvents(bot, localOnBotEventData);
+          pusherClient = subscribeToPusher(bot, localOnBotEventData);
+          loaded = true;
+        }
+        return pushAllEventsToClient(clientOnBotEventData);
+      };
+      return myExports;
     };
     return exports;
   })();
@@ -75,85 +241,34 @@
     return exports;
   })();
 
-  swapEventWatcher = (function() {
-    var exports, isActive, shouldProcessSwapEvent;
-    exports = {};
-    shouldProcessSwapEvent = function(event) {
-      if (event.swapId == null) {
-        return false;
-      }
-      switch (event.name) {
-        case 'swap.stateChange':
-          return false;
-      }
-      return true;
-    };
-    isActive = function(event) {
-      switch (event.name) {
-        case 'unconfirmed.tx':
-        case 'swap.confirming':
-        case 'swap.failed':
-          return true;
-      }
-      return false;
-    };
-    exports.botEventMatchesSwap = function(botEvent, swap) {
-      var event;
-      event = botEvent.event;
-      if (event.swapId == null) {
-        return false;
-      }
-      return event.swapId === swap.id;
-    };
-    exports.applyEventToSwapEventRecordsIfNew = function(botEvent, swapEventRecords) {
-      var createdAt, event, existingEventRecord, serial, swapId;
-      serial = botEvent.serial;
-      event = botEvent.event;
-      if (!shouldProcessSwapEvent(event)) {
-        return false;
-      }
-      swapId = event.swapId;
-      createdAt = botEvent.createdAt;
-      if (swapEventRecords[swapId] == null) {
-        swapEventRecords[swapId] = {
-          serial: serial,
-          date: createdAt,
-          event: event,
-          active: isActive(event)
+  BotStatus = React.createClass({
+    displayName: 'BotStatus',
+    getInitialState: function() {
+      return {
+        botStatus: swapbot.botUtils.getStatusFromBot(this.props.bot)
+      };
+    },
+    componentDidMount: function() {
+      this.props.eventSubscriber.subscribe((function(_this) {
+        return function(botEvent) {
+          var newState;
+          newState = swapbot.botUtils.newBotStatusFromEvent(_this.state.botStatus, botEvent);
+          return _this.setState({
+            botStatus: newState
+          });
         };
-        return true;
-      } else {
-        existingEventRecord = swapEventRecords[swapId];
-        if (serial > existingEventRecord.serial) {
-          swapEventRecords[swapId] = {
-            serial: serial,
-            date: createdAt,
-            event: event,
-            active: isActive(event)
-          };
-          return true;
-        }
-      }
-      return false;
-    };
-    return exports;
-  })();
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.botUtils = (function() {
-    var exports;
-    exports = {};
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
-    return exports;
-  })();
+      })(this));
+    },
+    render: function() {
+      return React.createElement("div", null, (this.state.botStatus === 'active' ? React.createElement("div", null, React.createElement("div", {
+        "className": "status-dot bckg-green"
+      }), "Active") : React.createElement("div", null, React.createElement("div", {
+        "className": "status-dot bckg-red"
+      }), "Inactive")), React.createElement("button", {
+        "className": "button-question"
+      }));
+    }
+  });
 
   SwapStatus = React.createClass({
     displayName: 'SwapStatus',
@@ -365,79 +480,79 @@
     }
   });
 
+  swapEventWatcher = (function() {
+    var exports, isActive, shouldProcessSwapEvent;
+    exports = {};
+    shouldProcessSwapEvent = function(event) {
+      if (event.swapId == null) {
+        return false;
+      }
+      switch (event.name) {
+        case 'swap.stateChange':
+          return false;
+      }
+      return true;
+    };
+    isActive = function(event) {
+      switch (event.name) {
+        case 'unconfirmed.tx':
+        case 'swap.confirming':
+        case 'swap.failed':
+          return true;
+      }
+      return false;
+    };
+    exports.botEventMatchesSwap = function(botEvent, swap) {
+      var event;
+      event = botEvent.event;
+      if (event.swapId == null) {
+        return false;
+      }
+      return event.swapId === swap.id;
+    };
+    exports.applyEventToSwapEventRecordsIfNew = function(botEvent, swapEventRecords) {
+      var createdAt, event, existingEventRecord, serial, swapId;
+      serial = botEvent.serial;
+      event = botEvent.event;
+      if (!shouldProcessSwapEvent(event)) {
+        return false;
+      }
+      swapId = event.swapId;
+      createdAt = botEvent.createdAt;
+      if (swapEventRecords[swapId] == null) {
+        swapEventRecords[swapId] = {
+          serial: serial,
+          date: createdAt,
+          event: event,
+          active: isActive(event)
+        };
+        return true;
+      } else {
+        existingEventRecord = swapEventRecords[swapId];
+        if (serial > existingEventRecord.serial) {
+          swapEventRecords[swapId] = {
+            serial: serial,
+            date: createdAt,
+            event: event,
+            active: isActive(event)
+          };
+          return true;
+        }
+      }
+      return false;
+    };
+    return exports;
+  })();
+
   window.BotApp = {
     init: function(bot) {
-      React.render(React.createElement(SwapStatuses, {
+      var eventSubscriber;
+      eventSubscriber = swapbot.botEventsService.buildEventSubscriberForBot(bot);
+      return React.render(React.createElement(BotStatus, {
+        "eventSubscriber": eventSubscriber,
         "bot": bot
-      }), document.getElementById('SwapStatuses'));
-      return React.render(React.createElement(SwapsList, {
-        "bot": bot
-      }), document.getElementById('SwapsList'));
+      }), document.getElementById('BotStatusComponent'));
     }
   };
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.pusher = (function() {
-    var exports;
-    exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
-      var client;
-      client = new window.Faye.Client("" + window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
-        callbackFn(data);
-      });
-      return client;
-    };
-    exports.closePusherChanel = function(client) {
-      client.disconnect();
-    };
-    return exports;
-  })();
-
-  if (swapbot == null) {
-    swapbot = {};
-  }
-
-  swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
-    exports = {};
-    buildDesc = {};
-    buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
-      outAmount = 1 * swap.rate;
-      inAmount = 1;
-      return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
-    };
-    buildDesc.fixed = function(swap) {
-      return "" + swap.out_qty + " " + swap.out + " for " + swap.in_qty + " " + swap["in"];
-    };
-    buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount / swap.rate;
-      return inAmount;
-    };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {
-      var inAmount;
-      if ((outAmount == null) || isNaN(outAmount)) {
-        return 0;
-      }
-      inAmount = outAmount / (swap.out_qty / swap.in_qty);
-      return inAmount;
-    };
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
-    };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
-    };
-    return exports;
-  })();
 
 }).call(this);

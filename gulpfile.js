@@ -30,10 +30,14 @@ var onError = function(e) {
 // combine admin
 elixir.extend("combineAdmin", function() {
     gulp.task('combineAdmin', function() {
-        es.merge(
-            gulp.src('resources/assets/coffee/admin/*.coffee'),
-            gulp.src('resources/assets/coffee/shared/*.coffee')
-        )
+        // es.merge(
+        //     gulp.src('resources/assets/coffee/admin/*.coffee'),
+        //     gulp.src('resources/assets/coffee/shared/*.coffee')
+        // )
+        gulp.src([
+            'resources/assets/coffee/admin/*.coffee',
+            'resources/assets/coffee/shared/*.coffee'
+        ])
       // gulp.src('resources/assets/coffee/admin/*.coffee')
         .pipe(concat('admin-combined.coffee'))
         .pipe(coffee({}).on('error', onError))
@@ -49,38 +53,45 @@ elixir.extend("combineAdmin", function() {
 });
 
 
-// combine popup
-elixir.extend("combinePopup", function() {
-    gulp.task('combinePopup', function() {
-        es.merge(
-            gulp.src('resources/assets/coffee/popup/*.cjsx'),
-            gulp.src('resources/assets/coffee/popup/*.coffee'),
-            gulp.src('resources/assets/coffee/shared/*.coffee')
-        )
-        .pipe(concat('popup-combined.cjsx'))
-        .pipe(cjsx().on('error', onError))
-        .pipe(gulp.dest('public/js/popup'))
-    });
+// // combine popup
+// elixir.extend("combinePopup", function() {
+//     gulp.task('combinePopup', function() {
+//         es.merge(
+//             gulp.src('resources/assets/coffee/popup/*.cjsx'),
+//             gulp.src('resources/assets/coffee/popup/*.coffee'),
+//             gulp.src('resources/assets/coffee/shared/*.coffee')
+//         )
+//         .pipe(concat('popup-combined.cjsx'))
+//         .pipe(cjsx().on('error', onError))
+//         .pipe(gulp.dest('public/js/popup'))
+//     });
 
 
-    this.registerWatcher("combinePopup", [
-        "resources/assets/coffee/shared/*.coffee",
-        "resources/assets/coffee/popup/**/*.coffee",
-        "resources/assets/coffee/popup/**/*.cjsx",
-    ]);
+//     this.registerWatcher("combinePopup", [
+//         "resources/assets/coffee/shared/*.coffee",
+//         "resources/assets/coffee/popup/**/*.coffee",
+//         "resources/assets/coffee/popup/**/*.cjsx",
+//     ]);
 
-    return this.queueTask("combinePopup");
-});
+//     return this.queueTask("combinePopup");
+// });
 
 
 // combine bot
 elixir.extend("combinePublicBotApp", function() {
     gulp.task('combinePublicBotApp', function() {
-        es.merge(
-            gulp.src('resources/assets/coffee/bot/*.cjsx'),
-            gulp.src('resources/assets/coffee/bot/*.coffee'),
-            gulp.src('resources/assets/coffee/shared/*.coffee')
-        )
+        // es.merge(
+        //     gulp.src('resources/assets/coffee/bot/*.cjsx'),
+        //     gulp.src('resources/assets/coffee/bot/*.coffee'),
+        //     gulp.src('resources/assets/coffee/shared/*.coffee'),
+        //     gulp.src('resources/assets/coffee/services/*.coffee')
+        // )
+        gulp.src([
+            'resources/assets/coffee/shared/*.coffee',
+            'resources/assets/coffee/services/*.coffee',
+            'resources/assets/coffee/bot/*.cjsx',
+            'resources/assets/coffee/bot/*.coffee'
+        ])
         .pipe(concat('bot-combined.cjsx'))
         .pipe(cjsx().on('error', onError))
         .pipe(gulp.dest('public/js/bot'))
@@ -89,6 +100,7 @@ elixir.extend("combinePublicBotApp", function() {
 
     this.registerWatcher("combinePublicBotApp", [
         "resources/assets/coffee/shared/*.coffee",
+        "resources/assets/coffee/services/*.coffee",
         "resources/assets/coffee/bot/**/*.coffee",
         "resources/assets/coffee/bot/**/*.cjsx",
     ]);
@@ -103,13 +115,14 @@ elixir(function(mix) {
 
     // less
     mix
-        .less(['admin.less', 'bot.less', 'popup.less'])
+        // less files
+        .less(['admin.less', 'main.less'])
 
         // admin
         .combineAdmin()
 
-        // popup
-        .combinePopup()
+        // // popup
+        // .combinePopup()
 
         // bot
         .combinePublicBotApp()
