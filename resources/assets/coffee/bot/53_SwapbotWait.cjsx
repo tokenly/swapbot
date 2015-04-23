@@ -49,24 +49,6 @@ TransactionInfo = React.createClass
             <div className="clearfix"></div>
         </li>
 
-                            # <li>
-                            #     <div className="item-content">
-                            #         <div className="item-header">1ThEBOtAddr3ssuzhrPVvGFEXeiqESnyys</div>
-                            #         <p>
-                            #             Any data and as long as you please.
-                            #             <br/> Any data and as long as you please.
-                            #             <br/> Any data and as long as you please.
-                            #             <br/> Any data and as long as you please.
-                            #             <br/> Any data and as long as you please.
-                            #             <br/>
-                            #         </p>
-                            #     </div>
-                            #     <div className="item-actions">
-                            #         <div className="icon-next"></div>
-                            #     </div>
-                            #     <div className="clearfix"></div>
-                            # </li>
-
 
 # ########################################################################################################################
 
@@ -99,6 +81,7 @@ SingleTransactionInfo = React.createClass
             emailValue: ''
             submittingEmail: false
             submittedEmail: false
+            emailErrorMsg: null
         }
 
     updateEmailValue: (e)->
@@ -115,10 +98,27 @@ SingleTransactionInfo = React.createClass
 
         email = this.state.emailValue
         console.log "submitting email: #{email}"
-        this.setState({submittingEmail: true})
-        setTimeout ()=>
-            this.setState({submittedEmail: true, submittingEmail: false})
-        , 750
+        this.setState({submittingEmail: true, emailErrorMsg: null})
+        data = {email: email, swapId: this.props.txInfo.swapId}
+        $.ajax({
+            type: "POST",
+            url: '/api/v1/public/customers',
+            data: data,
+            dataType: 'json'
+            success: (data)=>
+                if data.id
+                    this.setState({submittedEmail: true, submittingEmail: false})
+                return
+            error: (jqhr, textStatus)=>
+                data = if jqhr.responseText then $.parseJSON(jqhr.responseText) else null
+                if data?.message
+                    errorMsg = data.message
+                else
+                    errorMsg = "An error occurred while trying to submit this email."
+                console.error("Error: #{textStatus}", data)
+                this.setState({submittedEmail: false, submittingEmail: false, emailErrorMsg: errorMsg})
+                return
+        })
         return
 
     render: ()->
@@ -143,6 +143,7 @@ SingleTransactionInfo = React.createClass
                     <a id="not-my-transaction" onClick={this.props.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                 </p>
                 <p>This transaction has <b>{txInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
+                { if this.state.emailErrorMsg then <p className="error">{this.state.emailErrorMsg}.  Please try again.</p> else null }
                 {
                     if this.state.submittedEmail
                         <p>
@@ -150,7 +151,7 @@ SingleTransactionInfo = React.createClass
                         </p>
                     else
                         <p>
-                            Don{"'"}t want to wait here?
+                            Don&#38;t want to wait here?
                             <br/>We can notify you when the transaction is done!
                         </p>
                         <form action="#submit-email" onSubmit={this.submitEmailFn} style={if this.state.submittingEmail then {opacity: 0.2} else null}>
@@ -193,12 +194,6 @@ SwapbotWait = React.createClass
             this.subscriberId = null
         return
 
-
-    # subscribeToPusher: (bot)->
-    #     swapbot.pusher.subscribeToPusherChanel "swapbot_events_#{bot.id}", (botEvent)=>
-    #         if botEventWatcher.botEventMatchesInAmount(botEvent, this.props.swapDetails.chosenToken.inAmount, this.props.swapDetails.chosenToken.inAsset)
-    #             this.handleMatchedBotEvent(botEvent)
-    #     return
 
     # ########################################################################
     # matched bot event

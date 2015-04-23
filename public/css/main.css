@@ -2310,5 +2310,9 @@ button {
 .loading {
   color: #777;
 }
+.error {
+  color: #900;
+  font-weight: bold;
+}
 
 /*# sourceMappingURL=main.css.map */

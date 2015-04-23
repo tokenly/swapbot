@@ -828,7 +828,8 @@
         fromNow: '',
         emailValue: '',
         submittingEmail: false,
-        submittedEmail: false
+        submittedEmail: false,
+        emailErrorMsg: null
       };
     },
     updateEmailValue: function(e) {
@@ -838,7 +839,7 @@
       });
     },
     submitEmailFn: function(e) {
-      var email;
+      var data, email;
       e.preventDefault();
       if (this.state.submittingEmail) {
         return;
@@ -846,16 +847,46 @@
       email = this.state.emailValue;
       console.log("submitting email: " + email);
       this.setState({
-        submittingEmail: true
+        submittingEmail: true,
+        emailErrorMsg: null
       });
-      setTimeout((function(_this) {
-        return function() {
-          return _this.setState({
-            submittedEmail: true,
-            submittingEmail: false
-          });
-        };
-      })(this), 750);
+      data = {
+        email: email,
+        swapId: this.props.txInfo.swapId
+      };
+      $.ajax({
+        type: "POST",
+        url: '/api/v1/public/customers',
+        data: data,
+        dataType: 'json',
+        success: (function(_this) {
+          return function(data) {
+            if (data.id) {
+              _this.setState({
+                submittedEmail: true,
+                submittingEmail: false
+              });
+            }
+          };
+        })(this),
+        error: (function(_this) {
+          return function(jqhr, textStatus) {
+            var errorMsg;
+            data = jqhr.responseText ? $.parseJSON(jqhr.responseText) : null;
+            if (data != null ? data.message : void 0) {
+              errorMsg = data.message;
+            } else {
+              errorMsg = "An error occurred while trying to submit this email.";
+            }
+            console.error("Error: " + textStatus, data);
+            _this.setState({
+              submittedEmail: false,
+              submittingEmail: false,
+              emailErrorMsg: errorMsg
+            });
+          };
+        })(this)
+      });
     },
     render: function() {
       var bot, emailValue, txInfo;
@@ -884,7 +915,9 @@
         "onClick": this.props.notMyTransactionClicked,
         "href": "#",
         "className": "shadow-link"
-      }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, txInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), (this.state.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don", "'", "t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+      }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, txInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), (this.state.emailErrorMsg ? React.createElement("p", {
+        "className": "error"
+      }, this.state.emailErrorMsg, ".  Please try again.") : null), (this.state.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
         "action": "#submit-email",
         "onSubmit": this.submitEmailFn,
         "style": (this.state.submittingEmail ? {
