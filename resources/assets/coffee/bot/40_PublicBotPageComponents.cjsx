@@ -1,9 +1,8 @@
-BotStatus = React.createClass
-    displayName: 'BotStatus'
+BotStatusComponent = React.createClass
+    displayName: 'BotStatusComponent'
 
     getInitialState: ()->
         return {
-            botStatus: swapbot.botUtils.getStatusFromBot(this.props.bot)
         }
 
     componentDidMount: ()->
@@ -24,8 +23,10 @@ BotStatus = React.createClass
         </div>
 
 
-SwapStatus = React.createClass
-    displayName: 'SwapStatus'
+# ############################################################################################################
+
+SwapStatusComponent = React.createClass
+    displayName: 'SwapStatusComponent'
 
     getInitialState: ()->
         return {
@@ -38,40 +39,46 @@ SwapStatus = React.createClass
         swapEventRecord = this.props.swapEventRecord
         return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord)
 
+# ############################################################################################################
 
+# SwapsListComponent = React.createClass
+#     displayName: 'SwapsListComponent'
 
-SwapsList = React.createClass
-    displayName: 'SwapsList'
+#     getInitialState: ()->
+#         return {
+#         }
 
-    getInitialState: ()->
-        return {
-        }
+#     componentDidMount: ()->
+#         return
 
-    componentDidMount: ()->
-        return
+#     buildChooseSwap: (swap)->
+#         return ()=>
+#             this.props.chosenSwapProvider.setSwap(swap)
+#             return
 
-    render: ->
-        bot = this.props.bot
+#     render: ->
+#         bot = this.props.bot
 
-        if bot.swaps
-            <ul id="swaps-list" className="wide-list">
-            {
-                for swap in bot.swaps
-                    <li>
-                        <div>
-                            <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
-                            <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
-                            <a href={bot.id+"/popup"} target="_blank" className="icon-next"></a>
-                        </div>
-                    </li>
-            }
-            </ul>
-        else
-            <p className="description">There are no swaps available.</p>
+#         if bot.swaps
+#             <ul id="swaps-list" className="wide-list">
+#             {
+#                 for swap, index in bot.swaps
+#                     <li key={"swap#{index}"} className="swap">
+#                         <div>
+#                             <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
+#                             <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
+#                             <a href="#choose-swap" onClick={this.buildChooseSwap(swap)} className="icon-next"></a>
+#                         </div>
+#                     </li>
+#             }
+#             </ul>
+#         else
+#             <p className="description">There are no swaps available.</p>
 
+# ############################################################################################################
 
-SwapStatuses = React.createClass
-    displayName: 'SwapStatuses'
+RecentAndActiveSwapsComponent = React.createClass
+    displayName: 'RecentAndActiveSwapsComponent'
 
     getInitialState: ()->
         return {
@@ -85,30 +92,15 @@ SwapStatuses = React.createClass
 
         $.when(
             $.ajax("/api/v1/public/swaps/#{botId}"),
-            $.ajax("/api/v1/public/botevents/#{botId}")
-        ).done (r2, r3)=>
+        ).done (r2)=>
             if this.isMounted()
                 swapsData = r2[0]
-                eventsData = r3[0]
 
                 this.setState({swaps: swapsData})
 
-                for botEvent in eventsData
+                this.props.eventSubscriber.subscribe (botEvent)=>
                     this.applyBotEventToSwaps(botEvent)
-
-                # subscribe to bot events
-                this.subscribeToPusher(bot)
             return
-        return
-
-    componentWillUnmount: ()->
-        swapbot.pusher.closePusherChanel(this.state.pusherClient) if this.state.pusherClient
-        return
-
-    subscribeToPusher: (bot)->
-        swapbot.pusher.subscribeToPusherChanel "swapbot_events_#{bot.id}", (botEvent)=>
-            this.applyBotEventToSwaps(botEvent)
-
         return
 
     applyBotEventToSwaps: (botEvent)->
@@ -139,7 +131,7 @@ SwapStatuses = React.createClass
         eventRecords = this.state.swapEventRecords
         renderedSwaps = for swap in this.state.swaps
             eventRecord = eventRecords[swap.id]
-            console.log "#{swap.id} eventRecord=",eventRecord
+            # console.log "#{swap.id} eventRecord=",eventRecord
             if eventRecord? and not eventRecord.active
                 fn(swap, eventRecord)
         return renderedSwaps

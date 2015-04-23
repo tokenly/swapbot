@@ -29,8 +29,7 @@
             <div id="details-content">
                 <h1>{{ $bot['name'] }}</h1>
                 <div class="name">Status: </div>
-                <div id="BotStatusComponent" class="value">
-                    {{-- REACT --}}
+                <div class="value">
                     @if ($bot->isActive())
                     <div class="status-dot bckg-green"></div>Active
                     @else
@@ -56,12 +55,41 @@
                 <button id="active-swaps-button" class="btn-action bckg-blue btn-stick-right float-right">ACTIVE SWAPS</button>
             </div>
             <!-- DEFAULT CONTENT -->
-    
-
-            <div id="SwapInterfaceComponent">{{-- REACT --}}</div>
-
-
-{{-- 
+            <div id="swap-step-1">
+                <div class="section grid-50">
+                    <h3>Description</h3>
+                    <div class="description">{{ $bot['description'] }}</div>
+                </div>
+                <div class="section grid-50">
+                    <h3>Available Swaps</h3>
+                    <div id="SwapsList">{{-- REACT --}}</div>
+                    {{-- 
+                    <ul id="swaps-list" class="wide-list">
+                        <li>
+                            <a href="#move-to-step-2-for-BTC">
+                                <div class="item-header">BTC <small>(7.78973 available)</small></div>
+                                <p>Sends 1 BTC for 1,000,000 LTBCOIN or 1,000,000 NOTLTBCOIN.</p>
+                                <div class="icon-next"></div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#move-to-step-2-for-LTBCOIN">
+                                <div class="item-header">LTBCOIN <small>(98778973 available)</small></div>
+                                <p>Sends 1 LTBCOIN for each 0.000001 BTC or 1 NOTLTBCOIN.</p>
+                                <div class="icon-next"></div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#move-to-step-2-for-NOTLTBCOIN">
+                                <div class="item-header">NOTLTBCOIN <small>(0 available)</small></div>
+                                <p>Sends 1 NOTLTBCOIN for each 1 LTBCOIN or 0.000001 BTC.</p>
+                                <div class="icon-denied"></div>
+                            </a>
+                        </li>
+                    </ul>
+                     --}}
+                </div>
+            </div>
             <div id="swapbot-container" class="section grid-100 hidden">
                 <div id="swap-step-2" class="content hidden">
                     <h2>Receiving transaction</h2>
@@ -97,7 +125,7 @@
                                 <div class="icon-wallet"></div>
                             </a>
                             <div class="icon-qr"></div>
-                            <img class="qr-code-image hidden" src="/images/avatars/qrcode.png">
+                            <img class="qr-code-image hidden" src="images/avatars/qrcode.png">
                             <div class="clearfix"></div>
                         </li>
                         <li>
@@ -107,7 +135,7 @@
                                 <div class="icon-wallet"></div>
                             </a>
                             <div class="icon-qr"></div>
-                            <img class="qr-code-image hidden" src="/images/avatars/qrcode.png">
+                            <img class="qr-code-image hidden" src="images/avatars/qrcode.png">
                             <div class="clearfix"></div>
                         </li>
                     </ul>
@@ -226,13 +254,80 @@
                     <p><a href="details.html" class="details-link" target="_blank">Transaction details <i class="fa fa-arrow-circle-right"></i></a></p>
                 </div>
             </div>
---}}
-
-
             <div class="clearfix"></div>
-
-
-            <div id="RecentAndActiveSwapsComponent">{{-- REACT --}}</div>
+            <div id="active-swaps" class="section grid-100">
+                <h3>Active Swaps</h3>
+                <ul class="swap-list">
+                    <li class="pending">
+                        <div class="status-icon icon-pending"></div>
+                        <div class="status-content">
+                            <span><a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> waiting to exchange <b>0.2BTC</b> for <b>200,000 LTBCOIN</b>.<br>
+                                <small>Waiting for 1 confirmation to send 0.1 BTC</small></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="clearfix"></div>
+            <div id="recent-swaps" class="section grid-100">
+                <h3>Recent Swaps</h3>
+                <ul class="swap-list">
+                    <li class="confirmed">
+                        <div class="status-icon icon-confirmed"></div>
+                        <div class="status-content">
+                            <span><a target="_blank" href="http://blockchain.info/address/hello">1MySUperHyPerAddreSSNoTOTak991s</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a></span>
+                        </div>
+                    </li>
+                    <li class="failed">
+                        <div class="status-icon icon-failed"></div>
+                        <div class="status-content">
+                            <span>Failed to process <b>100,000 UNKNOWNCOIN</b>.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a></span>
+                        </div>
+                    </li>
+                    <li class="confirmed">
+                        <div class="status-icon icon-confirmed"></div>
+                        <div class="status-content">
+                            <span>Received 0.003 BTC from 1MFHQCPGtcSfNPXAS6NryWja3TbUN9239Y with 2 confirmations. Sent 3 SOUP to 1MFHQCPGtcSfNPXAS6NryWja3TbUN9239Y with transaction ID 689d28c0c3ebfabc40b9d06889ead015b9ecea8b9a6c9b82837d409d66875a76.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a></span>
+                        </div>
+                    </li>
+                    <li class="confirmed">
+                        <div class="status-icon icon-confirmed"></div>
+                        <div class="status-content">
+                            <span><a target="_blank" href="http://blockchain.info/address/hello">1MySUperHyPerAddreSSNoTOTak991s</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                        </div>
+                    </li>
+                    <li class="confirmed">
+                        <div class="status-icon icon-confirmed"></div>
+                        <div class="status-content">
+                            <span><a target="_blank" href="http://blockchain.info/address/hello">1MySUperHyPerAddreSSNoTOTak991s</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a></span>
+                        </div>
+                    </li>
+                    <li class="failed">
+                        <div class="status-icon icon-failed"></div>
+                        <div class="status-content">
+                            <span>Failed to process <b>100,000 UNKNOWNCOIN</b>.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                        </div>
+                    </li>
+                    <li class="confirmed">
+                        <div class="status-icon icon-confirmed"></div>
+                        <div class="status-content">
+                            <span><a target="_blank" href="http://blockchain.info/address/hello">1MySUperHyPerAddreSSNoTOTak991s</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
+                                <a href="details.html" class="details-link" target="_blank"><i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                        </div>
+                    </li>
+                </ul>
+                <center>
+                    <button class="button-load-more">Load more swaps...</button>
+                </center>
+            </div>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -244,9 +339,7 @@
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");
 </script>
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-<script src="http://fb.me/react-0.13.2.js"></script>
-<script src="/bower_components/director/build/director.min.js"></script>
-<script src="/bower_components/moment/min/moment.min.js"></script>
+<script src="http://fb.me/react-0.13.1.js"></script>
 
 {{-- pusher --}}
 <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>

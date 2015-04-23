@@ -14,6 +14,7 @@ swapEventWatcher = do ()->
                 return true
         return false
 
+    # #############################################
 
     exports.botEventMatchesSwap = (botEvent, swap)->
         event = botEvent.event

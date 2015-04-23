@@ -31,11 +31,12 @@ swapbot.botEventsService = do ()->
         loaded = false
         pusherClient = null
         allEvents = {}
-        clients = []
+        clients = {}
+        nextClientId = 1
 
 
-        myExports = {}
-        myExports.subscribe = (clientOnBotEventData)->
+        subscriberExports = {}
+        subscriberExports.subscribe = (clientOnBotEventData)->
 
             pushAllEventsToClient = (clientFn)->
                 for k, v of allEvents
@@ -47,13 +48,14 @@ swapbot.botEventsService = do ()->
 
                 allEvents[botEvent.serial] = botEvent
 
-                for clientFn in clients
+                for clientId, clientFn of clients
                     clientFn(botEvent)
 
                 return
 
 
-            clients.push(clientOnBotEventData)
+            newClientId = nextClientId++
+            clients[newClientId] = clientOnBotEventData
 
             if not loaded
                 loadBotEvents(bot, localOnBotEventData)
@@ -62,7 +64,13 @@ swapbot.botEventsService = do ()->
 
             pushAllEventsToClient(clientOnBotEventData)
 
-        return myExports
+            return newClientId
+
+        subscriberExports.unsubscribe = (oldClientId)->
+            delete clients[oldClientId] if clients[oldClientId]?
+            return
+
+        return subscriberExports
 
     return exports
 
