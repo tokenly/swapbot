@@ -818,6 +818,9 @@ body.outlook p {
             </tr>
           </table>
 
+          @section('subheader')
+          @show
+
           <table class="container">
             <tr>
               <td>

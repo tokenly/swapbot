@@ -21,7 +21,7 @@
         <div id="details">
             <div id="details-avatar">
                 @if ($bot['hash'])
-                <img src="http://robohash.org/{{ $bot['hash'] }}.png?set=set3" class="center">
+                <img src="{{ $bot->getRobohashURL() }}" class="center">
                 @else
                 <span data-no-image></span>
                 @endif

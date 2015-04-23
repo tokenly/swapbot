@@ -7,5 +7,7 @@ return [
     'site_host'   => env('SITE_HOST', 'http://swapbot.tokenly.co'),
 
     'defaultFee'  => 0.0001,
+
+    'robohash_url' => env('ROBOHASH_HOST', 'http://robohash.org').'/%%HASH%%.png?set=set3',
 ];
 

@@ -27,10 +27,10 @@ class EmailSenderTest extends TestCase {
         $mock
             ->shouldReceive('send')->once()
             ->andReturnUsing(function(\Swift_Message $msg) {
-                $this->assertEquals  ('Request Received'                      , $msg->getSubject());
-                $this->assertEquals  (['devon@tokenly.co' => 'Devon']         , $msg->getTo());
-                $this->assertEquals  (['no-reply@tokenly.co' => 'Tokenly Bot'], $msg->getFrom());
-                $this->assertContains('Your email was received'               , $msg->getBody());
+                $this->assertEquals  ('Request Received'                          , $msg->getSubject());
+                $this->assertEquals  (['devon@tokenly.co' => 'Devon']             , $msg->getTo());
+                $this->assertEquals  (['no-reply@tokenly.co' => 'Tokenly Bot']    , $msg->getFrom());
+                $this->assertContains('Thanks for making a purchase with SwapBot' , $msg->getBody());
             });
 
         // send
@@ -69,6 +69,7 @@ class EmailSenderTest extends TestCase {
             'outQty'          => 2000,
             'outAsset'        => 'LTBCOIN',
             'unsubscribeLink' => 'http://foo.bar',
+            'robohashSrc'     => 'http://robohash.org/5a8e7572b37212f8d32817f40409a29fb9849c0e2336c6df19f4bfde9ebc720a.png?set=set3',
         ];
         return $email_vars;
     }

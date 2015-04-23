@@ -1,14 +1,20 @@
-@extends('emails.base.base-html')
+@extends('emails.base.base-bot-image-html')
+
+@section('subheaderTitle')
+<h4>Thanks for making a purchase with SwapBot!</h4>
+<p>&nbsp;</p>
+@stop
 
 @section('main')
 
-<h2>Thanks for making a purchase with SwapBot!</h2>
 
 <p>We can see your payment on the blockchain and will be sending your {{ $outAsset }} shortly (After {{ $bot['confirmationsRequired'] }} confirmations or about {{ $bot['confirmationsRequired'] * 10 }} minutes).</p>
 
 <p>To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and will be receiving {{ $outQty }} {{ $outAsset }} shortly.</p>
 
-<h2>What Happens Next?</h2>
+<p>&nbsp;</p>
+<h4>What Happens Next?</h4>
+<p>&nbsp;</p>
 
 <p>You’ll receive a second email when your payment has been successfully confirmed by the Bitcoin network, which will trigger your Swapbot to send out your tokens.  You should get this email in under thirty minutes.</p>
 
@@ -18,6 +24,6 @@
 
 <p>&nbsp;</p>
 
-<small>If you did not leave your email address after making a purchase at swapbot.co please click <a href="{{ $unsubscribeLink }}">here</a> to unsubscribe.</small>
+<small>If you did not leave your email address after making a purchase at swapbot.co please click <a href="{{ $unsubscribeLink }}">here to unsubscribe</a>.</small>
 
 @stop

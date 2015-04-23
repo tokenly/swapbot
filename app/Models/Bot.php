@@ -3,6 +3,7 @@
 namespace Swapbot\Models;
 
 use Exception;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\BotState;
@@ -47,6 +48,10 @@ class Bot extends APIModel {
     public function getUsernameAttribute() {
         // get username
         return $this->user['username'];
+    }
+
+    public function getRobohashURL() {
+        return str_replace('%%HASH%%', $this['hash'], Config::get('swapbot.robohash_url'));
     }
 
     public function isActive() {

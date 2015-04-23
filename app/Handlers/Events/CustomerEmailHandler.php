@@ -47,8 +47,11 @@ class CustomerEmailHandler {
         foreach($customers as $customer) {
             if (!$customer->isActive()) { continue; }
 
+            // build variables
+            $email_vars = $this->buildEmailVariables($swap, $customer);
+
             // send an email
-            $send_email = new SendEmail('emails.notifications.received', [], "SwapBot Payment Received", $customer['email'], null);
+            $send_email = new SendEmail('emails.notifications.received', $email_vars, "SwapBot Payment Received", $customer['email'], null);
             $this->dispatch($send_email);
         }
     }
@@ -62,8 +65,11 @@ class CustomerEmailHandler {
         foreach($customers as $customer) {
             if (!$customer->isActive()) { continue; }
 
+            // build variables
+            $email_vars = $this->buildEmailVariables($swap, $customer);
+
             // send an email
-            $send_email = new SendEmail('emails.notifications.complete', [], "Swap Complete", $customer['email'], null);
+            $send_email = new SendEmail('emails.notifications.complete', $email_vars, "Swap Complete", $customer['email'], null);
             $this->dispatch($send_email);
         }
     }
@@ -98,7 +104,9 @@ class CustomerEmailHandler {
             'inAsset'         => $swap['in_asset'],
             'outQty'          => $out_quantity,
             'outAsset'        => $out_asset,
+            'host'            => $host,
             'unsubscribeLink' => $unsubscribe_link,
+            'robohashSrc'     => $bot->getRobohashURL(),
         ];
         return $email_vars;
         
