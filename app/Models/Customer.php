@@ -10,6 +10,11 @@ class Customer extends APIModel {
 
     protected static $unguarded = true;
 
+
+    public function isActive() {
+        return !!$this['active'];
+    }
+
     public function swap() {
         return $this->belongsTo('Swapbot\Models\Swap');
     }

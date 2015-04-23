@@ -21,7 +21,7 @@ class CreateCustomersTable extends Migration {
             $table->integer('swap_id')->unsigned()->index();
             $table->foreign('swap_id')->references('id')->on('swaps');
 
-            $table->boolean('active')->default(0);
+            $table->boolean('active')->default(1);
 
             $table->unique(['email', 'swap_id', ]);
 

@@ -1,0 +1,4 @@
+subject: Swap Complete
+body: Swap Complete
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

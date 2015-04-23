@@ -1,0 +1,4 @@
+subject: SwapBot Payment Received
+body: Payment Received
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

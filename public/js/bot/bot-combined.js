@@ -916,7 +916,7 @@
         "className": "shadow-link"
       }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, txInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), (this.state.emailErrorMsg ? React.createElement("p", {
         "className": "error"
-      }, this.state.emailErrorMsg, ".  Please try again.") : null), (this.state.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+      }, this.state.emailErrorMsg, "  Please try again.") : null), (this.state.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
         "action": "#submit-email",
         "onSubmit": this.submitEmailFn,
         "style": (this.state.submittingEmail ? {

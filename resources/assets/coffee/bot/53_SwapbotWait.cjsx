@@ -143,7 +143,7 @@ SingleTransactionInfo = React.createClass
                     <a id="not-my-transaction" onClick={this.props.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                 </p>
                 <p>This transaction has <b>{txInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
-                { if this.state.emailErrorMsg then <p className="error">{this.state.emailErrorMsg}.  Please try again.</p> else null }
+                { if this.state.emailErrorMsg then <p className="error">{this.state.emailErrorMsg}  Please try again.</p> else null }
                 {
                     if this.state.submittedEmail
                         <p>

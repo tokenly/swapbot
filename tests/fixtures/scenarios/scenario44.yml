@@ -1,9 +1,11 @@
-# simple live transaction received
+# full live transaction with 2 confirmations
+#   and emails
 
 ############################
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
 
 Customers:
   - meta: { baseFilename: Customer01.yml }
@@ -13,11 +15,16 @@ Customers:
 xchainNotifications:
   - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    blockId: 300002
 
 events:
   - {type: xchainNotification, offset: 0}
   - {type: addCustomer, baseFilename: Customer01.yml, data: {} }
-  - {type: xchainNotification, offset: 1}
+  - {type: xchainNotification, startOffset: 1}
 
 ############################
 # validate the expected results
@@ -33,18 +40,38 @@ expectedBotEvents:
 
   - #### transaction handled previously (1 confirmation)
     meta: { baseFilename: tx.previous-1.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-BTC.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-2.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-BTC.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
+    meta: { baseFilename: swap.found-2confirmations.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: swap.sent-2confirmations.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
   - #### transaction fee paid
     meta: { baseFilename: fee.transaction.yml }
 
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-BTC.yml }
+    msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
 expectedTransactionModels:
   - 
     meta: { baseFilename: transaction_model_01.yml }
+    confirmations: '2'
+  - 
+    meta: { baseFilename: transaction_model_01-send.yml }
 
 # check balance
 expectedBotModels:
@@ -58,5 +85,7 @@ expectedBotModels:
 
 expectedEmails:
   - meta: { baseFilename: 01-welcome.yml }
+  - meta: { baseFilename: 02-received.yml }
+  - meta: { baseFilename: 03-complete.yml }
 
 
