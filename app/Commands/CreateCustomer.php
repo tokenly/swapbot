@@ -2,7 +2,7 @@
 
 use Swapbot\Commands\Command;
 
-class CreateBot extends Command {
+class CreateCustomer extends Command {
 
     var $attributes;
 

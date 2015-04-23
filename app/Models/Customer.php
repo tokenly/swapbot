@@ -2,9 +2,11 @@
 
 namespace Swapbot\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Swapbot\Models\Base\APIModel;
 
-class Customer extends Model {
+class Customer extends APIModel {
+
+    protected $api_attributes = ['id', 'email', ];
 
     protected static $unguarded = true;
 

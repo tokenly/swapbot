@@ -35,6 +35,9 @@ $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEvents
 // Swaps API
 $router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');
 
+// Customer API
+$router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@store');
+
 
 
 
