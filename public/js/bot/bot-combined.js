@@ -845,7 +845,6 @@
         return;
       }
       email = this.state.emailValue;
-      console.log("submitting email: " + email);
       this.setState({
         submittingEmail: true,
         emailErrorMsg: null
@@ -947,7 +946,6 @@
       this.subscriberId = this.props.eventSubscriber.subscribe((function(_this) {
         return function(botEvent) {
           if (_this.isMounted()) {
-            console.log("botEvent.event.name=" + botEvent.event.name + " matches (" + _this.props.swapDetails.chosenToken.inAmount + ", " + _this.props.swapDetails.chosenToken.inAsset + ")=", botEventWatcher.botEventMatchesInAmount(botEvent, _this.props.swapDetails.chosenToken.inAmount, _this.props.swapDetails.chosenToken.inAsset));
             if (botEventWatcher.botEventMatchesInAmount(botEvent, _this.props.swapDetails.chosenToken.inAmount, _this.props.swapDetails.chosenToken.inAsset)) {
               return _this.handleMatchedBotEvent(botEvent);
             }
@@ -963,7 +961,6 @@
     },
     handleMatchedBotEvent: function(botEvent) {
       var matchedTxInfo, matchedTxs, selectedMatchedTxInfo, swapId;
-      console.log("handleMatchedBotEvent");
       matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent);
       swapId = matchedTxInfo.swapId;
       matchedTxs = this.state.matchedTxs;
@@ -984,7 +981,6 @@
       });
     },
     selectMatchedTx: function(matchedTxInfo) {
-      console.log("matchedTxInfo", matchedTxInfo);
       if (matchedTxInfo.status === 'swap.sent') {
         this.props.swapDetails.txInfo = matchedTxInfo;
         return this.props.router.setRoute('/complete');

@@ -831,7 +831,7 @@ class ScenarioRunner
     ////////////////////////////////////////////////////////////////////////
     // Mock Mailer
 
-    protected function installMockMailer() {
+    public function installMockMailer() {
         // don't background emails
         Mail::setQueue(Queue::getFacadeRoot()->connection('sync'));
 

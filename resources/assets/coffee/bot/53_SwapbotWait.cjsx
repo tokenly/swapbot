@@ -97,7 +97,7 @@ SingleTransactionInfo = React.createClass
         return if this.state.submittingEmail
 
         email = this.state.emailValue
-        console.log "submitting email: #{email}"
+        # console.log "submitting email: #{email}.  this.props.txInfo=",this.props.txInfo
         this.setState({submittingEmail: true, emailErrorMsg: null})
         data = {email: email, swapId: this.props.txInfo.swapId}
         $.ajax({
@@ -182,7 +182,7 @@ SwapbotWait = React.createClass
     componentDidMount: ()->
         this.subscriberId = this.props.eventSubscriber.subscribe (botEvent)=>
             if this.isMounted()
-                console.log "botEvent.event.name=#{botEvent.event.name} matches (#{this.props.swapDetails.chosenToken.inAmount}, #{this.props.swapDetails.chosenToken.inAsset})=",botEventWatcher.botEventMatchesInAmount(botEvent, this.props.swapDetails.chosenToken.inAmount, this.props.swapDetails.chosenToken.inAsset)
+                # console.log "botEvent.event.name=#{botEvent.event.name} matches (#{this.props.swapDetails.chosenToken.inAmount}, #{this.props.swapDetails.chosenToken.inAsset})=",botEventWatcher.botEventMatchesInAmount(botEvent, this.props.swapDetails.chosenToken.inAmount, this.props.swapDetails.chosenToken.inAsset)
                 if botEventWatcher.botEventMatchesInAmount(botEvent, this.props.swapDetails.chosenToken.inAmount, this.props.swapDetails.chosenToken.inAsset)
                     this.handleMatchedBotEvent(botEvent)
 
@@ -199,7 +199,7 @@ SwapbotWait = React.createClass
     # matched bot event
     
     handleMatchedBotEvent: (botEvent)->
-        console.log "handleMatchedBotEvent"
+        # console.log "handleMatchedBotEvent"
         matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent)
         swapId = matchedTxInfo.swapId
 
@@ -228,7 +228,7 @@ SwapbotWait = React.createClass
         return
 
     selectMatchedTx: (matchedTxInfo)->
-        console.log "matchedTxInfo",matchedTxInfo
+        # console.log "matchedTxInfo",matchedTxInfo
         if matchedTxInfo.status == 'swap.sent'
             this.props.swapDetails.txInfo = matchedTxInfo
             this.props.router.setRoute('/complete')
