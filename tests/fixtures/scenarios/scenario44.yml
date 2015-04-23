@@ -8,7 +8,7 @@ bots:
     confirmations_required: 2
 
 Customers:
-  - meta: { baseFilename: Customer01.yml }
+  - meta: { baseFilename: customer01.yml }
 
 ############################
 # receive notifications from xchain
@@ -23,7 +23,7 @@ xchainNotifications:
 
 events:
   - {type: xchainNotification, offset: 0}
-  - {type: addCustomer, baseFilename: Customer01.yml, data: {} }
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
   - {type: xchainNotification, startOffset: 1}
 
 ############################
