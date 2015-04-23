@@ -1,4 +1,4 @@
 subject: Swap Request Received
-body: Request Received
+body: you sent Sample Bot One 500 LTBCOIN and will be receiving 0.0005 BTC shortly
 to: {"testCustomer@tokenly.co": ~}
 from: {"no-reply@tokenly.co": Tokenly Bot}

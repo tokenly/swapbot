@@ -2,13 +2,22 @@
 
 @section('main')
 
-<h1>SwapBot Request Received</h1>
+<h2>Thanks for making a purchase with SwapBot!</h2>
 
-<p>We have received your request to be notified when your swap is complete.</p>
+<p>We can see your payment on the blockchain and will be sending your {{ $outAsset }} shortly (After {{ $bot['confirmationsRequired'] }} confirmations or about {{ $bot['confirmationsRequired'] * 10 }} minutes).</p>
 
-<p>You will receive 2 more emails.  You will receive an email when your swap has been sent and one when it has been finalized.</p>
+<p>To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and will be receiving {{ $outQty }} {{ $outAsset }} shortly.</p>
 
+<h2>What Happens Next?</h2>
 
-<p><a href="#unsubscribe-link-here">Click here to unsubscribe</a>.</p>
+<p>You’ll receive a second email when your payment has been successfully confirmed by the Bitcoin network, which will trigger your Swapbot to send out your tokens.  You should get this email in under thirty minutes.</p>
+
+<p>When your tokens have been delivered and are ready to use, we’ll send you one last email letting you know they’re waiting in your wallet.</p>
+
+<p>That’s it!  If you have any questions or comments email the team@tokenly.co.</p>
+
+<p>&nbsp;</p>
+
+<small>If you did not leave your email address after making a purchase at swapbot.co please click <a href="{{ $unsubscribeLink }}">here</a> to unsubscribe.</small>
 
 @stop

@@ -13,7 +13,7 @@ class EmailSenderTest extends TestCase {
 
     public function testSendEmail()
     {
-        $send_email = new SendEmail('emails.notifications.welcome', [], "Request Received", "devon@tokenly.co", "Devon");
+        $send_email = new SendEmail('emails.notifications.welcome', $this->getSampleEmailVars(), "Request Received", "devon@tokenly.co", "Devon");
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($send_email);
     }
 
@@ -34,7 +34,7 @@ class EmailSenderTest extends TestCase {
             });
 
         // send
-        $send_email = new SendEmail('emails.notifications.welcome', [], "Request Received", "devon@tokenly.co", "Devon");
+        $send_email = new SendEmail('emails.notifications.welcome', $this->getSampleEmailVars(), "Request Received", "devon@tokenly.co", "Devon");
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($send_email);
     }
 
@@ -58,6 +58,19 @@ class EmailSenderTest extends TestCase {
     protected function getMailerMockContructorArgs()
     {
         return [m::mock('Illuminate\Contracts\View\Factory'), m::mock('Swift_Mailer')];
+    }
+
+    protected function getSampleEmailVars() {
+        $email_vars = [
+            'swap'            => [],
+            'bot'             => ['confirmationsRequired' => 2, 'name' => 'Foo Bot'],
+            'inQty'           => 0.2,
+            'inAsset'         => 'BTC',
+            'outQty'          => 2000,
+            'outAsset'        => 'LTBCOIN',
+            'unsubscribeLink' => 'http://foo.bar',
+        ];
+        return $email_vars;
     }
 
 }

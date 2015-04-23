@@ -18,9 +18,6 @@ class Swap extends APIModel {
         'receipt'    => 'json',
     ];
 
-    public function setInQtyAttribute($in_qty) { $this->attributes['in_qty'] = CurrencyUtil::valueToSatoshis($in_qty); }
-    public function getInQtyAttribute() { return isset($this->attributes['in_qty']) ? CurrencyUtil::satoshisToValue($this->attributes['in_qty']) : 0; }
-
     public function getAddressAttribute() {
         $xchain_notification = $this->transaction['xchain_notification'];
         return $xchain_notification['sources'][0];
@@ -28,6 +25,14 @@ class Swap extends APIModel {
     public function getTxidAttribute() {
         $xchain_notification = $this->transaction['xchain_notification'];
         return $xchain_notification['txid'];
+    }
+    public function getInQtyAttribute() {
+        $xchain_notification = $this->transaction['xchain_notification'];
+        return $xchain_notification['quantity'];
+    }
+    public function getInAssetAttribute() {
+        $xchain_notification = $this->transaction['xchain_notification'];
+        return $xchain_notification['asset'];
     }
 
     public function transaction() {

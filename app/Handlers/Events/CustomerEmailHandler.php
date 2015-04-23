@@ -3,6 +3,7 @@
 namespace Swapbot\Handlers\Events;
 
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\SendEmail;
 use Swapbot\Events\CustomerAddedToSwap;
@@ -28,8 +29,11 @@ class CustomerEmailHandler {
         $customer = $event->customer;
         $swap     = $event->swap;
 
+        // build variables
+        $email_vars = $this->buildEmailVariables($swap, $customer);
+
         // send an email
-        $send_email = new SendEmail('emails.notifications.welcome', [], "Swap Request Received", $customer['email'], null);
+        $send_email = new SendEmail('emails.notifications.welcome', $email_vars, "Swap Request Received", $customer['email'], null);
         $this->dispatch($send_email);
 
     }
@@ -77,5 +81,27 @@ class CustomerEmailHandler {
         $events->listen('Swapbot\Events\SwapWasCompleted', 'Swapbot\Handlers\Events\CustomerEmailHandler@swapWasCompleted');
     }
 
+    protected function buildEmailVariables($swap, $customer) {
+        $bot = $swap->bot;
+
+        $swap_config = $swap->getSwapConfig();
+
+        list($out_quantity, $out_asset) = $swap_config->getStrategy()->buildSwapOutputQuantityAndAsset($swap_config, $swap['in_qty']);
+        $host = Config::get('swapbot.site_host');
+        $unsubscribe_link = "$host/email/unsubscribe?id={$customer['uuid']}&key=keywillbehere";
+
+
+        $email_vars = [
+            'swap'            => $swap->serializeForAPI(),
+            'bot'             => $bot->serializeForAPI(),
+            'inQty'           => $swap['in_qty'],
+            'inAsset'         => $swap['in_asset'],
+            'outQty'          => $out_quantity,
+            'outAsset'        => $out_asset,
+            'unsubscribeLink' => $unsubscribe_link,
+        ];
+        return $email_vars;
+        
+    }
 
 }
