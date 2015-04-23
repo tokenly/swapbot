@@ -3,12 +3,12 @@
 namespace Swapbot\Events;
 
 use Swapbot\Events\Event;
-use Swapbot\Models\Consumer;
+use Swapbot\Models\Customer;
 use Swapbot\Models\Swap;
 
-class ConsumerAddedToSwap extends Event {
+class CustomerAddedToSwap extends Event {
 
-    var $consumer;
+    var $customer;
     var $swap;
     
     /**
@@ -16,9 +16,9 @@ class ConsumerAddedToSwap extends Event {
      *
      * @return void
      */
-    public function __construct(Consumer $consumer, Swap $swap)
+    public function __construct(Customer $customer, Swap $swap)
     {
-        $this->consumer = $consumer;
+        $this->customer = $customer;
         $this->swap     = $swap;
     }
 

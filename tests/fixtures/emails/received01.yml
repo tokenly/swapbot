@@ -1,4 +1,4 @@
 subject: Swap Request Received
 body: Request Received
-to: {"testconsumer@tokenly.co": ~}
+to: {"testCustomer@tokenly.co": ~}
 from: {"no-reply@tokenly.co": Tokenly Bot}

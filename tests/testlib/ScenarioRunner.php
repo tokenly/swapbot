@@ -4,7 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
 use Swapbot\Commands\ReceiveWebhook;
-use Swapbot\Events\ConsumerAddedToSwap;
+use Swapbot\Events\CustomerAddedToSwap;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
@@ -27,11 +27,11 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, ConsumerHelper $consumer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
-        $this->consumer_helper             = $consumer_helper;
+        $this->customer_helper             = $customer_helper;
         $this->transaction_repository      = $transaction_repository;
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->bot_event_repository        = $bot_event_repository;
@@ -162,12 +162,12 @@ class ScenarioRunner
         throw new Exception("Unable to resolve offset for event: ".json_encode($event, 192), 1);
     }
 
-    protected function executeScenarioEvent_addConsumer($event, $scenario_data) {
-        $consumer_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "consumers"), isset($event['data']) ? $event['data'] : []);
+    protected function executeScenarioEvent_addCustomer($event, $scenario_data) {
+        $customer_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "customers"), isset($event['data']) ? $event['data'] : []);
         $swap = $this->resolveSwap($event, $scenario_data);
 
-        $consumer = $this->consumer_helper->newSampleConsumer($swap, $consumer_attributes);
-        Event::fire(new ConsumerAddedToSwap($consumer, $swap));
+        $customer = $this->customer_helper->newSampleCustomer($swap, $customer_attributes);
+        Event::fire(new CustomerAddedToSwap($customer, $swap));
     }
 
     protected function resolveSwap($event, $scenario_data) {

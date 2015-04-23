@@ -4,7 +4,7 @@ namespace Swapbot\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Consumer extends Model {
+class Customer extends Model {
 
     protected static $unguarded = true;
 

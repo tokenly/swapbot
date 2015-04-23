@@ -5,14 +5,14 @@ namespace Swapbot\Handlers\Events;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\SendEmail;
-use Swapbot\Events\ConsumerAddedToSwap;
+use Swapbot\Events\CustomerAddedToSwap;
 use Swapbot\Events\Event;
-use Swapbot\Models\Consumer;
+use Swapbot\Models\Customer;
 use Swapbot\Models\Swap;
 use Tokenly\PusherClient\Client;
 
 
-class ConsumerEmailHandler {
+class CustomerEmailHandler {
 
     use DispatchesCommands;
 
@@ -20,12 +20,12 @@ class ConsumerEmailHandler {
     }
 
 
-    public function consumerAddedToSwap(ConsumerAddedToSwap $event) {
-        $consumer = $event->consumer;
+    public function customerAddedToSwap(CustomerAddedToSwap $event) {
+        $customer = $event->customer;
         $swap     = $event->swap;
 
         // send an email
-        $send_email = new SendEmail('emails.notifications.welcome', [], "Swap Request Received", $consumer['email'], null);
+        $send_email = new SendEmail('emails.notifications.welcome', [], "Swap Request Received", $customer['email'], null);
         $this->dispatch($send_email);
 
     }
@@ -38,7 +38,7 @@ class ConsumerEmailHandler {
      */
     public function subscribe($events)
     {
-        $events->listen('Swapbot\Events\ConsumerAddedToSwap', 'Swapbot\Handlers\Events\ConsumerEmailHandler@consumerAddedToSwap');
+        $events->listen('Swapbot\Events\CustomerAddedToSwap', 'Swapbot\Handlers\Events\CustomerEmailHandler@customerAddedToSwap');
     }
 
 

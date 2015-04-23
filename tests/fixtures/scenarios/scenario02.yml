@@ -5,8 +5,8 @@
 bots:
   - meta: { baseFilename: bot01.yml }
 
-consumers:
-  - meta: { baseFilename: consumer01.yml }
+Customers:
+  - meta: { baseFilename: Customer01.yml }
 
 ############################
 # receive notifications from xchain
@@ -16,7 +16,7 @@ xchainNotifications:
 
 events:
   - {type: xchainNotification, offset: 0}
-  - {type: addConsumer, baseFilename: consumer01.yml, data: {} }
+  - {type: addCustomer, baseFilename: Customer01.yml, data: {} }
   - {type: xchainNotification, offset: 1}
 
 ############################

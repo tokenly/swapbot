@@ -2,18 +2,18 @@
 
 namespace Swapbot\Repositories;
 
-use Swapbot\Models\Consumer;
+use Swapbot\Models\Customer;
 use Swapbot\Models\Swap;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 
 /*
-* ConsumerRepository
+* CustomerRepository
 */
-class ConsumerRepository extends APIRepository
+class CustomerRepository extends APIRepository
 {
 
-    protected $model_type = 'Swapbot\Models\Consumer';
+    protected $model_type = 'Swapbot\Models\Customer';
 
     public function findBySwap(Swap $swap) {
         return $this->findBySwapId($swap['id']);

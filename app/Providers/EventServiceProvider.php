@@ -23,7 +23,7 @@ class EventServiceProvider extends ServiceProvider {
 	 */
 	protected $subscribe = [
 		'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler',
-		'Swapbot\Handlers\Events\ConsumerEmailHandler',
+		'Swapbot\Handlers\Events\CustomerEmailHandler',
 	];
 
 
