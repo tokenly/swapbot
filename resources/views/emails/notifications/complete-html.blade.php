@@ -1,4 +1,4 @@
-@extends('emails.base.base-html')
+@extends('emails.base.base-bot-image-html')
 
 @section('subheaderTitle')
 <h4>Hello Again!</h4>
