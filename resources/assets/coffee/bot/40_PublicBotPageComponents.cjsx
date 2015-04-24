@@ -92,9 +92,9 @@ RecentAndActiveSwapsComponent = React.createClass
 
         $.when(
             $.ajax("/api/v1/public/swaps/#{botId}"),
-        ).done (r2)=>
+        ).done (swapsData)=>
             if this.isMounted()
-                swapsData = r2[0]
+                console.log "swapsData=",swapsData
 
                 this.setState({swaps: swapsData})
 
@@ -150,7 +150,7 @@ RecentAndActiveSwapsComponent = React.createClass
                     {
                         this.activeSwaps (swap, eventRecord)=>
                             anyActiveSwaps = true
-                            <SwapStatus key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
+                            <SwapStatusComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
                     }
                 </ul>
                 {
@@ -165,7 +165,7 @@ RecentAndActiveSwapsComponent = React.createClass
                     {
                         this.recentSwaps (swap, eventRecord)=>
                             anyRecentSwaps = true
-                            <SwapStatus key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
+                            <SwapStatusComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
                     }
                 </ul>
                 {

@@ -1,3 +1,16 @@
+# swapEventRenderer
+
+# <ul className="swap-list">
+#     <li className="pending">
+#         <div className="status-icon icon-pending"></div>
+#         <div className="status-content">
+#             <span><a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> waiting to exchange <b>0.2BTC</b> for <b>200,000 LTBCOIN</b>.<br>
+#                 <small>Waiting for 1 confirmation to send 0.1 BTC</small></span>
+#         </div>
+#     </li>
+# </ul>
+
+
 swapEventRenderer = do ()->
     exports = {}
 
@@ -6,27 +19,39 @@ swapEventRenderer = do ()->
         event = swapEventRecord.event
         return <li className="pending">
             <div className="status-icon icon-pending"></div>
-            {event.msg}
-            <br/>
-            <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {event.outQty} {event.outAsset}</small>
+            <div className="status-content">
+                <span>
+                {event.msg}
+                <br/>
+                <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {event.outQty} {event.outAsset}</small>
+                </span>
+            </div>
         </li>
 
     renderers['swap.confirming'] = (bot, swap, swapEventRecord)->
         event = swapEventRecord.event
         return <li className="pending">
             <div className="status-icon icon-pending"></div>
-            {event.msg}
-            <br/>
-            <small>Received {event.confirmations} of {swapbot.botUtils.confirmationsProse(bot)} to send {event.outQty} {event.outAsset}</small>
+            <div className="status-content">
+                <span>
+                {event.msg}
+                <br/>
+                <small>Received {event.confirmations} of {swapbot.botUtils.confirmationsProse(bot)} to send {event.outQty} {event.outAsset}</small>
+                </span>
+            </div>
         </li>
 
     renderers['swap.failed'] = (bot, swap, swapEventRecord)->
         event = swapEventRecord.event
         return <li className="failed">
             <div className="status-icon icon-failed"></div>
-            {event.msg}
-            <br/>
-            <small>Failed to swap to {event.destination}</small>
+            <div className="status-content">
+                <span>
+                {event.msg}
+                <br/>
+                <small>Failed to swap to {event.destination}</small>
+                </span>
+            </div>
         </li>
 
     renderers['swap.sent'] = (bot, swap, swapEventRecord)->
@@ -43,12 +68,16 @@ swapEventRenderer = do ()->
             if renderers[name]?
                 return renderers[name](bot, swap, swapEventRecord)
 
-        console.log "renderSwapStatus swap=#{swap.id} swapEventRecord=",swapEventRecord
+        # console.log "renderSwapStatus swap=#{swap.id} swapEventRecord=",swapEventRecord
         return <li className="pending">
                 <div className="status-icon icon-pending"></div>
-                Processing swap from {swap.address}
-                <br />
-                <small>Waiting for more information</small>
+                <div className="status-content">
+                    <span>
+                    Processing swap from {swap.address}
+                    <br />
+                    <small>Waiting for more information</small>
+                    </span>
+                </div>
             </li>
 
 

@@ -205,7 +205,9 @@
         "className": "pending"
       }, React.createElement("div", {
         "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+      }), React.createElement("div", {
+        "className": "status-content"
+      }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset))));
     };
     renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
       var event;
@@ -214,7 +216,9 @@
         "className": "pending"
       }, React.createElement("div", {
         "className": "status-icon icon-pending"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset));
+      }), React.createElement("div", {
+        "className": "status-content"
+      }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset))));
     };
     renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
       var event;
@@ -223,7 +227,9 @@
         "className": "failed"
       }, React.createElement("div", {
         "className": "status-icon icon-failed"
-      }), event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination));
+      }), React.createElement("div", {
+        "className": "status-content"
+      }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination))));
     };
     renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
       var event;
@@ -242,12 +248,13 @@
           return renderers[name](bot, swap, swapEventRecord);
         }
       }
-      console.log("renderSwapStatus swap=" + swap.id + " swapEventRecord=", swapEventRecord);
       return React.createElement("li", {
         "className": "pending"
       }, React.createElement("div", {
         "className": "status-icon icon-pending"
-      }), "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"));
+      }), React.createElement("div", {
+        "className": "status-content"
+      }, React.createElement("span", null, "Processing swap from ", swap.address, React.createElement("br", null), React.createElement("small", null, "Waiting for more information"))));
     };
     return exports;
   })();
@@ -305,10 +312,9 @@
       bot = this.props.bot;
       botId = bot.id;
       $.when($.ajax("/api/v1/public/swaps/" + botId)).done((function(_this) {
-        return function(r2) {
-          var swapsData;
+        return function(swapsData) {
           if (_this.isMounted()) {
-            swapsData = r2[0];
+            console.log("swapsData=", swapsData);
             _this.setState({
               swaps: swapsData
             });
@@ -398,7 +404,7 @@
       }, this.activeSwaps((function(_this) {
         return function(swap, eventRecord) {
           anyActiveSwaps = true;
-          return React.createElement(SwapStatus, {
+          return React.createElement(SwapStatusComponent, {
             "key": swap.id,
             "bot": _this.props.bot,
             "swap": swap,
@@ -417,7 +423,7 @@
       }, this.recentSwaps((function(_this) {
         return function(swap, eventRecord) {
           anyRecentSwaps = true;
-          return React.createElement(SwapStatus, {
+          return React.createElement(SwapStatusComponent, {
             "key": swap.id,
             "bot": _this.props.bot,
             "swap": swap,

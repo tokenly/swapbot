@@ -720,7 +720,7 @@ ul.swaps-list li p {
   height: 100%;
   line-height: 84px;
 }
-.swap-list .status-content span {
+.swap-list .status-content > span {
   display: inline-block;
   vertical-align: middle;
   line-height: normal;
@@ -897,7 +897,7 @@ button {
     min-height: 62px;
     text-align: center;
   }
-  .swap-list li span {
+  .swap-list li > span {
     width: 100%;
   }
   #swapbot-container .content .wide-list li {
