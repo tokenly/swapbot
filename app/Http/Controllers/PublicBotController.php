@@ -33,21 +33,6 @@ class PublicBotController extends Controller {
         ]);
     }
 
-	/**
-     * Shows the bot payment popup
-     *
-     * @return Response
-     */
-    public function showBotPopup($username, $botid)
-    {
-        list($user, $bot) = $this->requireUserAndBot($username, $botid);
-
-        return view('public.bot-popup', [
-            'bot'       => $bot->serializeForAPI(),
-            'pusherUrl' => Config::get('tokenlyPusher.clientUrl'),
-        ]);
-    }
-
 
     protected function requireUserAndBot($username, $botid) {
 

@@ -20,7 +20,6 @@ $router->get('/', 'WelcomeController@index');
 // admin
 $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 $router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
-$router->get('/public/{username}/{botid}/popup', 'PublicBotController@showBotPopup');
 
 
 ////////////////////////////////////////////////////////////////////////
