@@ -58,7 +58,11 @@ swapEventRenderer = do ()->
         event = swapEventRecord.event
         return <li className="confirmed">
             <div className="status-icon icon-confirmed"></div>
-            {event.msg}
+            <div className="status-content">
+                <span>
+                    {event.msg}
+                </span>
+            </div>
         </li>
 
     exports.renderSwapStatus = (bot, swap, swapEventRecord)->

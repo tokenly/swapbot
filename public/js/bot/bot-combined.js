@@ -238,7 +238,9 @@
         "className": "confirmed"
       }, React.createElement("div", {
         "className": "status-icon icon-confirmed"
-      }), event.msg);
+      }), React.createElement("div", {
+        "className": "status-content"
+      }, React.createElement("span", null, event.msg)));
     };
     exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
       var name;
