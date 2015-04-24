@@ -31,21 +31,18 @@ TransactionInfo = React.createClass
         txInfo = this.props.txInfo
         bot = this.props.bot
 
-        return <li>
-            <div className="item-content">
-                <a onClick={this.props.clickedFn} href="#choose">
+        return <li className="chooseable">
+            <a onClick={this.props.clickedFn} href="#choose">
+                <div className="item-content">
                     <div className="item-header" title="{txInfo.name}">Transaction Received</div>
                     <p className="date">{ this.state.fromNow }</p>
-                    <p>
-                        Received <b>{txInfo.inQty} {txInfo.inAsset}</b> from {txInfo.address}.
-                    </p>
                     <p>{txInfo.msg}</p>
                     <p>This transaction has <b>{txInfo.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
-                </a>
-            </div>
-            <div className="item-actions">
-                <a onClick={this.props.clickedFn} href="#choose"><div className="icon-next"></div></a>
-            </div>
+                </div>
+                <div className="item-actions">
+                    <div className="icon-next"></div>
+                </div>
+            </a>
             <div className="clearfix"></div>
         </li>
 
@@ -97,6 +94,8 @@ SingleTransactionInfo = React.createClass
         return if this.state.submittingEmail
 
         email = this.state.emailValue
+        return if email.length < 1
+
         # console.log "submitting email: #{email}.  this.props.txInfo=",this.props.txInfo
         this.setState({submittingEmail: true, emailErrorMsg: null})
         data = {email: email, swapId: this.props.txInfo.swapId}
@@ -159,7 +158,7 @@ SingleTransactionInfo = React.createClass
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <input disabled={if this.state.submittingEmail then true else false} type="email" onChange={this.updateEmailValue} id="other-address" placeholder="example@example.com" value={emailValue} />
+                                            <input disabled={if this.state.submittingEmail then true else false} required type="email" onChange={this.updateEmailValue} id="other-address" placeholder="example@example.com" value={emailValue} />
                                         </td>
                                         <td>
                                             <div id="icon-other-next" className="icon-next" onClick={this.submitEmailFn}></div>
@@ -248,15 +247,21 @@ SwapbotWait = React.createClass
 
     goBack: (e)->
         e.preventDefault();
-        this.props.router.setRoute('/receive')
+        if this.state.selectedMatchedTxInfo?
+            this.setState({
+                selectedMatchedTxInfo: null
+            })
+        else
+            this.props.router.setRoute('/receive')
         return
 
-    notMyTransactionClicked: (e)->
+    clearSelectedTransaction: (e)->
+        e.preventDefault()
+
         this.setState({
             selectedMatchedTxInfo: null
         })
 
-        e.preventDefault()
         return
 
     buildChooseSwapClicked: (txInfo)->
@@ -300,16 +305,20 @@ SwapbotWait = React.createClass
                     </tr>
                 </table>
 
+                <div id="GoBackLink">
+                    <a id="go-back" onClick={this.goBack} href="#go-back" className="shadow-link">Go Back</a>
+                </div>
+
 
                 {
                     if this.state.selectedMatchedTxInfo?
-                        <SingleTransactionInfo bot={bot} txInfo={this.state.selectedMatchedTxInfo} notMyTransactionClicked={this.notMyTransactionClicked} />
+                        <SingleTransactionInfo bot={bot} txInfo={this.state.selectedMatchedTxInfo} notMyTransactionClicked={this.clearSelectedTransaction} />
                     else
                         if this.state.anyMatchedTxs
                             <ul id="transaction-confirm-list" className="wide-list">
                                 {
                                     for swapId, txInfo of this.state.matchedTxs
-                                        <TransactionInfo bot={bot} txInfo={txInfo} clickedFn={this.buildChooseSwapClicked(txInfo)} />
+                                        <TransactionInfo key={swapId} bot={bot} txInfo={txInfo} clickedFn={this.buildChooseSwapClicked(txInfo)} />
                                 }
                             </ul>
                         else
@@ -317,6 +326,7 @@ SwapbotWait = React.createClass
                                 <li>
                                     <div className="status-icon icon-pending"></div>
                                     Waiting for <strong>{swapDetails.chosenToken.inAmount} {swapDetails.chosenToken.inAsset}</strong> to be sent to {bot.address}.
+                                    <br/>
                                 </li>
                             </ul>
                 }

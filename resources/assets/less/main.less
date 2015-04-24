@@ -157,12 +157,18 @@ ul.swaps-list {
 			font-size: 1.7em;
 		}
 		.wide-list {
-			margin-top: 40px;
+			margin-top: 24px;
 			margin-bottom: 30px;
 			background-color: @panels-background-color;
 			li {
 				margin-left: 16%;
 				margin-right: 16%;
+			}
+			a.shadow-link {
+			    color: #9c9b9b;
+			    text-decoration: underline;
+			    font-size: 12px;
+			    font-weight: normal;
 			}
 		}
 		#transaction-wait-list li {
@@ -172,9 +178,9 @@ ul.swaps-list {
 				float:left;
 				margin-top: -8px;
 			}
-			a {
-				font-weight: bold;
-			}
+			// a {
+			// 	font-weight: bold;
+			// }
 		}
 		#transaction-confirm-list {
 			li {
@@ -200,6 +206,9 @@ ul.swaps-list {
 			padding: 28px;
 			padding-top: 16px;
 		}
+	}
+	div#GoBackLink {
+		margin-top: 20px
 	}
 }
 
@@ -260,6 +269,14 @@ ul.swaps-list {
 		width: 180px;
 	}
 }
+
+li.chooseable:hover {
+	background-color: lighten(@flat-blue, 42%);
+}
+li.unchooseable {
+	opacity: 0.4;
+}
+
 
 /* BUTTONS */
 

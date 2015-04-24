@@ -228,6 +228,8 @@ a {
   list-style: none;
 }
 .wide-list li {
+  padding-top: 20px;
+  padding-bottom: 8px;
   text-align: left;
 }
 .wide-list li a {
@@ -238,14 +240,12 @@ a {
   font-size: 12px;
   margin-top: 0px;
   padding-left: 16px;
-  margin-bottom: 22px;
 }
 .wide-list .item-header {
   font-weight: bold;
   font-size: 20px;
   padding-left: 16px;
   padding-right: 16px;
-  padding-top: 20px;
 }
 .wide-list .item-header small {
   font-weight: normal;
@@ -268,7 +268,7 @@ a {
 .wide-list .icon-wallet,
 .wide-list .icon-qr {
   float: right;
-  margin-top: -60px;
+  margin-top: -50px;
   margin-right: 14px;
   cursor: pointer;
 }
@@ -461,6 +461,7 @@ a {
   color: #9c9b9b;
   text-decoration: underline;
   font-size: 12px;
+  font-weight: normal;
 }
 .shadow-link:hover {
   color: black;
@@ -652,13 +653,19 @@ ul.swaps-list li p {
   font-size: 1.7em;
 }
 #swapbot-container .content .wide-list {
-  margin-top: 40px;
+  margin-top: 24px;
   margin-bottom: 30px;
   background-color: #fefefe;
 }
 #swapbot-container .content .wide-list li {
   margin-left: 16%;
   margin-right: 16%;
+}
+#swapbot-container .content .wide-list a.shadow-link {
+  color: #9c9b9b;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: normal;
 }
 #swapbot-container .content #transaction-wait-list li {
   text-align: center;
@@ -667,9 +674,6 @@ ul.swaps-list li p {
 #swapbot-container .content #transaction-wait-list li .status-icon {
   float: left;
   margin-top: -8px;
-}
-#swapbot-container .content #transaction-wait-list li a {
-  font-weight: bold;
 }
 #swapbot-container .content #transaction-confirm-list li {
   display: table;
@@ -692,6 +696,9 @@ ul.swaps-list li p {
 #swapbot-container .content .segment-control {
   padding: 28px;
   padding-top: 16px;
+}
+#swapbot-container div#GoBackLink {
+  margin-top: 20px;
 }
 .content .x-button {
   float: right;
@@ -740,6 +747,12 @@ ul.swaps-list li p {
 }
 .segment-control div.line {
   width: 180px;
+}
+li.chooseable:hover {
+  background-color: #daeff7;
+}
+li.unchooseable {
+  opacity: 0.4;
 }
 /* BUTTONS */
 button {

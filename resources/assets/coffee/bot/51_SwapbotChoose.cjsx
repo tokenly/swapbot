@@ -35,12 +35,14 @@ SwapbotChoose = React.createClass
                                 <ul id="swaps-list" className="wide-list">
                                 {
                                     for swap, index in bot.swaps
-                                        <li key={"swap#{index}"} className="swap">
-                                            <div>
-                                                <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
-                                                <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
-                                                <a href="#choose-swap" onClick={this.buildChooseSwap(swap)} className="icon-next"></a>
-                                            </div>
+                                        <li key={"swap#{index}"} className="chooseable swap">
+                                            <a href="#choose-swap" onClick={this.buildChooseSwap(swap)}>
+                                                <div>
+                                                    <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
+                                                    <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
+                                                    <div className="icon-next"></div>
+                                                </div>
+                                            </a>
                                         </li>
                                 }
                                 </ul>

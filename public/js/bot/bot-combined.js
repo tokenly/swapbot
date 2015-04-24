@@ -589,14 +589,15 @@
           swap = _ref[index];
           _results.push(React.createElement("li", {
             "key": "swap" + index,
-            "className": "swap"
+            "className": "chooseable swap"
+          }, React.createElement("a", {
+            "href": "#choose-swap",
+            "onClick": this.buildChooseSwap(swap)
           }, React.createElement("div", null, React.createElement("div", {
             "className": "item-header"
-          }, swap.out, " ", React.createElement("small", null, "(", bot.balances[swap.out], " available)")), React.createElement("p", null, "Sends ", swapbot.swapUtils.exchangeDescription(swap), "."), React.createElement("a", {
-            "href": "#choose-swap",
-            "onClick": this.buildChooseSwap(swap),
+          }, swap.out, " ", React.createElement("small", null, "(", bot.balances[swap.out], " available)")), React.createElement("p", null, "Sends ", swapbot.swapUtils.exchangeDescription(swap), "."), React.createElement("div", {
             "className": "icon-next"
-          }))));
+          })))));
         }
         return _results;
       }).call(this)) : React.createElement("p", {
@@ -607,38 +608,51 @@
 
   SwapbotSendItem = React.createClass({
     displayName: 'SwapbotSendItem',
+    getInAmount: function() {
+      var inAmount;
+      inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swap);
+      if (inAmount === NaN) {
+        inAmount = 0;
+      }
+      return inAmount;
+    },
+    getIsChooseable: function() {
+      if (this.getInAmount() > 0) {
+        return true;
+      }
+      return false;
+    },
     chooseToken: function(e) {
       var asset, swap;
       e.preventDefault();
+      if (!this.getIsChooseable()) {
+        return;
+      }
       swap = this.props.swap;
       asset = swap["in"];
       this.props.assetWasChosen(this.props.outAmount, swap);
     },
     render: function() {
-      var address, inAmount, swap;
+      var address, inAmount, isChooseable, swap;
       swap = this.props.swap;
-      inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, swap);
+      inAmount = this.getInAmount();
+      isChooseable = this.getIsChooseable();
       address = this.props.bot.address;
-      return React.createElement("li", null, React.createElement("div", {
-        "className": "item-header"
-      }, "Send ", React.createElement("span", {
-        "id": "token-value-1"
-      }, inAmount), " ", swap["in"], " to"), React.createElement("p", null, React.createElement("a", {
-        "href": "bitcoin:" + address + "?amount=" + inAmount,
-        "target": "_blank"
-      }, address)), React.createElement("a", {
+      return React.createElement("li", {
+        "className": 'choose-swap' + (isChooseable ? ' chooseable' : ' unchooseable')
+      }, React.createElement("a", {
+        "className": "choose-swap",
         "onClick": this.chooseToken,
         "href": "#next-step"
       }, React.createElement("div", {
+        "className": "item-header"
+      }, "Send ", React.createElement("span", {
+        "id": "token-value-1"
+      }, inAmount), " ", swap["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
         "className": "icon-next"
-      })), React.createElement("div", {
-        "className": "icon-qr"
-      }), React.createElement("img", {
-        "className": "qr-code-image hidden",
-        "src": "/images/avatars/qrcode.png"
       }), React.createElement("div", {
         "className": "clearfix"
-      }));
+      })));
     }
   });
 
@@ -667,7 +681,6 @@
     },
     assetWasChosen: function(outAmount, swap) {
       var inAmount;
-      console.log("assetWasChosen");
       inAmount = swapbot.swapUtils.inAmountFromOutAmount(outAmount, swap);
       this.props.swapDetails.chosenToken = {
         inAsset: swap["in"],
@@ -676,6 +689,10 @@
         outAsset: swap.out
       };
       this.props.router.setRoute('/wait');
+    },
+    goBack: function(e) {
+      e.preventDefault();
+      this.props.router.setRoute('/choose');
     },
     updateAmounts: function(e) {
       var outAmount;
@@ -734,7 +751,14 @@
         "id": "token-amount",
         "placeholder": '0 ' + swap.out,
         "defaultValue": this.props.swapDetails.chosenToken.outAmount
-      })))), React.createElement("ul", {
+      })))), React.createElement("div", {
+        "id": "GoBackLink"
+      }, React.createElement("a", {
+        "id": "go-back",
+        "onClick": this.goBack,
+        "href": "#go-back",
+        "className": "shadow-link"
+      }, "Go Back")), React.createElement("ul", {
         "id": "transaction-select-list",
         "className": "wide-list"
       }, ((function() {
@@ -790,21 +814,20 @@
       var bot, txInfo;
       txInfo = this.props.txInfo;
       bot = this.props.bot;
-      return React.createElement("li", null, React.createElement("div", {
-        "className": "item-content"
+      return React.createElement("li", {
+        "className": "chooseable"
       }, React.createElement("a", {
         "onClick": this.props.clickedFn,
         "href": "#choose"
+      }, React.createElement("div", {
+        "className": "item-content"
       }, React.createElement("div", {
         "className": "item-header",
         "title": "{txInfo.name}"
       }, "Transaction Received"), React.createElement("p", {
         "className": "date"
-      }, this.state.fromNow), React.createElement("p", null, "Received ", React.createElement("b", null, txInfo.inQty, " ", txInfo.inAsset), " from ", txInfo.address, "."), React.createElement("p", null, txInfo.msg), React.createElement("p", null, "This transaction has ", React.createElement("b", null, txInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."))), React.createElement("div", {
+      }, this.state.fromNow), React.createElement("p", null, txInfo.msg), React.createElement("p", null, "This transaction has ", React.createElement("b", null, txInfo.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), ".")), React.createElement("div", {
         "className": "item-actions"
-      }, React.createElement("a", {
-        "onClick": this.props.clickedFn,
-        "href": "#choose"
       }, React.createElement("div", {
         "className": "icon-next"
       }))), React.createElement("div", {
@@ -856,6 +879,9 @@
         return;
       }
       email = this.state.emailValue;
+      if (email.length < 1) {
+        return;
+      }
       this.setState({
         submittingEmail: true,
         emailErrorMsg: null
@@ -937,6 +963,7 @@
         "className": "fieldset fieldset-other"
       }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
         "disabled": (this.state.submittingEmail ? true : false),
+        "required": true,
         "type": "email",
         "onChange": this.updateEmailValue,
         "id": "other-address",
@@ -1011,13 +1038,19 @@
     },
     goBack: function(e) {
       e.preventDefault();
-      this.props.router.setRoute('/receive');
+      if (this.state.selectedMatchedTxInfo != null) {
+        this.setState({
+          selectedMatchedTxInfo: null
+        });
+      } else {
+        this.props.router.setRoute('/receive');
+      }
     },
-    notMyTransactionClicked: function(e) {
+    clearSelectedTransaction: function(e) {
+      e.preventDefault();
       this.setState({
         selectedMatchedTxInfo: null
       });
-      e.preventDefault();
     },
     buildChooseSwapClicked: function(txInfo) {
       return (function(_this) {
@@ -1064,10 +1097,17 @@
         "id": "token-amount",
         "placeholder": '0 ' + swap.out,
         "defaultValue": this.props.swapDetails.chosenToken.outAmount
-      })))), (this.state.selectedMatchedTxInfo != null ? React.createElement(SingleTransactionInfo, {
+      })))), React.createElement("div", {
+        "id": "GoBackLink"
+      }, React.createElement("a", {
+        "id": "go-back",
+        "onClick": this.goBack,
+        "href": "#go-back",
+        "className": "shadow-link"
+      }, "Go Back")), (this.state.selectedMatchedTxInfo != null ? React.createElement(SingleTransactionInfo, {
         "bot": bot,
         "txInfo": this.state.selectedMatchedTxInfo,
-        "notMyTransactionClicked": this.notMyTransactionClicked
+        "notMyTransactionClicked": this.clearSelectedTransaction
       }) : this.state.anyMatchedTxs ? React.createElement("ul", {
         "id": "transaction-confirm-list",
         "className": "wide-list"
@@ -1078,6 +1118,7 @@
         for (swapId in _ref) {
           txInfo = _ref[swapId];
           _results.push(React.createElement(TransactionInfo, {
+            "key": swapId,
             "bot": bot,
             "txInfo": txInfo,
             "clickedFn": this.buildChooseSwapClicked(txInfo)
@@ -1089,7 +1130,7 @@
         "className": "wide-list"
       }, React.createElement("li", null, React.createElement("div", {
         "className": "status-icon icon-pending"
-      }), "Waiting for ", React.createElement("strong", null, swapDetails.chosenToken.inAmount, " ", swapDetails.chosenToken.inAsset), " to be sent to ", bot.address, "."))), React.createElement("p", {
+      }), "Waiting for ", React.createElement("strong", null, swapDetails.chosenToken.inAmount, " ", swapDetails.chosenToken.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
         "className": "description"
       }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.botUtils.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
     }
