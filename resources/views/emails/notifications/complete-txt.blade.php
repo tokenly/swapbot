@@ -15,7 +15,7 @@ To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and
 What Happens Next?
 
 
-That’s it!  You can make a new purchase if you’d like.  And thanks for using Swapbot, if you’d like to create your own automated multi-token vending machine in just a few minute visit {{ $host }}.
+That’s it!  You can make a new purchase if you’d like.  And thanks for using Swapbot, if you’d like to create your own automated multi-token vending machine in just a few minutes, visit {{ $host }}.
 
 If you have any questions or comments about your experience please email the team@tokenly.co
 

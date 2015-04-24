@@ -95,7 +95,8 @@ class CustomerEmailHandler {
         list($out_quantity, $out_asset) = $swap_config->getStrategy()->buildSwapOutputQuantityAndAsset($swap_config, $swap['in_qty']);
         $host = Config::get('swapbot.site_host');
         $unsubscribe_link = "$host/email/unsubscribe?id={$customer['uuid']}&key=keywillbehere";
-
+        $bot_url = $bot->getPublicBotURL();
+        $bot_link = '<a href="'.$bot_url.'">'.$bot['name'].'</a>';
 
         $email_vars = [
             'swap'            => $swap->serializeForAPI(),
@@ -106,7 +107,9 @@ class CustomerEmailHandler {
             'outAsset'        => $out_asset,
             'host'            => $host,
             'unsubscribeLink' => $unsubscribe_link,
-            'robohashSrc'     => $bot->getRobohashURL(),
+            'robohashUrl'     => $bot->getRobohashURL(),
+            'botUrl'          => $bot_url,
+            'botLink'         => $bot_link,
         ];
         return $email_vars;
         

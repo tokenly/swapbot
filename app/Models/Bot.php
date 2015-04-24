@@ -54,6 +54,10 @@ class Bot extends APIModel {
         return str_replace('%%HASH%%', $this['hash'], Config::get('swapbot.robohash_url'));
     }
 
+    public function getPublicBotURL() {
+        return Config::get('swapbot.site_host')."/public/{$this['username']}/{$this['uuid']}";
+    }
+
     public function isActive() {
         switch ($this['state']) {
             case BotState::ACTIVE:

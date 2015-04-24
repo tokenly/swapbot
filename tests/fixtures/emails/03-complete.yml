@@ -1,4 +1,4 @@
 subject: Swap Complete
-body: The tokens you recently purchased from Sample Bot One have been delivered
+body: have been delivered
 to: {"testCustomer@tokenly.co": ~}
 from: {"no-reply@tokenly.co": Tokenly Bot}

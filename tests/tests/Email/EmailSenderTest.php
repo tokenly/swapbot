@@ -69,7 +69,9 @@ class EmailSenderTest extends TestCase {
             'outQty'          => 2000,
             'outAsset'        => 'LTBCOIN',
             'unsubscribeLink' => 'http://foo.bar',
-            'robohashSrc'     => 'http://robohash.org/5a8e7572b37212f8d32817f40409a29fb9849c0e2336c6df19f4bfde9ebc720a.png?set=set3',
+            'robohashUrl'     => 'http://robohash.org/5a8e7572b37212f8d32817f40409a29fb9849c0e2336c6df19f4bfde9ebc720a.png?set=set3',
+            'botUrl'          => 'http://foo.bar',
+            'botLink'         => '<a href="http://foo.bar">http://foo.bar</a>',
         ];
         return $email_vars;
     }

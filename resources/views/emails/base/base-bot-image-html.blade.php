@@ -21,7 +21,7 @@
                           <table class="two columns">
                             <tr>
                               <td>
-                                <img src="{{ $robohashSrc }}" alt="RoboHash" width="80" height="80">
+                                <img src="{{ $robohashUrl }}" alt="RoboHash" width="80" height="80">
                               </td>
                               <td class="expander"></td>
                             </tr>
