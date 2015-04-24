@@ -12,6 +12,10 @@ swapbot.botEventsService = do ()->
     loadBotEvents = (bot, onBotEventData)->
         botId = bot.id
         $.get "/api/v1/public/botevents/#{botId}", (data)=>
+            # sort by oldest to newest
+            data.sort (a,b)->
+                return a.serial - b.serial
+
             for botEvent in data
                 onBotEventData(botEvent)
             return

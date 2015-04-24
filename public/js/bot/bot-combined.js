@@ -131,6 +131,9 @@
       $.get("/api/v1/public/botevents/" + botId, (function(_this) {
         return function(data) {
           var botEvent, _i, _len;
+          data.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
           for (_i = 0, _len = data.length; _i < _len; _i++) {
             botEvent = data[_i];
             onBotEventData(botEvent);
