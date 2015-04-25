@@ -2671,12 +2671,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-event-log.git",
-                "reference": "96f6355677620c81016b657538b29cbfae09efaf"
+                "reference": "2b8f4e2c3c98f49e72465cd4a9eee5195ce87cb3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/96f6355677620c81016b657538b29cbfae09efaf",
-                "reference": "96f6355677620c81016b657538b29cbfae09efaf",
+                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/2b8f4e2c3c98f49e72465cd4a9eee5195ce87cb3",
+                "reference": "2b8f4e2c3c98f49e72465cd4a9eee5195ce87cb3",
                 "shasum": ""
             },
             "require": {

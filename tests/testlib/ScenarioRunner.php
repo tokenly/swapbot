@@ -136,6 +136,12 @@ class ScenarioRunner
             $notification = array_replace_recursive($this->loadBaseFilename($raw_notification, "notifications"), $notification);
             // echo "\$notification:\n".json_encode($notification, 192)."\n";
 
+            // ensure the notification has a notificationID (for duplicate protection)
+            if (!isset($notification['notificationId'])) {
+                $notification['notificationId'] = md5(json_encode($notification));
+            }
+
+
             // look for exceptions trigger
             if (isset($meta['xchainFailAfterRequests'])) {
                 $this->mock_builder->beginThrowingExceptionsAfterCount($meta['xchainFailAfterRequests']);

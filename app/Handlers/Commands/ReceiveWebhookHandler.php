@@ -1,7 +1,9 @@
 <?php namespace Swapbot\Handlers\Commands;
 
 use Exception;
+use Illuminate\Database\QueryException;
 use Swapbot\Commands\ReceiveWebhook;
+use Swapbot\Repositories\NotificationReceiptRepository;
 use Swapbot\Swap\Processor\ReceiveEventProcessor;
 use Swapbot\Swap\Processor\SendEventProcessor;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -13,10 +15,11 @@ class ReceiveWebhookHandler {
      *
      * @return void
      */
-    public function __construct(ReceiveEventProcessor $receive_event_processor, SendEventProcessor $send_event_processor)
+    public function __construct(ReceiveEventProcessor $receive_event_processor, SendEventProcessor $send_event_processor, NotificationReceiptRepository $notification_receipt_repository)
     {
-        $this->receive_event_processor = $receive_event_processor;
-        $this->send_event_processor    = $send_event_processor;
+        $this->receive_event_processor         = $receive_event_processor;
+        $this->send_event_processor            = $send_event_processor;
+        $this->notification_receipt_repository = $notification_receipt_repository;
     }
 
     /**
@@ -28,6 +31,14 @@ class ReceiveWebhookHandler {
     public function handle(ReceiveWebhook $command)
     {
         $payload = $command->payload;
+
+        // sometimes swapbot may take a long time to process a notification
+        //   and xchain may try to notify us again while we are still processing that notification
+        //   to prevent this, we will immediately mark the notification as received and return if it was already processed
+        if ($this->checkOrCreateNotificationReceipt($payload)) {
+            // event already processed
+            return;
+        }
 
         switch ($payload['event']) {
             case 'block':
@@ -54,6 +65,24 @@ class ReceiveWebhookHandler {
     }
 
     
+
+
+    // returns true if this notification was already received
+    protected function checkOrCreateNotificationReceipt($xchain_notification) {
+        $uuid = $xchain_notification['notificationId'];
+
+        try {
+            $this->notification_receipt_repository->createByUUID($uuid);
+        } catch (QueryException $e) {
+            if ($e->errorInfo[0] == 23000) {
+                EventLog::logError('notification.duplicate', ['notificationUd' => $uuid]);
+                return true;
+            }
+            throw $e;
+        }
+
+        return false;
+    }
 
 
 }
