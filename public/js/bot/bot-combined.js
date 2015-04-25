@@ -198,7 +198,7 @@
     var exports, renderers;
     exports = {};
     renderers = {};
-    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord) {
+    renderers['unconfirmed.tx'] = function(bot, swap, swapEventRecord, fromNow) {
       var event;
       event = swapEventRecord.event;
       return React.createElement("li", {
@@ -207,9 +207,11 @@
         "className": "status-icon icon-pending"
       }), React.createElement("div", {
         "className": "status-content"
-      }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset))));
+      }, React.createElement("span", null, React.createElement("div", {
+        "className": "date"
+      }, fromNow), event.msg, React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset))));
     };
-    renderers['swap.confirming'] = function(bot, swap, swapEventRecord) {
+    renderers['swap.confirming'] = function(bot, swap, swapEventRecord, fromNow) {
       var event;
       event = swapEventRecord.event;
       return React.createElement("li", {
@@ -220,7 +222,7 @@
         "className": "status-content"
       }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Received ", event.confirmations, " of ", swapbot.botUtils.confirmationsProse(bot), " to send ", event.outQty, " ", event.outAsset))));
     };
-    renderers['swap.failed'] = function(bot, swap, swapEventRecord) {
+    renderers['swap.failed'] = function(bot, swap, swapEventRecord, fromNow) {
       var event;
       event = swapEventRecord.event;
       return React.createElement("li", {
@@ -231,7 +233,7 @@
         "className": "status-content"
       }, React.createElement("span", null, event.msg, React.createElement("br", null), React.createElement("small", null, "Failed to swap to ", event.destination))));
     };
-    renderers['swap.sent'] = function(bot, swap, swapEventRecord) {
+    renderers['swap.sent'] = function(bot, swap, swapEventRecord, fromNow) {
       var event;
       event = swapEventRecord.event;
       return React.createElement("li", {
@@ -248,12 +250,12 @@
         "className": "fa fa-arrow-circle-right"
       })))));
     };
-    exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
+    exports.renderSwapStatus = function(bot, swap, swapEventRecord, fromNow) {
       var name;
       if (swapEventRecord != null) {
         name = swapEventRecord.event.name;
         if (renderers[name] != null) {
-          return renderers[name](bot, swap, swapEventRecord);
+          return renderers[name](bot, swap, swapEventRecord, fromNow);
         }
       }
       return React.createElement("li", {
@@ -297,13 +299,32 @@
   SwapStatusComponent = React.createClass({
     displayName: 'SwapStatusComponent',
     getInitialState: function() {
-      return {};
+      return {
+        fromNow: null
+      };
     },
-    componentDidMount: function() {},
+    componentDidMount: function() {
+      this.updateNow();
+      this.intervalTimer = setInterval((function(_this) {
+        return function() {
+          return _this.updateNow();
+        };
+      })(this), 1000);
+    },
+    updateNow: function() {
+      this.setState({
+        fromNow: moment(this.props.swapEventRecord.date).fromNow()
+      });
+    },
+    componentWillUnmount: function() {
+      if (this.intervalTimer != null) {
+        clearInterval(this.intervalTimer);
+      }
+    },
     render: function() {
       var swapEventRecord;
       swapEventRecord = this.props.swapEventRecord;
-      return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord);
+      return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord, this.state.fromNow);
     }
   });
 
@@ -334,7 +355,7 @@
       })(this));
     },
     applyBotEventToSwaps: function(botEvent) {
-      var anyFound, applied, newSwapEventRecords, swap, _i, _len, _ref;
+      var anyFound, applied, newSwapEventRecords, sortedSwaps, swap, _i, _len, _ref;
       if (this.state.swaps == null) {
         return false;
       }
@@ -351,8 +372,22 @@
         }
       }
       if (anyFound) {
+        sortedSwaps = this.state.swaps.slice(0);
+        sortedSwaps.sort(function(a, b) {
+          var aSerial, bSerial, _ref1, _ref2;
+          aSerial = (_ref1 = newSwapEventRecords[a.id]) != null ? _ref1.serial : void 0;
+          bSerial = (_ref2 = newSwapEventRecords[b.id]) != null ? _ref2.serial : void 0;
+          if (aSerial == null) {
+            aSerial = 0;
+          }
+          if (bSerial == null) {
+            bSerial = 0;
+          }
+          return bSerial - aSerial;
+        });
         this.setState({
-          swapEventRecords: newSwapEventRecords
+          swapEventRecords: newSwapEventRecords,
+          swaps: sortedSwaps
         });
       }
       return anyFound;

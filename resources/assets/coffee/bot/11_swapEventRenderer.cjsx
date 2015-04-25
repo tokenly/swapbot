@@ -15,12 +15,13 @@ swapEventRenderer = do ()->
     exports = {}
 
     renderers = {}
-    renderers['unconfirmed.tx'] = (bot, swap, swapEventRecord)->
+    renderers['unconfirmed.tx'] = (bot, swap, swapEventRecord, fromNow)->
         event = swapEventRecord.event
         return <li className="pending">
             <div className="status-icon icon-pending"></div>
             <div className="status-content">
                 <span>
+                <div className="date">{fromNow}</div>
                 {event.msg}
                 <br/>
                 <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {event.outQty} {event.outAsset}</small>
@@ -28,7 +29,7 @@ swapEventRenderer = do ()->
             </div>
         </li>
 
-    renderers['swap.confirming'] = (bot, swap, swapEventRecord)->
+    renderers['swap.confirming'] = (bot, swap, swapEventRecord, fromNow)->
         event = swapEventRecord.event
         return <li className="pending">
             <div className="status-icon icon-pending"></div>
@@ -41,7 +42,7 @@ swapEventRenderer = do ()->
             </div>
         </li>
 
-    renderers['swap.failed'] = (bot, swap, swapEventRecord)->
+    renderers['swap.failed'] = (bot, swap, swapEventRecord, fromNow)->
         event = swapEventRecord.event
         return <li className="failed">
             <div className="status-icon icon-failed"></div>
@@ -54,7 +55,7 @@ swapEventRenderer = do ()->
             </div>
         </li>
 
-    renderers['swap.sent'] = (bot, swap, swapEventRecord)->
+    renderers['swap.sent'] = (bot, swap, swapEventRecord, fromNow)->
         event = swapEventRecord.event
         return <li className="confirmed">
             <div className="status-icon icon-confirmed"></div>
@@ -66,12 +67,12 @@ swapEventRenderer = do ()->
             </div>
         </li>
 
-    exports.renderSwapStatus = (bot, swap, swapEventRecord)->
+    exports.renderSwapStatus = (bot, swap, swapEventRecord, fromNow)->
         # console.log "swap=",swap
         if swapEventRecord?
             name = swapEventRecord.event.name
             if renderers[name]?
-                return renderers[name](bot, swap, swapEventRecord)
+                return renderers[name](bot, swap, swapEventRecord, fromNow)
 
         # console.log "renderSwapStatus swap=#{swap.id} swapEventRecord=",swapEventRecord
         return <li className="pending">

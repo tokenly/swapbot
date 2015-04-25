@@ -30,14 +30,30 @@ SwapStatusComponent = React.createClass
 
     getInitialState: ()->
         return {
+            fromNow: null
         }
 
     componentDidMount: ()->
+        this.updateNow()
+
+        this.intervalTimer = setInterval ()=>
+            this.updateNow()
+        , 1000
+
+        return
+
+    updateNow: ()->
+        this.setState({fromNow: moment(this.props.swapEventRecord.date).fromNow()})
+        return
+
+    componentWillUnmount: ()->
+        if this.intervalTimer?
+            clearInterval(this.intervalTimer)
         return
 
     render: ->
         swapEventRecord = this.props.swapEventRecord
-        return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord)
+        return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord, this.state.fromNow)
 
 # ############################################################################################################
 
@@ -78,8 +94,16 @@ RecentAndActiveSwapsComponent = React.createClass
                 anyFound = true if applied
         
         if anyFound
-            # console.log "applyBotEventToSwaps anyFound=#{anyFound}"
-            this.setState({swapEventRecords: newSwapEventRecords})
+            # sort swaps by most recent first
+            sortedSwaps = this.state.swaps.slice(0)
+            sortedSwaps.sort (a,b)->
+                aSerial = newSwapEventRecords[a.id]?.serial
+                bSerial = newSwapEventRecords[b.id]?.serial
+                aSerial = 0 if not aSerial?
+                bSerial = 0 if not bSerial?
+                return bSerial - aSerial
+
+            this.setState({swapEventRecords: newSwapEventRecords, swaps: sortedSwaps})
 
         return anyFound
 
