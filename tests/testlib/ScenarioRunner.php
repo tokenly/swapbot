@@ -858,6 +858,8 @@ class ScenarioRunner
                     'body'    => $msg->getBody(),
                 ];
                 $mailer_recorder->emails[] = $email;
+
+                // app('Illuminate\Mail\Transport\LogTransport')->send($msg);
             });
 
         return $mailer_recorder;
