@@ -53,7 +53,7 @@
                     <div class="item-header">Recipient's address</div>
                     <p>
                         @if (isset($swap['receipt']['destination']))
-                        {{ $swap['receipt']['destination'] }}
+                            <a href="{{ $swapFormatter->formatAddressHref($swap['receipt']['destination']) }}" target="_blank">{{ $swap['receipt']['destination'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -61,13 +61,15 @@
                 </li>
                 <li>
                     <div class="item-header">Swapbot's address</div>
-                    <p>{{ $bot['address'] }}</p>
+                    <p>
+                        <a href="{{ $swapFormatter->formatAddressHref($bot['address']) }}" target="_blank">{{ $bot['address'] }}</a>
+                    </p>
                 </li>
                 <li>
                     <div class="item-header">Incoming TXID</div>
                     <p>
                         @if (isset($swap['receipt']['txidIn']))
-                            <a href="#" target="_blank">{{ $swap['receipt']['txidIn'] }}</a>
+                            <a href="{{ $swapFormatter->formatBlockchainHref($swap['receipt']['txidIn'], $swap['receipt']['assetIn']) }}" target="_blank">{{ $swap['receipt']['txidIn'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -77,7 +79,7 @@
                     <div class="item-header">Outgoing TXID</div>
                     <p>
                         @if (isset($swap['receipt']['txidOut']))
-                            <a href="#" target="_blank">{{ $swap['receipt']['txidOut'] }}</a>
+                            <a href="{{ $swapFormatter->formatBlockchainHref($swap['receipt']['txidOut'], $swap['receipt']['assetOut']) }}" target="_blank">{{ $swap['receipt']['txidOut'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif

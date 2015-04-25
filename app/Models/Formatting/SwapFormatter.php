@@ -69,4 +69,18 @@ class SwapFormatter {
         return $date;
     }
 
+    public function formatBlockchainHref($txid, $asset) {
+        if (!strlen($txid)) { return '#unknown'; }
+        if ($asset == 'BTC') {
+            return 'https://blockchain.info/tx/'.$txid;
+        } else {
+            return 'https://counterpartychain.io/transaction/'.$txid;
+        }
+    }
+
+    public function formatAddressHref($address) {
+        if (!strlen($address)) { return '#unknown'; }
+        return 'https://counterpartychain.io/address/'.$address;
+    }
+
 }
