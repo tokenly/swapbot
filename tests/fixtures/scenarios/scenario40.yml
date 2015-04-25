@@ -54,6 +54,5 @@ expectedSwapModels:
     meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
     state: refunded
     receipt:
-      txid: "0000000000000000000000000000001111"
       confirmations: 1
       type: refund

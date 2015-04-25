@@ -174,6 +174,21 @@ class SwapProcessor {
         if (!$swap_process['is_confirmed']) {
             $swap_process['swap_was_handled'] = true;
             $this->bot_event_logger->logUnconfirmedTx($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+
+            // mark details
+            $swap_process['swap_update_vars']['receipt'] = [
+                'type'          => 'pending',
+
+                'quantityIn'    => $swap_process['in_quantity'],
+                'assetIn'       => $swap_process['in_asset'],
+                'txidIn'        => $swap_process['transaction']['txid'],
+
+                'quantityOut'   => $swap_process['quantity'],
+                'assetOut'      => $swap_process['asset'],
+
+                'confirmations' => $swap_process['confirmations'],
+                'destination'   => $swap_process['destination'],
+            ];
         }
     }
 
@@ -205,12 +220,42 @@ class SwapProcessor {
 
             // log as confirming
             $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+
+            // mark details
+            $swap_process['swap_update_vars']['receipt'] = [
+                'type'          => 'pending',
+
+                'quantityIn'    => $swap_process['in_quantity'],
+                'assetIn'       => $swap_process['in_asset'],
+                'txidIn'        => $swap_process['transaction']['txid'],
+
+                'quantityOut'   => $swap_process['quantity'],
+                'assetOut'      => $swap_process['asset'],
+
+                'confirmations' => $swap_process['confirmations'],
+                'destination'   => $swap_process['destination'],
+            ];
         } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
             if ($swap_process['swap']->isConfirming()) {
                 // the swap just became confirmed
                 //   update the state right now
                 $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
                 $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
+
+                // mark details
+                $swap_process['swap_update_vars']['receipt'] = [
+                    'type'          => 'pending',
+
+                    'quantityIn'    => $swap_process['in_quantity'],
+                    'assetIn'       => $swap_process['in_asset'],
+                    'txidIn'        => $swap_process['transaction']['txid'],
+
+                    'quantityOut'   => $swap_process['quantity'],
+                    'assetOut'      => $swap_process['asset'],
+
+                    'confirmations' => $swap_process['confirmations'],
+                    'destination'   => $swap_process['destination'],
+                ];
             }
         }
 
@@ -251,9 +296,18 @@ class SwapProcessor {
 
         // update the swap receipts
         $swap_process['swap_update_vars']['receipt'] = [
-            'txid'          => $send_result['txid'],
-            'confirmations' => $swap_process['confirmations'],
             'type'          => 'swap',
+
+            'quantityIn'    => $swap_process['in_quantity'],
+            'assetIn'       => $swap_process['in_asset'],
+            'txidIn'        => $swap_process['transaction']['txid'],
+
+            'quantityOut'   => $swap_process['quantity'],
+            'assetOut'      => $swap_process['asset'],
+            'txidOut'       => $send_result['txid'],
+
+            'confirmations' => $swap_process['confirmations'],
+            'destination'   => $swap_process['destination'],
         ];
 
         // update the local balance
@@ -286,9 +340,19 @@ class SwapProcessor {
 
         // update the swap receipts
         $swap_process['swap_update_vars']['receipt'] = [
-            'txid'          => $send_result['txid'],
-            'confirmations' => $swap_process['confirmations'],
             'type'          => 'refund',
+
+            'quantityIn'    => $swap_process['in_quantity'],
+            'assetIn'       => $swap_process['in_asset'],
+            'txidIn'        => $swap_process['transaction']['txid'],
+
+            'quantityOut'   => $swap_process['quantity'],
+            'assetOut'      => $swap_process['asset'],
+            'txidOut'       => $send_result['txid'],
+
+            'confirmations' => $swap_process['confirmations'],
+            'destination'   => $swap_process['destination'],
+
         ];
 
         // update the local balance

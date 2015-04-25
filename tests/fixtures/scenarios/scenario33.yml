@@ -86,4 +86,6 @@ expectedSwapModels:
     state: sent
   -
     meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
+    receipt:
+      txidIn: 00000000000000000000000000000000000000000000000000000xcptx222222
     state: sent

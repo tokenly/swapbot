@@ -187,7 +187,7 @@ class SendEventProcessor {
 
         $any_swap_matched = false;
         foreach($swaps as $swap) {
-            if ($swap['receipt']['txid'] == $txid) {
+            if ($swap['receipt']['txidOut'] == $txid) {
                 $any_swap_matched = true;
 
                 if ($is_confirmed) {

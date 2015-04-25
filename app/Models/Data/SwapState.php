@@ -20,4 +20,18 @@ class SwapState extends State {
         return [self::BRAND_NEW, self::OUT_OF_STOCK, self::READY, self::CONFIRMING, self::ERROR];
     }
 
+    public static function friendlyLabel($state) {
+        switch ($state) {
+            case 'brandnew': return 'Brand New';
+            case 'outofstock': return 'Out of Stock';
+            case 'ready': return 'Ready';
+            case 'confirming': return 'Confirming';
+            case 'sent': return 'Sent';
+            case 'refunded': return 'Refunded';
+            case 'complete': return 'Complete';
+            case 'error': return 'Error';
+            default: return 'Unknown';
+        }
+    }
+
 }

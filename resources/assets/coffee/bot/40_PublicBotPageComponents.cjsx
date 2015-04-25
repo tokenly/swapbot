@@ -41,42 +41,6 @@ SwapStatusComponent = React.createClass
 
 # ############################################################################################################
 
-# SwapsListComponent = React.createClass
-#     displayName: 'SwapsListComponent'
-
-#     getInitialState: ()->
-#         return {
-#         }
-
-#     componentDidMount: ()->
-#         return
-
-#     buildChooseSwap: (swap)->
-#         return ()=>
-#             this.props.chosenSwapProvider.setSwap(swap)
-#             return
-
-#     render: ->
-#         bot = this.props.bot
-
-#         if bot.swaps
-#             <ul id="swaps-list" className="wide-list">
-#             {
-#                 for swap, index in bot.swaps
-#                     <li key={"swap#{index}"} className="swap">
-#                         <div>
-#                             <div className="item-header">{ swap.out } <small>({bot.balances[swap.out]} available)</small></div>
-#                             <p>Sends { swapbot.swapUtils.exchangeDescription(swap) }.</p>
-#                             <a href="#choose-swap" onClick={this.buildChooseSwap(swap)} className="icon-next"></a>
-#                         </div>
-#                     </li>
-#             }
-#             </ul>
-#         else
-#             <p className="description">There are no swaps available.</p>
-
-# ############################################################################################################
-
 RecentAndActiveSwapsComponent = React.createClass
     displayName: 'RecentAndActiveSwapsComponent'
 

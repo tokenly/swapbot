@@ -61,6 +61,7 @@ swapEventRenderer = do ()->
             <div className="status-content">
                 <span>
                     {event.msg}
+                    <a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
                 </span>
             </div>
         </li>

@@ -1,6 +1,12 @@
 name: BTC:LTBCOIN
 state: sent
 receipt:
-    txid: "0000000000000000000000000000001111"
-    confirmations: 1
+    confirmations: '1'
     type: swap
+    quantityIn: 0.001
+    assetIn: 'BTC'
+    txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+    quantityOut: 1000
+    assetOut: 'LTBCOIN'
+    txidOut: '0000000000000000000000000000001111'
+    destination: 'SENDER01'

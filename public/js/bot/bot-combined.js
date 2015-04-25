@@ -240,7 +240,13 @@
         "className": "status-icon icon-confirmed"
       }), React.createElement("div", {
         "className": "status-content"
-      }, React.createElement("span", null, event.msg)));
+      }, React.createElement("span", null, event.msg, React.createElement("a", {
+        "href": "/public/" + bot.username + "/swap/" + swap.id,
+        "className": "details-link",
+        "target": "_blank"
+      }, React.createElement("i", {
+        "className": "fa fa-arrow-circle-right"
+      })))));
     };
     exports.renderSwapStatus = function(bot, swap, swapEventRecord) {
       var name;
