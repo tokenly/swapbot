@@ -1,5 +1,5 @@
 (function() {
-  var BotStatusComponent, RecentAndActiveSwapsComponent, SingleTransactionInfo, SwapInterfaceComponent, SwapStatusComponent, SwapbotChoose, SwapbotReceive, SwapbotSendItem, SwapbotWait, TransactionInfo, botEventWatcher, swapEventRenderer, swapEventWatcher, swapbot;
+  var BotStatusComponent, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SingleTransactionInfo, SwapInterfaceComponent, SwapbotChoose, SwapbotReceive, SwapbotSendItem, SwapbotWait, TransactionInfo, botEventWatcher, swapEventRenderer, swapEventWatcher, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -50,6 +50,54 @@
           }
       }
       return state;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.fnUtils = (function() {
+    var callbackTimeouts, callbacksQueue, exports;
+    exports = {};
+    callbacksQueue = {};
+    callbackTimeouts = {};
+    exports.callOnceWithCallback = function(key, fn, newCallback, timeout) {
+      var runFunctionCall;
+      if (timeout == null) {
+        timeout = 5000;
+      }
+      if ((callbacksQueue[key] != null) && callbacksQueue[key].length > 0) {
+        return callbacksQueue[key].push(newCallback);
+      } else {
+        callbacksQueue[key] = [];
+        callbacksQueue[key].push(newCallback);
+        runFunctionCall = function() {
+          return fn(function() {
+            var callback, e, _i, _len, _ref, _results;
+            _ref = callbacksQueue[key];
+            _results = [];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              callback = _ref[_i];
+              try {
+                callback();
+              } catch (_error) {
+                e = _error;
+                console.error(e);
+              }
+              delete callbacksQueue[key];
+              clearTimeout(callbackTimeouts[key]);
+              _results.push(delete callbackTimeouts[key]);
+            }
+            return _results;
+          });
+        };
+        callbackTimeouts[key] = setTimeout(function() {
+          return runFunctionCall();
+        }, timeout);
+        return runFunctionCall();
+      }
     };
     return exports;
   })();
@@ -296,8 +344,8 @@
     }
   });
 
-  SwapStatusComponent = React.createClass({
-    displayName: 'SwapStatusComponent',
+  RecentOrActiveSwapComponent = React.createClass({
+    displayName: 'RecentOrActiveSwapComponent',
     getInitialState: function() {
       return {
         fromNow: null
@@ -332,34 +380,66 @@
     displayName: 'RecentAndActiveSwapsComponent',
     getInitialState: function() {
       return {
-        swaps: null,
+        swaps: [],
+        swapIdsMap: {},
         swapEventRecords: {}
       };
     },
     componentDidMount: function() {
-      var bot, botId;
-      bot = this.props.bot;
-      botId = bot.id;
+      this.refreshSwapsData((function(_this) {
+        return function() {
+          _this.props.eventSubscriber.subscribe(function(botEvent) {
+            _this.applyBotEventToSwaps(botEvent);
+          });
+        };
+      })(this));
+    },
+    refreshSwapsData: function(callback) {
+      swapbot.fnUtils.callOnceWithCallback('K:rswp', ((function(_this) {
+        return function(cb) {
+          return _this._refreshSwapsFn(cb);
+        };
+      })(this)), callback);
+    },
+    _refreshSwapsFn: function(refreshCallback) {
+      var botId;
+      botId = this.props.bot.id;
       $.when($.ajax("/api/v1/public/swaps/" + botId)).done((function(_this) {
         return function(swapsData) {
+          var anyFound, newSwap, newSwapIdsMap, _i, _len;
           if (_this.isMounted()) {
-            console.log("swapsData=", swapsData);
-            _this.setState({
-              swaps: swapsData
-            });
-            _this.props.eventSubscriber.subscribe(function(botEvent) {
-              return _this.applyBotEventToSwaps(botEvent);
-            });
+            newSwapIdsMap = $.extend({}, _this.state.swapIdsMap);
+            anyFound = false;
+            for (_i = 0, _len = swapsData.length; _i < _len; _i++) {
+              newSwap = swapsData[_i];
+              if (newSwapIdsMap[newSwap.id] == null) {
+                anyFound = true;
+                newSwapIdsMap[newSwap.id] = true;
+              }
+            }
+            if (anyFound) {
+              console.log("newSwapIdsMap=", newSwapIdsMap);
+              _this.setState({
+                swaps: swapsData,
+                swapIdsMap: newSwapIdsMap
+              });
+            }
+            if (refreshCallback != null) {
+              refreshCallback();
+            }
           }
         };
       })(this));
     },
-    applyBotEventToSwaps: function(botEvent) {
+    applyBotEventToSwaps: function(botEvent, allowRecursion) {
       var anyFound, applied, newSwapEventRecords, sortedSwaps, swap, _i, _len, _ref;
+      if (allowRecursion == null) {
+        allowRecursion = true;
+      }
       if (this.state.swaps == null) {
         return false;
       }
-      newSwapEventRecords = this.state.swapEventRecords;
+      newSwapEventRecords = $.extend({}, this.state.swapEventRecords);
       anyFound = false;
       _ref = this.state.swaps;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -389,6 +469,18 @@
           swapEventRecords: newSwapEventRecords,
           swaps: sortedSwaps
         });
+      }
+      if (!anyFound && (botEvent.event.swapId != null)) {
+        if (this.state.swapIdsMap[botEvent.event.swapId] == null) {
+          console.log("did not find swapId: " + botEvent.event.swapId + ".  refreshing swapsData");
+          this.refreshSwapsData((function(_this) {
+            return function() {
+              if (allowRecursion) {
+                _this.applyBotEventToSwaps(botEvent, false);
+              }
+            };
+          })(this));
+        }
       }
       return anyFound;
     },
@@ -447,7 +539,7 @@
       }, this.activeSwaps((function(_this) {
         return function(swap, eventRecord) {
           anyActiveSwaps = true;
-          return React.createElement(SwapStatusComponent, {
+          return React.createElement(RecentOrActiveSwapComponent, {
             "key": swap.id,
             "bot": _this.props.bot,
             "swap": swap,
@@ -466,7 +558,7 @@
       }, this.recentSwaps((function(_this) {
         return function(swap, eventRecord) {
           anyRecentSwaps = true;
-          return React.createElement(SwapStatusComponent, {
+          return React.createElement(RecentOrActiveSwapComponent, {
             "key": swap.id,
             "bot": _this.props.bot,
             "swap": swap,

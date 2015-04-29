@@ -2535,6 +2535,54 @@
     swapbot = {};
   }
 
+  swapbot.fnUtils = (function() {
+    var callbackTimeouts, callbacksQueue, exports;
+    exports = {};
+    callbacksQueue = {};
+    callbackTimeouts = {};
+    exports.callOnceWithCallback = function(key, fn, newCallback, timeout) {
+      var runFunctionCall;
+      if (timeout == null) {
+        timeout = 5000;
+      }
+      if ((callbacksQueue[key] != null) && callbacksQueue[key].length > 0) {
+        return callbacksQueue[key].push(newCallback);
+      } else {
+        callbacksQueue[key] = [];
+        callbacksQueue[key].push(newCallback);
+        runFunctionCall = function() {
+          return fn(function() {
+            var callback, e, j, len, ref, results;
+            ref = callbacksQueue[key];
+            results = [];
+            for (j = 0, len = ref.length; j < len; j++) {
+              callback = ref[j];
+              try {
+                callback();
+              } catch (_error) {
+                e = _error;
+                console.error(e);
+              }
+              delete callbacksQueue[key];
+              clearTimeout(callbackTimeouts[key]);
+              results.push(delete callbackTimeouts[key]);
+            }
+            return results;
+          });
+        };
+        callbackTimeouts[key] = setTimeout(function() {
+          return runFunctionCall();
+        }, timeout);
+        return runFunctionCall();
+      }
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
   swapbot.pusher = (function() {
     var exports;
     exports = {};

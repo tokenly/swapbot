@@ -1,32 +1,9 @@
-BotStatusComponent = React.createClass
-    displayName: 'BotStatusComponent'
-
-    getInitialState: ()->
-        return {
-        }
-
-    componentDidMount: ()->
-        this.props.eventSubscriber.subscribe (botEvent)=>
-            newState = swapbot.botUtils.newBotStatusFromEvent(this.state.botStatus, botEvent)
-            this.setState({botStatus: newState})
-        return
-
-    render: ->
-        <div>
-            {
-                if this.state.botStatus == 'active'
-                    <div><div className="status-dot bckg-green"></div>Active</div>
-                else
-                    <div><div className="status-dot bckg-red"></div>Inactive</div>
-            }
-            <button className="button-question"></button>
-        </div>
-
 
 # ############################################################################################################
+# An entry in the active or recent swaps list
 
-SwapStatusComponent = React.createClass
-    displayName: 'SwapStatusComponent'
+RecentOrActiveSwapComponent = React.createClass
+    displayName: 'RecentOrActiveSwapComponent'
 
     getInitialState: ()->
         return {
@@ -56,44 +33,73 @@ SwapStatusComponent = React.createClass
         return swapEventRenderer.renderSwapStatus(this.props.bot, this.props.swap, this.props.swapEventRecord, this.state.fromNow)
 
 # ############################################################################################################
+# The list of all recent or active swaps
 
 RecentAndActiveSwapsComponent = React.createClass
     displayName: 'RecentAndActiveSwapsComponent'
 
     getInitialState: ()->
         return {
-            swaps: null
+            swaps: []
+            swapIdsMap: {}
             swapEventRecords: {}
         }
 
     componentDidMount: ()->
-        bot = this.props.bot
-        botId = bot.id
+        this.refreshSwapsData ()=>
+            this.props.eventSubscriber.subscribe (botEvent)=>
+                this.applyBotEventToSwaps(botEvent)
+                return
+            return
+        return
+
+    refreshSwapsData: (callback)->
+        # refresh the swaps once
+        swapbot.fnUtils.callOnceWithCallback 'K:rswp', ((cb)=> this._refreshSwapsFn(cb)), callback
+        return
+
+
+    _refreshSwapsFn: (refreshCallback)->
+        botId = this.props.bot.id
 
         $.when(
             $.ajax("/api/v1/public/swaps/#{botId}"),
         ).done (swapsData)=>
             if this.isMounted()
-                console.log "swapsData=",swapsData
+                newSwapIdsMap = $.extend({}, this.state.swapIdsMap)
 
-                this.setState({swaps: swapsData})
+                anyFound = false
+                for newSwap in swapsData
+                    if not newSwapIdsMap[newSwap.id]?
+                        anyFound = true
+                        newSwapIdsMap[newSwap.id] = true
 
-                this.props.eventSubscriber.subscribe (botEvent)=>
-                    this.applyBotEventToSwaps(botEvent)
+                if anyFound
+                    console.log "newSwapIdsMap=",newSwapIdsMap
+                    this.setState({swaps: swapsData, swapIdsMap: newSwapIdsMap})
+
+                if refreshCallback?
+                    refreshCallback()
             return
         return
 
-    applyBotEventToSwaps: (botEvent)->
+
+
+    applyBotEventToSwaps: (botEvent, allowRecursion=true)->
         return false if not this.state.swaps?
 
-        newSwapEventRecords = this.state.swapEventRecords
+        # console.log "botEvent=",botEvent
+        # console.log "old this.state.swapEventRecords",this.state.swapEventRecords
+        newSwapEventRecords = $.extend({}, this.state.swapEventRecords)
         anyFound = false
         for swap in this.state.swaps
             if swapEventWatcher.botEventMatchesSwap(botEvent, swap)
                 applied = swapEventWatcher.applyEventToSwapEventRecordsIfNew(botEvent, newSwapEventRecords)
                 anyFound = true if applied
+
         
         if anyFound
+            # console.log "new newSwapEventRecords",newSwapEventRecords
             # sort swaps by most recent first
             sortedSwaps = this.state.swaps.slice(0)
             sortedSwaps.sort (a,b)->
@@ -105,7 +111,20 @@ RecentAndActiveSwapsComponent = React.createClass
 
             this.setState({swapEventRecords: newSwapEventRecords, swaps: sortedSwaps})
 
+        if not anyFound and botEvent.event.swapId?
+            if not this.state.swapIdsMap[botEvent.event.swapId]?
+                console.log "did not find swapId: #{botEvent.event.swapId}.  refreshing swapsData"
+                # this is for a new swap
+                this.refreshSwapsData ()=>
+                    # apply again
+                    if allowRecursion
+                        this.applyBotEventToSwaps(botEvent, false)
+                    return
+
         return anyFound
+
+
+
 
     activeSwaps: (fn)->
         eventRecords = this.state.swapEventRecords
@@ -138,7 +157,7 @@ RecentAndActiveSwapsComponent = React.createClass
                     {
                         this.activeSwaps (swap, eventRecord)=>
                             anyActiveSwaps = true
-                            <SwapStatusComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
+                            <RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
                     }
                 </ul>
                 {
@@ -153,7 +172,7 @@ RecentAndActiveSwapsComponent = React.createClass
                     {
                         this.recentSwaps (swap, eventRecord)=>
                             anyRecentSwaps = true
-                            <SwapStatusComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
+                            <RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} swapEventRecord={eventRecord} />
                     }
                 </ul>
                 {
@@ -168,35 +187,3 @@ RecentAndActiveSwapsComponent = React.createClass
         </div>
 
 
-
-        # <h3>Recent Swaps</h3>
-        # <ul className="swap-list">
-        #     <li className="confirmed">
-        #         <div className="status-icon icon-confirmed"></div>
-        #         <a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
-        #     </li>
-        #     <li className="failed">
-        #         <div className="status-icon icon-failed"></div>
-        #         Failed to process <b>100,000 UNKNOWNCOIN</b>.
-        #     </li>
-        #     <li className="confirmed">
-        #         <div className="status-icon icon-confirmed"></div>
-        #         <a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
-        #     </li>
-        #     <li className="confirmed">
-        #         <div className="status-icon icon-confirmed"></div>
-        #         <a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
-        #     </li>
-        #     <li className="confirmed">
-        #         <div className="status-icon icon-confirmed"></div>
-        #         <a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
-        #     </li>
-        #     <li className="failed">
-        #         <div className="status-icon icon-failed"></div>
-        #         Failed to process <b>100,000 UNKNOWNCOIN</b>.
-        #     </li>
-        #     <li className="confirmed">
-        #         <div className="status-icon icon-confirmed"></div>
-        #         <a target="_blank" href="http://blockchain.info/address/hello">1MyPers...Ce6f7cD</a> successfully exchanged <b>0.1BTC</b> for <b>100,000</b> LTBCOIN.
-        #     </li>
-        # </ul>
