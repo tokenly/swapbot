@@ -1939,21 +1939,6 @@
                     }, botPublicAddress(vm))
                   ])
                 ])
-              ]), m("div", {
-                "class": "row"
-              }, [
-                m("div", {
-                  "class": "col-md-12"
-                }, [
-                  sbAdmin.form.mValueDisplay("Bot Popup Address", {
-                    id: 'description'
-                  }, [
-                    m("a", {
-                      href: poupupBotAddress(vm),
-                      target: "_blank"
-                    }, poupupBotAddress(vm))
-                  ])
-                ])
               ])
             ]), m("div", {
               "class": "col-md-4"
