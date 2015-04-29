@@ -75,7 +75,7 @@ class ReceiveWebhookHandler {
             $this->notification_receipt_repository->createByUUID($uuid);
         } catch (QueryException $e) {
             if ($e->errorInfo[0] == 23000) {
-                EventLog::logError('notification.duplicate', ['notificationUd' => $uuid]);
+                EventLog::logError('notification.duplicate', ['notificationUuid' => $uuid]);
                 return true;
             }
             throw $e;
