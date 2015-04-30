@@ -21,6 +21,8 @@ expectedXChainCalls:
     meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -40,6 +42,9 @@ expectedBotEvents:
     meta: { baseFilename: bot.unpaid.yml }
     msg: Ignored transaction 00000000000000000000000000000000000000000000000000000xcptx222222 because this bot is unpaid.
     txid: '00000000000000000000000000000000000000000000000000000xcptx222222'
+
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
 
 
 expectedTransactionModels:

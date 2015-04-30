@@ -62,6 +62,9 @@ class Swap extends APIModel {
     public function isComplete() {
         return ($this['state'] == SwapState::COMPLETE);
     }
+    public function isError() {
+        return ($this['state'] == SwapState::ERROR);
+    }
     public function wasSent() {
         switch ($this['state']) {
             case SwapState::SENT:

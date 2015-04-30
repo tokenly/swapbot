@@ -11,6 +11,7 @@ use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Swap;
+use Swapbot\Models\Transaction;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotRepository;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -130,11 +131,6 @@ class BotEventLogger {
             'txid'          => $tx_id,
             'confirmations' => $confirmations,
         ]);
-        // $this->logBotEvent($bot, 'tx.previous', BotEvent::LEVEL_DEBUG, [
-        //     'msg'           => "Transaction {$tx_id} was confirmed with $confirmations confirmations.",
-        //     'txid'          => $tx_id,
-        //     'confirmations' => $confirmations
-        // ]);
     }
 
     public function logUnknownReceiveTransaction(Bot $bot, $xchain_notification) {
@@ -256,6 +252,10 @@ class BotEventLogger {
 
     ////////////////////////////////////////////////////////////////////////
     // swap
+
+    public function logNewSwap(Bot $bot, Swap $swap, Transaction $transaction) {
+        $this->logSwapEvent('swap.new', $bot, $swap, $transaction);
+    }
 
     public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
         return $this->logBotEventWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
@@ -551,21 +551,113 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    public function logSwapEvent(Swap $swap, Bot $bot, $event_name, $level, $event_data, $log_to_event_log = true) {
-        if ($log_to_event_log) { EventLog::log($event_name, $event_data); }
-        return $this->createBotEvent($bot, $swap, $event_name, $level, $event_data);
+    public function logSwapEvent($event_name, Bot $bot, Swap $swap, Transaction $transaction, $write_to_application_log=true) {
+        $event_template_data = $this->getEventTemplate($event_name);
+
+        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $transaction);
+
+        // log the bot event
+        if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
+
+        // save the bot event
+        $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, $swap, $swap_details_for_event_log);
+        $serialized_bot_event_model = $bot_event_model->serializeForAPI();
+
+        if ($event_template_data['swapEventStream'] ) {
+            // publish to event stream
+            Event::fire(new SwapEventStreamEventCreated($swap, $bot, $serialized_bot_event_model));
+        }
+
+        // // fire a bot event
+        // Event::fire(new BotEventCreated($bot, $serialized_bot_event_model));
+
+        // fire swap event
+        Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));
     }
 
-    public function logBotEvent(Bot $bot, $event_name, $level, $event_data, $log_to_event_log = true) {
-        return $this->createBotEvent($bot, null, $event_name, $level, $event_data);
+    protected function buildSwapDetailsForLog($bot, $swap, $transaction) {
+        $swap_details_for_log = [
+            'destination'   => isset($swap['receipt']['destination']) ? $swap['receipt']['destination'] : null,
+
+            'quantityIn'    => isset($swap['receipt']['quantityIn']) ? $swap['receipt']['quantityIn'] : null,
+            'assetIn'       => isset($swap['receipt']['assetIn']) ? $swap['receipt']['assetIn'] : null,
+            'txidIn'        => isset($swap['receipt']['txidIn']) ? $swap['receipt']['txidIn'] : null,
+
+            'quantityOut'   => isset($swap['receipt']['quantityOut']) ? $swap['receipt']['quantityOut'] : null,
+            'assetOut'      => isset($swap['receipt']['assetOut']) ? $swap['receipt']['assetOut'] : null,
+            'txidOut'       => isset($swap['receipt']['txidOut']) ? $swap['receipt']['txidOut'] : null,
+
+            'confirmations' => isset($swap['receipt']['confirmations']) ? $swap['receipt']['confirmations'] : null,
+
+            'state'         => $swap['state'],
+            'isComplete'    => $swap->isComplete(),
+            'isError'       => $swap->isError(),
+        ];
+
+        // filter null values
+        $filtered_swap_details = $swap_details_for_log;
+        foreach(array_keys($swap_details_for_log) as $key) {
+            if ($filtered_swap_details[$key] === null) { unset($filtered_swap_details[$key]); }
+        }
+        $swap_details_for_log = $filtered_swap_details;
+
+        return $swap_details_for_log;
+    }
+
+
+    protected function logBotEventFromCompiledData($event_name, Bot $bot, $event_vars) {
+        return $this->saveBotEventToRepository($event_name, $bot, null, $event_vars);
+    }
+
+    protected function saveBotEventToRepository($event_name, $bot, $swap, $event_vars) {
+        $event_template_data = $this->getEventTemplate($event_name);
+        $level = constant('Swapbot\Models\BotEvent::LEVEL_'.strtoupper($event_template_data['level']));
+
+        $event_data = ['name' => $event_name];
+        $event_data = array_merge($event_data, $event_vars);
+
+        $create_vars = [
+            'bot_id'      => $bot['id'],
+            'swap_id'     => $swap ? $swap['id'] : null,
+            'level'       => $level,
+            'event'       => $event_data,
+            'swap_stream' => isset($event_template_data['swapEventStream']) ? $event_template_data['swapEventStream'] : false,
+            'bot_stream'  => isset($event_template_data['botEventStream']) ? $event_template_data['botEventStream'] : false,
+        ];
+
+        // create the bot event
+        $bot_event_model = $this->bot_event_repository->create($create_vars);
+
+        return $bot_event_model;
+    }
+
+    protected function getEventTemplate($event_name) {
+        if (!isset($this->EVENT_TEMPLATE_DATA)) {
+            $this->EVENT_TEMPLATE_DATA = include(realpath(base_path('resources/data/events/compiled')).'/allEvents.data.php');
+        }
+
+        if (!isset($this->EVENT_TEMPLATE_DATA[$event_name])) { throw new Exception("Event template not found for {$event_name}", 1); }
+
+        return $this->EVENT_TEMPLATE_DATA[$event_name];
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // DEPRECATED
+
+    public function logBotEvent(Bot $bot, $event_name, $level, $event_data, $write_to_application_log = true) {
+        return $this->createBotEvent($bot, null, $event_name, $level, $event_data, $write_to_application_log);
     }
 
     public function logBotEventWithoutEventLog(Bot $bot, $event_name, $level, $event_data) {
         return $this->logBotEvent($bot, $event_name, $level, $event_data, false);
     }
 
-    public function createBotEvent($bot, $swap, $event_name, $level, $event_data) {
-        // DEPRECATED
+
+    public function createBotEvent($bot, $swap, $event_name, $level, $event_data, $write_to_application_log=true) {
+        // log the bot event
+        if ($write_to_application_log) { EventLog::log($event_name, $event_data); }
 
         $event_data['name'] = $event_name;
 
@@ -589,48 +681,7 @@ class BotEventLogger {
 
         return $bot_event_model;
     }
-
-    protected function logBotEventFromCompiledData($event_name, Bot $bot, $event_vars) {
-        return $this->logEventFromCompiledData($event_name, $bot, null, $event_vars);
-    }
-
-    protected function logEventFromCompiledData($event_name, $bot, $swap, $event_vars) {
-        $event_template_data = $this->getEventTemplate($event_name);
-        $level = constant('Swapbot\Models\BotEvent::LEVEL_'.strtoupper($event_template_data['level']));
-
-        $event_data = ['name' => $event_name];
-        $event_data = array_merge($event_data, $event_vars);
-
-        $create_vars = [
-            'bot_id'  => $bot['id'],
-            'swap_id' => $swap ? $swap['id'] : null,
-            'level'   => $level,
-            'event'   => $event_data,
-        ];
-
-        // create the bot event
-        $bot_event_model = $this->bot_event_repository->create($create_vars);
-
-        // fire a bot event
-        Event::fire(new BotEventCreated($bot, $bot_event_model->serializeForAPI()));
-
-        if ($swap) {
-            // also fire a swap event if this is a swap event
-            Event::fire(new SwapEventCreated($swap, $bot, $bot_event_model->serializeForAPI()));
-        }
-
-        return $bot_event_model;
-    }
-
-    protected function getEventTemplate($event_name) {
-        if (!isset($this->EVENT_TEMPLATE_DATA)) {
-            $this->EVENT_TEMPLATE_DATA = include(realpath(base_path('resources/data/events/compiled')).'/allEvents.data.php');
-        }
-
-        if (!isset($this->EVENT_TEMPLATE_DATA[$event_name])) { throw new Exception("Event template not found for {$event_name}", 1); }
-
-        return $this->EVENT_TEMPLATE_DATA[$event_name];
-    }
-
+    
+    
 
 }

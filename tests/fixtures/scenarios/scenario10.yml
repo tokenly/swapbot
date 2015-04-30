@@ -26,6 +26,8 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

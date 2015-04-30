@@ -22,6 +22,8 @@ expectedXChainCalls:
     meta: { baseFilename: send_LTBCOIN.yml }
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

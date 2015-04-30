@@ -29,6 +29,9 @@ class CreateBotEventsTable extends Migration {
 
 			$table->timestamp('created_at');
 			$table->bigInteger('serial')->unsigned()->index();
+
+            $table->boolean('swap_stream')->default(0);
+            $table->boolean('bot_stream')->default(0);
 		});
 	}
 

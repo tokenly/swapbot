@@ -25,6 +25,8 @@ expectedXChainCalls:
   - meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -47,6 +49,8 @@ expectedBotEvents:
 
   #### now the bot received the payment
 
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
   - #### ACTIVE

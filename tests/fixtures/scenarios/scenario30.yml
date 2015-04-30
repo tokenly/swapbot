@@ -38,8 +38,13 @@ expectedBotEvents:
     txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
 
 
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
+  - #### NEW (2nd swap)
+    meta: { baseFilename: swap.new.yml }
 
   ####
   # the original swap should now be found and handled

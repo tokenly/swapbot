@@ -30,6 +30,8 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY

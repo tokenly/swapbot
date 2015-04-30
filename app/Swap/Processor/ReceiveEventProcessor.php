@@ -292,7 +292,13 @@ class ReceiveEventProcessor {
             $should_process = ($tx_process['xchain_notification']['asset'] == $swap_config['in']);
             if ($should_process) {
                 // build a swap from this swap config
-                $swap = $this->swap_processor->getSwapFromSwapConfig($swap_config, $tx_process['bot']['id'], $tx_process['transaction']['id']);
+                $swap = $this->swap_processor->findSwapFromSwapConfig($swap_config, $tx_process['bot']['id'], $tx_process['transaction']['id']);
+
+                // if there wasn't a swap yet, create one
+                if (!$swap) {
+                    $swap = $this->swap_processor->createNewSwap($swap_config, $tx_process['bot'], $tx_process['transaction']);
+                }
+
                 $any_swap_processed = true;
             }
         }

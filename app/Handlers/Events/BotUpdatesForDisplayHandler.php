@@ -23,7 +23,7 @@ class BotUpdatesForDisplayHandler {
     }
 
     public function sendSwapEventToPusher(Event $event) {
-        // all swap events also go to the bot
+        // all swap events go to the bot
         $this->sendBotEventToPusher($event);
     }
 

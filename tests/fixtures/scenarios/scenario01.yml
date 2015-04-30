@@ -17,6 +17,8 @@ xchainNotifications:
 expectedXChainCalls: none
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### unconfirmed transaction found

@@ -32,6 +32,8 @@ expectedXChainCalls:
       fee: 0.000001
       dust_size: 0.000004
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap refundFound

@@ -23,6 +23,8 @@ expectedXChainCalls:
     meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### waiting on confirmation

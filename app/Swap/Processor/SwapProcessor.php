@@ -8,10 +8,12 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\BillBotForTransaction;
 use Swapbot\Commands\ReconcileSwapState;
+use Swapbot\Models\Bot;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Models\Swap;
+use Swapbot\Models\Transaction;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Exception\SwapStrategyException;
@@ -46,9 +48,34 @@ class SwapProcessor {
     }
 
 
-    public function getSwapFromSwapConfig(SwapConfig $swap_config, $bot_id, $transaction_id) {
-        // load or create the swap from the database
-        return $this->findOrCreateSwap($swap_config, $bot_id, $transaction_id);
+    public function findSwapFromSwapConfig(SwapConfig $swap_config, $bot_id, $transaction_id) {
+        // swap variables
+        $swap_name      = $swap_config->buildName();
+
+        // try to find an existing swap
+        $existing_swap = $this->swap_repository->findByBotIDTransactionIDAndName($bot_id, $transaction_id, $swap_name);
+        if ($existing_swap) { return $existing_swap; }
+
+        return null;
+    }
+
+    public function createNewSwap($swap_config, Bot $bot, Transaction $transaction) {
+        // swap variables
+        $swap_name      = $swap_config->buildName();
+
+        // new swap vars
+        $new_swap = $this->swap_repository->create([
+            'name'           => $swap_config->buildName(),
+            'definition'     => $swap_config->serialize(),
+            'state'          => 'brandnew',
+            'bot_id'         => $bot['id'],
+            'transaction_id' => $transaction['id'],
+        ]);
+
+        // log the new Swap
+        $this->bot_event_logger->logNewSwap($bot, $new_swap, $transaction);
+
+        return $new_swap;
     }
 
     public function processSwap(Swap $swap) {
@@ -424,26 +451,6 @@ class SwapProcessor {
     }
 
 
-
-    protected function findOrCreateSwap($swap_config, $bot_id, $transaction_id) {
-        // swap variables
-        $swap_name      = $swap_config->buildName();
-
-        // try to find an existing swap
-        $existing_swap = $this->swap_repository->findByBotIDTransactionIDAndName($bot_id, $transaction_id, $swap_name);
-        if ($existing_swap) { return $existing_swap; }
-
-        // no swap exists yet, so create one
-        $new_swap = $this->swap_repository->create([
-            'name'           => $swap_config->buildName(),
-            'definition'     => $swap_config->serialize(),
-            'state'          => 'brandnew',
-            'bot_id'         => $bot_id,
-            'transaction_id' => $transaction_id,
-        ]);
-
-        return $new_swap;
-    }
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

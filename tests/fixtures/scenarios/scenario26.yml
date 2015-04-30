@@ -27,6 +27,8 @@ expectedXChainCalls:
 
 
 expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -40,6 +42,8 @@ expectedBotEvents:
 
 ############## Transaction #2 ##############
 
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
