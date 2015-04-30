@@ -25,6 +25,15 @@ botEventWatcher = do ()->
         console.warn "unknown event #{event.name}"        
         return event.confirmations
 
+
+    exports.botEventIsFinal = (botEvent)->
+        event = botEvent.event
+        switch event.name
+            when 'swap.refunded', 'swap.failed', 'swap.sent'
+                return true
+        return false
+
+
     exports.txInfoFromBotEvent = (botEvent)->
         event = botEvent.event
         txInfo = {

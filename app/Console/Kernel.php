@@ -16,6 +16,8 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Bot\ReconcileBotStateCommand',
 		'Swapbot\Console\Commands\Bot\UpdateBotBalancesCommand',
 		'Swapbot\Console\Commands\Bot\ChangeBotStateCommand',
+		
+		'Swapbot\Console\Commands\Compile\CompileEventsCommand',
 
 		'Swapbot\Console\Commands\Development\ExportBotStateGraph',
 		'Swapbot\Console\Commands\Development\ExportSwapStateGraph',

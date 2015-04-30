@@ -305,7 +305,8 @@ class ScenarioRunner
 
         ///////////////////
         // EXPECTED
-        $expected_fields = ['name','msg',];
+        // 'msg' is no longer saved to the db
+        $expected_fields = ['name',];
         foreach ($expected_fields as $field) {
             $normalized_expected_bot_event[$field] = isset($expected_bot_event[$field]) ? $expected_bot_event[$field] : '[none provided]';
         }

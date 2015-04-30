@@ -125,7 +125,7 @@ class SwapProcessor {
                 EventLog::logError('swap.failed', $e);
                 $data = $e->getErrorData();
                 $data['swapId'] = $swap['uuid'];
-                $this->bot_event_logger->logToBotEventsWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
+                $this->bot_event_logger->logBotEventWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
             } else {
                 EventLog::logError('swap.failed', $e);
                 $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $swap_process['xchain_notification'], $e);

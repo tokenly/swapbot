@@ -2,9 +2,11 @@
 
 use Swapbot\Events\Event;
 use Swapbot\Models\Bot;
+use Swapbot\Models\Swap;
 
-class BotEventCreated extends Event {
+class SwapEventCreated extends Event {
 
+    var $swap;
     var $bot;
     var $event;
 
@@ -13,9 +15,10 @@ class BotEventCreated extends Event {
      *
      * @return void
      */
-    public function __construct(Bot $bot, $event)
+    public function __construct(Swap $swap, Bot $bot, $event)
     {
-        $this->bot = $bot;
+        $this->bot   = $bot;
+        $this->swap  = $swap;
         $this->event = $event;
     }
 

@@ -1,0 +1,7 @@
+events:
+  -
+    name: tx.previous
+    label: Previous Transaction
+    level: DEBUG
+    msg: Transaction {{ $tx_id }} was confirmed with {{ $confirmations }} confirmations.
+

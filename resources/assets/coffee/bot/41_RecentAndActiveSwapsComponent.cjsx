@@ -45,12 +45,19 @@ RecentAndActiveSwapsComponent = React.createClass
             swapEventRecords: {}
         }
 
+
     componentDidMount: ()->
         this.refreshSwapsData ()=>
-            this.props.eventSubscriber.subscribe (botEvent)=>
+            this.subscriberId = this.props.eventSubscriber.subscribe (botEvent)=>
                 this.applyBotEventToSwaps(botEvent)
                 return
             return
+        return
+
+    componentWillUnmount: ()->
+        if this.subscriberId?
+            this.props.eventSubscriber.unsubscribe(this.subscriberId)
+            this.subscriberId = null
         return
 
     refreshSwapsData: (callback)->

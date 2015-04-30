@@ -8,10 +8,18 @@ BotStatusComponent = React.createClass
         }
 
     componentDidMount: ()->
-        this.props.eventSubscriber.subscribe (botEvent)=>
+        this.subscriberId = this.props.eventSubscriber.subscribe (botEvent)=>
             newState = swapbot.botUtils.newBotStatusFromEvent(this.state.botStatus, botEvent)
             this.setState({botStatus: newState})
         return
+
+    componentWillUnmount: ()->
+        if this.subscriberId?
+            this.props.eventSubscriber.unsubscribe(this.subscriberId)
+            this.subscriberId = null
+        return
+
+
 
     render: ->
         <div>

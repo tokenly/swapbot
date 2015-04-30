@@ -19,6 +19,5 @@ window.BotApp =
 
         React.render <BotStatusComponent eventSubscriber={eventSubscriber} bot={bot} />, document.getElementById('BotStatusComponent')
         React.render <SwapInterfaceComponent eventSubscriber={eventSubscriber} bot={bot} chosenSwapProvider={chosenSwapProvider} />, document.getElementById('SwapInterfaceComponent')
-        # React.render <SwapsListComponent bot={bot} chosenSwapProvider={chosenSwapProvider} />, document.getElementById('SwapsListComponent')
         React.render <RecentAndActiveSwapsComponent eventSubscriber={eventSubscriber} bot={bot} />, document.getElementById('RecentAndActiveSwapsComponent')
 

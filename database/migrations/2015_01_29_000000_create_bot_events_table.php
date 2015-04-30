@@ -21,6 +21,9 @@ class CreateBotEventsTable extends Migration {
             $table->integer('bot_id')->unsigned();
             $table->foreign('bot_id')->references('id')->on('bots');
 
+            $table->integer('swap_id')->unsigned()->nullable();
+            $table->foreign('swap_id')->references('id')->on('swaps');
+
             $table->mediumInteger('level')->unsigned();
             $table->longText('event');
 
