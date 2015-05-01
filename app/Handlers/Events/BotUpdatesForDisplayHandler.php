@@ -27,6 +27,14 @@ class BotUpdatesForDisplayHandler {
         $this->sendBotEventToPusher($event);
     }
 
+    public function sendSwapstreamEventToPusher(Event $event) {
+        $bot   = $event->bot;
+        $event = $event->event;
+
+        $this->pusher_client->send('/swapbot_swapstream_'.$bot['uuid'], $event);
+    }
+
+
     public function sendBalanceUpdateToPusher(Event $event) {
         $bot   = $event->bot;
         $balances = $event->new_balances;
@@ -52,6 +60,8 @@ class BotUpdatesForDisplayHandler {
     {
         $events->listen('Swapbot\Events\SwapEventCreated',         'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendSwapEventToPusher');
         $events->listen('Swapbot\Events\BotEventCreated',          'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBotEventToPusher');
+        $events->listen('Swapbot\Events\SwapstreamEventCreated',   'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendSwapstreamEventToPusher');
+
         $events->listen('Swapbot\Events\BotBalancesUpdated',       'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBalanceUpdateToPusher');
         $events->listen('Swapbot\Events\BotPaymentAccountUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
     }

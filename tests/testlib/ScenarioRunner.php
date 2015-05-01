@@ -720,6 +720,10 @@ class ScenarioRunner
         foreach ($must_exist_fields as $field) {
             if (isset($actual_swap_model[$field])) { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
         }
+
+        // receipt timestamp
+        if (isset($actual_swap_model['receipt']['timestamp'])) { $normalized_expected_swap_model['receipt']['timestamp'] = $actual_swap_model['receipt']['timestamp']; }
+
         ///////////////////
 
 

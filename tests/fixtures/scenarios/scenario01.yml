@@ -21,7 +21,7 @@ expectedBotEvents:
     meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - #### unconfirmed transaction found
-    meta: { baseFilename: unconfirmed.tx.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
 
 

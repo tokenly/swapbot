@@ -1,0 +1,11 @@
+name: swap.transaction.update
+destination: SENDER01
+quantityIn: 500
+assetIn: 'LTBCOIN'
+txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+quantityOut: 0.0005
+assetOut: 'BTC'
+confirmations: '0'
+state: 'ready'
+isComplete: false
+isError: false

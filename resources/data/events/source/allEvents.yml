@@ -4,8 +4,15 @@ events:
     name: swap.new
     label: New Swap
     level: INFO
-    msg: A new swap was created for incoming transaction {{ $tx_id }}.
+    msg: A new swap was created for incoming transaction {{ $txidIn }}.
     swapEventStream: false
+
+  -
+    name: swap.transaction.update
+    label: Swap Transaction
+    level: INFO
+    msg: Transaction {{ $txidIn }} was seen.
+    swapEventStream: true
 
 
   # ### Bot Events ##########################################

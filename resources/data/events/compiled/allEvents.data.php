@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-04-30 16:09:11
+// compiled on 2015-04-30 17:07:00
 
 return array (
   'swap.new' => 
@@ -8,8 +8,16 @@ return array (
     'name' => 'swap.new',
     'label' => 'New Swap',
     'level' => 'INFO',
-    'msg' => 'A new swap was created for incoming transaction {{ $tx_id }}.',
+    'msg' => 'A new swap was created for incoming transaction {{ $txidIn }}.',
     'swapEventStream' => false,
+  ),
+  'swap.transaction.update' => 
+  array (
+    'name' => 'swap.transaction.update',
+    'label' => 'Swap Transaction',
+    'level' => 'INFO',
+    'msg' => 'Transaction {{ $txidIn }} was seen.',
+    'swapEventStream' => true,
   ),
   'tx.previous' => 
   array (

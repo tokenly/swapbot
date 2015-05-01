@@ -73,7 +73,7 @@ class SwapProcessor {
         ]);
 
         // log the new Swap
-        $this->bot_event_logger->logNewSwap($bot, $new_swap, $transaction);
+        $this->bot_event_logger->logNewSwap($bot, $new_swap);
 
         return $new_swap;
     }
@@ -200,10 +200,9 @@ class SwapProcessor {
         // is this an unconfirmed tx?
         if (!$swap_process['is_confirmed']) {
             $swap_process['swap_was_handled'] = true;
-            $this->bot_event_logger->logUnconfirmedTx($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
 
             // mark details
-            $swap_process['swap_update_vars']['receipt'] = [
+            $receipt_update_vars = [
                 'type'          => 'pending',
 
                 'quantityIn'    => $swap_process['in_quantity'],
@@ -216,6 +215,18 @@ class SwapProcessor {
                 'confirmations' => $swap_process['confirmations'],
                 'destination'   => $swap_process['destination'],
             ];
+
+            // only update if something has changed
+            $any_changed = false;
+            $previous_receipt = $swap_process['swap']['receipt'];
+            foreach($receipt_update_vars as $k => $v) {
+                if ($v != $previous_receipt[$k]) { $any_changed = true; }
+            }
+
+            if ($any_changed) {
+                $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+                $this->bot_event_logger->logSwapTransactionUpdate($swap_process['bot'], $swap_process['swap'], $receipt_update_vars);
+            }
         }
     }
 
@@ -261,6 +272,8 @@ class SwapProcessor {
 
                 'confirmations' => $swap_process['confirmations'],
                 'destination'   => $swap_process['destination'],
+
+                'timestamp'     => time(),
             ];
         } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
             if ($swap_process['swap']->isConfirming()) {
@@ -282,6 +295,8 @@ class SwapProcessor {
 
                     'confirmations' => $swap_process['confirmations'],
                     'destination'   => $swap_process['destination'],
+
+                    'timestamp'     => time(),
                 ];
             }
         }
@@ -335,6 +350,8 @@ class SwapProcessor {
 
             'confirmations' => $swap_process['confirmations'],
             'destination'   => $swap_process['destination'],
+
+            'timestamp'     => time(),
         ];
 
         // update the local balance

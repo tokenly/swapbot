@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Event;
 use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Events\BotEventCreated;
 use Swapbot\Events\SwapEventCreated;
+use Swapbot\Events\SwapstreamEventCreated;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\BotState;
@@ -253,9 +254,15 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // swap
 
-    public function logNewSwap(Bot $bot, Swap $swap, Transaction $transaction) {
-        $this->logSwapEvent('swap.new', $bot, $swap, $transaction);
+    public function logNewSwap(Bot $bot, Swap $swap) {
+        $this->logSwapEvent('swap.new', $bot, $swap);
     }
+
+    public function logSwapTransactionUpdate(Bot $bot, Swap $swap, $receipt_update_vars) {
+        $this->logSwapEvent('swap.transaction.update', $bot, $swap, $receipt_update_vars);
+    }
+
+
 
     public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
         return $this->logBotEventWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
@@ -309,19 +316,6 @@ class BotEventLogger {
         ]);
     }
 
-    public function logUnconfirmedTx(Bot $bot, Swap $swap, $xchain_notification, $destination, $quantity, $asset) {
-        return $this->logBotEvent($bot, 'unconfirmed.tx', BotEvent::LEVEL_INFO, [
-            'msg'         => "Received an unconfirmed transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.  Will vend {$quantity} {$asset} to {$destination} when it confirms.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-            'swapId'      => $swap['uuid'],
-        ]);
-    }
 
     public function logSendAttempt(Bot $bot, Swap $swap, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
         // log the send
@@ -551,10 +545,10 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    public function logSwapEvent($event_name, Bot $bot, Swap $swap, Transaction $transaction, $write_to_application_log=true) {
+    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $write_to_application_log=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
-        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $transaction);
+        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $receipt_update_vars);
 
         // log the bot event
         if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
@@ -565,7 +559,7 @@ class BotEventLogger {
 
         if ($event_template_data['swapEventStream'] ) {
             // publish to event stream
-            Event::fire(new SwapEventStreamEventCreated($swap, $bot, $serialized_bot_event_model));
+            Event::fire(new SwapstreamEventCreated($swap, $bot, $serialized_bot_event_model));
         }
 
         // // fire a bot event
@@ -575,19 +569,22 @@ class BotEventLogger {
         Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));
     }
 
-    protected function buildSwapDetailsForLog($bot, $swap, $transaction) {
+    protected function buildSwapDetailsForLog($bot, $swap, $receipt_update_vars=null) {
+        $receipt = (array)$swap['receipt'];
+        if ($receipt_update_vars !== null) { $receipt = array_merge($receipt, $receipt_update_vars); }
+
         $swap_details_for_log = [
-            'destination'   => isset($swap['receipt']['destination']) ? $swap['receipt']['destination'] : null,
+            'destination'   => isset($receipt['destination'])   ? $receipt['destination']   : null,
 
-            'quantityIn'    => isset($swap['receipt']['quantityIn']) ? $swap['receipt']['quantityIn'] : null,
-            'assetIn'       => isset($swap['receipt']['assetIn']) ? $swap['receipt']['assetIn'] : null,
-            'txidIn'        => isset($swap['receipt']['txidIn']) ? $swap['receipt']['txidIn'] : null,
+            'quantityIn'    => isset($receipt['quantityIn'])    ? $receipt['quantityIn']    : null,
+            'assetIn'       => isset($receipt['assetIn'])       ? $receipt['assetIn']       : null,
+            'txidIn'        => isset($receipt['txidIn'])        ? $receipt['txidIn']        : null,
 
-            'quantityOut'   => isset($swap['receipt']['quantityOut']) ? $swap['receipt']['quantityOut'] : null,
-            'assetOut'      => isset($swap['receipt']['assetOut']) ? $swap['receipt']['assetOut'] : null,
-            'txidOut'       => isset($swap['receipt']['txidOut']) ? $swap['receipt']['txidOut'] : null,
+            'quantityOut'   => isset($receipt['quantityOut'])   ? $receipt['quantityOut']   : null,
+            'assetOut'      => isset($receipt['assetOut'])      ? $receipt['assetOut']      : null,
+            'txidOut'       => isset($receipt['txidOut'])       ? $receipt['txidOut']       : null,
 
-            'confirmations' => isset($swap['receipt']['confirmations']) ? $swap['receipt']['confirmations'] : null,
+            'confirmations' => isset($receipt['confirmations']) ? $receipt['confirmations'] : null,
 
             'state'         => $swap['state'],
             'isComplete'    => $swap->isComplete(),

@@ -19,6 +19,10 @@ $router->get('/', 'WelcomeController@index');
 
 // admin
 $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
+
+
+////////////////////////////////////////////////////////////////////////
+// Public Bot Pages
 $router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
 $router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap');
 
@@ -31,6 +35,9 @@ $router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
 
 // Bot Events API
 $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
+
+// Bot Events API
+$router->get('api/v1/public/swapevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@swapsEventStreamIndex');
 
 // Swaps API
 $router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');

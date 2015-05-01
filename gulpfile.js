@@ -80,17 +80,11 @@ elixir.extend("combineAdmin", function() {
 // combine bot
 elixir.extend("combinePublicBotApp", function() {
     gulp.task('combinePublicBotApp', function() {
-        // es.merge(
-        //     gulp.src('resources/assets/coffee/bot/*.cjsx'),
-        //     gulp.src('resources/assets/coffee/bot/*.coffee'),
-        //     gulp.src('resources/assets/coffee/shared/*.coffee'),
-        //     gulp.src('resources/assets/coffee/services/*.coffee')
-        // )
         gulp.src([
             'resources/assets/coffee/shared/*.coffee',
             'resources/assets/coffee/services/*.coffee',
-            'resources/assets/coffee/bot/*.cjsx',
-            'resources/assets/coffee/bot/*.coffee'
+            'resources/assets/coffee/bot/**/*.cjsx',
+            'resources/assets/coffee/bot/**/*.coffee'
         ])
         .pipe(concat('bot-combined.cjsx'))
         .pipe(cjsx().on('error', onError))

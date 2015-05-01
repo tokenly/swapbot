@@ -18,7 +18,12 @@ class BotEvent extends APIModel {
     const LEVEL_ALERT     = 550;
     const LEVEL_EMERGENCY = 600;
 
-    protected $api_attributes = ['id', 'level', 'event', 'created_at', 'serial', ];
+    protected $api_attributes = ['id', 'level', 'event', 'created_at', 'serial', 'swap_uuid', ];
+
+    protected $casts = [
+        'swap_stream' => 'boolean',
+        'bot_stream'  => 'boolean',
+    ];
 
     public function setEventAttribute($event) { $this->attributes['event'] = json_encode($event); }
     public function getEventAttribute() { return json_decode($this->attributes['event'], true); }
@@ -26,12 +31,14 @@ class BotEvent extends APIModel {
     public function setActiveAttribute($active) { $this->attributes['active'] = $active ? 1 : 0; }
     public function getActiveAttribute() { return !!$this->attributes['active']; }
 
-
-    // public function setLevelAttribute($level) { $this->attributes['level'] = $level ? 1 : 0; }
     public function getLevelAttribute() { return intval($this->attributes['level']); }
 
+    public function getSwapUuidAttribute() {
+        return $this->swap['uuid'];
+    }
 
-
-
+    public function swap() {
+        return $this->belongsTo('Swapbot\Models\Swap');
+    }
 
 }
