@@ -4,7 +4,6 @@ SwapAPIActionCreator = do ()->
     subscriberId = null
 
     handleSwapstreamEvents = (swapstreamEvents)->
-        console.log "handleSwapstreamEvents: ",swapstreamEvents
         SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents)
 
         return

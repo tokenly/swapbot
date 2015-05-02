@@ -44,7 +44,9 @@ swapbot.swapUtils = do ()->
         return buildDesc[swap.strategy](swap)
     
     exports.inAmountFromOutAmount = (inAmount, swap)->
-        return buildInAmountFromOutAmount[swap.strategy](inAmount, swap)
+        inAmount = buildInAmountFromOutAmount[swap.strategy](inAmount, swap)
+        inAmount = 0 if inAmount == NaN
+        return inAmount
 
     return exports
 

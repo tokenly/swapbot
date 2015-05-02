@@ -21,7 +21,7 @@ expectedXChainCalls: []
 
 expectedBotEvents:
   - #### NEW
-    meta: { baseFilename: swap.new.yml }
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY

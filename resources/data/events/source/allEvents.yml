@@ -5,13 +5,15 @@ events:
     label: New Swap
     level: INFO
     msg: A new swap was created for incoming transaction {{ $txidIn }}.
+    msgVars: [txidIn]
     swapEventStream: false
 
   -
     name: swap.transaction.update
     label: Swap Transaction
     level: INFO
-    msg: Transaction {{ $txidIn }} was seen.
+    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
 
@@ -20,5 +22,22 @@ events:
     name: tx.previous
     label: Previous Transaction
     level: DEBUG
-    msg: Transaction {{ $tx_id }} was confirmed with {{ $confirmations }} confirmations.
+    msgVars: [txid, confirmations]
+    msg: Transaction {{ $txid }} was confirmed with {{ $confirmations }} confirmations.
 
+
+
+
+# ### Standard Vars ### #
+
+# destination
+# quantityIn
+# assetIn
+# txidIn
+# quantityOut
+# assetOut
+# txidOut
+# confirmations
+# state
+# isComplete
+# isError

@@ -1,0 +1,5 @@
+name: swap.new
+state: 'brandnew'
+isComplete: false
+isError: false
+txidIn: "00000000000000000000000000000000000000000000000000000BTCtx222222"

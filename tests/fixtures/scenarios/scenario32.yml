@@ -45,7 +45,7 @@ expectedBotEvents:
 
   - #### NEW
     meta: { baseFilename: swap.new.yml }
-
+    txidIn: "00000000000000000000000000000000000000000000000000000xcptx222222"
 
 expectedTransactionModels:
   - 

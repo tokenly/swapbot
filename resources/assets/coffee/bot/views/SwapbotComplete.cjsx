@@ -1,7 +1,3 @@
-
-# ########################################################################################################################
-
-
 SwapbotComplete = React.createClass
     displayName: 'SwapbotComplete'
     subscriberId: null

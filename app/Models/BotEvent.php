@@ -4,6 +4,7 @@ namespace Swapbot\Models;
 
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Traits\CreatedAtDateOnly;
+use Swapbot\Swap\Logger\OutputTransformer\Facade\BotEventOutputTransformer;
 
 class BotEvent extends APIModel {
 
@@ -18,7 +19,7 @@ class BotEvent extends APIModel {
     const LEVEL_ALERT     = 550;
     const LEVEL_EMERGENCY = 600;
 
-    protected $api_attributes = ['id', 'level', 'event', 'created_at', 'serial', 'swap_uuid', ];
+    protected $api_attributes = ['id', 'level', 'event', 'created_at', 'serial', 'swap_uuid', 'message', ];
 
     protected $casts = [
         'swap_stream' => 'boolean',
@@ -35,6 +36,10 @@ class BotEvent extends APIModel {
 
     public function getSwapUuidAttribute() {
         return $this->swap['uuid'];
+    }
+
+    public function getMessageAttribute() {
+        return BotEventOutputTransformer::buildMessage($this);
     }
 
     public function swap() {

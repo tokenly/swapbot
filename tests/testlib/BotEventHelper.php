@@ -14,7 +14,7 @@ class BotEventHelper  {
     public function sampleBotEventVars() {
         return [
             'level' => BotEvent::LEVEL_INFO,
-            'event' => ['msg' => 'test bot event',],
+            'event' => ['name' => 'sample.event', 'msg' => 'test bot event',],
         ];
     }
 

@@ -46,13 +46,12 @@ do ()->
             if swap.isError then icon = 'failed'
             else if swap.isComplete then icon = 'confirmed'
 
-            console.log "rendering RecentOrActiveSwapComponent"
             return <li className={icon}>
                     <div className={"status-icon icon-#{icon}"}></div>
                     <div className="status-content">
                         <span>
                         <div className="date">{this.state.fromNow}</div>
-                        Confirming
+                        <span>{swap.message}</span>
                         <br/>
                         <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {swap.quantityOut} {swap.assetOut}</small>
                         </span>
@@ -70,7 +69,6 @@ do ()->
             return getViewState()
 
         _onChange: ()->
-            console.log "_onChange"
             this.setState(getViewState())
 
         componentDidMount: ()->
@@ -85,7 +83,6 @@ do ()->
             activeSwaps = []
             for swap in this.state.swaps
                 if not swap.isComplete
-                    console.log "calling for active swap"
                     activeSwaps.push(swap)
             return activeSwaps
 
@@ -97,7 +94,6 @@ do ()->
             return recentSwaps
 
         render: ->
-            console.log "this.state.swaps=",this.state.swaps
             if not this.state.swaps
                 return <div>No swaps</div>
             

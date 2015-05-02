@@ -4,6 +4,7 @@ namespace Swapbot\Console\Commands\Compile;
 
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Blade;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Yaml\Yaml;
@@ -55,6 +56,11 @@ class CompileEventsCommand extends Command {
         // resolve the data
         $events_by_name = [];
         foreach ($parsed_data['events'] as $event) {
+            // compile msg
+            if (isset($event['msg'])) {
+                $event['msg'] = Blade::compileString($event['msg']);
+            }
+
             $events_by_name[$event['name']] = $event;
         }
 

@@ -145,6 +145,8 @@ return [
 		'Swapbot\Providers\EventServiceProvider',
 		'Swapbot\Providers\RouteServiceProvider',
 
+		'Swapbot\Swap\Logger\OutputTransformer\Provider\BotEventOutputTransformerServiceProvider',
+
 
 		/*
 		 * Vendor Service Providers...

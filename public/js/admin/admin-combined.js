@@ -1660,7 +1660,7 @@
     };
     handleBotEventMessage = function(data) {
       var ref;
-      if (data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) {
+      if ((data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) || (data != null ? data.message : void 0)) {
         vm.botEvents().unshift(data);
         m.redraw(true);
       }
@@ -1989,7 +1989,7 @@
                     title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
                   }, dateObj.format('MMM D h:mm a')), m("span", {
                     "class": "msg"
-                  }, (ref = botEventObj.event) != null ? ref.msg : void 0)
+                  }, botEventObj.message || ((ref = botEventObj.event) != null ? ref.msg : void 0))
                 ]);
               })
             ]), m("div", {
@@ -2638,7 +2638,11 @@
       return buildDesc[swap.strategy](swap);
     };
     exports.inAmountFromOutAmount = function(inAmount, swap) {
-      return buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+      inAmount = buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+      if (inAmount === NaN) {
+        inAmount = 0;
+      }
+      return inAmount;
     };
     return exports;
   })();

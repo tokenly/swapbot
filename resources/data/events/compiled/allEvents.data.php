@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-04-30 17:07:00
+// compiled on 2015-05-02 12:39:02
 
 return array (
   'swap.new' => 
@@ -8,7 +8,11 @@ return array (
     'name' => 'swap.new',
     'label' => 'New Swap',
     'level' => 'INFO',
-    'msg' => 'A new swap was created for incoming transaction {{ $txidIn }}.',
+    'msg' => 'A new swap was created for incoming transaction <?php echo e($txidIn); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'txidIn',
+    ),
     'swapEventStream' => false,
   ),
   'swap.transaction.update' => 
@@ -16,7 +20,14 @@ return array (
     'name' => 'swap.transaction.update',
     'label' => 'Swap Transaction',
     'level' => 'INFO',
-    'msg' => 'Transaction {{ $txidIn }} was seen.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityIn',
+      1 => 'assetIn',
+      2 => 'destination',
+      3 => 'confirmations',
+    ),
     'swapEventStream' => true,
   ),
   'tx.previous' => 
@@ -24,7 +35,12 @@ return array (
     'name' => 'tx.previous',
     'label' => 'Previous Transaction',
     'level' => 'DEBUG',
-    'msg' => 'Transaction {{ $tx_id }} was confirmed with {{ $confirmations }} confirmations.',
+    'msgVars' => 
+    array (
+      0 => 'txid',
+      1 => 'confirmations',
+    ),
+    'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> confirmations.',
   ),
 );
 

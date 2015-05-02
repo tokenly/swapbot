@@ -49,9 +49,9 @@ expectedXChainCalls:
 
 expectedBotEvents:
   - #### NEW
-    meta: { baseFilename: swap.new.yml }
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
   - #### NEW (2nd swap)
-    meta: { baseFilename: swap.new.yml }
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

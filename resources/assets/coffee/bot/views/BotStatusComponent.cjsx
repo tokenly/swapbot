@@ -3,20 +3,16 @@
 BotStatusComponent = React.createClass
     displayName: 'BotStatusComponent'
 
+    # need to use a new BotStreamStore
     getInitialState: ()->
         return {
+            botStatus: 'inactive'
         }
 
     componentDidMount: ()->
-        this.subscriberId = this.props.eventSubscriber.subscribe (botEvent)=>
-            newState = swapbot.botUtils.newBotStatusFromEvent(this.state.botStatus, botEvent)
-            this.setState({botStatus: newState})
         return
 
     componentWillUnmount: ()->
-        if this.subscriberId?
-            this.props.eventSubscriber.unsubscribe(this.subscriberId)
-            this.subscriberId = null
         return
 
 

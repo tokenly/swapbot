@@ -115,7 +115,7 @@ do ()->
     handleBotEventMessage = (data)->
         # console.log "pusher received:", data
         # console.log "msg:", data?.event?.msg
-        if data?.event?.msg
+        if data?.event?.msg or data?.message
             vm.botEvents().unshift(data)
             # this is outside of mithril, so we must force a redraw
             m.redraw(true)
@@ -425,7 +425,7 @@ do ()->
                                 return m("li", {class: "bot-list-entry event"}, [
                                     m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
                                     m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
-                                    m("span", {class: "msg"}, botEventObj.event?.msg),
+                                    m("span", {class: "msg"}, (botEventObj.message or botEventObj.event?.msg)),
                                 ])
                         ]),
                         m("div", {class: "pull-right"}, [

@@ -73,7 +73,7 @@ class SwapProcessor {
         ]);
 
         // log the new Swap
-        $this->bot_event_logger->logNewSwap($bot, $new_swap);
+        $this->bot_event_logger->logNewSwap($bot, $new_swap, ['txidIn' => $transaction['xchain_notification']['txid'], ]);
 
         return $new_swap;
     }
@@ -216,13 +216,14 @@ class SwapProcessor {
                 'destination'   => $swap_process['destination'],
             ];
 
-            // only update if something has changed
+            // determine if this is an update
             $any_changed = false;
             $previous_receipt = $swap_process['swap']['receipt'];
             foreach($receipt_update_vars as $k => $v) {
                 if ($v != $previous_receipt[$k]) { $any_changed = true; }
             }
 
+            // only update if something has changed
             if ($any_changed) {
                 $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
                 $this->bot_event_logger->logSwapTransactionUpdate($swap_process['bot'], $swap_process['swap'], $receipt_update_vars);

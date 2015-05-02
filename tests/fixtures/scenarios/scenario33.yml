@@ -51,6 +51,7 @@ expectedBotEvents:
 
   - #### NEW
     meta: { baseFilename: swap.new.yml }
+    txidIn: "00000000000000000000000000000000000000000000000000000xcptx222222"
   - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
   - #### ACTIVE

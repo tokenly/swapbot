@@ -254,8 +254,8 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // swap
 
-    public function logNewSwap(Bot $bot, Swap $swap) {
-        $this->logSwapEvent('swap.new', $bot, $swap);
+    public function logNewSwap(Bot $bot, Swap $swap, $receipt_update_vars) {
+        $this->logSwapEvent('swap.new', $bot, $swap, $receipt_update_vars);
     }
 
     public function logSwapTransactionUpdate(Bot $bot, Swap $swap, $receipt_update_vars) {

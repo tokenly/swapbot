@@ -6,7 +6,6 @@ SwapsStore = do ()->
     eventEmitter = null
 
     addNewSwaps = (newSwaps)->
-        console.log "handling newSwaps"
         for swap in newSwaps
             allMySwapsById[swap.id] = swap
 
@@ -36,7 +35,6 @@ SwapsStore = do ()->
 
             emitChange()
         
-        console.log "handling new swap event"
         return
 
     rebuildAllMySwaps = ()->
@@ -51,6 +49,7 @@ SwapsStore = do ()->
         newSwap.id = eventWrapper.swapUuid
         newSwap.serial = eventWrapper.serial
         newSwap.updatedAt = eventWrapper.createdAt
+        newSwap.message = eventWrapper.message
         return newSwap
 
     emitChange = ()->
@@ -73,8 +72,8 @@ SwapsStore = do ()->
                 when BotConstants.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS
                     handleSwapstreamEvents(action.swapstreamEvents)
 
-                else
-                    console.log "unknown action: #{action.actionType}"
+                # else
+                #     console.log "unknown action: #{action.actionType}"
             return
 
         return
@@ -93,4 +92,22 @@ SwapsStore = do ()->
     # #############################################
     return exports
 
+# a swap is:
+
+# id
+# serial
+# updatedAt
+# message
+
+# destination
+# quantityIn
+# assetIn
+# txidIn
+# quantityOut
+# assetOut
+# txidOut
+# confirmations
+# state
+# isComplete
+# isError
 
