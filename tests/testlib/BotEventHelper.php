@@ -67,6 +67,30 @@ class BotEventHelper  {
     }
 
 
+    // creates a bot
+    //   directly in the repository (no validation)
+    public function newSampleBotEventstreamEvent($bot=null, $swap=null, $bot_event_vars=[]) {
+        $attributes = array_replace_recursive($this->sampleBotEventVars(), $bot_event_vars);
+        if ($bot == null) { $bot = app('BotHelper')->getSampleBot(); }
+
+        $attributes['bot_id'] = $bot['id'];
+
+        try {
+            if (!isset($attributes['uuid'])) {
+                $uuid = Uuid::uuid4()->toString();
+                $attributes['uuid'] = $uuid;
+            }
+
+            $attributes['bot_stream'] = true;
+
+            $bot_event_model = $this->bot_event_repository->create($attributes);
+            return $bot_event_model;
+        } catch (ValidationException $e) {
+            throw new Exception("ValidationException: ".json_encode($e->errors()->all(), 192), $e->getCode());
+        }
+    }
+
+
 
 
 }

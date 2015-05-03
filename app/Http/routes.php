@@ -36,7 +36,10 @@ $router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
 // Bot Events API
 $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
 
-// Bot Events API
+// Swap Event Strem API
+$router->get('api/v1/public/boteventstream/{botuuid}', 'API\BotEvents\PublicBotEventsController@botEventStreamIndex');
+
+// Swap Event Stream API
 $router->get('api/v1/public/swapevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@swapsEventStreamIndex');
 
 // Swaps API

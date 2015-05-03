@@ -28,6 +28,13 @@ class BotEventRepository extends APIRepository
             ->get();
     }
 
+    public function findBotEventStreamByBotId($bot_id) {
+        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
+            ->where('bot_stream', true)
+            ->orderBy('serial', 'asc')
+            ->get();
+    }
+
 
 
     protected function modifyAttributesBeforeCreate($attributes) {

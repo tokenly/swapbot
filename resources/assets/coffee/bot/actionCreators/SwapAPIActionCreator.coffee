@@ -14,7 +14,7 @@ SwapAPIActionCreator = do ()->
             return
         return
 
-    exports.subscribeToSwapEventStream = (botId)->
+    exports.subscribeToSwapstream = (botId)->
         subscriberId = swapbot.pusher.subscribeToPusherChanel "swapbot_swapstream_#{botId}", (swapstreamEvent)->
             handleSwapstreamEvents([swapstreamEvent])
 

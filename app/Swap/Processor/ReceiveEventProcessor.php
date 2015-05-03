@@ -160,7 +160,7 @@ class ReceiveEventProcessor {
         if ($tx_process['tx_is_handled']) { return; }
 
         if ($tx_process['transaction']['processed']) {
-            $this->bot_event_logger->logPreviousTransaction($tx_process['bot'], $tx_process['xchain_notification']['txid'], $tx_process['confirmations']);
+            $this->bot_event_logger->logPreviousTransaction($tx_process['bot'], $tx_process['xchain_notification']);
 
             // update the notification and the confirmations
             $tx_process['transaction_update_vars']['xchain_notification'] = $tx_process['xchain_notification'];

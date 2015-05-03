@@ -5,12 +5,14 @@ namespace Swapbot\Console\Commands\Development;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Event;
+use Swapbot\Events\BotstreamEventCreated;
 use Swapbot\Models\BotEvent;
-use Tokenly\LaravelEventLog\Facade\EventLog;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 
-class TestCreateBotEventCommand extends Command {
+class TestPushBotEventCommand extends Command {
 
     use DispatchesCommands;
 
@@ -19,14 +21,14 @@ class TestCreateBotEventCommand extends Command {
      *
      * @var string
      */
-    protected $name = 'swapbot:send-bot-event';
+    protected $name = 'swapbot:push-bot-event';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sends a test event';
+    protected $description = 'Pushes a test event to the client';
 
 
     /**
@@ -39,7 +41,6 @@ class TestCreateBotEventCommand extends Command {
         $this
             ->addArgument('bot-id', InputArgument::REQUIRED, 'Bot ID')
             ->addArgument('event', InputArgument::REQUIRED, 'Event JSON')
-            ->addOption('level', 'l', InputOption::VALUE_OPTIONAL, 'Event level', BotEvent::LEVEL_INFO)
             ->setHelp(<<<EOF
 Sends a test event
 EOF
@@ -84,9 +85,8 @@ EOF
             throw new Exception("Unable to find bot", 1);
         }
 
-        $this->info("Creating event for bot ".$bot['name']." ({$bot['uuid']})");
-        $level = $this->input->getOption('level');
-        app('Swapbot\Swap\Logger\BotEventLogger')->createLegacyBotEvent($bot, $level, $event);
+        $this->info("Sending Botstreamevent for bot ".$bot['name']." ({$bot['uuid']})");
+        Event::fire(new BotstreamEventCreated($bot, $event));
         $this->info("done");
     }
 

@@ -17,7 +17,7 @@ class CreateBotEventCommandTest extends TestCase {
         // send a bot event to be created
         $level = 1;
         $event_data = ['foo' => 'bar', 'baz' => 'bar2', 'name' => 'foo.event', ];
-        app('Swapbot\Swap\Logger\BotEventLogger')->createBotEvent($bot, null, 'foo.event', $level, $event_data);
+        app('Swapbot\Swap\Logger\BotEventLogger')->createLegacyBotEvent($bot, null, 'foo.event', $level, $event_data);
 
 
         // check the bot event repository

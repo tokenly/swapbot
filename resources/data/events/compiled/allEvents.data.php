@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-02 12:39:02
+// compiled on 2015-05-03 02:13:23
 
 return array (
   'swap.new' => 
@@ -41,6 +41,7 @@ return array (
       1 => 'confirmations',
     ),
     'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> confirmations.',
+    'botEventStream' => true,
   ),
 );
 

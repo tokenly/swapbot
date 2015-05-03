@@ -1,30 +1,47 @@
-# The bot status component updates the green or red indicator
-#   and the bot status on the public bot page
-BotStatusComponent = React.createClass
-    displayName: 'BotStatusComponent'
+BotStatusComponent = null
+do ()->
 
-    # need to use a new BotStreamStore
-    getInitialState: ()->
+    getViewState = ()->
         return {
-            botStatus: 'inactive'
+            lastEvent: BotstreamStore.getLastEvent()
         }
 
-    componentDidMount: ()->
-        return
 
-    componentWillUnmount: ()->
-        return
+    # ############################################################################################################
+    # The bot status component updates the green or red indicator
+    #   and the bot status on the public bot page
 
+    BotStatusComponent = React.createClass
+        displayName: 'BotStatusComponent'
 
+        # need to use a new BotStreamStore
+        getInitialState: ()->
+            return getViewState()
 
-    render: ->
-        <div>
-            {
-                if this.state.botStatus == 'active'
-                    <div><div className="status-dot bckg-green"></div>Active</div>
-                else
-                    <div><div className="status-dot bckg-red"></div>Inactive</div>
-            }
-            <button className="button-question"></button>
-        </div>
+        _onChange: ()->
+            this.setState(getViewState())
+            return
+
+        componentDidMount: ()->
+            BotstreamStore.addChangeListener(this._onChange)
+            return
+
+        componentWillUnmount: ()->
+            BotstreamStore.removeChangeListener(this._onChange)
+            return
+
+        render: ->
+            lastEvent = this.state.lastEvent
+            isActive = if lastEvent? then lastEvent.isActive else false
+            console.log "lastEvent",lastEvent
+            console.log "isActive",isActive
+            <div>
+                {
+                    if isActive
+                        <div><div className="status-dot bckg-green"></div>Active</div>
+                    else
+                        <div><div className="status-dot bckg-red"></div>Inactive</div>
+                }
+                <button className="button-question"></button>
+            </div>
 

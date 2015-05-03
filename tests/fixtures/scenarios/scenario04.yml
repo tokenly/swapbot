@@ -29,4 +29,6 @@ expectedBotEvents:
     meta: { baseFilename: bot.inactive.yml }
   - #### transaction handled previously
     meta: { baseFilename: tx.previous.yml }
+    state: 'inactive'
+    isActive: false
 

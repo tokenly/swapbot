@@ -1,5 +1,5 @@
 (function() {
-  var BotConstants, BotStatusComponent, Dispatcher, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapInterfaceComponent, SwapMatcher, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotReceive, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapInterfaceComponent, SwapMatcher, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotReceive, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -246,25 +246,45 @@
     return exports;
   })();
 
-  BotStatusComponent = React.createClass({
-    displayName: 'BotStatusComponent',
-    getInitialState: function() {
+  BotStatusComponent = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
       return {
-        botStatus: 'inactive'
+        lastEvent: BotstreamStore.getLastEvent()
       };
-    },
-    componentDidMount: function() {},
-    componentWillUnmount: function() {},
-    render: function() {
-      return React.createElement("div", null, (this.state.botStatus === 'active' ? React.createElement("div", null, React.createElement("div", {
-        "className": "status-dot bckg-green"
-      }), "Active") : React.createElement("div", null, React.createElement("div", {
-        "className": "status-dot bckg-red"
-      }), "Inactive")), React.createElement("button", {
-        "className": "button-question"
-      }));
-    }
-  });
+    };
+    return BotStatusComponent = React.createClass({
+      displayName: 'BotStatusComponent',
+      getInitialState: function() {
+        return getViewState();
+      },
+      _onChange: function() {
+        this.setState(getViewState());
+      },
+      componentDidMount: function() {
+        BotstreamStore.addChangeListener(this._onChange);
+      },
+      componentWillUnmount: function() {
+        BotstreamStore.removeChangeListener(this._onChange);
+      },
+      render: function() {
+        var isActive, lastEvent;
+        lastEvent = this.state.lastEvent;
+        isActive = lastEvent != null ? lastEvent.isActive : false;
+        console.log("lastEvent", lastEvent);
+        console.log("isActive", isActive);
+        return React.createElement("div", null, (isActive ? React.createElement("div", null, React.createElement("div", {
+          "className": "status-dot bckg-green"
+        }), "Active") : React.createElement("div", null, React.createElement("div", {
+          "className": "status-dot bckg-red"
+        }), "Inactive")), React.createElement("button", {
+          "className": "button-question"
+        }));
+      }
+    });
+  })();
 
   RecentAndActiveSwapsComponent = null;
 
@@ -1040,8 +1060,13 @@
   window.BotApp = {
     init: function(bot) {
       SwapsStore.init();
+      BotstreamStore.init();
       UserChoiceStore.init();
-      SwapAPIActionCreator.subscribeToSwapEventStream(bot.id);
+      BotAPIActionCreator.subscribeToBotstream(bot.id);
+      SwapAPIActionCreator.subscribeToSwapstream(bot.id);
+      React.render(React.createElement(BotStatusComponent, {
+        "bot": bot
+      }), document.getElementById('BotStatusComponent'));
       React.render(React.createElement(RecentAndActiveSwapsComponent, {
         "bot": bot
       }), document.getElementById('RecentAndActiveSwapsComponent'));
@@ -1050,6 +1075,30 @@
       }), document.getElementById('SwapInterfaceComponent'));
     }
   };
+
+  BotAPIActionCreator = (function() {
+    var exports, handleBotstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleBotstreamEvents = function(botstreamEvents) {
+      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    };
+    exports.subscribeToBotstream = function(botId) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
+        return handleBotstreamEvents([botstreamEvent]);
+      });
+      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
+        return function(botstreamEvents) {
+          console.log("botstreamEvents", botstreamEvents);
+          botstreamEvents.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
+          handleBotstreamEvents(botstreamEvents);
+        };
+      })(this));
+    };
+    return exports;
+  })();
 
   SwapAPIActionCreator = (function() {
     var exports, handleSwapstreamEvents, subscriberId;
@@ -1063,7 +1112,7 @@
         SwapstreamEventActions.addNewSwaps(swapsData);
       });
     };
-    exports.subscribeToSwapEventStream = function(botId) {
+    exports.subscribeToSwapstream = function(botId) {
       subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
         return handleSwapstreamEvents([swapstreamEvent]);
       });
@@ -1075,6 +1124,18 @@
           handleSwapstreamEvents(swapstreamEvents);
         };
       })(this));
+    };
+    return exports;
+  })();
+
+  BotstreamEventActions = (function() {
+    var exports;
+    exports = {};
+    exports.handleBotstreamEvents = function(botstreamEvents) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_HANDLE_NEW_BOTSTREAM_EVENTS,
+        botstreamEvents: botstreamEvents
+      });
     };
     return exports;
   })();
@@ -1149,22 +1210,6 @@
         actionType: BotConstants.BOT_GO_BACK
       });
     };
-    return exports;
-  })();
-
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
     return exports;
   })();
 
@@ -1267,6 +1312,117 @@
       throw error;
     }
   };
+
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    return exports;
+  })();
+
+  SwapMatcher = (function() {
+    var exports, swapIsMatched;
+    exports = {};
+    swapIsMatched = function(swap, userChoices) {
+      return true;
+    };
+    exports.buildMatchedSwaps = function(swaps, userChoices) {
+      var matchedSwaps, swap, _i, _len;
+      matchedSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsMatched(swap, userChoices)) {
+          matchedSwaps.push(swap);
+        }
+      }
+      return matchedSwaps;
+    };
+    return exports;
+  })();
+
+  BotstreamStore = (function() {
+    var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
+    exports = {};
+    allMyBotstreamEventsById = {};
+    allMyBotstreamEvents = [];
+    eventEmitter = null;
+    handleBotstreamEvents = function(eventWrappers) {
+      var anyChanged, event, eventId, eventWrapper, _i, _len;
+      anyChanged = false;
+      for (_i = 0, _len = eventWrappers.length; _i < _len; _i++) {
+        eventWrapper = eventWrappers[_i];
+        eventId = eventWrapper.id;
+        event = eventWrapper.event;
+        if (allMyBotstreamEventsById[eventId] != null) {
+          allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
+        } else {
+          allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
+        }
+        anyChanged = true;
+      }
+      if (anyChanged) {
+        allMyBotstreamEvents = rebuildAllMyBotEvents();
+        emitChange();
+      }
+    };
+    rebuildAllMyBotEvents = function() {
+      var event, id, newAllMyBotstreamEvents;
+      newAllMyBotstreamEvents = [];
+      for (id in allMyBotstreamEventsById) {
+        event = allMyBotstreamEventsById[id];
+        newAllMyBotstreamEvents.push(event);
+      }
+      return newAllMyBotstreamEvents;
+    };
+    buildEventFromStreamstreamEventWrapper = function(eventWrapper) {
+      var newEvent;
+      newEvent = $.extend({}, eventWrapper.event);
+      delete newEvent.name;
+      newEvent.id = eventWrapper.id;
+      newEvent.serial = eventWrapper.serial;
+      newEvent.updatedAt = eventWrapper.createdAt;
+      newEvent.message = eventWrapper.message;
+      return newEvent;
+    };
+    emitChange = function() {
+      eventEmitter.emitEvent('change');
+    };
+    exports.init = function() {
+      eventEmitter = new window.EventEmitter();
+      Dispatcher.register(function(action) {
+        switch (action.actionType) {
+          case BotConstants.BOT_HANDLE_NEW_BOTSTREAM_EVENTS:
+            handleBotstreamEvents(action.botstreamEvents);
+        }
+      });
+    };
+    exports.getEvents = function() {
+      return allMyBotstreamEvents;
+    };
+    exports.getLastEvent = function() {
+      if (!allMyBotstreamEvents.length > 1) {
+        return null;
+      }
+      return allMyBotstreamEvents[allMyBotstreamEvents.length - 1];
+    };
+    exports.addChangeListener = function(callback) {
+      eventEmitter.addListener('change', callback);
+    };
+    exports.removeChangeListener = function(callback) {
+      eventEmitter.removeListener('change', callback);
+    };
+    return exports;
+  })();
 
   SwapsStore = (function() {
     var addNewSwaps, allMySwaps, allMySwapsById, buildSwapFromSwapEvent, emitChange, eventEmitter, exports, handleSwapstreamEvents, rebuildAllMySwaps;
@@ -1582,26 +1738,6 @@
     };
     exports.removeChangeListener = function(callback) {
       eventEmitter.removeListener('change', callback);
-    };
-    return exports;
-  })();
-
-  SwapMatcher = (function() {
-    var exports, swapIsMatched;
-    exports = {};
-    swapIsMatched = function(swap, userChoices) {
-      return true;
-    };
-    exports.buildMatchedSwaps = function(swaps, userChoices) {
-      var matchedSwaps, swap, _i, _len;
-      matchedSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsMatched(swap, userChoices)) {
-          matchedSwaps.push(swap);
-        }
-      }
-      return matchedSwaps;
     };
     return exports;
   })();

@@ -46,5 +46,18 @@ class PublicBotEventsController extends APIController {
     }
 
 
+    public function botEventStreamIndex($botuuid, BotRepository $bot_repository, BotEventRepository $bot_event_repository, APIControllerHelper $api_helper)
+    {
+        // get the bot
+        $bot = $api_helper->requireResource($botuuid, $bot_repository);
+
+        // get all events fot this bot
+        $resources = $bot_event_repository->findBotEventStreamByBotId($bot['id']);
+
+        // format for API
+        return $api_helper->transformResourcesForOutput($resources);
+    }
+
+
 
 }
