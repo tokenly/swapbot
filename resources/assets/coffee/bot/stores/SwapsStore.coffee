@@ -42,6 +42,11 @@ SwapsStore = do ()->
         newAllMySwaps = []
         for id, swap of allMySwapsById
             newAllMySwaps.push(swap)
+
+        # sort by most recent active first
+        newAllMySwaps.sort (a,b)->
+            return b.serial - a.serial
+
         return newAllMySwaps
 
     buildSwapFromSwapEvent = (eventWrapper)->

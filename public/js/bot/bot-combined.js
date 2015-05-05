@@ -1450,6 +1450,9 @@
         swap = allMySwapsById[id];
         newAllMySwaps.push(swap);
       }
+      newAllMySwaps.sort(function(a, b) {
+        return b.serial - a.serial;
+      });
       return newAllMySwaps;
     };
     buildSwapFromSwapEvent = function(eventWrapper) {
