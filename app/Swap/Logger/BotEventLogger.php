@@ -278,6 +278,17 @@ class BotEventLogger {
         $this->logSwapEvent('swap.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
     }
 
+    public function logSwapSent(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        $this->logSwapEvent('swap.sent', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+        // Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.
+    }
+
+    public function logSwapRefunded(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        // log the send
+        $this->logSwapEvent('swap.refunded', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+        // "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunded {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}."
+    }    
+    
 
 
 
@@ -321,25 +332,6 @@ class BotEventLogger {
         ]);
     }
     
-    public function logSendResult(Bot $bot, Swap $swap, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        // log the send
-        return $this->logLegacyBotEvent($bot, 'swap.sent', BotEvent::LEVEL_INFO, [
-            // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
-            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
-            'txid'          => $xchain_notification['txid'],
-            'source'        => $xchain_notification['sources'][0],
-            'inQty'         => $xchain_notification['quantity'],
-            'inAsset'       => $xchain_notification['asset'],
-            'destination'   => $destination,
-            'outQty'        => $quantity,
-            'outAsset'      => $asset,
-            'sentTxID'      => $send_result['txid'],
-            'confirmations' => $confirmations,
-            'swapId'        => $swap['uuid'],
-        ]);
-
-    }
-
 
     public function logPreviouslyProcessedSwap(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
         return $this->logLegacyBotEvent($bot, 'swap.processed.previous', BotEvent::LEVEL_DEBUG, [
@@ -500,23 +492,6 @@ class BotEventLogger {
         ]);
     }
     
-    public function logRefundResult(Bot $bot, $send_result, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        // log the send
-        return $this->logLegacyBotEvent($bot, 'swap.refunded', BotEvent::LEVEL_INFO, [
-            // Received 500 LTBCOIN from SENDER01 with 1 confirmation.  Sent 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111
-            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunded {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
-            'txid'          => $xchain_notification['txid'],
-            'destination'   => $destination,
-            'inQty'         => $xchain_notification['quantity'],
-            'inAsset'       => $xchain_notification['asset'],
-            'outQty'        => $quantity,
-            'outAsset'      => $asset,
-            'sentTxID'      => $send_result['txid'],
-            'confirmations' => $confirmations,
-        ]);
-
-    }    
-    
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -555,21 +530,22 @@ class BotEventLogger {
         $state = ($swap_update_vars !== null AND isset($swap_update_vars['state'])) ? $swap_update_vars['state'] : $swap['state'];
 
         $swap_details_for_log = [
-            'destination'   => isset($receipt['destination'])   ? $receipt['destination']   : null,
+            'destination'      => isset($receipt['destination'])      ? $receipt['destination']   : null,
 
-            'quantityIn'    => isset($receipt['quantityIn'])    ? $receipt['quantityIn']    : null,
-            'assetIn'       => isset($receipt['assetIn'])       ? $receipt['assetIn']       : null,
-            'txidIn'        => isset($receipt['txidIn'])        ? $receipt['txidIn']        : null,
+            'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']    : null,
+            'assetIn'          => isset($receipt['assetIn'])          ? $receipt['assetIn']       : null,
+            'txidIn'           => isset($receipt['txidIn'])           ? $receipt['txidIn']        : null,
+            'confirmations'    => isset($receipt['confirmations'])    ? $receipt['confirmations'] : null,
 
-            'quantityOut'   => isset($receipt['quantityOut'])   ? $receipt['quantityOut']   : null,
-            'assetOut'      => isset($receipt['assetOut'])      ? $receipt['assetOut']      : null,
-            'txidOut'       => isset($receipt['txidOut'])       ? $receipt['txidOut']       : null,
+            'quantityOut'      => isset($receipt['quantityOut'])      ? $receipt['quantityOut']   : null,
+            'assetOut'         => isset($receipt['assetOut'])         ? $receipt['assetOut']      : null,
+            'txidOut'          => isset($receipt['txidOut'])          ? $receipt['txidOut']       : null,
+            'confirmationsOut' => isset($receipt['confirmationsOut']) ? $receipt['confirmationsOut'] : null,
 
-            'confirmations' => isset($receipt['confirmations']) ? $receipt['confirmations'] : null,
 
-            'state'         => $state,
-            'isComplete'    => $swap->isComplete($state),
-            'isError'       => $swap->isError($state),
+            'state'            => $state,
+            'isComplete'       => $swap->isComplete($state),
+            'isError'          => $swap->isError($state),
         ];
 
         // determine event vars

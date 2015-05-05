@@ -56,7 +56,12 @@ SwapsStore = do ()->
         newSwap.id = eventWrapper.swapUuid
         newSwap.serial = eventWrapper.serial
         newSwap.updatedAt = eventWrapper.createdAt
-        newSwap.message = eventWrapper.message
+        
+        if eventWrapper.level >= 200
+            newSwap.message = eventWrapper.message
+        else
+            newSwap.debugMessage = eventWrapper.message
+
         return newSwap
 
     emitChange = ()->

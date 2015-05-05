@@ -34,11 +34,11 @@ expectedBotEvents:
     outAsset: EARLY
   - #### swap sent
     meta: { baseFilename: swap.sent.yml }
-    msg: Received 12345 LTBCOIN from SENDER01 with 1 confirmation. Sent 1 EARLY to SENDER01 with transaction ID 0000000000000000000000000000001111.
-    inQty: 12345
-    inAsset: LTBCOIN
-    outQty: 1
-    outAsset: EARLY
+    # msg: Received 12345 LTBCOIN from SENDER01 with 1 confirmation. Sent 1 EARLY to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    quantityIn: 12345
+    assetIn: LTBCOIN
+    quantityOut: 1
+    assetOut: EARLY
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
   - #### transaction fee paid

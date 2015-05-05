@@ -347,22 +347,24 @@ class SwapProcessor {
         }
 
         // update the swap receipts
-        $swap_process['swap_update_vars']['receipt'] = [
-            'type'          => 'swap',
+        $receipt_update_vars = [
+            'type'             => 'swap',
 
-            'quantityIn'    => $swap_process['in_quantity'],
-            'assetIn'       => $swap_process['in_asset'],
-            'txidIn'        => $swap_process['transaction']['txid'],
+            'quantityIn'       => $swap_process['in_quantity'],
+            'assetIn'          => $swap_process['in_asset'],
+            'txidIn'           => $swap_process['transaction']['txid'],
+            'confirmations'    => $swap_process['confirmations'],
 
-            'quantityOut'   => $swap_process['quantity'],
-            'assetOut'      => $swap_process['asset'],
-            'txidOut'       => $send_result['txid'],
+            'quantityOut'      => $swap_process['quantity'],
+            'assetOut'         => $swap_process['asset'],
+            'txidOut'          => $send_result['txid'],
+            'confirmationsOut' => 0,
 
-            'confirmations' => $swap_process['confirmations'],
-            'destination'   => $swap_process['destination'],
+            'destination'      => $swap_process['destination'],
 
-            'timestamp'     => time(),
+            'timestamp'        => time(),
         ];
+        $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
 
         // update the local balance
         $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);
@@ -371,7 +373,8 @@ class SwapProcessor {
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
 
         // log it
-        $this->bot_event_logger->logSendResult($swap_process['bot'], $swap_process['swap'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
+        $swap_update_vars = ['state' => SwapState::SENT];
+        $this->bot_event_logger->logSwapSent($swap_process['bot'], $swap_process['swap'], $receipt_update_vars, $swap_update_vars);
 
         // mark the swap as sent
         $swap_process['swap_was_sent'] = true;
@@ -393,21 +396,23 @@ class SwapProcessor {
         }
 
         // update the swap receipts
-        $swap_process['swap_update_vars']['receipt'] = [
-            'type'          => 'refund',
+        $receipt_update_vars = [
+            'type'             => 'refund',
 
-            'quantityIn'    => $swap_process['in_quantity'],
-            'assetIn'       => $swap_process['in_asset'],
-            'txidIn'        => $swap_process['transaction']['txid'],
+            'quantityIn'       => $swap_process['in_quantity'],
+            'assetIn'          => $swap_process['in_asset'],
+            'txidIn'           => $swap_process['transaction']['txid'],
 
-            'quantityOut'   => $swap_process['quantity'],
-            'assetOut'      => $swap_process['asset'],
-            'txidOut'       => $send_result['txid'],
+            'quantityOut'      => $swap_process['quantity'],
+            'assetOut'         => $swap_process['asset'],
+            'txidOut'          => $send_result['txid'],
+            'confirmationsOut' => 0,
 
-            'confirmations' => $swap_process['confirmations'],
-            'destination'   => $swap_process['destination'],
+            'confirmations'    => $swap_process['confirmations'],
+            'destination'      => $swap_process['destination'],
 
         ];
+        $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
 
         // update the local balance
         $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $fee);
@@ -416,7 +421,8 @@ class SwapProcessor {
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_REFUND;
 
         // log it
-        $this->bot_event_logger->logRefundResult($swap_process['bot'], $send_result, $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $swap_process['confirmations']);
+        $swap_update_vars = ['state' => SwapState::REFUNDED];
+        $this->bot_event_logger->logSwapRefunded($swap_process['bot'], $swap_process['swap'], $receipt_update_vars, $swap_update_vars);
 
         // mark the swap as sent
         $swap_process['swap_was_sent'] = true;

@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-05 12:34:10
+// compiled on 2015-05-05 13:12:22
 
 return array (
   'swap.new' => 
@@ -75,6 +75,34 @@ return array (
       1 => 'assetIn',
       2 => 'destination',
       3 => 'confirmations',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.sent' => 
+  array (
+    'name' => 'swap.sent',
+    'label' => 'Swap Sent',
+    'level' => 'INFO',
+    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.refunded' => 
+  array (
+    'name' => 'swap.refunded',
+    'label' => 'Swap Refunded',
+    'level' => 'INFO',
+    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
     ),
     'swapEventStream' => true,
   ),

@@ -131,18 +131,19 @@ EOF
 
         // build the receipt
         $receipt = [
-            'type'          => $existing_receipt['type'],
+            'type'             => $existing_receipt['type'],
 
-            'quantityIn'    => $swap_process['in_quantity'],
-            'assetIn'       => $swap_process['in_asset'],
-            'txidIn'        => $swap_process['transaction']['txid'],
+            'quantityIn'       => $swap_process['in_quantity'],
+            'assetIn'          => $swap_process['in_asset'],
+            'txidIn'           => $swap_process['transaction']['txid'],
 
-            'quantityOut'   => $swap_process['quantity'],
-            'assetOut'      => $swap_process['asset'],
-            'txidOut'       => $out_tx_id,
+            'quantityOut'      => $swap_process['quantity'],
+            'assetOut'         => $swap_process['asset'],
+            'txidOut'          => $out_tx_id,
+            'confirmationsOut' => 0,
 
-            'confirmations' => $swap_process['confirmations'],
-            'destination'   => $swap_process['destination'],
+            'confirmations'    => $swap_process['confirmations'],
+            'destination'      => $swap_process['destination'],
         ];
         return $receipt;
     }
