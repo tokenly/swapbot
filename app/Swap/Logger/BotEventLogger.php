@@ -256,6 +256,16 @@ class BotEventLogger {
         $this->logSwapEvent('swap.new', $bot, $swap, $receipt_update_vars);
     }
 
+    public function logSwapStateChange(Swap $swap, $new_state, $swap_update_vars=null) {
+        if ($swap_update_vars === null) { $swap_update_vars = []; }
+        if (!isset($swap_update_vars['state'])) { $swap_update_vars['state'] = $new_state; }
+
+        // load the bot
+        $bot = $this->bot_repository->findByID($swap['bot_id']);
+
+        $this->logSwapEvent('swap.stateChange', $bot, $swap, null, $swap_update_vars);
+    }
+
     public function logSwapTransactionUpdate(Bot $bot, Swap $swap, $receipt_update_vars) {
         $this->logSwapEvent('swap.transaction.update', $bot, $swap, $receipt_update_vars);
     }
@@ -267,6 +277,9 @@ class BotEventLogger {
     public function logConfirmedSwap(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
         $this->logSwapEvent('swap.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
     }
+
+
+
 
 
     public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
@@ -327,17 +340,6 @@ class BotEventLogger {
 
     }
 
-
-    public function logSwapStateChange(Swap $swap, $new_state) {
-        $bot = $this->bot_repository->findByID($swap['bot_id']);
-
-        return $this->logLegacyBotEvent($bot, 'swap.stateChange', BotEvent::LEVEL_DEBUG, [
-            'msg'    => "Swap entered state {$new_state}",
-            'swapId' => $swap['uuid'],
-            'state'  => $new_state,
-        ]);
-
-    }
 
     public function logPreviouslyProcessedSwap(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
         return $this->logLegacyBotEvent($bot, 'swap.processed.previous', BotEvent::LEVEL_DEBUG, [
@@ -524,7 +526,7 @@ class BotEventLogger {
     public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $write_to_application_log=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
-        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $receipt_update_vars, $swap_update_vars);
+        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars, $swap_update_vars);
 
         // log the bot event
         if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
@@ -545,11 +547,13 @@ class BotEventLogger {
         Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));
     }
 
-    protected function buildSwapDetailsForLog($bot, $swap, $receipt_update_vars=null, $swap_update_vars=null) {
+    protected function buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars=null, $swap_update_vars=null) {
         $receipt = (array)$swap['receipt'];
         if ($receipt_update_vars !== null) { $receipt = array_merge($receipt, $receipt_update_vars); }
 
+        // get the state
         $state = ($swap_update_vars !== null AND isset($swap_update_vars['state'])) ? $swap_update_vars['state'] : $swap['state'];
+
         $swap_details_for_log = [
             'destination'   => isset($receipt['destination'])   ? $receipt['destination']   : null,
 
@@ -568,10 +572,30 @@ class BotEventLogger {
             'isError'       => $swap->isError($state),
         ];
 
-        // filter null values
+        // determine event vars
+        if (isset($event_template_data['eventVars'])) {
+            $all_event_vars = false;
+            $event_vars_map = array_fill_keys($event_template_data['eventVars'], true);
+
+        } else {
+            $all_event_vars = true;
+            $event_vars_map = [];
+        }
+
+        // filter null values and ignore keys not specified in eventVars
         $filtered_swap_details = $swap_details_for_log;
         foreach(array_keys($swap_details_for_log) as $key) {
-            if ($filtered_swap_details[$key] === null) { unset($filtered_swap_details[$key]); }
+            // filter if not a specified event var
+            if (!$all_event_vars AND !isset($event_vars_map[$key])) {
+                unset($filtered_swap_details[$key]);
+                continue;
+            }
+
+            // filter if null
+            if ($filtered_swap_details[$key] === null) {
+                unset($filtered_swap_details[$key]);
+                continue;
+            }
         }
         $swap_details_for_log = $filtered_swap_details;
 

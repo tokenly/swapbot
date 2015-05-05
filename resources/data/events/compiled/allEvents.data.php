@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-05 02:16:04
+// compiled on 2015-05-05 12:34:10
 
 return array (
   'swap.new' => 
@@ -14,6 +14,24 @@ return array (
       0 => 'txidIn',
     ),
     'swapEventStream' => false,
+  ),
+  'swap.stateChange' => 
+  array (
+    'name' => 'swap.stateChange',
+    'label' => 'Swap State Change',
+    'level' => 'DEBUG',
+    'msg' => 'Entered state <?php echo e($state); ?>',
+    'msgVars' => 
+    array (
+      0 => 'state',
+    ),
+    'eventVars' => 
+    array (
+      0 => 'state',
+      1 => 'isComplete',
+      2 => 'isError',
+    ),
+    'swapEventStream' => true,
   ),
   'swap.transaction.update' => 
   array (

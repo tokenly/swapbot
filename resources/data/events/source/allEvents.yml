@@ -9,6 +9,15 @@ events:
     swapEventStream: false
 
   -
+    name: swap.stateChange
+    label: Swap State Change
+    level: DEBUG
+    msg: Entered state {{ $state }}
+    msgVars: [state]
+    eventVars: [state, isComplete, isError]
+    swapEventStream: true
+
+  -
     name: swap.transaction.update
     label: Swap Transaction
     level: INFO

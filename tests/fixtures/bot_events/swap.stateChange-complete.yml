@@ -1,3 +1,5 @@
 name: swap.stateChange
-msg: Swap entered state complete
+# msg: Swap entered state complete
 state: complete
+isComplete: true
+isError: false

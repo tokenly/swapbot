@@ -1,3 +1,5 @@
 name: swap.stateChange
-msg: Swap entered state outofstock
+# msg: Swap entered state outofstock
 state: outofstock
+isComplete: false
+isError: true
