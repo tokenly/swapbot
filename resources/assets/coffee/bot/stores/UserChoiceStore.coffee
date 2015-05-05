@@ -235,12 +235,18 @@ UserChoiceStore = do ()->
                 router.setRoute('/choose')
             return false
 
-        # if no change is made, don't emit a change
+        # if no change was made, don't continue
         if newStep == userChoices.step
             return false
 
-        # save the step
+        # save the new step
         userChoices.step = newStep
+
+        # handle updates on routing
+        switch newStep
+            when 'choose'
+                # start over
+                resetUserChoices()
 
         # emit change
         emitChange()
@@ -265,9 +271,7 @@ UserChoiceStore = do ()->
     onSwapStoreChanged = ()->
         if userChoices.swap?.id
             # update the chosen swap when the swapStore changes it
-            console.log "onSwapStoreChanged userChoices.swap.id=#{userChoices.swap.id}"
             userChoices.swap = SwapsStore.getSwapById(userChoices.swap.id)
-            console.log "userChoices.swap.confirmations is now #{userChoices.swap.confirmations}"
 
             emitChange()
 
