@@ -1424,14 +1424,15 @@
       emitChange();
     };
     handleSwapstreamEvents = function(eventWrappers) {
-      var anyChanged, event, eventWrapper, swapId, _i, _len;
+      var anyChanged, event, eventWrapper, newSwap, swapId, _i, _len;
       anyChanged = false;
       for (_i = 0, _len = eventWrappers.length; _i < _len; _i++) {
         eventWrapper = eventWrappers[_i];
         swapId = eventWrapper.swapUuid;
         event = eventWrapper.event;
         if (allMySwapsById[swapId] != null) {
-          allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper);
+          newSwap = buildSwapFromSwapEvent(eventWrapper);
+          $.extend(allMySwapsById[swapId], newSwap);
         } else {
           allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper);
         }

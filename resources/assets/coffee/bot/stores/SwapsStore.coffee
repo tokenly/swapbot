@@ -22,7 +22,8 @@ SwapsStore = do ()->
     
             if allMySwapsById[swapId]?
                 # update existing swap
-                allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper)
+                newSwap = buildSwapFromSwapEvent(eventWrapper)
+                $.extend(allMySwapsById[swapId], newSwap)
             else
                 # new swap
                 allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper)
