@@ -831,7 +831,8 @@
         return getViewState();
       },
       _onChange: function() {
-        return this.setState(getViewState());
+        console.log("SwapbotWait _onChange.  ");
+        this.setState(getViewState());
       },
       componentDidMount: function() {
         SwapsStore.addChangeListener(this._onChange);
@@ -843,6 +844,7 @@
       },
       render: function() {
         var bot, swap, swapConfig;
+        console.log("SwapbotWait render");
         bot = this.props.bot;
         swapConfig = this.state.userChoices.swapConfig;
         if (!swapConfig) {
@@ -1113,8 +1115,10 @@
       });
     };
     exports.subscribeToSwapstream = function(botId) {
+      console.log("exports.subscribeToSwapstream");
       subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
-        return handleSwapstreamEvents([swapstreamEvent]);
+        console.log("swapstreamEvent heard: ", swapstreamEvent);
+        handleSwapstreamEvents([swapstreamEvent]);
       });
       $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
         return function(swapstreamEvents) {
@@ -1435,6 +1439,7 @@
       }
       if (anyChanged) {
         allMySwaps = rebuildAllMySwaps();
+        console.log("emitChange");
         emitChange();
       }
     };
@@ -1475,6 +1480,12 @@
     exports.getSwaps = function() {
       return allMySwaps;
     };
+    exports.getSwapById = function(swapId) {
+      if (allMySwapsById[swapId] == null) {
+        return null;
+      }
+      return allMySwapsById[swapId];
+    };
     exports.addChangeListener = function(callback) {
       eventEmitter.addListener('change', callback);
     };
@@ -1485,7 +1496,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, resetEmailChoices, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
+    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
     exports = {};
     userChoices = {
       step: 'choose',
@@ -1678,6 +1689,15 @@
       });
       router.init(userChoices.step);
     };
+    onSwapStoreChanged = function() {
+      var _ref;
+      if ((_ref = userChoices.swap) != null ? _ref.id : void 0) {
+        console.log("onSwapStoreChanged userChoices.swap.id=" + userChoices.swap.id);
+        userChoices.swap = SwapsStore.getSwapById(userChoices.swap.id);
+        console.log("userChoices.swap.confirmations is now " + userChoices.swap.confirmations);
+        emitChange();
+      }
+    };
     exports.init = function() {
       eventEmitter = new window.EventEmitter();
       Dispatcher.register(function(action) {
@@ -1709,6 +1729,9 @@
       });
       resetUserChoices();
       initRouter();
+      SwapsStore.addChangeListener(function() {
+        onSwapStoreChanged();
+      });
     };
     exports.getUserChoices = function() {
       return userChoices;

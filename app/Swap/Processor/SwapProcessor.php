@@ -257,11 +257,8 @@ class SwapProcessor {
             // don't process it any further
             $swap_process['swap_was_handled'] = true;
 
-            // log as confirming
-            $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
-
             // mark details
-            $swap_process['swap_update_vars']['receipt'] = [
+            $receipt_update_vars = [
                 'type'          => 'pending',
 
                 'quantityIn'    => $swap_process['in_quantity'],
@@ -276,15 +273,17 @@ class SwapProcessor {
 
                 'timestamp'     => time(),
             ];
+
+            $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+
+            // log as confirming
+            $swap_update_vars = ['state' => SwapState::CONFIRMING];
+            $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['swap'], $receipt_update_vars, $swap_update_vars);
         } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
             if ($swap_process['swap']->isConfirming()) {
-                // the swap just became confirmed
-                //   update the state right now
-                $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['confirmations'], $swap_process['bot']['confirmations_required'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
-                $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
 
                 // mark details
-                $swap_process['swap_update_vars']['receipt'] = [
+                $receipt_update_vars = [
                     'type'          => 'pending',
 
                     'quantityIn'    => $swap_process['in_quantity'],
@@ -299,6 +298,16 @@ class SwapProcessor {
 
                     'timestamp'     => time(),
                 ];
+                $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+
+                // log the confirmed swap
+                $swap_update_vars = ['state' => SwapState::READY];
+                $this->bot_event_logger->logConfirmedSwap($swap_process['bot'], $swap_process['swap'], $receipt_update_vars, $swap_update_vars);
+
+                // the swap just became confirmed
+                //   update the state right now
+                $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
+
             }
         }
 

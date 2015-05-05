@@ -25,7 +25,9 @@ do ()->
             return getViewState()
 
         _onChange: ()->
+            console.log "SwapbotWait _onChange.  "
             this.setState(getViewState())
+            return
 
         componentDidMount: ()->
             SwapsStore.addChangeListener(this._onChange)
@@ -42,6 +44,7 @@ do ()->
 
 
         render: ()->
+            console.log "SwapbotWait render"
             bot = this.props.bot
             swapConfig = this.state.userChoices.swapConfig
             return null if not swapConfig

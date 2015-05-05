@@ -59,11 +59,11 @@ class Swap extends APIModel {
     public function isConfirming() {
         return ($this['state'] == SwapState::CONFIRMING);
     }
-    public function isComplete() {
-        return ($this['state'] == SwapState::COMPLETE);
+    public function isComplete($state=null) {
+        return (($state === null ? $this['state'] : $state) == SwapState::COMPLETE);
     }
-    public function isError() {
-        return ($this['state'] == SwapState::ERROR);
+    public function isError($state=null) {
+        return (($state === null ? $this['state'] : $state) == SwapState::ERROR);
     }
     public function wasSent() {
         switch ($this['state']) {

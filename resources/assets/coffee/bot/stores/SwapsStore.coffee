@@ -32,6 +32,7 @@ SwapsStore = do ()->
         if anyChanged
             # rebuild allMySwaps
             allMySwaps = rebuildAllMySwaps()
+            console.log "emitChange"
 
             emitChange()
         
@@ -80,6 +81,10 @@ SwapsStore = do ()->
 
     exports.getSwaps = ()->
         return allMySwaps
+
+    exports.getSwapById = (swapId)->
+        return null if not allMySwapsById[swapId]?
+        return allMySwapsById[swapId]
 
     exports.addChangeListener = (callback)->
         eventEmitter.addListener('change', callback)

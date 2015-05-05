@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-03 02:13:23
+// compiled on 2015-05-05 02:16:04
 
 return array (
   'swap.new' => 
@@ -21,6 +21,36 @@ return array (
     'label' => 'Swap Transaction',
     'level' => 'INFO',
     'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityIn',
+      1 => 'assetIn',
+      2 => 'destination',
+      3 => 'confirmations',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.confirming' => 
+  array (
+    'name' => 'swap.confirming',
+    'label' => 'Confirming Swap',
+    'level' => 'INFO',
+    'msg' => 'Confirmed <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityIn',
+      1 => 'assetIn',
+      2 => 'destination',
+      3 => 'confirmations',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.confirmed' => 
+  array (
+    'name' => 'swap.confirmed',
+    'label' => 'Confirmed Swap',
+    'level' => 'INFO',
+    'msg' => 'Confirmed <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',

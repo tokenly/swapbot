@@ -260,6 +260,13 @@ class BotEventLogger {
         $this->logSwapEvent('swap.transaction.update', $bot, $swap, $receipt_update_vars);
     }
 
+    public function logConfirmingSwap(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        $this->logSwapEvent('swap.confirming', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+    }
+
+    public function logConfirmedSwap(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        $this->logSwapEvent('swap.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+    }
 
 
     public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
@@ -282,37 +289,7 @@ class BotEventLogger {
         ]);
     }
 
-    public function logConfirmingSwap(Bot $bot, Swap $swap, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
-        return $this->logLegacyBotEvent($bot, 'swap.confirming', BotEvent::LEVEL_INFO, [
-            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations confirmation".($confirmations==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination} after $confirmations_required confirmations.",
-            'confirmations'         => $confirmations,
-            'confirmationsRequired' => $confirmations_required,
-            'txid'                  => $xchain_notification['txid'],
-            'source'                => $xchain_notification['sources'][0],
-            'inQty'                 => $xchain_notification['quantity'],
-            'inAsset'               => $xchain_notification['asset'],
-            'destination'           => $destination,
-            'outQty'                => $quantity,
-            'outAsset'              => $asset,
-            'swapId'                => $swap['uuid'],
-        ]);
-    }
 
-    public function logConfirmedSwap(Bot $bot, Swap $swap, $xchain_notification, $confirmations, $confirmations_required, $destination, $quantity, $asset) {
-        return $this->logLegacyBotEvent($bot, 'swap.confirmed', BotEvent::LEVEL_INFO, [
-            'msg'                   => "Received a transaction of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with $confirmations of $confirmations_required confirmation".($confirmations_required==1?'':'s').".  Will vend {$quantity} {$asset} to {$destination}.",
-            'confirmations'         => $confirmations,
-            'confirmationsRequired' => $confirmations_required,
-            'txid'                  => $xchain_notification['txid'],
-            'source'                => $xchain_notification['sources'][0],
-            'inQty'                 => $xchain_notification['quantity'],
-            'inAsset'               => $xchain_notification['asset'],
-            'destination'           => $destination,
-            'outQty'                => $quantity,
-            'outAsset'              => $asset,
-            'swapId'                => $swap['uuid'],
-        ]);
-    }
 
 
     public function logSendAttempt(Bot $bot, Swap $swap, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
@@ -544,10 +521,10 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // Log Swap Event
 
-    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $write_to_application_log=true) {
+    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $write_to_application_log=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
-        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $receipt_update_vars);
+        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $receipt_update_vars, $swap_update_vars);
 
         // log the bot event
         if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
@@ -568,10 +545,11 @@ class BotEventLogger {
         Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));
     }
 
-    protected function buildSwapDetailsForLog($bot, $swap, $receipt_update_vars=null) {
+    protected function buildSwapDetailsForLog($bot, $swap, $receipt_update_vars=null, $swap_update_vars=null) {
         $receipt = (array)$swap['receipt'];
         if ($receipt_update_vars !== null) { $receipt = array_merge($receipt, $receipt_update_vars); }
 
+        $state = ($swap_update_vars !== null AND isset($swap_update_vars['state'])) ? $swap_update_vars['state'] : $swap['state'];
         $swap_details_for_log = [
             'destination'   => isset($receipt['destination'])   ? $receipt['destination']   : null,
 
@@ -585,9 +563,9 @@ class BotEventLogger {
 
             'confirmations' => isset($receipt['confirmations']) ? $receipt['confirmations'] : null,
 
-            'state'         => $swap['state'],
-            'isComplete'    => $swap->isComplete(),
-            'isError'       => $swap->isError(),
+            'state'         => $state,
+            'isComplete'    => $swap->isComplete($state),
+            'isError'       => $swap->isError($state),
         ];
 
         // filter null values

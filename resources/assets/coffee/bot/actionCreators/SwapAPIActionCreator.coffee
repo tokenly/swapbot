@@ -15,8 +15,11 @@ SwapAPIActionCreator = do ()->
         return
 
     exports.subscribeToSwapstream = (botId)->
+        console.log "exports.subscribeToSwapstream"
         subscriberId = swapbot.pusher.subscribeToPusherChanel "swapbot_swapstream_#{botId}", (swapstreamEvent)->
+            console.log "swapstreamEvent heard: ",swapstreamEvent
             handleSwapstreamEvents([swapstreamEvent])
+            return
 
         # load all existing swapstream events
         $.get "/api/v1/public/swapevents/#{botId}", (swapstreamEvents)=>

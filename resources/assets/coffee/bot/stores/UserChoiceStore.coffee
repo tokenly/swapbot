@@ -262,6 +262,19 @@ UserChoiceStore = do ()->
 
     # #############################################
 
+    onSwapStoreChanged = ()->
+        if userChoices.swap?.id
+            # update the chosen swap when the swapStore changes it
+            console.log "onSwapStoreChanged userChoices.swap.id=#{userChoices.swap.id}"
+            userChoices.swap = SwapsStore.getSwapById(userChoices.swap.id)
+            console.log "userChoices.swap.confirmations is now #{userChoices.swap.confirmations}"
+
+            emitChange()
+
+        return
+
+    # #############################################
+
     exports.init = ()->
         # init emitter
         eventEmitter = new window.EventEmitter()
@@ -305,6 +318,10 @@ UserChoiceStore = do ()->
 
         # init router
         initRouter()
+
+        SwapsStore.addChangeListener ()->
+            onSwapStoreChanged()
+            return
 
         return
 
