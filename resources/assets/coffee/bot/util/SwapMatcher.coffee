@@ -3,7 +3,9 @@ SwapMatcher = do ()->
 
 
     swapIsMatched = (swap, userChoices)->
-        return true
+        if swap.assetIn = userChoices.inAsset and swap.quantityIn == userChoices.inAmount
+            return true
+        return false
 
     # #############################################
 
