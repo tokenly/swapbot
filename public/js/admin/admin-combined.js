@@ -1243,7 +1243,6 @@
           return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function(apiResponse) {
             var botId;
             if (vm.isNew) {
-              console.log("apiResponse=", apiResponse);
               botId = apiResponse.id;
             } else {
               botId = vm.resourceId();
@@ -2501,6 +2500,12 @@
   swapbot.botUtils = (function() {
     var exports;
     exports = {};
+    exports.formatConfirmations = function(confirmations) {
+      if (confirmations == null) {
+        return 0;
+      }
+      return window.numeral(confirmations).format('0');
+    };
     exports.confirmationsProse = function(bot) {
       return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };

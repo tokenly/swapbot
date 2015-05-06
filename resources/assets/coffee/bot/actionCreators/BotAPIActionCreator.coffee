@@ -15,7 +15,7 @@ BotAPIActionCreator = do ()->
         # load all existing botstream events
         $.get "/api/v1/public/boteventstream/#{botId}", (botstreamEvents)=>
             # sort by oldest to newest
-            console.log "botstreamEvents",botstreamEvents
+            # console.log "botstreamEvents",botstreamEvents
             botstreamEvents.sort (a,b)->
                 return a.serial - b.serial
 

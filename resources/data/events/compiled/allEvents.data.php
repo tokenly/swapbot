@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-05 13:12:22
+// compiled on 2015-05-06 01:52:22
 
 return array (
   'swap.new' => 
@@ -53,7 +53,7 @@ return array (
     'name' => 'swap.confirming',
     'label' => 'Confirming Swap',
     'level' => 'INFO',
-    'msg' => 'Confirmed <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -68,13 +68,27 @@ return array (
     'name' => 'swap.confirmed',
     'label' => 'Confirmed Swap',
     'level' => 'INFO',
-    'msg' => 'Confirmed <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
       1 => 'assetIn',
       2 => 'destination',
       3 => 'confirmations',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.refunded' => 
+  array (
+    'name' => 'swap.refunded',
+    'label' => 'Swap Refunded',
+    'level' => 'INFO',
+    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
     ),
     'swapEventStream' => true,
   ),
@@ -92,17 +106,32 @@ return array (
     ),
     'swapEventStream' => true,
   ),
-  'swap.refunded' => 
+  'send.unconfirmed' => 
   array (
-    'name' => 'swap.refunded',
-    'label' => 'Swap Refunded',
-    'level' => 'INFO',
-    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'name' => 'send.unconfirmed',
+    'label' => 'Unconfirmed Swap Send',
+    'level' => 'DEBUG',
+    'msg' => 'Unconfirmed send of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
       1 => 'assetOut',
       2 => 'destination',
+    ),
+    'swapEventStream' => true,
+  ),
+  'send.confirmed' => 
+  array (
+    'name' => 'send.confirmed',
+    'label' => 'Swap Send Confirmed',
+    'level' => 'INFO',
+    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+      3 => 'confirmationsOut',
     ),
     'swapEventStream' => true,
   ),

@@ -29,7 +29,7 @@ events:
     name: swap.confirming
     label: Confirming Swap
     level: INFO
-    msg: Confirmed {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -37,8 +37,16 @@ events:
     name: swap.confirmed
     label: Confirmed Swap
     level: INFO
-    msg: Confirmed {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
+    swapEventStream: true
+
+  -
+    name: swap.refunded
+    label: Swap Refunded
+    level: INFO
+    msg: Refunded {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msgVars: [quantityOut,assetOut,destination]
     swapEventStream: true
 
   -
@@ -50,11 +58,19 @@ events:
     swapEventStream: true
 
   -
-    name: swap.refunded
-    label: Swap Refunded
-    level: INFO
-    msg: Refunded {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    name: send.unconfirmed
+    label: Unconfirmed Swap Send
+    level: DEBUG
+    msg: Unconfirmed send of {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
     msgVars: [quantityOut,assetOut,destination]
+    swapEventStream: true
+
+  -
+    name: send.confirmed
+    label: Swap Send Confirmed
+    level: INFO
+    msg: Sent {{ $quantityOut }} {{ $assetOut }} to {{ $destination }} with {{ $confirmationsOut }} {{ str_plural('confirmation', $confirmationsOut) }}.
+    msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 
 

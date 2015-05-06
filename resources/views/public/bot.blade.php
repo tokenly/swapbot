@@ -246,6 +246,7 @@
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 <script src="http://fb.me/react-0.13.2.js"></script>
 {{-- <script src="http://fb.me/react-0.13.2.min.js"></script> --}}
+<script src="/bower_components/numeral/min/numeral.min.js"></script>
 <script src="/bower_components/director/build/director.min.js"></script>
 <script src="/bower_components/moment/min/moment.min.js"></script>
 <script src="/bower_components/eventEmitter/EventEmitter.min.js"></script>

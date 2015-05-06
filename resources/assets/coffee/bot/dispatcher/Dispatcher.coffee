@@ -12,7 +12,7 @@ Dispatcher = do ()->
 
 
   exports.sayHi = ()->
-    console.log "Dispatcher says hi"
+    # console.log "Dispatcher says hi"
 
   exports.register = (callback) ->
     id = _prefix + _lastID++

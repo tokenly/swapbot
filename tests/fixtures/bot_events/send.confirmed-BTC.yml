@@ -1,7 +1,21 @@
 name: send.confirmed
-msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
-source: SWAPBOTADDR01
-outQty: 0.0005
-outAsset: BTC
+# msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
 destination: SENDER01
-confirmations: 1
+
+confirmations: '1'
+quantityIn: 500
+assetIn: 'LTBCOIN'
+txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+quantityOut: 0.0005
+assetOut: 'BTC'
+txidOut: '0000000000000000000000000000001111'
+confirmationsOut: 1
+state: 'complete'
+isComplete: true
+isError: false
+
+
+# source: SWAPBOTADDR01
+# outQty: 0.0005
+# outAsset: BTC
+# confirmations: 1

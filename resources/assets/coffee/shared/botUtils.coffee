@@ -13,6 +13,10 @@ swapbot.botUtils = do ()->
     # #############################################
     # exports
 
+    exports.formatConfirmations = (confirmations)->
+        return 0 if not confirmations?
+        return window.numeral(confirmations).format('0')
+
     exports.confirmationsProse = (bot)->
         return "#{bot.confirmationsRequired} #{exports.confirmationsWord(bot)}"
     

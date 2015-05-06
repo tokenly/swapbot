@@ -33,8 +33,8 @@ do ()->
         render: ->
             lastEvent = this.state.lastEvent
             isActive = if lastEvent? then lastEvent.isActive else false
-            console.log "lastEvent",lastEvent
-            console.log "isActive",isActive
+            # console.log "lastEvent",lastEvent
+            # console.log "isActive",isActive
             <div>
                 {
                     if isActive

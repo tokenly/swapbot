@@ -290,6 +290,13 @@ class BotEventLogger {
     }    
     
 
+    public function logSwapSendConfirmed(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars) {
+        $this->logSwapEvent('send.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+    }
+
+    public function logUnconfirmedSwapSend(Bot $bot, Swap $swap, $receipt_update_vars) {
+        $this->logSwapEvent('send.unconfirmed', $bot, $swap, $receipt_update_vars);
+    }
 
 
 
@@ -397,28 +404,6 @@ class BotEventLogger {
     }
 
 
-    public function logUnconfirmedSendTx(Bot $bot, $xchain_notification, $destination, $quantity, $asset) {
-        return $this->logLegacyBotEvent($bot, 'send.unconfirmed', BotEvent::LEVEL_DEBUG, [
-            'msg'         => "Saw unconfirmed send of {$quantity} {$asset} to {$destination} with transaction ID {$xchain_notification['txid']}.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-            'destination' => $destination,
-        ]);
-    }
-
-    public function logConfirmedSendTx(Bot $bot, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        return $this->logLegacyBotEvent($bot, 'send.confirmed', BotEvent::LEVEL_INFO, [
-            'msg'           => "Saw confirmed send of {$quantity} {$asset} to {$destination} with transaction ID {$xchain_notification['txid']}.",
-            'txid'          => $xchain_notification['txid'],
-            'confirmations' => $confirmations,
-            'source'        => $xchain_notification['sources'][0],
-            'outQty'        => $quantity,
-            'outAsset'      => $asset,
-            'destination'   => $destination,
-        ]);
-    }
 
     public function logUnknownSendTransaction(Bot $bot, $xchain_notification) {
         $confirmations = $xchain_notification['confirmations'];

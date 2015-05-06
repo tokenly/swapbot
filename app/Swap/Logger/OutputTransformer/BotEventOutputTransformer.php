@@ -28,6 +28,12 @@ class BotEventOutputTransformer {
 
         // resolve the template
         $compiled_blade_src = $message_template['msg'];
+
+        // fill missing event vars
+        foreach ($message_template['msgVars'] as $var_name) {
+            if (!isset($event_details[$var_name])) { $event_details[$var_name] = ''; }
+        }
+
         $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $event_details, $event);
         return $resolved_message;
     }

@@ -64,7 +64,8 @@ expectedBotEvents:
 
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-BTC.yml }
-    msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
+    confirmations: 2
+    # msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 

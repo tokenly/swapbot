@@ -220,7 +220,7 @@ do ()->
                     # go to bot display
 
                     if vm.isNew
-                        console.log "apiResponse=",apiResponse
+                        # console.log "apiResponse=",apiResponse
                         botId = apiResponse.id
                     else
                         botId = vm.resourceId()

@@ -33,7 +33,7 @@ SwapsStore = do ()->
         if anyChanged
             # rebuild allMySwaps
             allMySwaps = rebuildAllMySwaps()
-            console.log "emitChange"
+            # console.log "emitChange"
 
             emitChange()
         

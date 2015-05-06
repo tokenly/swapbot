@@ -25,7 +25,7 @@ do ()->
             return getViewState()
 
         _onChange: ()->
-            console.log "SwapbotWait _onChange.  "
+            # console.log "SwapbotWait _onChange.  "
             this.setState(getViewState())
             return
 
@@ -44,7 +44,7 @@ do ()->
 
 
         render: ()->
-            console.log "SwapbotWait render"
+            # console.log "SwapbotWait render"
             bot = this.props.bot
             swapConfig = this.state.userChoices.swapConfig
             return null if not swapConfig
@@ -140,7 +140,7 @@ do ()->
 
         clickedFn: (e)->
             e.preventDefault()
-            console.log "chooseSwap"
+            # console.log "chooseSwap"
             UserInputActions.chooseSwap(this.props.swap)
             return
 
@@ -221,6 +221,8 @@ do ()->
             bot = this.props.bot
             emailValue = userChoices.email.value
 
+            # Received <b>{swap.quantityIn} {swap.assetIn}</b> from {swap.destination}.
+
             return <div id="swap-step-3" className="content">
                     <h2>Waiting for confirmations</h2>
                     <div className="segment-control">
@@ -233,11 +235,11 @@ do ()->
                     </div>
                     <div className="icon-loading center"></div>
                     <p>
-                        Received <b>{swap.quantityIn} {swap.assetIn}</b> from {swap.destination}.
+                        {swap.message}
                         <br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>
-                    <p>This transaction has <b>{swap.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
+                    <p>This transaction has <b>{swapbot.botUtils.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} in and <b>{swapbot.botUtils.formatConfirmations(swap.confirmationsOut)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} out.</p>
                     { if userChoices.email.emailErrorMsg then <p className="error">{userChoices.email.emailErrorMsg}  Please try again.</p> else null }
                     {
                         if userChoices.email.submittedEmail

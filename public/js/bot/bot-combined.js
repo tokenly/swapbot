@@ -24,6 +24,12 @@
   swapbot.botUtils = (function() {
     var exports;
     exports = {};
+    exports.formatConfirmations = function(confirmations) {
+      if (confirmations == null) {
+        return 0;
+      }
+      return window.numeral(confirmations).format('0');
+    };
     exports.confirmationsProse = function(bot) {
       return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
     };
@@ -273,8 +279,6 @@
         var isActive, lastEvent;
         lastEvent = this.state.lastEvent;
         isActive = lastEvent != null ? lastEvent.isActive : false;
-        console.log("lastEvent", lastEvent);
-        console.log("isActive", isActive);
         return React.createElement("div", null, (isActive ? React.createElement("div", null, React.createElement("div", {
           "className": "status-dot bckg-green"
         }), "Active") : React.createElement("div", null, React.createElement("div", {
@@ -831,7 +835,6 @@
         return getViewState();
       },
       _onChange: function() {
-        console.log("SwapbotWait _onChange.  ");
         this.setState(getViewState());
       },
       componentDidMount: function() {
@@ -844,7 +847,6 @@
       },
       render: function() {
         var bot, swap, swapConfig;
-        console.log("SwapbotWait render");
         bot = this.props.bot;
         swapConfig = this.state.userChoices.swapConfig;
         if (!swapConfig) {
@@ -946,7 +948,6 @@
       },
       clickedFn: function(e) {
         e.preventDefault();
-        console.log("chooseSwap");
         UserInputActions.chooseSwap(this.props.swap);
       },
       render: function() {
@@ -1027,12 +1028,12 @@
           "className": "dot"
         })), React.createElement("div", {
           "className": "icon-loading center"
-        }), React.createElement("p", null, "Received ", React.createElement("b", null, swap.quantityIn, " ", swap.assetIn), " from ", swap.destination, ".", React.createElement("br", null), React.createElement("a", {
+        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
           "id": "not-my-transaction",
           "onClick": this.notMyTransactionClicked,
           "href": "#",
           "className": "shadow-link"
-        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), "."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
+        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
           "className": "error"
         }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
           "action": "#submit-email",
@@ -1091,7 +1092,6 @@
       });
       $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
         return function(botstreamEvents) {
-          console.log("botstreamEvents", botstreamEvents);
           botstreamEvents.sort(function(a, b) {
             return a.serial - b.serial;
           });
@@ -1115,9 +1115,7 @@
       });
     };
     exports.subscribeToSwapstream = function(botId) {
-      console.log("exports.subscribeToSwapstream");
       subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
-        console.log("swapstreamEvent heard: ", swapstreamEvent);
         handleSwapstreamEvents([swapstreamEvent]);
       });
       $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
@@ -1244,9 +1242,7 @@
     _isHandled = {};
     _isDispatching = false;
     _pendingPayload = null;
-    exports.sayHi = function() {
-      return console.log("Dispatcher says hi");
-    };
+    exports.sayHi = function() {};
     exports.register = function(callback) {
       var id;
       id = _prefix + _lastID++;
@@ -1440,7 +1436,6 @@
       }
       if (anyChanged) {
         allMySwaps = rebuildAllMySwaps();
-        console.log("emitChange");
         emitChange();
       }
     };
@@ -1504,7 +1499,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
+    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
     exports = {};
     userChoices = {
       step: 'choose',
@@ -1567,7 +1562,11 @@
     updateChosenSwap = function(newChosenSwap) {
       if ((userChoices.swap == null) || userChoices.swap.id !== newChosenSwap.id) {
         userChoices.swap = newChosenSwap;
-        console.log("updateChosenSwap complete");
+        console.log("updateChosenSwap newChosenSwap.isComplete=", newChosenSwap.isComplete);
+        if (swapIsComplete(newChosenSwap)) {
+          console.log("swapIsComplete = TRUE");
+          return;
+        }
         emitChange();
       }
     };
@@ -1636,6 +1635,12 @@
           userChoices.inAsset = null;
           router.setRoute('/receive');
       }
+    };
+    swapIsComplete = function(newChosenSwap) {
+      if (newChosenSwap.isComplete) {
+        return true;
+      }
+      return false;
     };
     routeToStepOrEmitChange = function(newStep) {
       if (userChoices.step !== newStep) {
