@@ -85,6 +85,10 @@ expectedBotModels:
       LTBCOIN: 1000500
       BTC: 0.99941 # + 0.00001 dust
 
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-complete.yml }
+
 
 expectedEmails:
   - meta: { baseFilename: 01-welcome.yml }

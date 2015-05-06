@@ -58,6 +58,7 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         return [
             ['sender'         , 's',  InputOption::VALUE_OPTIONAL, 'Sender Address', '1SENDER000000111111111111111111111'],
             ['txid'           , null, InputOption::VALUE_OPTIONAL, 'Transaction ID', 1],
+            ['txidout'        , null, InputOption::VALUE_OPTIONAL, 'Transaction ID out for Sends', null],
             ['notification-id', 'i',  InputOption::VALUE_OPTIONAL, 'Notification ID', null],
             ['asset'          , 'a',  InputOption::VALUE_OPTIONAL, 'Asset', 'BTC'],
             ['quantity'       , 'u',  InputOption::VALUE_OPTIONAL, 'Quantity', '0.005'],
@@ -86,7 +87,12 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         $this->comment("Sending mock xChain notification to bot {$bot['name']}");
 
         // mock xchain client so we don't try to make real calls
-        $mock = app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient();
+        $mock_builder = app('Tokenly\XChainClient\Mock\MockBuilder');
+        if ($txid_out = $this->input->getOption('txidout')) {
+            if (strlen($txid_out) < 51) { $txid_out = 'deadbeef00000000000000000000000000000000000000000000000000'.sprintf('%06x',$txid_out); }
+            $mock_builder->setOutputTransactionID($txid_out);
+        }
+        $mock = $mock_builder->installXChainMockClient();
 
         // fire the notification webhook
         $this->dispatch(new ReceiveWebhook($notification));

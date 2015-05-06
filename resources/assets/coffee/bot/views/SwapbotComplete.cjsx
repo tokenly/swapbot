@@ -1,49 +1,79 @@
-SwapbotComplete = React.createClass
-    displayName: 'SwapbotComplete'
-    subscriberId: null
+SwapbotComplete = null
 
-    componentDidMount: ()->
-        this.subscriberId = this.props.eventSubscriber.subscribe (botEvent)=>
-                if botEventWatcher.botEventIsFinal(botEvent)
-                    matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent)
-                    this.setState({matchedTxInfo: matchedTxInfo})
-            return
-        return
+do ()->
 
-    componentWillUnmount: ()->
-        if this.subscriberId?
-            this.props.eventSubscriber.unsubscribe(this.subscriberId)
-            this.subscriberId = null
-        return
+    getViewState = ()->
+        userChoices = UserChoiceStore.getUserChoices()
+        swaps = SwapsStore.getSwaps()
 
-
-    getInitialState: ()->
         return {
-            matchedTxInfo: null
-            success: true
+            userChoices: userChoices
+            swaps      : swaps
         }
+    
 
-    render: ()->
-        bot = this.props.bot
-        swapDetails = this.props.swapDetails
-        swap = swapDetails.swap
+    # ########################################################################################################################
+    # The swapbot wait receive component
 
-        return <div id="swapbot-container" className="section grid-100">
-            <div id="swap-step-4" className="content hidden">
-                <h2>Successfully finished</h2>
-                <div className="x-button" id="swap-step-4-close"></div>
-                <div className="segment-control">
-                    <div className="line"></div>
-                    <br>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot selected"></div>
+    SwapbotComplete = React.createClass
+        displayName: 'SwapbotComplete'
+
+        getInitialState: ()->
+            return getViewState()
+
+        _onChange: ()->
+            # console.log "SwapbotComplete _onChange.  "
+            this.setState(getViewState())
+            return
+
+        componentDidMount: ()->
+            SwapsStore.addChangeListener(this._onChange)
+            UserChoiceStore.addChangeListener(this._onChange)
+            return
+
+        componentWillUnmount: ()->
+            SwapsStore.removeChangeListener(this._onChange)
+            UserChoiceStore.removeChangeListener(this._onChange)
+            return
+
+
+        notMyTransactionClicked: (e)->
+            e.preventDefault()
+            UserInputActions.clearSwap()
+            return
+
+
+        # ########################################################################
+
+
+        render: ()->
+            # console.log "SwapbotComplete render"
+            bot = this.props.bot
+            swap = this.state.userChoices.swap
+            return null if not swap
+
+            return <div id="swapbot-container" className="section grid-100">
+                <div id="swap-step-4" className="content">
+                    <h2>Successfully finished</h2>
+                    <div className="x-button" id="swap-step-4-close"></div>
+                    <div className="segment-control">
+                        <div className="line"></div>
+                        <br />
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                        <div className="dot selected"></div>
+                    </div>
+                    <div className="icon-success center"></div>
+                    <p>
+                        {swap.message}
+                        <br/>
+                        <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
+                    </p>
+                    <p><a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank">Transaction details <i className="fa fa-arrow-circle-right"></i></a></p>
                 </div>
-                <div className="icon-success center"></div>
-                <p>Exchanged <b>0.1 XXX</b> for <b>100,000 XXXX</b> with {bot.address}.</p>
-                <p><a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank">Transaction details <i className="fa fa-arrow-circle-right"></i></a></p>
             </div>
-        </div>
 
+
+    # ########################################################################################################################
 

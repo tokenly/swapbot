@@ -587,72 +587,84 @@
     });
   })();
 
-  SwapbotComplete = React.createClass({
-    displayName: 'SwapbotComplete',
-    subscriberId: null,
-    componentDidMount: function() {
-      this.subscriberId = this.props.eventSubscriber.subscribe((function(_this) {
-        return function(botEvent) {
-          var matchedTxInfo;
-          if (botEventWatcher.botEventIsFinal(botEvent)) {
-            matchedTxInfo = botEventWatcher.txInfoFromBotEvent(botEvent);
-            return _this.setState({
-              matchedTxInfo: matchedTxInfo
-            });
-          }
-        };
-      })(this));
-      return;
-    },
-    componentWillUnmount: function() {
-      if (this.subscriberId != null) {
-        this.props.eventSubscriber.unsubscribe(this.subscriberId);
-        this.subscriberId = null;
-      }
-    },
-    getInitialState: function() {
+  SwapbotComplete = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      var swaps, userChoices;
+      userChoices = UserChoiceStore.getUserChoices();
+      swaps = SwapsStore.getSwaps();
       return {
-        matchedTxInfo: null,
-        success: true
+        userChoices: userChoices,
+        swaps: swaps
       };
-    },
-    render: function() {
-      var bot, swap, swapDetails;
-      bot = this.props.bot;
-      swapDetails = this.props.swapDetails;
-      swap = swapDetails.swap;
-      return React.createElement("div", {
-        "id": "swapbot-container",
-        "className": "section grid-100"
-      }, React.createElement("div", {
-        "id": "swap-step-4",
-        "className": "content hidden"
-      }, React.createElement("h2", null, "Successfully finished"), React.createElement("div", {
-        "className": "x-button",
-        "id": "swap-step-4-close"
-      }), React.createElement("div", {
-        "className": "segment-control"
-      }, React.createElement("div", {
-        "className": "line"
-      }), "\x3Cbr\x3E", React.createElement("div", {
-        "className": "dot"
-      }), React.createElement("div", {
-        "className": "dot"
-      }), React.createElement("div", {
-        "className": "dot"
-      }), React.createElement("div", {
-        "className": "dot selected"
-      })), React.createElement("div", {
-        "className": "icon-success center"
-      }), React.createElement("p", null, "Exchanged ", React.createElement("b", null, "0.1 XXX"), " for ", React.createElement("b", null, "100,000 XXXX"), " with ", bot.address, "."), React.createElement("p", null, React.createElement("a", {
-        "href": "/public/" + bot.username + "/swap/" + swap.id,
-        "className": "details-link",
-        "target": "_blank"
-      }, "Transaction details ", React.createElement("i", {
-        "className": "fa fa-arrow-circle-right"
-      })))));
-    }
-  });
+    };
+    return SwapbotComplete = React.createClass({
+      displayName: 'SwapbotComplete',
+      getInitialState: function() {
+        return getViewState();
+      },
+      _onChange: function() {
+        this.setState(getViewState());
+      },
+      componentDidMount: function() {
+        SwapsStore.addChangeListener(this._onChange);
+        UserChoiceStore.addChangeListener(this._onChange);
+      },
+      componentWillUnmount: function() {
+        SwapsStore.removeChangeListener(this._onChange);
+        UserChoiceStore.removeChangeListener(this._onChange);
+      },
+      notMyTransactionClicked: function(e) {
+        e.preventDefault();
+        UserInputActions.clearSwap();
+      },
+      render: function() {
+        var bot, swap;
+        bot = this.props.bot;
+        swap = this.state.userChoices.swap;
+        if (!swap) {
+          return null;
+        }
+        return React.createElement("div", {
+          "id": "swapbot-container",
+          "className": "section grid-100"
+        }, React.createElement("div", {
+          "id": "swap-step-4",
+          "className": "content"
+        }, React.createElement("h2", null, "Successfully finished"), React.createElement("div", {
+          "className": "x-button",
+          "id": "swap-step-4-close"
+        }), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        })), React.createElement("div", {
+          "className": "icon-success center"
+        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
+          "id": "not-my-transaction",
+          "onClick": this.notMyTransactionClicked,
+          "href": "#",
+          "className": "shadow-link"
+        }, "Not your transaction?")), React.createElement("p", null, React.createElement("a", {
+          "href": "/public/" + bot.username + "/swap/" + swap.id,
+          "className": "details-link",
+          "target": "_blank"
+        }, "Transaction details ", React.createElement("i", {
+          "className": "fa fa-arrow-circle-right"
+        })))));
+      }
+    });
+  })();
 
   SwapbotReceive = null;
 
@@ -829,7 +841,145 @@
         anyMatchedSwaps: (matchedSwaps.length > 0 ? true : false)
       };
     };
-    SwapbotWait = React.createClass({
+    TransactionInfo = React.createClass({
+      displayName: 'TransactionInfo',
+      intervalTimer: null,
+      componentDidMount: function() {
+        this.updateNow();
+        this.intervalTimer = setInterval((function(_this) {
+          return function() {
+            return _this.updateNow();
+          };
+        })(this), 1000);
+      },
+      updateNow: function() {
+        this.setState({
+          fromNow: moment(this.props.swap.updatedAt).fromNow()
+        });
+      },
+      componentWillUnmount: function() {
+        if (this.intervalTimer != null) {
+          clearInterval(this.intervalTimer);
+        }
+      },
+      getInitialState: function() {
+        return {
+          fromNow: ''
+        };
+      },
+      clickedFn: function(e) {
+        e.preventDefault();
+        UserInputActions.chooseSwap(this.props.swap);
+      },
+      render: function() {
+        var bot, swap;
+        swap = this.props.swap;
+        bot = this.props.bot;
+        return React.createElement("li", {
+          "className": "chooseable"
+        }, React.createElement("a", {
+          "onClick": this.clickedFn,
+          "href": "#choose"
+        }, React.createElement("div", {
+          "className": "item-content"
+        }, React.createElement("div", {
+          "className": "item-header",
+          "title": "{swap.name}"
+        }, "Transaction Received"), React.createElement("p", {
+          "className": "date"
+        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), ".")), React.createElement("div", {
+          "className": "item-actions"
+        }, React.createElement("div", {
+          "className": "icon-next"
+        }))), React.createElement("div", {
+          "className": "clearfix"
+        }));
+      }
+    });
+    SingleTransactionInfo = React.createClass({
+      displayName: 'SingleTransactionInfo',
+      intervalTimer: null,
+      componentDidMount: function() {},
+      updateNow: function() {},
+      componentWillUnmount: function() {
+        if (this.intervalTimer != null) {
+          clearInterval(this.intervalTimer);
+        }
+      },
+      getInitialState: function() {
+        return {};
+      },
+      updateEmailValue: function(e) {
+        e.preventDefault();
+        UserInputActions.updateEmailValue(e.target.value);
+      },
+      submitEmailFn: function(e) {
+        var email;
+        e.preventDefault();
+        email = this.props.userChoices.email.value;
+        if (email.length < 1) {
+          return;
+        }
+        return UserInputActions.submitEmail();
+      },
+      notMyTransactionClicked: function(e) {
+        e.preventDefault();
+        UserInputActions.clearSwap();
+      },
+      render: function() {
+        var bot, emailValue, swap, userChoices;
+        userChoices = this.props.userChoices;
+        swap = userChoices.swap;
+        bot = this.props.bot;
+        emailValue = userChoices.email.value;
+        return React.createElement("div", {
+          "id": "swap-step-3",
+          "className": "content"
+        }, React.createElement("h2", null, "Waiting for confirmations"), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        }), React.createElement("div", {
+          "className": "dot"
+        })), React.createElement("div", {
+          "className": "icon-loading center"
+        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
+          "id": "not-my-transaction",
+          "onClick": this.notMyTransactionClicked,
+          "href": "#",
+          "className": "shadow-link"
+        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
+          "className": "error"
+        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+          "action": "#submit-email",
+          "onSubmit": this.submitEmailFn,
+          "style": (userChoices.email.submittingEmail ? {
+            opacity: 0.2
+          } : null)
+        }, React.createElement("table", {
+          "className": "fieldset fieldset-other"
+        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
+          "disabled": (userChoices.email.submittingEmail ? true : false),
+          "required": true,
+          "type": "email",
+          "onChange": this.updateEmailValue,
+          "id": "other-address",
+          "placeholder": "example@example.com",
+          "value": emailValue
+        })), React.createElement("td", null, React.createElement("div", {
+          "id": "icon-other-next",
+          "className": "icon-next",
+          "onClick": this.submitEmailFn
+        })))))))));
+      }
+    });
+    return SwapbotWait = React.createClass({
       displayName: 'SwapbotWait',
       getInitialState: function() {
         return getViewState();
@@ -918,144 +1068,6 @@
         }), "Waiting for ", React.createElement("strong", null, this.state.userChoices.inAmount, " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
           "className": "description"
         }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.botUtils.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
-      }
-    });
-    TransactionInfo = React.createClass({
-      displayName: 'TransactionInfo',
-      intervalTimer: null,
-      componentDidMount: function() {
-        this.updateNow();
-        this.intervalTimer = setInterval((function(_this) {
-          return function() {
-            return _this.updateNow();
-          };
-        })(this), 1000);
-      },
-      updateNow: function() {
-        this.setState({
-          fromNow: moment(this.props.swap.updatedAt).fromNow()
-        });
-      },
-      componentWillUnmount: function() {
-        if (this.intervalTimer != null) {
-          clearInterval(this.intervalTimer);
-        }
-      },
-      getInitialState: function() {
-        return {
-          fromNow: ''
-        };
-      },
-      clickedFn: function(e) {
-        e.preventDefault();
-        UserInputActions.chooseSwap(this.props.swap);
-      },
-      render: function() {
-        var bot, swap;
-        swap = this.props.swap;
-        bot = this.props.bot;
-        return React.createElement("li", {
-          "className": "chooseable"
-        }, React.createElement("a", {
-          "onClick": this.clickedFn,
-          "href": "#choose"
-        }, React.createElement("div", {
-          "className": "item-content"
-        }, React.createElement("div", {
-          "className": "item-header",
-          "title": "{swap.name}"
-        }, "Transaction Received"), React.createElement("p", {
-          "className": "date"
-        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), ".")), React.createElement("div", {
-          "className": "item-actions"
-        }, React.createElement("div", {
-          "className": "icon-next"
-        }))), React.createElement("div", {
-          "className": "clearfix"
-        }));
-      }
-    });
-    return SingleTransactionInfo = React.createClass({
-      displayName: 'SingleTransactionInfo',
-      intervalTimer: null,
-      componentDidMount: function() {},
-      updateNow: function() {},
-      componentWillUnmount: function() {
-        if (this.intervalTimer != null) {
-          clearInterval(this.intervalTimer);
-        }
-      },
-      getInitialState: function() {
-        return {};
-      },
-      updateEmailValue: function(e) {
-        e.preventDefault();
-        UserInputActions.updateEmailValue(e.target.value);
-      },
-      submitEmailFn: function(e) {
-        var email;
-        e.preventDefault();
-        email = this.props.userChoices.email.value;
-        if (email.length < 1) {
-          return;
-        }
-        return UserInputActions.submitEmail();
-      },
-      notMyTransactionClicked: function(e) {
-        e.preventDefault();
-        UserInputActions.clearSwap();
-      },
-      render: function() {
-        var bot, emailValue, swap, userChoices;
-        userChoices = this.props.userChoices;
-        swap = userChoices.swap;
-        bot = this.props.bot;
-        emailValue = userChoices.email.value;
-        return React.createElement("div", {
-          "id": "swap-step-3",
-          "className": "content"
-        }, React.createElement("h2", null, "Waiting for confirmations"), React.createElement("div", {
-          "className": "segment-control"
-        }, React.createElement("div", {
-          "className": "line"
-        }), React.createElement("br", null), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot selected"
-        }), React.createElement("div", {
-          "className": "dot"
-        })), React.createElement("div", {
-          "className": "icon-loading center"
-        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
-          "id": "not-my-transaction",
-          "onClick": this.notMyTransactionClicked,
-          "href": "#",
-          "className": "shadow-link"
-        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
-          "className": "error"
-        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
-          "action": "#submit-email",
-          "onSubmit": this.submitEmailFn,
-          "style": (userChoices.email.submittingEmail ? {
-            opacity: 0.2
-          } : null)
-        }, React.createElement("table", {
-          "className": "fieldset fieldset-other"
-        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
-          "disabled": (userChoices.email.submittingEmail ? true : false),
-          "required": true,
-          "type": "email",
-          "onChange": this.updateEmailValue,
-          "id": "other-address",
-          "placeholder": "example@example.com",
-          "value": emailValue
-        })), React.createElement("td", null, React.createElement("div", {
-          "id": "icon-other-next",
-          "className": "icon-next",
-          "onClick": this.submitEmailFn
-        })))))))));
       }
     });
   })();
@@ -1432,6 +1444,8 @@
         } else {
           allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper);
         }
+        console.log("eventWrapper=", eventWrapper);
+        console.log("allMySwapsById[" + swapId + "]=", allMySwapsById[swapId]);
         anyChanged = true;
       }
       if (anyChanged) {
@@ -1565,6 +1579,7 @@
         console.log("updateChosenSwap newChosenSwap.isComplete=", newChosenSwap.isComplete);
         if (swapIsComplete(newChosenSwap)) {
           console.log("swapIsComplete = TRUE");
+          routeToStepOrEmitChange('complete');
           return;
         }
         emitChange();
@@ -1647,7 +1662,7 @@
         router.setRoute('/' + newStep);
         return;
       }
-      return emitChange();
+      emitChange();
     };
     emitChange = function() {
       eventEmitter.emitEvent('change');

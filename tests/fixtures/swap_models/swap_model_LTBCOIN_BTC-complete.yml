@@ -1,0 +1,15 @@
+name: LTBCOIN:BTC
+state: complete
+receipt:
+    confirmations: '2'
+    type: swap
+    quantityIn: 500
+    assetIn: 'LTBCOIN'
+    txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+    quantityOut: 0.0005
+    assetOut: 'BTC'
+    txidOut: '0000000000000000000000000000001111'
+    destination: 'SENDER01'
+    confirmationsOut: 1
+
+

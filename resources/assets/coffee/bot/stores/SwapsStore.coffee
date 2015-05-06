@@ -28,6 +28,9 @@ SwapsStore = do ()->
                 # new swap
                 allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper)
 
+            console.log "eventWrapper=",eventWrapper
+            console.log "allMySwapsById[#{swapId}]=",allMySwapsById[swapId]
+
             anyChanged = true
 
         if anyChanged

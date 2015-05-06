@@ -93,9 +93,9 @@ UserChoiceStore = do ()->
             # check for completed transaction
             console.log "updateChosenSwap newChosenSwap.isComplete=",newChosenSwap.isComplete
             if swapIsComplete(newChosenSwap)
-                # throw an action back in the system to mark it as complete
+                # route to the complete stage
                 console.log "swapIsComplete = TRUE"
-                
+                routeToStepOrEmitChange('complete')
                 return
 
             # emit a change
@@ -199,6 +199,7 @@ UserChoiceStore = do ()->
             return
 
         emitChange()
+        return
 
 
     emitChange = ()->

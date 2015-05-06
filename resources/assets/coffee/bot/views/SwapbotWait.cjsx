@@ -16,100 +16,6 @@ do ()->
     
 
     # ########################################################################################################################
-    # The swapbot wait receive component
-
-    SwapbotWait = React.createClass
-        displayName: 'SwapbotWait'
-
-        getInitialState: ()->
-            return getViewState()
-
-        _onChange: ()->
-            # console.log "SwapbotWait _onChange.  "
-            this.setState(getViewState())
-            return
-
-        componentDidMount: ()->
-            SwapsStore.addChangeListener(this._onChange)
-            UserChoiceStore.addChangeListener(this._onChange)
-            return
-
-        componentWillUnmount: ()->
-            SwapsStore.removeChangeListener(this._onChange)
-            UserChoiceStore.removeChangeListener(this._onChange)
-            return
-
-
-        # ########################################################################
-
-
-        render: ()->
-            # console.log "SwapbotWait render"
-            bot = this.props.bot
-            swapConfig = this.state.userChoices.swapConfig
-            return null if not swapConfig
-
-            return <div id="swapbot-container" className="section grid-100">
-                <div id="swap-step-2" className="content">
-                    <h2>Receiving transaction</h2>
-                    <div className="segment-control">
-                        <div className="line"></div>
-                        <br />
-                        <div className="dot"></div>
-                        <div className="dot selected"></div>
-                        <div className="dot"></div>
-                        <div className="dot"></div>
-                    </div>
-                    <table className="fieldset">
-                        <tr>
-                            <td>
-                                <label htmlFor="token-available">{swapConfig.out} available for purchase: </label>
-                            </td>
-                            <td><span id="token-available">{bot.balances[swapConfig.out]} {swapConfig.out}</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="token-amount">I would like to purchase: </label>
-                            </td>
-                            <td>
-                                <input disabled type="text" id="token-amount" placeholder={'0 '+swapConfig.out} defaultValue={this.state.userChoices.outAmount} />
-                            </td>
-                        </tr>
-                    </table>
-
-                    <div id="GoBackLink">
-                        <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
-                    </div>
-
-
-                    {
-                        if this.state.userChoices.swap?
-                            <SingleTransactionInfo bot={bot} userChoices={this.state.userChoices} />
-                        else
-                            if this.state.anyMatchedSwaps
-                                <ul id="transaction-confirm-list" className="wide-list">
-                                    {
-                                        for swap in this.state.matchedSwaps
-                                            <TransactionInfo key={swap.id} bot={bot} swap={swap} />
-                                    }
-                                </ul>
-                            else
-                                <ul id="transaction-wait-list" className="wide-list">
-                                    <li>
-                                        <div className="status-icon icon-pending"></div>
-                                        Waiting for <strong>{this.state.userChoices.inAmount} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}.
-                                        <br/>
-                                    </li>
-                                </ul>
-                    }
-
-
-
-                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.botUtils.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
-                </div>
-            </div>
-
-    # ########################################################################################################################
 
     TransactionInfo = React.createClass
         displayName: 'TransactionInfo'
@@ -209,10 +115,7 @@ do ()->
 
         notMyTransactionClicked: (e)->
             e.preventDefault()
-
             UserInputActions.clearSwap()
-
-
             return
 
         render: ()->
@@ -268,16 +171,98 @@ do ()->
                     }
                 </div>
 
-                # destination
-                # quantityIn
-                # assetIn
-                # txidIn
-                # quantityOut
-                # assetOut
-                # txidOut
-                # confirmations
-                # state
-                # isComplete
-                # isError
 
+    # ########################################################################################################################
+    # The swapbot wait receive component
+
+    SwapbotWait = React.createClass
+        displayName: 'SwapbotWait'
+
+        getInitialState: ()->
+            return getViewState()
+
+        _onChange: ()->
+            # console.log "SwapbotWait _onChange.  "
+            this.setState(getViewState())
+            return
+
+        componentDidMount: ()->
+            SwapsStore.addChangeListener(this._onChange)
+            UserChoiceStore.addChangeListener(this._onChange)
+            return
+
+        componentWillUnmount: ()->
+            SwapsStore.removeChangeListener(this._onChange)
+            UserChoiceStore.removeChangeListener(this._onChange)
+            return
+
+
+        # ########################################################################
+
+
+        render: ()->
+            # console.log "SwapbotWait render"
+            bot = this.props.bot
+            swapConfig = this.state.userChoices.swapConfig
+            return null if not swapConfig
+
+            return <div id="swapbot-container" className="section grid-100">
+                <div id="swap-step-2" className="content">
+                    <h2>Receiving transaction</h2>
+                    <div className="segment-control">
+                        <div className="line"></div>
+                        <br />
+                        <div className="dot"></div>
+                        <div className="dot selected"></div>
+                        <div className="dot"></div>
+                        <div className="dot"></div>
+                    </div>
+                    <table className="fieldset">
+                        <tr>
+                            <td>
+                                <label htmlFor="token-available">{swapConfig.out} available for purchase: </label>
+                            </td>
+                            <td><span id="token-available">{bot.balances[swapConfig.out]} {swapConfig.out}</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label htmlFor="token-amount">I would like to purchase: </label>
+                            </td>
+                            <td>
+                                <input disabled type="text" id="token-amount" placeholder={'0 '+swapConfig.out} defaultValue={this.state.userChoices.outAmount} />
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div id="GoBackLink">
+                        <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
+                    </div>
+
+
+                    {
+                        if this.state.userChoices.swap?
+                            <SingleTransactionInfo bot={bot} userChoices={this.state.userChoices} />
+                        else
+                            if this.state.anyMatchedSwaps
+                                <ul id="transaction-confirm-list" className="wide-list">
+                                    {
+                                        for swap in this.state.matchedSwaps
+                                            <TransactionInfo key={swap.id} bot={bot} swap={swap} />
+                                    }
+                                </ul>
+                            else
+                                <ul id="transaction-wait-list" className="wide-list">
+                                    <li>
+                                        <div className="status-icon icon-pending"></div>
+                                        Waiting for <strong>{this.state.userChoices.inAmount} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}.
+                                        <br/>
+                                    </li>
+                                </ul>
+                    }
+
+
+
+                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.botUtils.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                </div>
+            </div>
 
