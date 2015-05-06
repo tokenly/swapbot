@@ -25,15 +25,9 @@ class RepositoryTestHelper  {
         $loaded_model = $this->repository->findByID($created_model['id']);
         PHPUnit::assertNotEmpty($loaded_model);
 
-        PHPUnit::assertEquals($created_model->toArray(), $this->normalizeDates($loaded_model->toArray(), $created_model->toArray()));
+        PHPUnit::assertEquals($created_model->toArray(), normalize_updated_date($loaded_model->toArray(), $created_model->toArray()));
 
         return $loaded_model;
-    }
-
-    protected function normalizeDates($loaded_array, $expected_array) {
-        if (isset($loaded_array['updated_at'])) { $loaded_array['updated_at'] = $expected_array['updated_at']; }
-
-        return $loaded_array;
     }
 
     public function testUpdate($update_attributes) {
@@ -115,8 +109,8 @@ class RepositoryTestHelper  {
         $loaded_models = array_values(iterator_to_array($this->repository->findAll()));
         PHPUnit::assertNotEmpty($loaded_models);
         PHPUnit::assertCount(2, $loaded_models);
-        PHPUnit::assertEquals($created_model->toArray(), $this->normalizeDates($loaded_models[0]->toArray(), $created_model->toArray()));
-        PHPUnit::assertEquals($created_model_2->toArray(), $this->normalizeDates($loaded_models[1]->toArray(), $created_model_2->toArray()));
+        PHPUnit::assertEquals($created_model->toArray(), normalize_updated_date($loaded_models[0]->toArray(), $created_model->toArray()));
+        PHPUnit::assertEquals($created_model_2->toArray(), normalize_updated_date($loaded_models[1]->toArray(), $created_model_2->toArray()));
     }
 
 
