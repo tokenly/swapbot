@@ -73,6 +73,15 @@ events:
     msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 
+  # ### Swap Errors
+  -
+    name: swap.failed
+    label: Swap Failed
+    level: WARNING
+    msg: This swap send attempt failed.
+    msgVars: []
+    swapEventStream: true
+
   -
     name: swap.notReady
     label: Swap Not Ready

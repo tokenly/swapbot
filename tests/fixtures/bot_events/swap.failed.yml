@@ -1,4 +1,17 @@
 name: swap.failed
-msg: Failed to swap asset.
+# msg: Failed to swap asset.
+
 error: Test Exception Triggered
-destination: SENDER01
+
+destination: 'SENDER01'
+quantityIn: 0.001
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+confirmations: '1'
+quantityOut: 5000
+assetOut: 'SOUP'
+confirmationsOut: 0
+
+state: 'ready'
+isComplete: false
+isError: false

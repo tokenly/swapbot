@@ -155,7 +155,7 @@ class SwapProcessor {
                 $this->bot_event_logger->logLegacyBotEventWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
             } else {
                 EventLog::logError('swap.failed', $e);
-                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $swap_process['xchain_notification'], $e);
+                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $e, $swap_process['swap_update_vars']['receipt']);
             }
         }
 
@@ -317,7 +317,7 @@ class SwapProcessor {
         if ($swap_process['swap_was_handled']) { return; }
 
         if (!$swap_process['swap']->isReady()) {
-            $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['swap'], $swap_process['transaction']['id'], $swap_process['swap']['name']);
+            $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['swap']);
             return;
         }
 
@@ -336,17 +336,7 @@ class SwapProcessor {
         // log the attempt to send
         $this->bot_event_logger->logSendAttempt($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
 
-        // send it
-        try {
-            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
-        } catch (Exception $e) {
-            // move the swap into an error state
-            $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
-
-            throw $e;
-        }
-
-        // update the swap receipts
+        // update the swap receipts (before the attempt)
         $receipt_update_vars = [
             'type'             => 'swap',
 
@@ -357,7 +347,6 @@ class SwapProcessor {
 
             'quantityOut'      => $swap_process['quantity'],
             'assetOut'         => $swap_process['asset'],
-            'txidOut'          => $send_result['txid'],
             'confirmationsOut' => 0,
 
             'destination'      => $swap_process['destination'],
@@ -365,6 +354,22 @@ class SwapProcessor {
             'timestamp'        => time(),
         ];
         $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+
+        // send it
+        try {
+            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+        } catch (Exception $e) {
+            // move the swap into an error state
+            $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
+
+            throw $e;
+        }
+
+
+        // update the txidOut
+        $receipt_update_vars['txidOut'] = $send_result['txid'];
+        $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+
 
         // update the local balance
         $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);

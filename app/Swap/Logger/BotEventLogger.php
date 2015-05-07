@@ -299,17 +299,14 @@ class BotEventLogger {
     }
 
 
+    public function logSwapNotReady(Bot $bot, Swap $swap) {
+        $this->logSwapEvent('swap.notReady', $bot, $swap);
+    }
 
-    public function logSwapFailed(Bot $bot, Swap $swap, $xchain_notification, $e) {
-        return $this->logLegacyBotEventWithoutEventLog($bot, 'swap.failed', BotEvent::LEVEL_WARNING, [
-            'msg'         => "Failed to swap asset.",
-            'swapId'      => $swap['uuid'],
-            'error'       => $e->getMessage(),
-            'txid'        => $xchain_notification['txid'],
-            'destination' => $xchain_notification['sources'][0],
-            // 'file'     => $e->getFile(),
-            // 'line'     => $e->getLine(),
-        ]);
+
+
+    public function logSwapFailed(Bot $bot, Swap $swap, Exception $e, $receipt_update_vars) {
+        $this->logSwapEvent('swap.failed', $bot, $swap, $receipt_update_vars, null, ['error' => $e->getMessage()]);
     }
 
     public function logSwapRetry(Bot $bot, Swap $swap) {
@@ -351,11 +348,6 @@ class BotEventLogger {
             'outQty'      => $quantity,
             'outAsset'    => $asset,
         ]);
-    }
-
-
-    public function logSwapNotReady(Bot $bot, Swap $swap) {
-        $this->logSwapEvent('swap.notReady', $bot, $swap);
     }
 
 
@@ -479,10 +471,13 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // Log Swap Event
 
-    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $write_to_application_log=true) {
+    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $extra_event_vars=null, $write_to_application_log=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
         $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars, $swap_update_vars);
+
+        // merge $extra_event_vars
+        if ($extra_event_vars !== null) { $swap_details_for_event_log = array_merge($swap_details_for_event_log, $extra_event_vars); }
 
         // log the bot event
         if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
@@ -495,9 +490,6 @@ class BotEventLogger {
             // publish to event stream
             Event::fire(new SwapstreamEventCreated($swap, $bot, $serialized_bot_event_model));
         }
-
-        // // fire a bot event
-        // Event::fire(new BotEventCreated($bot, $serialized_bot_event_model));
 
         // fire swap event
         Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));

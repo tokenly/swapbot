@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-07 02:39:44
+// compiled on 2015-05-07 02:49:15
 
 return array (
   'swap.new' => 
@@ -132,6 +132,17 @@ return array (
       1 => 'assetOut',
       2 => 'destination',
       3 => 'confirmationsOut',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.failed' => 
+  array (
+    'name' => 'swap.failed',
+    'label' => 'Swap Failed',
+    'level' => 'WARNING',
+    'msg' => 'This swap send attempt failed.',
+    'msgVars' => 
+    array (
     ),
     'swapEventStream' => true,
   ),

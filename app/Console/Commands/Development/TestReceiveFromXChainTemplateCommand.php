@@ -56,13 +56,14 @@ class TestReceiveFromXChainTemplateCommand extends Command {
     {
 
         return [
-            ['sender'         , 's',  InputOption::VALUE_OPTIONAL, 'Sender Address', '1SENDER000000111111111111111111111'],
-            ['txid'           , null, InputOption::VALUE_OPTIONAL, 'Transaction ID', 1],
-            ['txidout'        , null, InputOption::VALUE_OPTIONAL, 'Transaction ID out for Sends', null],
-            ['notification-id', 'i',  InputOption::VALUE_OPTIONAL, 'Notification ID', null],
-            ['asset'          , 'a',  InputOption::VALUE_OPTIONAL, 'Asset', 'BTC'],
-            ['quantity'       , 'u',  InputOption::VALUE_OPTIONAL, 'Quantity', '0.005'],
-            ['confirmations'  , 'c',  InputOption::VALUE_OPTIONAL, 'Confirmations', '0'],
+            ['sender',             's',  InputOption::VALUE_OPTIONAL, 'Sender Address', '1SENDER000000111111111111111111111'],
+            ['txid',               null, InputOption::VALUE_OPTIONAL, 'Transaction ID', 1],
+            ['txidout',            null, InputOption::VALUE_OPTIONAL, 'Transaction ID out for Sends', null],
+            ['trigger-send-error', null, InputOption::VALUE_NONE,     'Trigger a send error'],
+            ['notification-id',    'i',  InputOption::VALUE_OPTIONAL, 'Notification ID', null],
+            ['asset',              'a',  InputOption::VALUE_OPTIONAL, 'Asset', 'BTC'],
+            ['quantity',           'u',  InputOption::VALUE_OPTIONAL, 'Quantity', '0.005'],
+            ['confirmations',      'c',  InputOption::VALUE_OPTIONAL, 'Confirmations', '0'],
         ];
     }
 
@@ -91,6 +92,10 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         if ($txid_out = $this->input->getOption('txidout')) {
             if (strlen($txid_out) < 51) { $txid_out = 'deadbeef00000000000000000000000000000000000000000000000000'.sprintf('%06x',$txid_out); }
             $mock_builder->setOutputTransactionID($txid_out);
+        }
+        if ($this->input->getOption('trigger-send-error')) {
+            $this->comment("Using test error");
+            $mock_builder->beginThrowingExceptionsAfterCount();
         }
         $mock = $mock_builder->installXChainMockClient();
 
