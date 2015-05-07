@@ -1,3 +1,5 @@
 name: bot.stateChange
-msg: Entered state lowfuel
+# msg: Entered state lowfuel
 state: lowfuel
+isActive: false
+

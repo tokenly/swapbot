@@ -58,8 +58,10 @@ class Bot extends APIModel {
         return Config::get('swapbot.site_host')."/public/{$this['username']}/{$this['uuid']}";
     }
 
-    public function isActive() {
-        switch ($this['state']) {
+    public function isActive($state=null) {
+        $state = ($state === null ? $this['state'] : $state);
+
+        switch ($state) {
             case BotState::ACTIVE:
                 return true;
         }

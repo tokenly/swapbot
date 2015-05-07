@@ -142,7 +142,7 @@ do ()->
                         <br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>
-                    <p>This transaction has <b>{swapbot.botUtils.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} in and <b>{swapbot.botUtils.formatConfirmations(swap.confirmationsOut)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} out.</p>
+                    <p>This transaction has <b>{swapbot.botUtils.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} in and <b>{swapbot.botUtils.formatConfirmations(swap.confirmationsOut)}</b> {swapbot.botUtils.confirmationsWord(bot)} out.</p>
                     { if userChoices.email.emailErrorMsg then <p className="error">{userChoices.email.emailErrorMsg}  Please try again.</p> else null }
                     {
                         if userChoices.email.submittedEmail

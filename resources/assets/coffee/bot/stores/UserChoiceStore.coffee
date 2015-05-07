@@ -90,11 +90,8 @@ UserChoiceStore = do ()->
             # set the new swap
             userChoices.swap = newChosenSwap
 
-            # check for completed transaction
-            console.log "updateChosenSwap newChosenSwap.isComplete=",newChosenSwap.isComplete
+            # check for a completed swap
             if swapIsComplete(newChosenSwap)
-                # route to the complete stage
-                console.log "swapIsComplete = TRUE"
                 routeToStepOrEmitChange('complete')
                 return
 
@@ -103,6 +100,7 @@ UserChoiceStore = do ()->
             emitChange()
 
         return
+
 
     clearChosenSwap = ()->
         if userChoices.swap?
@@ -286,8 +284,15 @@ UserChoiceStore = do ()->
 
     onSwapStoreChanged = ()->
         if userChoices.swap?.id
+            swap = SwapsStore.getSwapById(userChoices.swap.id)
+
             # update the chosen swap when the swapStore changes it
-            userChoices.swap = SwapsStore.getSwapById(userChoices.swap.id)
+            userChoices.swap = swap
+
+            # check for a completed swap
+            if swapIsComplete(swap)
+                routeToStepOrEmitChange('complete')
+                return
 
             emitChange()
 

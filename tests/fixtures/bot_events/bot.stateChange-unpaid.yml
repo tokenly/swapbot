@@ -1,3 +1,4 @@
 name: bot.stateChange
-msg: Entered state unpaid
+# msg: Entered state unpaid
 state: unpaid
+isActive: false

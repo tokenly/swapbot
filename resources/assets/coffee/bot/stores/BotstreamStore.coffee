@@ -18,6 +18,8 @@ BotstreamStore = do ()->
                 # new event
                 allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper)
 
+            console.log "BotstreamStore allMyBotstreamEventsById[#{eventId}] = ",allMyBotstreamEventsById[eventId]
+
             anyChanged = true
 
         if anyChanged
@@ -41,6 +43,10 @@ BotstreamStore = do ()->
         newEvent.serial    = eventWrapper.serial
         newEvent.updatedAt = eventWrapper.createdAt
         newEvent.message   = eventWrapper.message
+        if eventWrapper.level >= 200
+            newEvent.message = eventWrapper.message
+        else
+            newEvent.debugMessage = eventWrapper.message
         return newEvent
 
     emitChange = ()->

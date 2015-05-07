@@ -51,9 +51,17 @@ do ()->
                     <div className="status-content">
                         <span>
                         <div className="date">{this.state.fromNow}</div>
-                        <span>{swap.message}</span>
-                        <br/>
-                        <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {swap.quantityOut} {swap.assetOut}</small>
+                        <span>
+                            {swap.message}
+                            { if swap.isComplete
+                                <a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
+                            }
+                        </span>
+                        { if not swap.isComplete
+                            <div>
+                                <small>Waiting for {swapbot.botUtils.confirmationsProse(bot)} to send {swap.quantityOut} {swap.assetOut}</small>
+                            </div>
+                        }
                         </span>
                     </div>
                 </li>

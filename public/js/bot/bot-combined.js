@@ -344,7 +344,13 @@
           "className": "status-content"
         }, React.createElement("span", null, React.createElement("div", {
           "className": "date"
-        }, this.state.fromNow), React.createElement("span", null, swap.message), React.createElement("br", null), React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", swap.quantityOut, " ", swap.assetOut))));
+        }, this.state.fromNow), React.createElement("span", null, swap.message, (swap.isComplete ? React.createElement("a", {
+          "href": "/public/" + bot.username + "/swap/" + swap.id,
+          "className": "details-link",
+          "target": "_blank"
+        }, React.createElement("i", {
+          "className": "fa fa-arrow-circle-right"
+        })) : void 0)), (!swap.isComplete ? React.createElement("div", null, React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", swap.quantityOut, " ", swap.assetOut)) : void 0))));
       }
     });
     return RecentAndActiveSwapsComponent = React.createClass({
@@ -954,7 +960,7 @@
           "onClick": this.notMyTransactionClicked,
           "href": "#",
           "className": "shadow-link"
-        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
+        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut)), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
           "className": "error"
         }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
           "action": "#submit-email",
@@ -1360,6 +1366,7 @@
         } else {
           allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
         }
+        console.log("BotstreamStore allMyBotstreamEventsById[" + eventId + "] = ", allMyBotstreamEventsById[eventId]);
         anyChanged = true;
       }
       if (anyChanged) {
@@ -1384,6 +1391,11 @@
       newEvent.serial = eventWrapper.serial;
       newEvent.updatedAt = eventWrapper.createdAt;
       newEvent.message = eventWrapper.message;
+      if (eventWrapper.level >= 200) {
+        newEvent.message = eventWrapper.message;
+      } else {
+        newEvent.debugMessage = eventWrapper.message;
+      }
       return newEvent;
     };
     emitChange = function() {
@@ -1576,9 +1588,7 @@
     updateChosenSwap = function(newChosenSwap) {
       if ((userChoices.swap == null) || userChoices.swap.id !== newChosenSwap.id) {
         userChoices.swap = newChosenSwap;
-        console.log("updateChosenSwap newChosenSwap.isComplete=", newChosenSwap.isComplete);
         if (swapIsComplete(newChosenSwap)) {
-          console.log("swapIsComplete = TRUE");
           routeToStepOrEmitChange('complete');
           return;
         }
@@ -1722,9 +1732,14 @@
       router.init(userChoices.step);
     };
     onSwapStoreChanged = function() {
-      var _ref;
+      var swap, _ref;
       if ((_ref = userChoices.swap) != null ? _ref.id : void 0) {
-        userChoices.swap = SwapsStore.getSwapById(userChoices.swap.id);
+        swap = SwapsStore.getSwapById(userChoices.swap.id);
+        userChoices.swap = swap;
+        if (swapIsComplete(swap)) {
+          routeToStepOrEmitChange('complete');
+          return;
+        }
         emitChange();
       }
     };

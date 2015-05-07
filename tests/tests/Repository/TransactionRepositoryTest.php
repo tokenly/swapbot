@@ -42,6 +42,28 @@ class TransactionRepositoryTest extends TestCase {
         PHPUnit::assertEquals($tx3['id'], $loaded_tx3['id']);
     }
 
+    public function testFindTransactionByBotID()
+    {
+        $bot1 = app()->make('BotHelper')->newSampleBot();
+        $bot2 = app()->make('BotHelper')->newSampleBot();
+
+        $tx_helper = $this->app->make('TransactionHelper');
+        $tx1 = $tx_helper->newSampleTransaction($bot1, ['txid' => 'tx001']);
+        $tx2 = $tx_helper->newSampleTransaction($bot2, ['txid' => 'tx002']);
+        $tx3 = $tx_helper->newSampleTransaction($bot1, ['txid' => 'tx002']);
+
+        $tx_repository = $this->app->make('Swapbot\Repositories\TransactionRepository');
+        $loaded_txs = $tx_repository->findByBotID($bot1['id']);
+        PHPUnit::assertCount(2, $loaded_txs);
+        PHPUnit::assertEquals($tx1['id'], $loaded_txs[0]['id']);
+        PHPUnit::assertEquals($tx3['id'], $loaded_txs[1]['id']);
+
+        // bot 2
+        $loaded_txs = $tx_repository->findByBotID($bot2['id']);
+        PHPUnit::assertCount(1, $loaded_txs);
+        PHPUnit::assertEquals($tx2['id'], $loaded_txs[0]['id']);
+    }
+
     public function testTransactionLock()
     {
         $tx_helper = $this->app->make('TransactionHelper');

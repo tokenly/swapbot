@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\TestReceiveXChainNotificationCommand',
 		'Swapbot\Console\Commands\Development\TestReceiveFromXChainTemplateCommand',
 		'Swapbot\Console\Commands\Development\PopulateMissingSwapReceiptsCommand',
+		'Swapbot\Console\Commands\Development\ResetBotHistoryCommand',
 	];
 
 	/**

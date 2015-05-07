@@ -22,6 +22,10 @@ class TransactionRepository
         return call_user_func([$this->model_type, 'where'], 'txid', $txid)->where('bot_id', $bot_id)->first();
     }
 
+    public function findByBotID($bot_id) {
+        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)->get();
+    }
+
     public function findByTransactionIDAndBotIDWithLock($txid, $bot_id, $type) {
         return 
             call_user_func([$this->model_type, 'where'], 'txid', $txid)

@@ -31,6 +31,15 @@ class BotEventLogger {
     }
 
 
+    ////////////////////////////////////////////////////////////////////////
+    // bot
+
+    public function logBotStateChange(Bot $bot, $new_state) {
+        $this->logStandardBotEvent('bot.stateChange', $bot, ['state' => $new_state]);
+
+    }
+
+
     public function logUnconfirmedPaymentTx(Bot $bot, $xchain_notification) {
         return $this->logLegacyBotEvent($bot, 'payment.unconfirmed', BotEvent::LEVEL_INFO, [
             'msg'         => "Received an unconfirmed payment of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.",
@@ -240,13 +249,6 @@ class BotEventLogger {
 
     }
 
-    public function logBotStateChange(Bot $bot, $new_state) {
-        return $this->logLegacyBotEvent($bot, 'bot.stateChange', BotEvent::LEVEL_DEBUG, [
-            'msg'   => "Entered state {$new_state}",
-            'state' => $new_state,
-        ]);
-
-    }
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -569,28 +571,26 @@ class BotEventLogger {
     // Log Bot Event
 
 
-    protected function logXChainBotEvent($event_name, Bot $bot, $xchain_notification, $event_vars=null, $write_to_application_log=true) {
-        $bot_details_for_event_log = $this->buildXChainBotDetailsForLog($bot, $xchain_notification, $event_vars);
-        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, $write_to_application_log);
+    protected function logStandardBotEvent($event_name, Bot $bot, $bot_update_vars_for_event_log=null, $write_to_application_log=true) {
+        $bot_details_for_event_log = $this->buildStandardBotDetailsForLog($bot, $bot_update_vars_for_event_log);
+        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, null, $write_to_application_log);
     }
 
-    protected function logBotEvent($event_name, Bot $bot, $event_vars=null, $write_to_application_log=true) {
-        $event_template_data = $this->getEventTemplate($event_name);
+    protected function logXChainBotEvent($event_name, Bot $bot, $xchain_notification, $write_to_application_log=true) {
+        $bot_details_for_event_log = $this->buildXChainBotDetailsForLog($bot, $xchain_notification);
+        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, null, $write_to_application_log);
+    }
 
-        // log the bot event
-        if ($write_to_application_log) { EventLog::log($event_name, $event_vars); }
+    protected function buildStandardBotDetailsForLog($bot, $bot_update_vars_for_event_log=null) {
+        // get the state
+        $state = ($bot_update_vars_for_event_log !== null AND isset($bot_update_vars_for_event_log['state'])) ? $bot_update_vars_for_event_log['state'] : $bot['state'];
 
-        // save the bot event
-        $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, null, $event_vars);
-        $serialized_bot_event_model = $bot_event_model->serializeForAPI();
+        $bot_details_for_log = [
+            'state'    => $bot['state'],
+            'isActive' => $bot->isActive($state),
+        ];
 
-        if ($event_template_data['botEventStream'] ) {
-            // publish to event stream
-            Event::fire(new BotstreamEventCreated($bot, $serialized_bot_event_model));
-        }
-
-        // fire a bot event
-        Event::fire(new BotEventCreated($bot, $serialized_bot_event_model));
+        return $bot_details_for_log;
     }
 
     protected function buildXChainBotDetailsForLog($bot, $xchain_notification, $event_vars=null) {
@@ -613,6 +613,27 @@ class BotEventLogger {
     }
 
 
+
+
+
+    protected function logBotEvent($event_name, Bot $bot, $event_vars=null, $write_to_application_log=true) {
+        $event_template_data = $this->getEventTemplate($event_name);
+
+        // log the bot event
+        if ($write_to_application_log) { EventLog::log($event_name, $event_vars); }
+
+        // save the bot event
+        $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, null, $event_vars);
+        $serialized_bot_event_model = $bot_event_model->serializeForAPI();
+
+        if ($event_template_data['botEventStream'] ) {
+            // publish to event stream
+            Event::fire(new BotstreamEventCreated($bot, $serialized_bot_event_model));
+        }
+
+        // fire a bot event
+        Event::fire(new BotEventCreated($bot, $serialized_bot_event_model));
+    }
 
     protected function saveBotEventToRepository($event_name, $bot, $swap, $event_vars) {
         $event_template_data = $this->getEventTemplate($event_name);

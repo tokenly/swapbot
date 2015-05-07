@@ -82,6 +82,14 @@ events:
     msgVars: [txid, confirmations]
     msg: Transaction {{ $txid }} was confirmed with {{ $confirmations }} confirmations.
     botEventStream: true
+  -
+    name: bot.stateChange
+    label: Bot State Change
+    level: DEBUG
+    msg: Bot entered state {{ $state }}.
+    msgVars: [state]
+    botEventStream: true
+
 
 
 
