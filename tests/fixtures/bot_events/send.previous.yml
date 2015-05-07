@@ -1,3 +1,0 @@
-name: send.previous
-msg: Send transaction 0000000000000000000000000000001111 has already been processed.  Ignoring it.
-txid: "0000000000000000000000000000001111"

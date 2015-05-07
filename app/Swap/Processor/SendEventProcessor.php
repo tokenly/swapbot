@@ -66,11 +66,15 @@ class SendEventProcessor {
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'send');
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }
 
+            // find any swap associated with this send
+            $swap = $this->findSwapFromNotification($xchain_notification, $bot);
+
             // initialize a DTO (data transfer object) to hold all the variables
             $tx_process = new ArrayObject([
                 'transaction'                  => $transaction_model,
                 'xchain_notification'          => $xchain_notification,
                 'bot'                          => $bot,
+                'swap'                         => $swap,
 
                 'confirmations'                => $xchain_notification['confirmations'],
                 'is_confirmed'                 => $xchain_notification['confirmed'],
@@ -118,9 +122,17 @@ class SendEventProcessor {
         if ($transaction_model['processed']) {
             $xchain_notification = $tx_process['xchain_notification'];
             $bot = $tx_process['bot'];
-            $this->bot_event_logger->logPreviousSendTx($bot, $xchain_notification);
+            $swap = $tx_process['swap'];
+
+            // $this->bot_event_logger->logPreviousSendTx($bot, $xchain_notification);
+
             $tx_process['tx_is_handled'] = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
+
+            $receipt_update_vars = ['confirmationsOut' => $tx_process['xchain_notification']['confirmations'],];
+            $tx_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+
+            $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars);
         }
     }
 
@@ -277,8 +289,22 @@ class SendEventProcessor {
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
-    // Desc
-    
+    // Swap
+
+    protected function findSwapFromNotification($xchain_notification, $bot) {
+        // get all swaps that are in state sent
+        $txid = $xchain_notification['txid'];
+        $states = [SwapState::SENT, SwapState::COMPLETE, SwapState::REFUNDED];
+        $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
+
+        foreach($swaps as $swap) {
+            if ($swap['receipt']['txidOut'] == $txid) {
+                return $swap;
+            }
+        }
+
+        return null;
+    }    
 
 
 }

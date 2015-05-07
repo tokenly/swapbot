@@ -290,7 +290,7 @@ class BotEventLogger {
         $this->logSwapEvent('swap.refunded', $bot, $swap, $receipt_update_vars, $swap_update_vars);
     }    
 
-    public function logSwapSendConfirmed(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars) {
+    public function logSwapSendConfirmed(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
         $this->logSwapEvent('send.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
     }
 
@@ -316,6 +316,8 @@ class BotEventLogger {
             'swapId' => $swap['uuid'],
         ]);
     }
+
+
 
 
 
@@ -383,14 +385,6 @@ class BotEventLogger {
 
     ////////////////////////////////////////////////////////////////////////
     // sends
-
-    public function logPreviousSendTx(Bot $bot, $xchain_notification) {
-        return $this->logLegacyBotEvent($bot, 'send.previous', BotEvent::LEVEL_DEBUG, [
-            'msg'  => "Send transaction {$xchain_notification['txid']} has already been processed.  Ignoring it.",
-            'txid' => $xchain_notification['txid']
-        ]);
-    }
-
 
 
     public function logUnknownSendTransaction(Bot $bot, $xchain_notification) {

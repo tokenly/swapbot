@@ -47,7 +47,8 @@ expectedBotEvents:
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
   - #### found a previously processed send transaction
-    meta: { baseFilename: send.previous.yml }
+    meta: { baseFilename: send.confirmed.yml }
+    confirmationsOut: 2
 
 expectedTransactionModels:
   - 
