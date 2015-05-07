@@ -41,10 +41,11 @@
                 <li>
                     <div class="item-header">Amount</div>
                     <p>
-                    @if (isset($swap['assetIn']) AND isset($swap['assetOut']))
-                        {{ $swap['receipt']['quantityIn'] }} {{ $swap['receipt']['assetIn'] }}
+                    <?php $receipt = $swap['receipt']; ?>
+                    @if (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
+                        {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}
                         →
-                        {{ $swap['receipt']['quantityOut'] }} {{ $swap['receipt']['assetOut'] }}
+                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
                     @else
                         <span class="none">none</span>
                     @endif

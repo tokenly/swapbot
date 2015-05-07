@@ -20,6 +20,9 @@ xchainNotifications:
     blockId: 300001
   - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
     blockId: 300002
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
 
 events:
   - {type: xchainNotification, offset: 0}
@@ -65,9 +68,14 @@ expectedBotEvents:
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-BTC.yml }
     confirmations: 2
-    # msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
+
+  - #### found a confirmed send transaction (2 confirmations)
+    meta: { baseFilename: send.confirmed-BTC.yml }
+    confirmations: 2
+    confirmationsOut: 2
+
 
 expectedTransactionModels:
   - 
@@ -75,6 +83,7 @@ expectedTransactionModels:
     confirmations: '2'
   - 
     meta: { baseFilename: transaction_model_01-send.yml }
+    confirmations: '2'
 
 # check balance
 expectedBotModels:

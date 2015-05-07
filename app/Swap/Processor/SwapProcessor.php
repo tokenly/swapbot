@@ -3,6 +3,7 @@
 namespace Swapbot\Swap\Processor;
 
 use ArrayObject;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
@@ -351,6 +352,7 @@ class SwapProcessor {
 
             'destination'      => $swap_process['destination'],
 
+            'completedAt'      => time(),
             'timestamp'        => time(),
         ];
         $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
@@ -369,6 +371,7 @@ class SwapProcessor {
         // update the txidOut
         $receipt_update_vars['txidOut'] = $send_result['txid'];
         $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+        $swap_process['swap_update_vars']['completed_at'] = Carbon::now();
 
 
         // update the local balance
@@ -416,8 +419,11 @@ class SwapProcessor {
             'confirmations'    => $swap_process['confirmations'],
             'destination'      => $swap_process['destination'],
 
+            'completedAt'      => time(),
+            'timestamp'        => time(),
         ];
         $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+        $swap_process['swap_update_vars']['completed_at'] = Carbon::now();
 
         // update the local balance
         $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $fee);

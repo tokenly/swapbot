@@ -321,6 +321,16 @@ class ScenarioRunner
         }
         ///////////////////
 
+        ///////////////////
+        // JUST NEEDS TO EXIST
+        $must_exist_fields = ['completedAt',];
+        foreach ($must_exist_fields as $field) {
+            if (isset($actual_bot_event[$field])) { $normalized_expected_bot_event[$field] = $actual_bot_event[$field]; }
+        }
+        ///////////////////
+
+
+
         // ///////////////////
         // // Special
         // // build satoshis
@@ -707,10 +717,11 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['id','uuid','definition','transaction_id','bot_id','created_at','updated_at',];
+        $optional_fields = ['id','uuid','definition','transaction_id','bot_id','created_at','updated_at','completed_at',];
         foreach ($optional_fields as $field) {
             if (isset($expected_swap_model[$field])) { $normalized_expected_swap_model[$field] = $expected_swap_model[$field]; }
-                else if (isset($actual_swap_model[$field])) { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
+                // else if (isset($actual_swap_model[$field])) { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
+                else { $normalized_expected_swap_model[$field] = $actual_swap_model[$field]; }
         }
         ///////////////////
 
@@ -723,6 +734,7 @@ class ScenarioRunner
 
         // receipt timestamp
         if (isset($actual_swap_model['receipt']['timestamp'])) { $normalized_expected_swap_model['receipt']['timestamp'] = $actual_swap_model['receipt']['timestamp']; }
+        if (isset($actual_swap_model['receipt']['completedAt'])) { $normalized_expected_swap_model['receipt']['completedAt'] = $actual_swap_model['receipt']['completedAt']; }
 
         ///////////////////
 

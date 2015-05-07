@@ -31,7 +31,8 @@ do ()->
             return
 
         updateNow: ()->
-            this.setState({fromNow: moment(this.props.swap.updatedAt).fromNow()})
+            ts = if this.props.swap.completedAt? then this.props.swap.completedAt else this.props.swap.updatedAt
+            this.setState({fromNow: moment(ts).fromNow()})
             return
 
         componentWillUnmount: ()->
@@ -77,16 +78,6 @@ do ()->
         intervalTimer: null
 
         componentDidMount: ()->
-            # this.updateNow()
-
-            # this.intervalTimer = setInterval ()=>
-            #     this.updateNow()
-            # , 1000
-
-            return
-
-        updateNow: ()->
-            # this.setState({fromNow: moment(this.props.userChoices.swap.updatedAt).fromNow()})
             return
 
         componentWillUnmount: ()->

@@ -8,7 +8,7 @@ use Swapbot\Models\Data\SwapState;
 
 class Swap extends APIModel {
 
-    protected $api_attributes = ['id', 'txid', 'state', 'receipt', 'address', 'updated_at', ];
+    protected $api_attributes = ['id', 'txid', 'state', 'receipt', 'address', 'created_at', 'updated_at', 'completed_at', ];
 
 
     protected $state_machine        = null;

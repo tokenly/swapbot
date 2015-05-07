@@ -317,8 +317,10 @@
         })(this), 1000);
       },
       updateNow: function() {
+        var ts;
+        ts = this.props.swap.completedAt != null ? this.props.swap.completedAt : this.props.swap.updatedAt;
         this.setState({
-          fromNow: moment(this.props.swap.updatedAt).fromNow()
+          fromNow: moment(ts).fromNow()
         });
       },
       componentWillUnmount: function() {
@@ -865,8 +867,10 @@
         })(this), 1000);
       },
       updateNow: function() {
+        var ts;
+        ts = this.props.swap.completedAt != null ? this.props.swap.completedAt : this.props.swap.updatedAt;
         this.setState({
-          fromNow: moment(this.props.swap.updatedAt).fromNow()
+          fromNow: moment(ts).fromNow()
         });
       },
       componentWillUnmount: function() {
@@ -912,7 +916,6 @@
       displayName: 'SingleTransactionInfo',
       intervalTimer: null,
       componentDidMount: function() {},
-      updateNow: function() {},
       componentWillUnmount: function() {
         if (this.intervalTimer != null) {
           clearInterval(this.intervalTimer);
@@ -1244,24 +1247,6 @@
     return exports;
   })();
 
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    return exports;
-  })();
-
   Dispatcher = (function() {
     var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
     exports = {};
@@ -1359,6 +1344,24 @@
       throw error;
     }
   };
+
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    return exports;
+  })();
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -1496,6 +1499,9 @@
       newSwap.id = eventWrapper.swapUuid;
       newSwap.serial = eventWrapper.serial;
       newSwap.updatedAt = eventWrapper.createdAt;
+      if (eventWrapper.event.completedAt != null) {
+        newSwap.completedAt = eventWrapper.event.completedAt * 1000;
+      }
       if (eventWrapper.level >= 200) {
         newSwap.message = eventWrapper.message;
       } else {

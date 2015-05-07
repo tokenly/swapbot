@@ -22,6 +22,8 @@ class SwapHelper  {
                 'rate'     => 0.00000150,
             ],
             'receipt'    => [],
+
+            'completed_at' => null,
         ];
     }
 

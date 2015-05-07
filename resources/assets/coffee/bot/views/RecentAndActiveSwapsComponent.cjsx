@@ -30,7 +30,8 @@ do ()->
             return
 
         updateNow: ()->
-            this.setState({fromNow: moment(this.props.swap.updatedAt).fromNow()})
+            ts = if this.props.swap.completedAt? then this.props.swap.completedAt else this.props.swap.updatedAt
+            this.setState({fromNow: moment(ts).fromNow()})
             return
 
         componentWillUnmount: ()->

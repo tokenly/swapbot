@@ -30,7 +30,12 @@ class CreateSwapsTable extends Migration {
 
             $table->mediumText('receipt')->nullable();
 
+            $table->timestamp('completed_at')->nullable();
+
             $table->unique(['bot_id', 'transaction_id', 'name', ]);
+            
+            $table->index('created_at');
+            $table->index('completed_at');
 
             $table->timestamps();
         });

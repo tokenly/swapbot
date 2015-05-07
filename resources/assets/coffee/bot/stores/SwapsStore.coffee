@@ -59,6 +59,10 @@ SwapsStore = do ()->
         newSwap.id = eventWrapper.swapUuid
         newSwap.serial = eventWrapper.serial
         newSwap.updatedAt = eventWrapper.createdAt
+
+        # merge completedAt
+        if eventWrapper.event.completedAt?
+            newSwap.completedAt = eventWrapper.event.completedAt * 1000
         
         if eventWrapper.level >= 200
             newSwap.message = eventWrapper.message
