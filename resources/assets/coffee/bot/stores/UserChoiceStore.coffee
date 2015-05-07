@@ -48,8 +48,8 @@ UserChoiceStore = do ()->
             # set the new swapConfig
             userChoices.outAsset = newChosenOutAsset
 
-            # move on to step receive
-            routeToStepOrEmitChange('receive')
+            # move on to step place
+            routeToStepOrEmitChange('place')
 
         return
 
@@ -64,8 +64,8 @@ UserChoiceStore = do ()->
             # calculate the new inAmount based on the outAmount
             _recalulateUserChoices()
 
-            # move on to step wait
-            router.setRoute('wait')
+            # move on to step receive
+            router.setRoute('receive')
 
         return
 
@@ -97,7 +97,7 @@ UserChoiceStore = do ()->
 
             # emit a change
             # console.log "updateChosenSwap complete"
-            emitChange()
+            routeToStepOrEmitChange('wait')
 
         return
 
@@ -108,11 +108,12 @@ UserChoiceStore = do ()->
 
             # clear email
             resetEmailChoices()
+        return
 
-            # go back to the wait step if we aren't there
-            routeToStepOrEmitChange('wait')
-
-
+    clearChosenSwapConfig = ()->
+        clearChosenSwap()
+        userChoices.swapConfig = null;
+        emitChange()
         return
 
     resetSwap = ()->
@@ -177,13 +178,16 @@ UserChoiceStore = do ()->
 
     goBack = ()->
         switch userChoices.step
-            when 'receive'
+            when 'place'
                 resetUserChoices()
                 router.setRoute('/choose')
-            when 'wait'
+            when 'receive'
                 userChoices.swapConfig = null
                 userChoices.inAmount   = null
                 userChoices.inAsset    = null
+                router.setRoute('/place')
+            when 'wait'
+                clearChosenSwap()
                 router.setRoute('/receive')
         return
 
@@ -233,11 +237,11 @@ UserChoiceStore = do ()->
                 # all good
                 valid = true
                 
-            when 'receive', 'wait', 'complete'
+            when 'place', 'receive', 'wait', 'complete'
                 if userChoices.outAsset == null
                     # no out amount was chosen - go back
                     valid = false
-            # when 'receive', 'wait', 'complete'
+            # when 'place', 'wait', 'complete'
             #     if not userChoices.swapConfig?
             #         # no swap chosen - go back
             #         valid = false
@@ -247,6 +251,7 @@ UserChoiceStore = do ()->
             #             valid = false
             else
                 # unknown stage
+                console.warn "Unknown route: #{rawNewStep}"
                 valid = false
 
 
@@ -268,6 +273,9 @@ UserChoiceStore = do ()->
             when 'choose'
                 # start over
                 resetUserChoices()
+            when 'place'
+                # clear the chose swapConfig
+                clearChosenSwapConfig()
 
         # emit change
         emitChange()
@@ -277,6 +285,7 @@ UserChoiceStore = do ()->
     initRouter = ()->
         router = Router({
             '/choose'  : onRouteUpdate.bind(null, 'choose'),
+            '/place'   : onRouteUpdate.bind(null, 'place'),
             '/receive' : onRouteUpdate.bind(null, 'receive'),
             '/wait'    : onRouteUpdate.bind(null, 'wait'),
             '/complete': onRouteUpdate.bind(null, 'complete'),
@@ -326,6 +335,10 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_USER_CLEAR_SWAP
                     clearChosenSwap()
+
+                    # go back to the wait step if we aren't there
+                    routeToStepOrEmitChange('receive')
+
 
                 when BotConstants.BOT_USER_RESET_SWAP
                     resetSwap()

@@ -58,7 +58,7 @@
             <!-- DEFAULT CONTENT -->
     
 
-            <div id="SwapInterfaceComponent">{{-- REACT --}}</div>
+            <div id="SwapPurchaseStepsComponent">{{-- REACT --}}</div>
 
 
 {{-- 

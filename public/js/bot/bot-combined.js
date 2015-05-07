@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapInterfaceComponent, SwapMatcher, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotReceive, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, PlaceOrderInput, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -481,43 +481,6 @@
     });
   })();
 
-  SwapInterfaceComponent = null;
-
-  (function() {
-    var getViewState;
-    getViewState = function() {
-      return UserChoiceStore.getUserChoices();
-    };
-    return SwapInterfaceComponent = React.createClass({
-      displayName: 'SwapInterfaceComponent',
-      getInitialState: function() {
-        return $.extend({}, getViewState());
-      },
-      _onUserChoiceChange: function() {
-        return this.setState(getViewState());
-      },
-      componentDidMount: function() {
-        UserChoiceStore.addChangeListener(this._onUserChoiceChange);
-      },
-      componentWillUnmount: function() {
-        UserChoiceStore.removeChangeListener(this._onUserChoiceChange);
-      },
-      render: function() {
-        return React.createElement("div", null, (this.props.bot != null ? React.createElement("div", null, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
-          "bot": this.props.bot
-        }) : null), (this.state.step === 'receive' ? React.createElement(SwapbotReceive, {
-          "bot": this.props.bot
-        }) : null), (this.state.step === 'wait' ? React.createElement(SwapbotWait, {
-          "bot": this.props.bot
-        }) : null), (this.state.step === 'complete' ? React.createElement(SwapbotComplete, {
-          "bot": this.props.bot
-        }) : null)) : React.createElement("div", {
-          "className": "loading"
-        }, "Loading...")));
-      }
-    });
-  })();
-
   SwapTestView = null;
 
   (function() {
@@ -555,6 +518,63 @@
           }
           return _results;
         }).call(this)));
+      }
+    });
+  })();
+
+  PlaceOrderInput = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {
+        userChoices: UserChoiceStore.getUserChoices()
+      };
+    };
+    return PlaceOrderInput = React.createClass({
+      displayName: 'PlaceOrderInput',
+      getInitialState: function() {
+        return $.extend({}, getViewState());
+      },
+      updateAmount: function(e) {
+        var outAmount;
+        outAmount = parseFloat($(e.target).val());
+        if (outAmount < 0 || outAmount === NaN) {
+          outAmount = 0;
+        }
+        UserInputActions.updateOutAmount(outAmount);
+      },
+      checkEnter: function(e) {
+        if (e.keyCode === 13) {
+          if (this.props.onOrderInput != null) {
+            this.props.onOrderInput();
+          }
+        }
+      },
+      render: function() {
+        var bot, defaultValue, outAsset, swapConfigIsChosen;
+        bot = this.props.bot;
+        defaultValue = this.state.userChoices.outAmount;
+        outAsset = this.state.userChoices.outAsset;
+        swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
+        return React.createElement("div", null, React.createElement("table", {
+          "className": "fieldset"
+        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-available"
+        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
+          "id": "token-available"
+        }, swapbot.formatters.formatCurrency(bot.balances[outAsset]), " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-amount"
+        }, "I would like to purchase: ")), React.createElement("td", null, (swapConfigIsChosen ? React.createElement("div", {
+          "className": "chosenInputAmount"
+        }, swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset) : React.createElement("div", null, React.createElement("input", {
+          "onChange": this.updateAmount,
+          "onKeyUp": this.checkEnter,
+          "type": "text",
+          "id": "token-amount",
+          "placeholder": '0',
+          "defaultValue": defaultValue
+        }), "\u00a0", outAsset))))));
       }
     });
   })();
@@ -617,6 +637,428 @@
         }).call(this)) : React.createElement("p", {
           "className": "description"
         }, "There are no swaps available.")))));
+      }
+    });
+  })();
+
+  SwapbotPlaceOrder = null;
+
+  (function() {
+    var SwapbotSendItem, getViewState;
+    getViewState = function() {
+      return {
+        userChoices: UserChoiceStore.getUserChoices()
+      };
+    };
+    SwapbotSendItem = React.createClass({
+      displayName: 'SwapbotSendItem',
+      getInAmount: function() {
+        var inAmount;
+        inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swap);
+        return inAmount;
+      },
+      isChooseable: function() {
+        if (this.getInAmount() > 0) {
+          return true;
+        }
+        return false;
+      },
+      chooseSwap: function(e) {
+        e.preventDefault();
+        if (!this.isChooseable()) {
+          return;
+        }
+        UserInputActions.chooseSwapConfig(this.props.swap);
+      },
+      render: function() {
+        var inAmount, isChooseable, swap;
+        swap = this.props.swap;
+        inAmount = this.getInAmount();
+        isChooseable = this.isChooseable();
+        return React.createElement("li", {
+          "className": 'choose-swap' + (isChooseable ? ' chooseable' : ' unchooseable')
+        }, React.createElement("a", {
+          "className": "choose-swap",
+          "onClick": this.chooseSwap,
+          "href": "#next-step"
+        }, React.createElement("div", {
+          "className": "item-header"
+        }, "Send ", React.createElement("span", {
+          "id": "token-value-1"
+        }, swapbot.formatters.formatCurrency(inAmount)), " ", swap["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
+          "className": "icon-next"
+        }), React.createElement("div", {
+          "className": "clearfix"
+        })));
+      }
+    });
+    return SwapbotPlaceOrder = React.createClass({
+      displayName: 'SwapbotPlaceOrder',
+      getInitialState: function() {
+        return $.extend({}, getViewState());
+      },
+      getMatchingSwapConfigsForOutputAsset: function() {
+        var chosenOutAsset, filteredSwapConfigs, offset, otherSwapConfig, swapConfigs, _i, _len, _ref;
+        filteredSwapConfigs = [];
+        swapConfigs = (_ref = this.props.bot) != null ? _ref.swaps : void 0;
+        chosenOutAsset = this.state.userChoices.outAsset;
+        if (swapConfigs) {
+          for (offset = _i = 0, _len = swapConfigs.length; _i < _len; offset = ++_i) {
+            otherSwapConfig = swapConfigs[offset];
+            if (otherSwapConfig.out === chosenOutAsset) {
+              filteredSwapConfigs.push(otherSwapConfig);
+            }
+          }
+        }
+        return filteredSwapConfigs;
+      },
+      onOrderInput: function() {
+        var matchingSwapConfigs;
+        matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset();
+        if (!matchingSwapConfigs) {
+          return;
+        }
+        if (matchingSwapConfigs.length === 1) {
+          UserInputActions.chooseSwapConfig(matchingSwapConfigs[0]);
+        }
+      },
+      render: function() {
+        var bot, defaultValue, matchedSwapConfig, matchingSwapConfigs, offset, outAsset;
+        defaultValue = this.state.userChoices.outAmount;
+        bot = this.props.bot;
+        matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset();
+        outAsset = this.state.userChoices.outAsset;
+        return React.createElement("div", {
+          "id": "swapbot-container",
+          "className": "section grid-100"
+        }, React.createElement("div", {
+          "id": "swap-step-2",
+          "className": "content"
+        }, React.createElement("h2", null, "Place your Order"), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        })), React.createElement(PlaceOrderInput, {
+          "onOrderInput": this.onOrderInput,
+          "bot": bot
+        }), React.createElement("div", {
+          "id": "GoBackLink"
+        }, React.createElement("a", {
+          "id": "go-back",
+          "onClick": UserInputActions.goBackOnClick,
+          "href": "#go-back",
+          "className": "shadow-link"
+        }, "Go Back")), React.createElement("ul", {
+          "id": "transaction-select-list",
+          "className": "wide-list"
+        }, ((function() {
+          var _i, _len, _results;
+          if (matchingSwapConfigs) {
+            _results = [];
+            for (offset = _i = 0, _len = matchingSwapConfigs.length; _i < _len; offset = ++_i) {
+              matchedSwapConfig = matchingSwapConfigs[offset];
+              _results.push(React.createElement(SwapbotSendItem, {
+                "key": 'swap' + offset,
+                "outAmount": this.state.userChoices.outAmount,
+                "swap": matchedSwapConfig,
+                "bot": bot
+              }));
+            }
+            return _results;
+          }
+        }).call(this))), React.createElement("p", {
+          "className": "description"
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+      }
+    });
+  })();
+
+  SwapbotReceivingTransaction = null;
+
+  (function() {
+    var TransactionInfo, getViewState;
+    getViewState = function() {
+      var matchedSwaps, swaps, userChoices;
+      userChoices = UserChoiceStore.getUserChoices();
+      swaps = SwapsStore.getSwaps();
+      matchedSwaps = SwapMatcher.buildMatchedSwaps(swaps, userChoices);
+      return {
+        userChoices: userChoices,
+        swaps: swaps,
+        matchedSwaps: matchedSwaps,
+        anyMatchedSwaps: (matchedSwaps.length > 0 ? true : false)
+      };
+    };
+    TransactionInfo = React.createClass({
+      displayName: 'TransactionInfo',
+      intervalTimer: null,
+      componentDidMount: function() {
+        this.updateNow();
+        this.intervalTimer = setInterval((function(_this) {
+          return function() {
+            return _this.updateNow();
+          };
+        })(this), 1000);
+      },
+      updateNow: function() {
+        var ts;
+        ts = this.props.swap.completedAt != null ? this.props.swap.completedAt : this.props.swap.updatedAt;
+        this.setState({
+          fromNow: moment(ts).fromNow()
+        });
+      },
+      componentWillUnmount: function() {
+        if (this.intervalTimer != null) {
+          clearInterval(this.intervalTimer);
+        }
+      },
+      getInitialState: function() {
+        return {
+          fromNow: ''
+        };
+      },
+      clickedFn: function(e) {
+        e.preventDefault();
+        UserInputActions.chooseSwap(this.props.swap);
+      },
+      render: function() {
+        var bot, swap;
+        swap = this.props.swap;
+        bot = this.props.bot;
+        return React.createElement("li", {
+          "className": "chooseable"
+        }, React.createElement("a", {
+          "onClick": this.clickedFn,
+          "href": "#choose"
+        }, React.createElement("div", {
+          "className": "item-content"
+        }, React.createElement("div", {
+          "className": "item-header",
+          "title": "{swap.name}"
+        }, "Transaction Received"), React.createElement("p", {
+          "className": "date"
+        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), ".")), React.createElement("div", {
+          "className": "item-actions"
+        }, React.createElement("div", {
+          "className": "icon-next"
+        }))), React.createElement("div", {
+          "className": "clearfix"
+        }));
+      }
+    });
+    return SwapbotReceivingTransaction = React.createClass({
+      displayName: 'SwapbotReceivingTransaction',
+      getInitialState: function() {
+        return getViewState();
+      },
+      _onChange: function() {
+        this.setState(getViewState());
+      },
+      componentDidMount: function() {
+        SwapsStore.addChangeListener(this._onChange);
+        UserChoiceStore.addChangeListener(this._onChange);
+      },
+      componentWillUnmount: function() {
+        SwapsStore.removeChangeListener(this._onChange);
+        UserChoiceStore.removeChangeListener(this._onChange);
+      },
+      render: function() {
+        var bot, swap, swapConfig;
+        bot = this.props.bot;
+        swapConfig = this.state.userChoices.swapConfig;
+        if (!swapConfig) {
+          return null;
+        }
+        return React.createElement("div", {
+          "id": "swapbot-container",
+          "className": "section grid-100"
+        }, React.createElement("div", {
+          "id": "swap-step-2",
+          "className": "content"
+        }, React.createElement("h2", null, "Receiving transaction"), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        })), React.createElement(PlaceOrderInput, {
+          "bot": bot
+        }), React.createElement("div", {
+          "id": "GoBackLink"
+        }, React.createElement("a", {
+          "id": "go-back",
+          "onClick": UserInputActions.goBackOnClick,
+          "href": "#go-back",
+          "className": "shadow-link"
+        }, "Go Back")), (this.state.anyMatchedSwaps ? React.createElement("ul", {
+          "id": "transaction-confirm-list",
+          "className": "wide-list"
+        }, (function() {
+          var _i, _len, _ref, _results;
+          _ref = this.state.matchedSwaps;
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            swap = _ref[_i];
+            _results.push(React.createElement(TransactionInfo, {
+              "key": swap.id,
+              "bot": bot,
+              "swap": swap
+            }));
+          }
+          return _results;
+        }).call(this)) : React.createElement("ul", {
+          "id": "transaction-wait-list",
+          "className": "wide-list"
+        }, React.createElement("li", null, React.createElement("div", {
+          "className": "status-icon icon-pending"
+        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
+          "className": "description"
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+      }
+    });
+  })();
+
+  SwapbotWait = null;
+
+  (function() {
+    var SingleTransactionInfo, getViewState;
+    getViewState = function() {
+      var userChoices;
+      userChoices = UserChoiceStore.getUserChoices();
+      return {
+        userChoices: userChoices
+      };
+    };
+    SingleTransactionInfo = React.createClass({
+      displayName: 'SingleTransactionInfo',
+      intervalTimer: null,
+      componentDidMount: function() {},
+      componentWillUnmount: function() {
+        if (this.intervalTimer != null) {
+          clearInterval(this.intervalTimer);
+        }
+      },
+      getInitialState: function() {
+        return {};
+      },
+      updateEmailValue: function(e) {
+        e.preventDefault();
+        UserInputActions.updateEmailValue(e.target.value);
+      },
+      submitEmailFn: function(e) {
+        var email;
+        e.preventDefault();
+        email = this.props.userChoices.email.value;
+        if (email.length < 1) {
+          return;
+        }
+        return UserInputActions.submitEmail();
+      },
+      notMyTransactionClicked: function(e) {
+        e.preventDefault();
+        UserInputActions.clearSwap();
+      },
+      render: function() {
+        var bot, emailValue, swap, userChoices;
+        userChoices = this.props.userChoices;
+        swap = userChoices.swap;
+        bot = this.props.bot;
+        emailValue = userChoices.email.value;
+        return React.createElement("div", null, React.createElement("p", null, swap.message, React.createElement("br", null), "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot), " out.", React.createElement("br", null), React.createElement("a", {
+          "id": "not-my-transaction",
+          "onClick": this.notMyTransactionClicked,
+          "href": "#",
+          "className": "shadow-link"
+        }, "Not your transaction?")), React.createElement("p", null, "\u00a0"), (userChoices.email.emailErrorMsg ? React.createElement("p", {
+          "className": "error"
+        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : React.createElement("div", null, React.createElement("p", null, "Don\u2019t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+          "action": "#submit-email",
+          "onSubmit": this.submitEmailFn,
+          "style": (userChoices.email.submittingEmail ? {
+            opacity: 0.2
+          } : null)
+        }, React.createElement("table", {
+          "className": "fieldset fieldset-other"
+        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
+          "disabled": (userChoices.email.submittingEmail ? true : false),
+          "required": true,
+          "type": "email",
+          "onChange": this.updateEmailValue,
+          "id": "other-address",
+          "placeholder": "example@example.com",
+          "value": emailValue
+        })), React.createElement("td", null, React.createElement("div", {
+          "id": "icon-other-next",
+          "className": "icon-next",
+          "onClick": this.submitEmailFn
+        })))))))));
+      }
+    });
+    return SwapbotWait = React.createClass({
+      displayName: 'SwapbotWait',
+      getInitialState: function() {
+        return getViewState();
+      },
+      _onChange: function() {
+        this.setState(getViewState());
+      },
+      componentDidMount: function() {
+        UserChoiceStore.addChangeListener(this._onChange);
+      },
+      componentWillUnmount: function() {
+        UserChoiceStore.removeChangeListener(this._onChange);
+      },
+      render: function() {
+        var bot, defaultValue, outAsset, swapConfig;
+        bot = this.props.bot;
+        swapConfig = this.state.userChoices.swapConfig;
+        defaultValue = this.state.userChoices.outAmount;
+        outAsset = this.state.userChoices.outAsset;
+        if (!swapConfig) {
+          return null;
+        }
+        return React.createElement("div", {
+          "id": "swapbot-container",
+          "className": "section grid-100"
+        }, React.createElement("div", {
+          "id": "swap-step-3",
+          "className": "content"
+        }, React.createElement("h2", null, "Waiting for confirmations"), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        }), React.createElement("div", {
+          "className": "dot"
+        })), React.createElement("div", {
+          "className": "icon-loading center"
+        }), React.createElement("div", {
+          "className": "chosenInputAmount"
+        }, "Purchasing", ' ' + swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset), (this.state.userChoices.swap != null ? React.createElement(SingleTransactionInfo, {
+          "bot": bot,
+          "userChoices": this.state.userChoices
+        }) : React.createElement("div", null, "No transaction found")), React.createElement("p", {
+          "className": "description"
+        }, "This bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
     });
   })();
@@ -706,409 +1148,41 @@
     });
   })();
 
-  SwapbotReceive = null;
+  SwapPurchaseStepsComponent = null;
 
   (function() {
-    var SwapbotSendItem, getViewState;
+    var getViewState;
     getViewState = function() {
-      return {
-        userChoices: UserChoiceStore.getUserChoices()
-      };
+      return UserChoiceStore.getUserChoices();
     };
-    SwapbotReceive = React.createClass({
-      displayName: 'SwapbotReceive',
+    return SwapPurchaseStepsComponent = React.createClass({
+      displayName: 'SwapPurchaseStepsComponent',
       getInitialState: function() {
         return $.extend({}, getViewState());
       },
-      getMatchingSwapConfigsForOutputAsset: function() {
-        var chosenOutAsset, filteredSwapConfigs, offset, otherSwapConfig, swapConfigs, _i, _len, _ref;
-        filteredSwapConfigs = [];
-        swapConfigs = (_ref = this.props.bot) != null ? _ref.swaps : void 0;
-        chosenOutAsset = this.state.userChoices.outAsset;
-        if (swapConfigs) {
-          for (offset = _i = 0, _len = swapConfigs.length; _i < _len; offset = ++_i) {
-            otherSwapConfig = swapConfigs[offset];
-            if (otherSwapConfig.out === chosenOutAsset) {
-              filteredSwapConfigs.push(otherSwapConfig);
-            }
-          }
-        }
-        return filteredSwapConfigs;
-      },
-      updateAmount: function(e) {
-        var outAmount;
-        outAmount = parseFloat($(e.target).val());
-        UserInputActions.updateOutAmount(outAmount);
-      },
-      checkEnter: function(e) {
-        var matchingSwapConfigs;
-        if (e.keyCode === 13) {
-          matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset();
-          if (!matchingSwapConfigs) {
-            return;
-          }
-          if (matchingSwapConfigs.length === 1) {
-            UserInputActions.chooseSwapConfig(matchingSwapConfigs[0]);
-          }
-        }
-      },
-      render: function() {
-        var bot, defaultValue, matchedSwapConfig, matchingSwapConfigs, offset, outAsset;
-        defaultValue = this.state.userChoices.outAmount;
-        bot = this.props.bot;
-        matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset();
-        outAsset = this.state.userChoices.outAsset;
-        return React.createElement("div", {
-          "id": "swapbot-container",
-          "className": "section grid-100"
-        }, React.createElement("div", {
-          "id": "swap-step-2",
-          "className": "content"
-        }, React.createElement("h2", null, "Receiving transaction"), React.createElement("div", {
-          "className": "segment-control"
-        }, React.createElement("div", {
-          "className": "line"
-        }), React.createElement("br", null), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot selected"
-        }), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot"
-        })), React.createElement("table", {
-          "className": "fieldset"
-        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-available"
-        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
-          "id": "token-available"
-        }, bot.balances[outAsset], " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-amount"
-        }, "I would like to purchase: ")), React.createElement("td", null, React.createElement("input", {
-          "onChange": this.updateAmount,
-          "onKeyUp": this.checkEnter,
-          "type": "text",
-          "id": "token-amount",
-          "placeholder": '0',
-          "defaultValue": defaultValue
-        }), "\u00a0", outAsset))), React.createElement("div", {
-          "id": "GoBackLink"
-        }, React.createElement("a", {
-          "id": "go-back",
-          "onClick": UserInputActions.goBackOnClick,
-          "href": "#go-back",
-          "className": "shadow-link"
-        }, "Go Back")), React.createElement("ul", {
-          "id": "transaction-select-list",
-          "className": "wide-list"
-        }, ((function() {
-          var _i, _len, _results;
-          if (matchingSwapConfigs) {
-            _results = [];
-            for (offset = _i = 0, _len = matchingSwapConfigs.length; _i < _len; offset = ++_i) {
-              matchedSwapConfig = matchingSwapConfigs[offset];
-              _results.push(React.createElement(SwapbotSendItem, {
-                "key": 'swap' + offset,
-                "outAmount": this.state.userChoices.outAmount,
-                "swap": matchedSwapConfig,
-                "bot": bot
-              }));
-            }
-            return _results;
-          }
-        }).call(this))), React.createElement("p", {
-          "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
-      }
-    });
-    return SwapbotSendItem = React.createClass({
-      displayName: 'SwapbotSendItem',
-      getInAmount: function() {
-        var inAmount;
-        inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swap);
-        return inAmount;
-      },
-      isChooseable: function() {
-        if (this.getInAmount() > 0) {
-          return true;
-        }
-        return false;
-      },
-      chooseSwap: function(e) {
-        e.preventDefault();
-        if (!this.isChooseable()) {
-          return;
-        }
-        UserInputActions.chooseSwapConfig(this.props.swap);
-      },
-      render: function() {
-        var inAmount, isChooseable, swap;
-        swap = this.props.swap;
-        inAmount = this.getInAmount();
-        isChooseable = this.isChooseable();
-        return React.createElement("li", {
-          "className": 'choose-swap' + (isChooseable ? ' chooseable' : ' unchooseable')
-        }, React.createElement("a", {
-          "className": "choose-swap",
-          "onClick": this.chooseSwap,
-          "href": "#next-step"
-        }, React.createElement("div", {
-          "className": "item-header"
-        }, "Send ", React.createElement("span", {
-          "id": "token-value-1"
-        }, inAmount), " ", swap["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
-          "className": "icon-next"
-        }), React.createElement("div", {
-          "className": "clearfix"
-        })));
-      }
-    });
-  })();
-
-  SwapbotWait = null;
-
-  (function() {
-    var SingleTransactionInfo, TransactionInfo, getViewState;
-    getViewState = function() {
-      var matchedSwaps, swaps, userChoices;
-      userChoices = UserChoiceStore.getUserChoices();
-      swaps = SwapsStore.getSwaps();
-      matchedSwaps = SwapMatcher.buildMatchedSwaps(swaps, userChoices);
-      return {
-        userChoices: userChoices,
-        swaps: swaps,
-        matchedSwaps: matchedSwaps,
-        anyMatchedSwaps: (matchedSwaps.length > 0 ? true : false)
-      };
-    };
-    TransactionInfo = React.createClass({
-      displayName: 'TransactionInfo',
-      intervalTimer: null,
-      componentDidMount: function() {
-        this.updateNow();
-        this.intervalTimer = setInterval((function(_this) {
-          return function() {
-            return _this.updateNow();
-          };
-        })(this), 1000);
-      },
-      updateNow: function() {
-        var ts;
-        ts = this.props.swap.completedAt != null ? this.props.swap.completedAt : this.props.swap.updatedAt;
-        this.setState({
-          fromNow: moment(ts).fromNow()
-        });
-      },
-      componentWillUnmount: function() {
-        if (this.intervalTimer != null) {
-          clearInterval(this.intervalTimer);
-        }
-      },
-      getInitialState: function() {
-        return {
-          fromNow: ''
-        };
-      },
-      clickedFn: function(e) {
-        e.preventDefault();
-        UserInputActions.chooseSwap(this.props.swap);
-      },
-      render: function() {
-        var bot, swap;
-        swap = this.props.swap;
-        bot = this.props.bot;
-        return React.createElement("li", {
-          "className": "chooseable"
-        }, React.createElement("a", {
-          "onClick": this.clickedFn,
-          "href": "#choose"
-        }, React.createElement("div", {
-          "className": "item-content"
-        }, React.createElement("div", {
-          "className": "item-header",
-          "title": "{swap.name}"
-        }, "Transaction Received"), React.createElement("p", {
-          "className": "date"
-        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), ".")), React.createElement("div", {
-          "className": "item-actions"
-        }, React.createElement("div", {
-          "className": "icon-next"
-        }))), React.createElement("div", {
-          "className": "clearfix"
-        }));
-      }
-    });
-    SingleTransactionInfo = React.createClass({
-      displayName: 'SingleTransactionInfo',
-      intervalTimer: null,
-      componentDidMount: function() {},
-      componentWillUnmount: function() {
-        if (this.intervalTimer != null) {
-          clearInterval(this.intervalTimer);
-        }
-      },
-      getInitialState: function() {
-        return {};
-      },
-      updateEmailValue: function(e) {
-        e.preventDefault();
-        UserInputActions.updateEmailValue(e.target.value);
-      },
-      submitEmailFn: function(e) {
-        var email;
-        e.preventDefault();
-        email = this.props.userChoices.email.value;
-        if (email.length < 1) {
-          return;
-        }
-        return UserInputActions.submitEmail();
-      },
-      notMyTransactionClicked: function(e) {
-        e.preventDefault();
-        UserInputActions.clearSwap();
-      },
-      render: function() {
-        var bot, emailValue, swap, userChoices;
-        userChoices = this.props.userChoices;
-        swap = userChoices.swap;
-        bot = this.props.bot;
-        emailValue = userChoices.email.value;
-        return React.createElement("div", {
-          "id": "swap-step-3",
-          "className": "content"
-        }, React.createElement("h2", null, "Waiting for confirmations"), React.createElement("div", {
-          "className": "segment-control"
-        }, React.createElement("div", {
-          "className": "line"
-        }), React.createElement("br", null), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot selected"
-        }), React.createElement("div", {
-          "className": "dot"
-        })), React.createElement("div", {
-          "className": "icon-loading center"
-        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
-          "id": "not-my-transaction",
-          "onClick": this.notMyTransactionClicked,
-          "href": "#",
-          "className": "shadow-link"
-        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
-          "className": "error"
-        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
-          "action": "#submit-email",
-          "onSubmit": this.submitEmailFn,
-          "style": (userChoices.email.submittingEmail ? {
-            opacity: 0.2
-          } : null)
-        }, React.createElement("table", {
-          "className": "fieldset fieldset-other"
-        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
-          "disabled": (userChoices.email.submittingEmail ? true : false),
-          "required": true,
-          "type": "email",
-          "onChange": this.updateEmailValue,
-          "id": "other-address",
-          "placeholder": "example@example.com",
-          "value": emailValue
-        })), React.createElement("td", null, React.createElement("div", {
-          "id": "icon-other-next",
-          "className": "icon-next",
-          "onClick": this.submitEmailFn
-        })))))))));
-      }
-    });
-    return SwapbotWait = React.createClass({
-      displayName: 'SwapbotWait',
-      getInitialState: function() {
-        return getViewState();
-      },
-      _onChange: function() {
-        this.setState(getViewState());
+      _onUserChoiceChange: function() {
+        return this.setState(getViewState());
       },
       componentDidMount: function() {
-        SwapsStore.addChangeListener(this._onChange);
-        UserChoiceStore.addChangeListener(this._onChange);
+        UserChoiceStore.addChangeListener(this._onUserChoiceChange);
       },
       componentWillUnmount: function() {
-        SwapsStore.removeChangeListener(this._onChange);
-        UserChoiceStore.removeChangeListener(this._onChange);
+        UserChoiceStore.removeChangeListener(this._onUserChoiceChange);
       },
       render: function() {
-        var bot, swap, swapConfig;
-        bot = this.props.bot;
-        swapConfig = this.state.userChoices.swapConfig;
-        if (!swapConfig) {
-          return null;
-        }
-        return React.createElement("div", {
-          "id": "swapbot-container",
-          "className": "section grid-100"
-        }, React.createElement("div", {
-          "id": "swap-step-2",
-          "className": "content"
-        }, React.createElement("h2", null, "Receiving transaction"), React.createElement("div", {
-          "className": "segment-control"
-        }, React.createElement("div", {
-          "className": "line"
-        }), React.createElement("br", null), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot selected"
-        }), React.createElement("div", {
-          "className": "dot"
-        }), React.createElement("div", {
-          "className": "dot"
-        })), React.createElement("table", {
-          "className": "fieldset"
-        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-available"
-        }, swapConfig.out, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
-          "id": "token-available"
-        }, bot.balances[swapConfig.out], " ", swapConfig.out))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-amount"
-        }, "I would like to purchase: ")), React.createElement("td", null, React.createElement("input", {
-          "disabled": true,
-          "type": "text",
-          "id": "token-amount",
-          "placeholder": '0 ' + swapConfig.out,
-          "defaultValue": this.state.userChoices.outAmount
-        })))), React.createElement("div", {
-          "id": "GoBackLink"
-        }, React.createElement("a", {
-          "id": "go-back",
-          "onClick": UserInputActions.goBackOnClick,
-          "href": "#go-back",
-          "className": "shadow-link"
-        }, "Go Back")), (this.state.userChoices.swap != null ? React.createElement(SingleTransactionInfo, {
-          "bot": bot,
-          "userChoices": this.state.userChoices
-        }) : this.state.anyMatchedSwaps ? React.createElement("ul", {
-          "id": "transaction-confirm-list",
-          "className": "wide-list"
-        }, (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.state.matchedSwaps;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            swap = _ref[_i];
-            _results.push(React.createElement(TransactionInfo, {
-              "key": swap.id,
-              "bot": bot,
-              "swap": swap
-            }));
-          }
-          return _results;
-        }).call(this)) : React.createElement("ul", {
-          "id": "transaction-wait-list",
-          "className": "wide-list"
-        }, React.createElement("li", null, React.createElement("div", {
-          "className": "status-icon icon-pending"
-        }), "Waiting for ", React.createElement("strong", null, this.state.userChoices.inAmount, " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
-          "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+        return React.createElement("div", null, (this.props.bot != null ? React.createElement("div", null, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
+          "bot": this.props.bot
+        }) : null), (this.state.step === 'place' ? React.createElement(SwapbotPlaceOrder, {
+          "bot": this.props.bot
+        }) : null), (this.state.step === 'receive' ? React.createElement(SwapbotReceivingTransaction, {
+          "bot": this.props.bot
+        }) : null), (this.state.step === 'wait' ? React.createElement(SwapbotWait, {
+          "bot": this.props.bot
+        }) : null), (this.state.step === 'complete' ? React.createElement(SwapbotComplete, {
+          "bot": this.props.bot
+        }) : null)) : React.createElement("div", {
+          "className": "loading"
+        }, "Loading...")));
       }
     });
   })();
@@ -1126,9 +1200,9 @@
       React.render(React.createElement(RecentAndActiveSwapsComponent, {
         "bot": bot
       }), document.getElementById('RecentAndActiveSwapsComponent'));
-      return React.render(React.createElement(SwapInterfaceComponent, {
+      return React.render(React.createElement(SwapPurchaseStepsComponent, {
         "bot": bot
-      }), document.getElementById('SwapInterfaceComponent'));
+      }), document.getElementById('SwapPurchaseStepsComponent'));
     }
   };
 
@@ -1290,6 +1364,104 @@
     exports.BOT_GO_BACK = 'BOT_GO_BACK';
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -1471,7 +1643,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
+    var clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
     exports = {};
     userChoices = {
       step: 'choose',
@@ -1510,7 +1682,7 @@
     updateChosenOutAsset = function(newChosenOutAsset) {
       if (userChoices.outAsset !== newChosenOutAsset) {
         userChoices.outAsset = newChosenOutAsset;
-        routeToStepOrEmitChange('receive');
+        routeToStepOrEmitChange('place');
       }
     };
     updateChosenSwapConfig = function(newChosenSwapConfig) {
@@ -1520,7 +1692,7 @@
         userChoices.swapConfig = newChosenSwapConfig;
         userChoices.swapConfig.name = newName;
         _recalulateUserChoices();
-        router.setRoute('wait');
+        router.setRoute('receive');
       }
     };
     updateOutAmount = function(newOutAmount) {
@@ -1538,15 +1710,19 @@
           routeToStepOrEmitChange('complete');
           return;
         }
-        emitChange();
+        routeToStepOrEmitChange('wait');
       }
     };
     clearChosenSwap = function() {
       if (userChoices.swap != null) {
         userChoices.swap = null;
         resetEmailChoices();
-        routeToStepOrEmitChange('wait');
       }
+    };
+    clearChosenSwapConfig = function() {
+      clearChosenSwap();
+      userChoices.swapConfig = null;
+      emitChange();
     };
     resetSwap = function() {
       resetUserChoices();
@@ -1600,14 +1776,18 @@
     };
     goBack = function() {
       switch (userChoices.step) {
-        case 'receive':
+        case 'place':
           resetUserChoices();
           router.setRoute('/choose');
           break;
-        case 'wait':
+        case 'receive':
           userChoices.swapConfig = null;
           userChoices.inAmount = null;
           userChoices.inAsset = null;
+          router.setRoute('/place');
+          break;
+        case 'wait':
+          clearChosenSwap();
           router.setRoute('/receive');
       }
     };
@@ -1644,6 +1824,7 @@
         case 'choose':
           valid = true;
           break;
+        case 'place':
         case 'receive':
         case 'wait':
         case 'complete':
@@ -1652,6 +1833,7 @@
           }
           break;
         default:
+          console.warn("Unknown route: " + rawNewStep);
           valid = false;
       }
       if (!valid) {
@@ -1668,6 +1850,9 @@
       switch (newStep) {
         case 'choose':
           resetUserChoices();
+          break;
+        case 'place':
+          clearChosenSwapConfig();
       }
       emitChange();
       return true;
@@ -1675,6 +1860,7 @@
     initRouter = function() {
       router = Router({
         '/choose': onRouteUpdate.bind(null, 'choose'),
+        '/place': onRouteUpdate.bind(null, 'place'),
         '/receive': onRouteUpdate.bind(null, 'receive'),
         '/wait': onRouteUpdate.bind(null, 'wait'),
         '/complete': onRouteUpdate.bind(null, 'complete')
@@ -1708,6 +1894,7 @@
             break;
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();
+            routeToStepOrEmitChange('receive');
             break;
           case BotConstants.BOT_USER_RESET_SWAP:
             resetSwap();
@@ -1742,104 +1929,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   SwapMatcher = (function() {
     var exports, swapIsMatched;

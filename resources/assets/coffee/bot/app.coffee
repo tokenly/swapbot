@@ -21,4 +21,4 @@ window.BotApp =
         # recent and active swaps
         React.render <RecentAndActiveSwapsComponent bot={bot} />, document.getElementById('RecentAndActiveSwapsComponent')
         # run the swap interface
-        React.render <SwapInterfaceComponent        bot={bot} />, document.getElementById('SwapInterfaceComponent')
+        React.render <SwapPurchaseStepsComponent        bot={bot} />, document.getElementById('SwapPurchaseStepsComponent')

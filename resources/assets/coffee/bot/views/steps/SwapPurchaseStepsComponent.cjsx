@@ -1,4 +1,4 @@
-SwapInterfaceComponent = null
+SwapPurchaseStepsComponent = null
 
 do ()->
 
@@ -9,8 +9,8 @@ do ()->
     # ############################################################################################################
     # The swap chooser component
 
-    SwapInterfaceComponent = React.createClass
-        displayName: 'SwapInterfaceComponent'
+    SwapPurchaseStepsComponent = React.createClass
+        displayName: 'SwapPurchaseStepsComponent'
 
         getInitialState: ()->
             return $.extend(
@@ -35,10 +35,11 @@ do ()->
             <div>
             { if this.props.bot?
                 <div>
-                { if this.state.step == 'choose'   then <SwapbotChoose   bot={this.props.bot} /> else null }
-                { if this.state.step == 'receive'  then <SwapbotReceive  bot={this.props.bot} /> else null }
-                { if this.state.step == 'wait'     then <SwapbotWait     bot={this.props.bot} /> else null }
-                { if this.state.step == 'complete' then <SwapbotComplete bot={this.props.bot} /> else null }
+                { if this.state.step == 'choose'   then <SwapbotChoose               bot={this.props.bot} /> else null }
+                { if this.state.step == 'place'    then <SwapbotPlaceOrder           bot={this.props.bot} /> else null }
+                { if this.state.step == 'receive'  then <SwapbotReceivingTransaction bot={this.props.bot} /> else null }
+                { if this.state.step == 'wait'     then <SwapbotWait                 bot={this.props.bot} /> else null }
+                { if this.state.step == 'complete' then <SwapbotComplete             bot={this.props.bot} /> else null }
                 </div>
             else
                 <div className="loading">Loading...</div>
