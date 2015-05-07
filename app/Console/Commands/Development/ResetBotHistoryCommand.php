@@ -5,6 +5,7 @@ namespace Swapbot\Console\Commands\Development;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\CustomerRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -127,8 +128,8 @@ class ResetBotHistoryCommand extends Command {
             $new_balances[$asset] = $asset_quantity;
         }
 
-        $this->comment("updating balances to ".json_encode($new_balances, 192));
-        $update_vars = ['balances' => $new_balances];
+        // $this->comment("updating balances to ".json_encode($new_balances, 192));
+        $update_vars = ['state' => BotState::BRAND_NEW, 'balances' => $new_balances];
         $bot_repository->update($bot, $update_vars);
 
         $this->info("done");
