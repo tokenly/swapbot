@@ -1,5 +1,8 @@
 <!doctype html>
-<?php $receipt = $swap['receipt']; ?>
+<?php 
+$receipt = $swap['receipt']; 
+$receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
+?>
 
 <head>
     <meta charset="utf-8">
@@ -24,10 +27,10 @@
                 <div class="status-icon icon-{{ $swapFormatter->buildStateIcon($swap) }}"></div>
                 <div class="message">
                     @if ($swap['state'] == 'complete')
-                        @if ($receipt['type'] == 'swap')
+                        @if ($receipt_type == 'swap')
                             {{-- swap --}}
                             <span><b>Successfully</b> completed exchange of <b>{{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}</b> for <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
-                        @elseif ($receipt['type'] == 'refund')
+                        @elseif ($receipt_type == 'refund')
                             {{-- refund --}}
                             <span>This swap was <b>refunded</b> <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
                         @else
@@ -53,7 +56,7 @@
                 <li>
                     <div class="item-header">Amount</div>
                     <p>
-                    @if (($receipt['type'] == 'refund'))
+                    @if (($receipt_type == 'refund'))
                         {{-- expr --}}
                         Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }} and refunded
                         {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
