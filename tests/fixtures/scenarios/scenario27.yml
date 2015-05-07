@@ -35,7 +35,7 @@ expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
-    meta: { baseFilename: swap.notReady.yml }
+    meta: { baseFilename: swap.notReady-outofstock.yml }
   - #### blacklist
     meta: { baseFilename: swap.ignored.blacklist.yml }
     msg: Ignored transaction of 1000 LTBCOIN from RESTOCKING_SENDER01 because sender address was blacklisted.

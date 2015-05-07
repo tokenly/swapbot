@@ -288,9 +288,7 @@ class BotEventLogger {
     public function logSwapRefunded(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
         // log the send
         $this->logSwapEvent('swap.refunded', $bot, $swap, $receipt_update_vars, $swap_update_vars);
-        // "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunded {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}."
     }    
-    
 
     public function logSwapSendConfirmed(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars) {
         $this->logSwapEvent('send.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
@@ -356,12 +354,8 @@ class BotEventLogger {
     }
 
 
-    public function logSwapNotReady(Bot $bot, Swap $swap, $transaction_id, $name) {
-        return $this->logLegacyBotEvent($bot, 'swap.notReady', BotEvent::LEVEL_WARNING, [
-            'msg'           => "The swap {$name} could not be processed because it was not ready.",
-            'swapId'        => $swap['uuid'],
-            'transactionId' => $transaction_id,
-        ]);
+    public function logSwapNotReady(Bot $bot, Swap $swap) {
+        $this->logSwapEvent('swap.notReady', $bot, $swap);
     }
 
 

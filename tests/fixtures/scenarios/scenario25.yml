@@ -25,7 +25,7 @@ expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
-    meta: { baseFilename: swap.notReady.yml }
+    meta: { baseFilename: swap.notReady-outofstock.yml }
 
 
 expectedBotModels:

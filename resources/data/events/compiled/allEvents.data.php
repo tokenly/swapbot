@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-07 01:02:10
+// compiled on 2015-05-07 02:39:44
 
 return array (
   'swap.new' => 
@@ -132,6 +132,17 @@ return array (
       1 => 'assetOut',
       2 => 'destination',
       3 => 'confirmationsOut',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.notReady' => 
+  array (
+    'name' => 'swap.notReady',
+    'label' => 'Swap Not Ready',
+    'level' => 'WARNING',
+    'msg' => 'This swap could not be processed because it was not ready.',
+    'msgVars' => 
+    array (
     ),
     'swapEventStream' => true,
   ),

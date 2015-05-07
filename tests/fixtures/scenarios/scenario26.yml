@@ -48,7 +48,7 @@ expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
-    meta: { baseFilename: swap.notReady.yml }
+    meta: { baseFilename: swap.notReady-outofstock.yml }
 
 expectedBotLedgerEntries:
   - meta: { baseFilename: bot_ledger_entry_model_TEST_SETUP.yml }

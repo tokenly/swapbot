@@ -73,6 +73,15 @@ events:
     msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 
+  -
+    name: swap.notReady
+    label: Swap Not Ready
+    level: WARNING
+    msg: This swap could not be processed because it was not ready.
+    msgVars: []
+    swapEventStream: true
+
+
 
   # ### Bot Events ##########################################
   -

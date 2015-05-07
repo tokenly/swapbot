@@ -1,0 +1,6 @@
+name: swap.notReady
+# msg: The swap BTC:LTBCOIN could not be processed because it was not ready.
+state: 'outofstock'
+isComplete: false
+isError: true
+
