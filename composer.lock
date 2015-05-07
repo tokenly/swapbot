@@ -2792,12 +2792,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "f9ff19d4a432693d59e7fc379a3372af35cba39b"
+                "reference": "0ed5da5d3b6a6d6a37220a67638f647ae0e3cd97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/f9ff19d4a432693d59e7fc379a3372af35cba39b",
-                "reference": "f9ff19d4a432693d59e7fc379a3372af35cba39b",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/0ed5da5d3b6a6d6a37220a67638f647ae0e3cd97",
+                "reference": "0ed5da5d3b6a6d6a37220a67638f647ae0e3cd97",
                 "shasum": ""
             },
             "require": {
