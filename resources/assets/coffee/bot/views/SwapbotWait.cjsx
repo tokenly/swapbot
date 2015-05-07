@@ -61,7 +61,7 @@ do ()->
                         <div className="item-header" title="{swap.name}">Transaction Received</div>
                         <p className="date">{ this.state.fromNow }</p>
                         <p>{swap.message}</p>
-                        <p>This transaction has <b>{swap.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)}.</p>
+                        <p>This transaction has <b>{swap.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot)}.</p>
                     </div>
                     <div className="item-actions">
                         <div className="icon-next"></div>
@@ -133,7 +133,7 @@ do ()->
                         <br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>
-                    <p>This transaction has <b>{swapbot.botUtils.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.botUtils.confirmationsWord(bot)} in and <b>{swapbot.botUtils.formatConfirmations(swap.confirmationsOut)}</b> {swapbot.botUtils.confirmationsWord(bot)} out.</p>
+                    <p>This transaction has <b>{swapbot.formatters.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot)} in and <b>{swapbot.formatters.formatConfirmations(swap.confirmationsOut)}</b> {swapbot.formatters.confirmationsWord(bot)} out.</p>
                     { if userChoices.email.emailErrorMsg then <p className="error">{userChoices.email.emailErrorMsg}  Please try again.</p> else null }
                     {
                         if userChoices.email.submittedEmail
@@ -253,7 +253,7 @@ do ()->
 
 
 
-                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.botUtils.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
                 </div>
             </div>
 

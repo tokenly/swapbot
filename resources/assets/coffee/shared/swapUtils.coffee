@@ -11,10 +11,16 @@ swapbot.swapUtils = do ()->
     buildDesc.rate = (swap)->
         outAmount = 1 * swap.rate
         inAmount = 1
-        return "#{outAmount} #{swap.out} for #{inAmount} #{swap.in}"
+
+        formatCurrency = swapbot.formatters.formatCurrency
+
+        # This bot will send you 1000 SOUP for every 1 BTC you deposit
+        return "This bot will send you #{formatCurrency(outAmount)} #{swap.out} for every #{formatCurrency(inAmount)} #{swap.in} you deposit."
 
     buildDesc.fixed = (swap)->
-        return "#{swap.out_qty} #{swap.out} for #{swap.in_qty} #{swap.in}"
+        formatCurrency = swapbot.formatters.formatCurrency
+        # return "#{swap.out_qty} #{swap.out} for #{swap.in_qty} #{swap.in}"
+        return "This bot will send you #{formatCurrency(swap.out_qty)} #{swap.out} for every #{formatCurrency(swap.in_qty)} #{swap.in} you deposit."
 
 
     buildInAmountFromOutAmount = {}

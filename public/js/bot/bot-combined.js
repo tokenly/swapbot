@@ -24,18 +24,6 @@
   swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.formatConfirmations = function(confirmations) {
-      if (confirmations == null) {
-        return 0;
-      }
-      return window.numeral(confirmations).format('0');
-    };
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
     exports.getStatusFromBot = function(bot) {
       if (bot.state === 'active') {
         return 'active';
@@ -56,6 +44,41 @@
           }
       }
       return state;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.formatters = (function() {
+    var SATOSHI, exports;
+    exports = {};
+    SATOSHI = 100000000;
+    exports.formatConfirmations = function(confirmations) {
+      if (confirmations == null) {
+        return 0;
+      }
+      return window.numeral(confirmations).format('0');
+    };
+    exports.confirmationsProse = function(bot) {
+      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    };
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    };
+    exports.satoshisToValue = function(amount, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
+    };
+    exports.formatCurrency = function(value, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = '';
+      }
+      return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
     return exports;
   })();
@@ -138,13 +161,16 @@
     exports = {};
     buildDesc = {};
     buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
+      var formatCurrency, inAmount, outAmount;
       outAmount = 1 * swap.rate;
       inAmount = 1;
-      return "" + outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+      formatCurrency = swapbot.formatters.formatCurrency;
+      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swap.out + " for every " + (formatCurrency(inAmount)) + " " + swap["in"] + " you deposit.";
     };
     buildDesc.fixed = function(swap) {
-      return "" + swap.out_qty + " " + swap.out + " for " + swap.in_qty + " " + swap["in"];
+      var formatCurrency;
+      formatCurrency = swapbot.formatters.formatCurrency;
+      return "This bot will send you " + (formatCurrency(swap.out_qty)) + " " + swap.out + " for every " + (formatCurrency(swap.in_qty)) + " " + swap["in"] + " you deposit.";
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swap) {
@@ -352,7 +378,7 @@
           "target": "_blank"
         }, React.createElement("i", {
           "className": "fa fa-arrow-circle-right"
-        })) : void 0)), (!swap.isComplete ? React.createElement("div", null, React.createElement("small", null, "Waiting for ", swapbot.botUtils.confirmationsProse(bot), " to send ", swap.quantityOut, " ", swap.assetOut)) : void 0))));
+        })) : void 0)), (!swap.isComplete ? React.createElement("div", null, React.createElement("small", null, "Waiting for ", swapbot.formatters.confirmationsProse(bot), " to send ", swap.quantityOut, " ", swap.assetOut)) : void 0))));
       }
     });
     return RecentAndActiveSwapsComponent = React.createClass({
@@ -583,7 +609,7 @@
               "onClick": this.buildChooseOutAsset(swapConfig.out)
             }, React.createElement("div", null, React.createElement("div", {
               "className": "item-header"
-            }, swapConfig.out, " ", React.createElement("small", null, "(", bot.balances[swapConfig.out], " available)")), React.createElement("p", null, "Sends ", swapbot.swapUtils.exchangeDescription(swapConfig), "."), React.createElement("div", {
+            }, swapConfig.out, " ", React.createElement("small", null, "(", swapbot.formatters.formatCurrency(bot.balances[swapConfig.out]), " available)")), React.createElement("p", null, swapbot.swapUtils.exchangeDescription(swapConfig)), React.createElement("div", {
               "className": "icon-next"
             })))));
           }
@@ -792,7 +818,7 @@
           }
         }).call(this))), React.createElement("p", {
           "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.botUtils.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
     });
     return SwapbotSendItem = React.createClass({
@@ -903,7 +929,7 @@
           "title": "{swap.name}"
         }, "Transaction Received"), React.createElement("p", {
           "className": "date"
-        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), ".")), React.createElement("div", {
+        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), ".")), React.createElement("div", {
           "className": "item-actions"
         }, React.createElement("div", {
           "className": "icon-next"
@@ -969,7 +995,7 @@
           "onClick": this.notMyTransactionClicked,
           "href": "#",
           "className": "shadow-link"
-        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.botUtils.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.botUtils.formatConfirmations(swap.confirmationsOut)), " ", swapbot.botUtils.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
+        }, "Not your transaction?")), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot), " out."), (userChoices.email.emailErrorMsg ? React.createElement("p", {
           "className": "error"
         }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : (React.createElement("p", null, "Don\&t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
           "action": "#submit-email",
@@ -1082,7 +1108,7 @@
           "className": "status-icon icon-pending"
         }), "Waiting for ", React.createElement("strong", null, this.state.userChoices.inAmount, " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
           "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.botUtils.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
     });
   })();
@@ -1246,104 +1272,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   BotConstants = (function() {
     var exports;
@@ -1814,6 +1742,104 @@
     };
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   SwapMatcher = (function() {
     var exports, swapIsMatched;

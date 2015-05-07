@@ -2500,18 +2500,6 @@
   swapbot.botUtils = (function() {
     var exports;
     exports = {};
-    exports.formatConfirmations = function(confirmations) {
-      if (confirmations == null) {
-        return 0;
-      }
-      return window.numeral(confirmations).format('0');
-    };
-    exports.confirmationsProse = function(bot) {
-      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
-    };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
-    };
     exports.getStatusFromBot = function(bot) {
       if (bot.state === 'active') {
         return 'active';
@@ -2532,6 +2520,41 @@
           }
       }
       return state;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.formatters = (function() {
+    var SATOSHI, exports;
+    exports = {};
+    SATOSHI = 100000000;
+    exports.formatConfirmations = function(confirmations) {
+      if (confirmations == null) {
+        return 0;
+      }
+      return window.numeral(confirmations).format('0');
+    };
+    exports.confirmationsProse = function(bot) {
+      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    };
+    exports.confirmationsWord = function(bot) {
+      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    };
+    exports.satoshisToValue = function(amount, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = 'BTC';
+      }
+      return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
+    };
+    exports.formatCurrency = function(value, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = '';
+      }
+      return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
     return exports;
   })();
@@ -2614,13 +2637,16 @@
     exports = {};
     buildDesc = {};
     buildDesc.rate = function(swap) {
-      var inAmount, outAmount;
+      var formatCurrency, inAmount, outAmount;
       outAmount = 1 * swap.rate;
       inAmount = 1;
-      return outAmount + " " + swap.out + " for " + inAmount + " " + swap["in"];
+      formatCurrency = swapbot.formatters.formatCurrency;
+      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swap.out + " for every " + (formatCurrency(inAmount)) + " " + swap["in"] + " you deposit.";
     };
     buildDesc.fixed = function(swap) {
-      return swap.out_qty + " " + swap.out + " for " + swap.in_qty + " " + swap["in"];
+      var formatCurrency;
+      formatCurrency = swapbot.formatters.formatCurrency;
+      return "This bot will send you " + (formatCurrency(swap.out_qty)) + " " + swap.out + " for every " + (formatCurrency(swap.in_qty)) + " " + swap["in"] + " you deposit.";
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swap) {
