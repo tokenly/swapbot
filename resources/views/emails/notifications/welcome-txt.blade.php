@@ -18,7 +18,7 @@ When your tokens have been delivered and are ready to use, we’ll send you one 
 That’s it!  If you have any questions or comments email the team@tokenly.co.
 
 
-If you did not leave your email address after making a purchase at swapbot.co please click this link to unsubscribe:
+If you did not leave your email address after making a purchase at swapbot.co please use this link to unsubscribe:
 
 {{ $unsubscribeLink }}
 

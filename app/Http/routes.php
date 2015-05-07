@@ -26,6 +26,10 @@ $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminC
 $router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
 $router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap');
 
+////////////////////////////////////////////////////////////////////////
+// Unsubscribe Pages
+$router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptionController@unsubscribe');
+
 
 ////////////////////////////////////////////////////////////////////////
 // Public API

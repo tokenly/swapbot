@@ -13,6 +13,10 @@ class EmailSenderTest extends TestCase {
 
     public function testSendEmail()
     {
+        if ($this->pretend_to_send_mail) {
+            Mail::pretend();
+        }
+
         $send_email = new SendEmail('emails.notifications.welcome', $this->getSampleEmailVars(), "Request Received", "devon@tokenly.co", "Devon");
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($send_email);
     }
@@ -31,6 +35,7 @@ class EmailSenderTest extends TestCase {
                 $this->assertEquals  (['devon@tokenly.co' => 'Devon']             , $msg->getTo());
                 $this->assertEquals  (['no-reply@tokenly.co' => 'Tokenly Bot']    , $msg->getFrom());
                 $this->assertContains('Thanks for making a purchase with SwapBot' , $msg->getBody());
+                $this->assertContains('/public/unsubscribe/12345-67890/foo123'    , $msg->getBody());
             });
 
         // send
@@ -46,10 +51,10 @@ class EmailSenderTest extends TestCase {
     {
         parent::setUp();
 
-        // pretend to send mail - don't actually send it
-        if ($this->pretend_to_send_mail) {
-            Mail::pretend();
-        }
+        // // pretend to send mail - don't actually send it
+        // if ($this->pretend_to_send_mail) {
+        //     Mail::pretend();
+        // }
 
         // use the sync queue
         Mail::setQueue(Queue::getFacadeRoot()->connection('sync'));
@@ -68,10 +73,11 @@ class EmailSenderTest extends TestCase {
             'inAsset'         => 'BTC',
             'outQty'          => 2000,
             'outAsset'        => 'LTBCOIN',
-            'unsubscribeLink' => 'http://foo.bar',
+            'unsubscribeLink' => 'http://foo.bar/public/unsubscribe/12345-67890/foo123',
             'robohashUrl'     => 'http://robohash.org/5a8e7572b37212f8d32817f40409a29fb9849c0e2336c6df19f4bfde9ebc720a.png?set=set3',
             'botUrl'          => 'http://foo.bar',
             'botLink'         => '<a href="http://foo.bar">http://foo.bar</a>',
+            'customer'        => ['uuid' => '12345-67890', 'unsubscribe_token' => 'foo123'],
         ];
         return $email_vars;
     }

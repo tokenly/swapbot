@@ -5,6 +5,7 @@ namespace Swapbot\Repositories;
 use Swapbot\Models\Customer;
 use Swapbot\Models\Swap;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
+use Tokenly\TokenGenerator\TokenGenerator;
 use \Exception;
 
 /*
@@ -27,5 +28,15 @@ class CustomerRepository extends APIRepository
     ////////////////////////////////////////////////////////////////////////
     // Modify
     
+    protected function modifyAttributesBeforeCreate($attributes) {
+        $token_generator = new TokenGenerator();
+
+        // create a token
+        if (!isset($attributes['unsubscribe_token'])) {
+            $attributes['unsubscribe_token'] = $token_generator->generateToken(24, 'U');
+        }
+
+        return $attributes;
+    }
 
 }

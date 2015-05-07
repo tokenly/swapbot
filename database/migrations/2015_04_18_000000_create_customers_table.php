@@ -25,6 +25,8 @@ class CreateCustomersTable extends Migration {
 
             $table->unique(['email', 'swap_id', ]);
 
+            $table->char('unsubscribe_token', 24)->nullable();
+
             $table->timestamps();
         });
     }
