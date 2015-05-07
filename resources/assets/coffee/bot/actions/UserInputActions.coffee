@@ -35,6 +35,14 @@ UserInputActions = do ()->
         })
         return
 
+    exports.resetSwap = ()->
+        Dispatcher.dispatch({
+            actionType: BotConstants.BOT_USER_RESET_SWAP
+        })
+        return
+
+
+
 
     exports.updateEmailValue = (email)->
         Dispatcher.dispatch({

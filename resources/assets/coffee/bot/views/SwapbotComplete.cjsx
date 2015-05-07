@@ -42,6 +42,11 @@ do ()->
             UserInputActions.clearSwap()
             return
 
+        closeClicked: (e)->
+            e.preventDefault()
+            UserInputActions.resetSwap()
+            return
+
 
         # ########################################################################
 
@@ -55,7 +60,7 @@ do ()->
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-4" className="content">
                     <h2>Successfully finished</h2>
-                    <div className="x-button" id="swap-step-4-close"></div>
+                    <a href="#close" onClick={this.closeClicked} className="x-button" id="swap-step-4-close"></a>
                     <div className="segment-control">
                         <div className="line"></div>
                         <br />

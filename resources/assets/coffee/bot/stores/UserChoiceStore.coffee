@@ -105,13 +105,20 @@ UserChoiceStore = do ()->
     clearChosenSwap = ()->
         if userChoices.swap?
             userChoices.swap = null
-            emitChange()
 
             # clear email
             resetEmailChoices()
 
+            # go back to the wait step if we aren't there
+            routeToStepOrEmitChange('wait')
+
+
         return
 
+    resetSwap = ()->
+        resetUserChoices()
+        routeToStepOrEmitChange('choose')
+        return
 
     updateEmailValue = (email)->
         if email != userChoices.email.value
@@ -319,6 +326,9 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_USER_CLEAR_SWAP
                     clearChosenSwap()
+
+                when BotConstants.BOT_USER_RESET_SWAP
+                    resetSwap()
 
                 when BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT
                     updateOutAmount(action.outAmount)

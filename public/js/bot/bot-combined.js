@@ -626,6 +626,10 @@
         e.preventDefault();
         UserInputActions.clearSwap();
       },
+      closeClicked: function(e) {
+        e.preventDefault();
+        UserInputActions.resetSwap();
+      },
       render: function() {
         var bot, swap;
         bot = this.props.bot;
@@ -639,7 +643,9 @@
         }, React.createElement("div", {
           "id": "swap-step-4",
           "className": "content"
-        }, React.createElement("h2", null, "Successfully finished"), React.createElement("div", {
+        }, React.createElement("h2", null, "Successfully finished"), React.createElement("a", {
+          "href": "#close",
+          "onClick": this.closeClicked,
           "className": "x-button",
           "id": "swap-step-4-close"
         }), React.createElement("div", {
@@ -1210,6 +1216,11 @@
         actionType: BotConstants.BOT_USER_CLEAR_SWAP
       });
     };
+    exports.resetSwap = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_RESET_SWAP
+      });
+    };
     exports.updateEmailValue = function(email) {
       Dispatcher.dispatch({
         actionType: BotConstants.BOT_UPDATE_EMAIL_VALUE,
@@ -1243,6 +1254,7 @@
     exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
     exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
     exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
     exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
     exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
     exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
@@ -1525,7 +1537,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
+    var clearChosenSwap, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
     exports = {};
     userChoices = {
       step: 'choose',
@@ -1598,9 +1610,13 @@
     clearChosenSwap = function() {
       if (userChoices.swap != null) {
         userChoices.swap = null;
-        emitChange();
         resetEmailChoices();
+        routeToStepOrEmitChange('wait');
       }
+    };
+    resetSwap = function() {
+      resetUserChoices();
+      routeToStepOrEmitChange('choose');
     };
     updateEmailValue = function(email) {
       if (email !== userChoices.email.value) {
@@ -1758,6 +1774,9 @@
             break;
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();
+            break;
+          case BotConstants.BOT_USER_RESET_SWAP:
+            resetSwap();
             break;
           case BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT:
             updateOutAmount(action.outAmount);
