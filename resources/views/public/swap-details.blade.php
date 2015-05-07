@@ -1,4 +1,5 @@
 <!doctype html>
+<?php $receipt = $swap['receipt']; ?>
 
 <head>
     <meta charset="utf-8">
@@ -15,15 +16,22 @@
             <div class="avatar">
                 <img src="http://robohash.org/siemano.png?set=set3">
             </div>
-            <div class="status-dot bckg-{{ $swapFormatter->stateDotColor($swap['state']) }}"></div>
+            <div class="status-dot bckg-{{ $swapFormatter->stateDotColor($swap) }}"></div>
             <h1><a href="http://raburski.com/swapbot0" target="_blank">The Sample LTBCOIN Bot</a></h1>
         </div>
         <div class="content">
             <div class="content-header">
-                <div class="status-icon icon-{{ $swapFormatter->stateIcon($swap['state']) }}"></div>
+                <div class="status-icon icon-{{ $swapFormatter->buildStateIcon($swap) }}"></div>
                 <div class="message">
                     @if ($swap['state'] == 'complete')
-                        <span><b>Successfully</b> completed exchange of <b>{{ $swap['receipt']['quantityIn'] }} {{ $swap['receipt']['assetIn'] }}</b> for <b>{{ $swap['receipt']['quantityOut'] }} {{ $swap['receipt']['assetOut'] }}</b>.</span>
+                        @if ($receipt['type'] == 'swap')
+                            {{-- swap --}}
+                            <span><b>Successfully</b> completed exchange of <b>{{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}</b> for <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
+                        @elseif ($receipt['type'] == 'refund')
+                            {{-- refund --}}
+                            <span>This swap was <b>refunded</b> <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
+                        @else
+                        @endif
                     @else
                         <span>This swap is {{ $swapFormatter->formatState($swap['state']) }}.</span>
                     @endif
@@ -35,14 +43,21 @@
                     <p>{{ $swapFormatter->formatState($swap['state']) }}</p>
                 </li>
                 <li>
-                    <div class="item-header">Date</div>
-                    <p>{{ $swapFormatter->formatDate($swap['updated_at']) }}</p>
+                    <div class="item-header">Began</div>
+                    <p>{{ $swapFormatter->formatDate($swap['created_at']) }}</p>
+                </li>
+                <li>
+                    <div class="item-header">Completed</div>
+                    <p>{{ $swapFormatter->formatDate($swap['completed_at']) }}</p>
                 </li>
                 <li>
                     <div class="item-header">Amount</div>
                     <p>
-                    <?php $receipt = $swap['receipt']; ?>
-                    @if (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
+                    @if (($receipt['type'] == 'refund'))
+                        {{-- expr --}}
+                        Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }} and refunded
+                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
+                    @elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
                         {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}
                         →
                         {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
@@ -53,8 +68,8 @@
                 <li>
                     <div class="item-header">Recipient's address</div>
                     <p>
-                        @if (isset($swap['receipt']['destination']))
-                            <a href="{{ $swapFormatter->formatAddressHref($swap['receipt']['destination']) }}" target="_blank">{{ $swap['receipt']['destination'] }}</a>
+                        @if (isset($receipt['destination']))
+                            <a href="{{ $swapFormatter->formatAddressHref($receipt['destination']) }}" target="_blank">{{ $receipt['destination'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -69,8 +84,8 @@
                 <li>
                     <div class="item-header">Incoming TXID</div>
                     <p>
-                        @if (isset($swap['receipt']['txidIn']))
-                            <a href="{{ $swapFormatter->formatBlockchainHref($swap['receipt']['txidIn'], $swap['receipt']['assetIn']) }}" target="_blank">{{ $swap['receipt']['txidIn'] }}</a>
+                        @if (isset($receipt['txidIn']))
+                            <a href="{{ $swapFormatter->formatBlockchainHref($receipt['txidIn'], $receipt['assetIn']) }}" target="_blank">{{ $receipt['txidIn'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -79,8 +94,8 @@
                 <li>
                     <div class="item-header">Outgoing TXID</div>
                     <p>
-                        @if (isset($swap['receipt']['txidOut']))
-                            <a href="{{ $swapFormatter->formatBlockchainHref($swap['receipt']['txidOut'], $swap['receipt']['assetOut']) }}" target="_blank">{{ $swap['receipt']['txidOut'] }}</a>
+                        @if (isset($receipt['txidOut']))
+                            <a href="{{ $swapFormatter->formatBlockchainHref($receipt['txidOut'], $receipt['assetOut']) }}" target="_blank">{{ $receipt['txidOut'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif

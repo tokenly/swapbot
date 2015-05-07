@@ -14,9 +14,10 @@ class Swap extends APIModel {
     protected $state_machine        = null;
 
     protected $casts = [
-        'definition' => 'json',
-        'receipt'    => 'json',
+        'definition'   => 'json',
+        'receipt'      => 'json',
     ];
+    protected $dates = ['completed_at'];
 
     public function getAddressAttribute() {
         $xchain_notification = $this->transaction['xchain_notification'];

@@ -3,8 +3,10 @@
 namespace Swapbot\Models\Formatting;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
+use Swapbot\Models\Swap;
 
 class SwapFormatter {
 
@@ -41,9 +43,14 @@ class SwapFormatter {
         return SwapState::friendlyLabel($state);
     }
 
-    public function stateIcon($state) {
+    public function buildStateIcon(Swap $swap) {
+        $state = $swap['state'];
         switch ($state) {
-            case 'complete': return 'confirmed';
+            case 'complete':
+                if ($swap['receipt']['type'] == 'refund') {
+                    return 'failed';
+                }
+                return 'confirmed';
             case 'error': return 'failed';
             default: return 'pending';
         }
@@ -56,6 +63,9 @@ class SwapFormatter {
             case 'confirming':
             case 'sent':
             case 'complete':
+                if ($swap['receipt']['type'] == 'refund') {
+                    return 'red';
+                }
                 return 'green';
             default:
                 return 'red';
