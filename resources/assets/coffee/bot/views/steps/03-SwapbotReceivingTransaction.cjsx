@@ -127,12 +127,15 @@ do ()->
 
                     {
                             if this.state.anyMatchedSwaps
-                                <ul id="transaction-confirm-list" className="wide-list">
-                                    {
-                                        for swap in this.state.matchedSwaps
-                                            <TransactionInfo key={swap.id} bot={bot} swap={swap} />
-                                    }
-                                </ul>
+                                <div>
+                                    <h4>We&rsquo;ve detected one or multiple orders that might be yours, please select the correct one to continue.</h4>
+                                    <ul id="transaction-confirm-list" className="wide-list">
+                                        {
+                                            for swap in this.state.matchedSwaps
+                                                <TransactionInfo key={swap.id} bot={bot} swap={swap} />
+                                        }
+                                    </ul>
+                                </div>
                             else
                                 <ul id="transaction-wait-list" className="wide-list">
                                     <li>

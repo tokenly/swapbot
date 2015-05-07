@@ -904,7 +904,7 @@
           "onClick": UserInputActions.goBackOnClick,
           "href": "#go-back",
           "className": "shadow-link"
-        }, "Go Back")), (this.state.anyMatchedSwaps ? React.createElement("ul", {
+        }, "Go Back")), (this.state.anyMatchedSwaps ? React.createElement("div", null, React.createElement("h4", null, "We\u2019ve detected one or multiple orders that might be yours, please select the correct one to continue."), React.createElement("ul", {
           "id": "transaction-confirm-list",
           "className": "wide-list"
         }, (function() {
@@ -920,7 +920,7 @@
             }));
           }
           return _results;
-        }).call(this)) : React.createElement("ul", {
+        }).call(this))) : React.createElement("ul", {
           "id": "transaction-wait-list",
           "className": "wide-list"
         }, React.createElement("li", null, React.createElement("div", {
@@ -1571,8 +1571,6 @@
         } else {
           allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper);
         }
-        console.log("eventWrapper=", eventWrapper);
-        console.log("allMySwapsById[" + swapId + "]=", allMySwapsById[swapId]);
         anyChanged = true;
       }
       if (anyChanged) {
@@ -1643,7 +1641,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalulateUserChoices;
+    var autoMatchTransaction, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, initRouter, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
     exports = {};
     userChoices = {
       step: 'choose',
@@ -1653,6 +1651,7 @@
       outAmount: null,
       outAsset: null,
       swap: null,
+      allowAutoMatch: true,
       email: {
         value: '',
         submitting: false,
@@ -1669,6 +1668,7 @@
       userChoices.outAmount = null;
       userChoices.outAsset = null;
       userChoices.swap = null;
+      userChoices.allowAutoMatch = true;
       resetEmailChoices();
     };
     resetEmailChoices = function() {
@@ -1686,12 +1686,16 @@
       }
     };
     updateChosenSwapConfig = function(newChosenSwapConfig) {
-      var newName;
+      var matched, newName;
       newName = newChosenSwapConfig["in"] + ':' + newChosenSwapConfig.out;
       if ((userChoices.swapConfig == null) || userChoices.swapConfig.name !== newName) {
         userChoices.swapConfig = newChosenSwapConfig;
         userChoices.swapConfig.name = newName;
-        _recalulateUserChoices();
+        _recalculateSwapConfigArtifacts();
+        matched = checkForAutoMatch();
+        if (matched) {
+          return;
+        }
         router.setRoute('receive');
       }
     };
@@ -1700,7 +1704,7 @@
         return;
       }
       userChoices.outAmount = newOutAmount;
-      _recalulateUserChoices();
+      _recalculateSwapConfigArtifacts();
       emitChange();
     };
     updateChosenSwap = function(newChosenSwap) {
@@ -1784,12 +1788,36 @@
           userChoices.swapConfig = null;
           userChoices.inAmount = null;
           userChoices.inAsset = null;
+          userChoices.allowAutoMatch = true;
           router.setRoute('/place');
           break;
         case 'wait':
           clearChosenSwap();
           router.setRoute('/receive');
       }
+    };
+    checkForAutoMatch = function() {
+      var matchedSingleSwap;
+      if (!userChoices.allowAutoMatch) {
+        return false;
+      }
+      matchedSingleSwap = autoMatchTransaction();
+      if (matchedSingleSwap) {
+        updateChosenSwap(matchedSingleSwap);
+        return true;
+      }
+      return false;
+    };
+    autoMatchTransaction = function() {
+      var matchedSwaps;
+      if ((userChoices.inAsset == null) || !userChoices.inAmount) {
+        return null;
+      }
+      matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices);
+      if (matchedSwaps.length === 1) {
+        return matchedSwaps[0];
+      }
+      return null;
     };
     swapIsComplete = function(newChosenSwap) {
       if (newChosenSwap.isComplete) {
@@ -1807,7 +1835,7 @@
     emitChange = function() {
       eventEmitter.emitEvent('change');
     };
-    _recalulateUserChoices = function() {
+    _recalculateSwapConfigArtifacts = function() {
       if ((userChoices.outAmount != null) && (userChoices.swapConfig != null)) {
         userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig);
       }
@@ -1868,7 +1896,7 @@
       router.init(userChoices.step);
     };
     onSwapStoreChanged = function() {
-      var swap, _ref;
+      var matched, swap, _ref;
       if ((_ref = userChoices.swap) != null ? _ref.id : void 0) {
         swap = SwapsStore.getSwapById(userChoices.swap.id);
         userChoices.swap = swap;
@@ -1877,6 +1905,11 @@
           return;
         }
         emitChange();
+      } else {
+        matched = checkForAutoMatch();
+        if (matched) {
+          return;
+        }
       }
     };
     exports.init = function() {
@@ -1894,6 +1927,7 @@
             break;
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();
+            userChoices.allowAutoMatch = false;
             routeToStepOrEmitChange('receive');
             break;
           case BotConstants.BOT_USER_RESET_SWAP:

@@ -2,19 +2,20 @@ UserChoiceStore = do ()->
     exports = {}
 
     userChoices = {
-        step      : 'choose'
-        swapConfig: {}
-        inAmount  : null
-        inAsset   : null
-        outAmount : null
-        outAsset  : null
-        swap      : null
+        step          : 'choose'
+        swapConfig    : {}
+        inAmount      : null
+        inAsset       : null
+        outAmount     : null
+        outAsset      : null
+        swap          : null
+        allowAutoMatch: true
 
         email:
-            value: ''
+            value     : ''
             submitting: false
-            submitted: false
-            errorMsg: null
+            submitted : false
+            errorMsg  : null
 
     }
     
@@ -23,12 +24,13 @@ UserChoiceStore = do ()->
 
     resetUserChoices = ()->
         # does not reset the step
-        userChoices.swapConfig = null
-        userChoices.inAmount   = null
-        userChoices.inAsset    = null
-        userChoices.outAmount  = null
-        userChoices.outAsset   = null
-        userChoices.swap       = null
+        userChoices.swapConfig     = null
+        userChoices.inAmount       = null
+        userChoices.inAsset        = null
+        userChoices.outAmount      = null
+        userChoices.outAsset       = null
+        userChoices.swap           = null
+        userChoices.allowAutoMatch = true
         resetEmailChoices()
         return
 
@@ -62,9 +64,12 @@ UserChoiceStore = do ()->
             userChoices.swapConfig.name = newName
 
             # calculate the new inAmount based on the outAmount
-            _recalulateUserChoices()
+            _recalculateSwapConfigArtifacts()
 
             # move on to step receive
+            matched = checkForAutoMatch()
+            return if matched
+
             router.setRoute('receive')
 
         return
@@ -77,7 +82,7 @@ UserChoiceStore = do ()->
         userChoices.outAmount = newOutAmount
 
         # calculate the new inAmount based on the outAmount
-        _recalulateUserChoices()
+        _recalculateSwapConfigArtifacts()
 
         emitChange()
 
@@ -182,9 +187,11 @@ UserChoiceStore = do ()->
                 resetUserChoices()
                 router.setRoute('/choose')
             when 'receive'
-                userChoices.swapConfig = null
-                userChoices.inAmount   = null
-                userChoices.inAsset    = null
+                userChoices.swapConfig     = null
+                userChoices.inAmount       = null
+                userChoices.inAsset        = null
+                userChoices.allowAutoMatch = true
+
                 router.setRoute('/place')
             when 'wait'
                 clearChosenSwap()
@@ -194,6 +201,28 @@ UserChoiceStore = do ()->
 
 
     # #############################################
+
+    checkForAutoMatch = ()->
+        # console.log "userChoices.allowAutoMatch=#{userChoices.allowAutoMatch}"
+        if not userChoices.allowAutoMatch then return false
+
+        matchedSingleSwap = autoMatchTransaction()
+        if matchedSingleSwap
+            # console.log "Auto match found"
+            updateChosenSwap(matchedSingleSwap)
+            return true
+
+        return false
+
+    autoMatchTransaction = ()->
+        if not userChoices.inAsset? or not userChoices.inAmount
+            return null
+
+        matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices)
+        if matchedSwaps.length == 1
+            return matchedSwaps[0]
+
+        return null
     
     swapIsComplete = (newChosenSwap)->
         return true if newChosenSwap.isComplete
@@ -215,7 +244,7 @@ UserChoiceStore = do ()->
         eventEmitter.emitEvent('change')
         return
 
-    _recalulateUserChoices = ()->
+    _recalculateSwapConfigArtifacts = ()->
         # calculate the new inAmount based on the outAmount
         if userChoices.outAmount? and userChoices.swapConfig?
             userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig)
@@ -241,14 +270,6 @@ UserChoiceStore = do ()->
                 if userChoices.outAsset == null
                     # no out amount was chosen - go back
                     valid = false
-            # when 'place', 'wait', 'complete'
-            #     if not userChoices.swapConfig?
-            #         # no swap chosen - go back
-            #         valid = false
-            #     if userChoices.step == 'complete'
-            #         if not this.state.swapDetails.txInfo?
-            #             # no txInfo found - go back
-            #             valid = false
             else
                 # unknown stage
                 console.warn "Unknown route: #{rawNewStep}"
@@ -300,6 +321,8 @@ UserChoiceStore = do ()->
 
     onSwapStoreChanged = ()->
         if userChoices.swap?.id
+            # a swap has been chosen
+            #   update the user choice if the swap was updated
             swap = SwapsStore.getSwapById(userChoices.swap.id)
 
             # update the chosen swap when the swapStore changes it
@@ -311,6 +334,11 @@ UserChoiceStore = do ()->
                 return
 
             emitChange()
+        else
+            # swap not chosen yet
+            #   check for an automatched swap
+            matched = checkForAutoMatch()
+            return if matched
 
         return
 
@@ -335,6 +363,9 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_USER_CLEAR_SWAP
                     clearChosenSwap()
+
+                    # disable automatching
+                    userChoices.allowAutoMatch = false
 
                     # go back to the wait step if we aren't there
                     routeToStepOrEmitChange('receive')
