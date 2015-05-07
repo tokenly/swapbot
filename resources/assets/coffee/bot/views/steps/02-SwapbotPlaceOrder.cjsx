@@ -13,30 +13,44 @@ do ()->
         displayName: 'SwapbotSendItem'
 
         getInAmount: ()->
-            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swap)
+            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig)
             return inAmount
 
         isChooseable: ()->
+            if this.getErrorMessage()?
+                return false
+
             if this.getInAmount() > 0
                 return true
+
             return false
+
+        getErrorMessage: ()->
+            return swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig)
+
 
         chooseSwap: (e)->
             e.preventDefault()
             return if not this.isChooseable()
 
-            UserInputActions.chooseSwapConfig(this.props.swap)
+            UserInputActions.chooseSwapConfig(this.props.swapConfig)
 
             return
 
         render: ()->
-            swap = this.props.swap
+            swapConfig = this.props.swapConfig
             inAmount = this.getInAmount()
             isChooseable = this.isChooseable()
+            errorMsg = this.getErrorMessage()
 
             <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
                 <a className="choose-swap" onClick={this.chooseSwap} href="#next-step">
-                    <div className="item-header">Send <span id="token-value-1">{swapbot.formatters.formatCurrency(inAmount)}</span> {swap.in}</div>
+                    { if errorMsg
+                        <div className="item-content error">
+                            {errorMsg}
+                        </div>
+                    }
+                    <div className="item-header">Send <span id="token-value-1">{swapbot.formatters.formatCurrency(inAmount)}</span> {swapConfig.in}</div>
                     <p>
                         { 
                             if isChooseable
@@ -114,7 +128,7 @@ do ()->
                         { 
                             if matchingSwapConfigs
                                 for matchedSwapConfig, offset in matchingSwapConfigs
-                                        <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} swap={matchedSwapConfig} bot={bot} />
+                                        <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} swapConfig={matchedSwapConfig} bot={bot} />
                         }
                     </ul>
 

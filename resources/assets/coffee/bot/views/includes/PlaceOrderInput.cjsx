@@ -20,7 +20,7 @@ do ()->
 
         updateAmount: (e)->
             outAmount = parseFloat($(e.target).val())
-            outAmount = 0 if outAmount < 0 or outAmount == NaN
+            outAmount = 0 if outAmount < 0 or isNaN(outAmount)
             UserInputActions.updateOutAmount(outAmount)
             return
 

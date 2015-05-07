@@ -2633,47 +2633,86 @@
   }
 
   swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
+    var buildDesc, buildInAmountFromOutAmount, exports, validateOutAmount;
     exports = {};
     buildDesc = {};
-    buildDesc.rate = function(swap) {
+    buildDesc.rate = function(swapConfig) {
       var formatCurrency, inAmount, outAmount;
-      outAmount = 1 * swap.rate;
+      outAmount = 1 * swapConfig.rate;
       inAmount = 1;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swap.out + " for every " + (formatCurrency(inAmount)) + " " + swap["in"] + " you deposit.";
+      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(inAmount)) + " " + swapConfig["in"] + " you deposit.";
     };
-    buildDesc.fixed = function(swap) {
+    buildDesc.fixed = function(swapConfig) {
       var formatCurrency;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(swap.out_qty)) + " " + swap.out + " for every " + (formatCurrency(swap.in_qty)) + " " + swap["in"] + " you deposit.";
+      return "This bot will send you " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit.";
     };
     buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+    buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
       var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount / swap.rate;
+      inAmount = outAmount / swapConfig.rate;
       return inAmount;
     };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {
+    buildInAmountFromOutAmount.fixed = function(outAmount, swapConfig) {
       var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount / (swap.out_qty / swap.in_qty);
+      inAmount = outAmount / (swapConfig.out_qty / swapConfig.in_qty);
       return inAmount;
     };
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
+    validateOutAmount = {};
+    validateOutAmount.shared = function(outAmount, swapConfig) {
+      if (("" + outAmount).length === 0) {
+        return null;
+      }
+      if (isNaN(outAmount)) {
+        return 'The amount to purchase does not look like a number.';
+      }
+      return null;
     };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      inAmount = buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    validateOutAmount.rate = function(outAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    validateOutAmount.fixed = function(outAmount, swapConfig) {
+      var errorMsg, formatCurrency, ratio;
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      ratio = outAmount / swapConfig.out_qty;
+      if (ratio !== Math.floor(ratio)) {
+        formatCurrency = swapbot.formatters.formatCurrency;
+        return "This swap must be purchased at a rate of exactly " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + ".";
+      }
+      return null;
+    };
+    exports.exchangeDescription = function(swapConfig) {
+      return buildDesc[swapConfig.strategy](swapConfig);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swapConfig) {
+      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig);
       if (inAmount === NaN) {
         inAmount = 0;
       }
       return inAmount;
+    };
+    exports.validateOutAmount = function(outAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
     };
     return exports;
   })();

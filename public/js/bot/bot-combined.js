@@ -157,47 +157,86 @@
   }
 
   swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports;
+    var buildDesc, buildInAmountFromOutAmount, exports, validateOutAmount;
     exports = {};
     buildDesc = {};
-    buildDesc.rate = function(swap) {
+    buildDesc.rate = function(swapConfig) {
       var formatCurrency, inAmount, outAmount;
-      outAmount = 1 * swap.rate;
+      outAmount = 1 * swapConfig.rate;
       inAmount = 1;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swap.out + " for every " + (formatCurrency(inAmount)) + " " + swap["in"] + " you deposit.";
+      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(inAmount)) + " " + swapConfig["in"] + " you deposit.";
     };
-    buildDesc.fixed = function(swap) {
+    buildDesc.fixed = function(swapConfig) {
       var formatCurrency;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(swap.out_qty)) + " " + swap.out + " for every " + (formatCurrency(swap.in_qty)) + " " + swap["in"] + " you deposit.";
+      return "This bot will send you " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit.";
     };
     buildInAmountFromOutAmount = {};
-    buildInAmountFromOutAmount.rate = function(outAmount, swap) {
+    buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
       var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount / swap.rate;
+      inAmount = outAmount / swapConfig.rate;
       return inAmount;
     };
-    buildInAmountFromOutAmount.fixed = function(outAmount, swap) {
+    buildInAmountFromOutAmount.fixed = function(outAmount, swapConfig) {
       var inAmount;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount / (swap.out_qty / swap.in_qty);
+      inAmount = outAmount / (swapConfig.out_qty / swapConfig.in_qty);
       return inAmount;
     };
-    exports.exchangeDescription = function(swap) {
-      return buildDesc[swap.strategy](swap);
+    validateOutAmount = {};
+    validateOutAmount.shared = function(outAmount, swapConfig) {
+      if (("" + outAmount).length === 0) {
+        return null;
+      }
+      if (isNaN(outAmount)) {
+        return 'The amount to purchase does not look like a number.';
+      }
+      return null;
     };
-    exports.inAmountFromOutAmount = function(inAmount, swap) {
-      inAmount = buildInAmountFromOutAmount[swap.strategy](inAmount, swap);
+    validateOutAmount.rate = function(outAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    validateOutAmount.fixed = function(outAmount, swapConfig) {
+      var errorMsg, formatCurrency, ratio;
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      ratio = outAmount / swapConfig.out_qty;
+      if (ratio !== Math.floor(ratio)) {
+        formatCurrency = swapbot.formatters.formatCurrency;
+        return "This swap must be purchased at a rate of exactly " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + ".";
+      }
+      return null;
+    };
+    exports.exchangeDescription = function(swapConfig) {
+      return buildDesc[swapConfig.strategy](swapConfig);
+    };
+    exports.inAmountFromOutAmount = function(inAmount, swapConfig) {
+      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig);
       if (inAmount === NaN) {
         inAmount = 0;
       }
       return inAmount;
+    };
+    exports.validateOutAmount = function(outAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
     };
     return exports;
   })();
@@ -539,7 +578,7 @@
       updateAmount: function(e) {
         var outAmount;
         outAmount = parseFloat($(e.target).val());
-        if (outAmount < 0 || outAmount === NaN) {
+        if (outAmount < 0 || isNaN(outAmount)) {
           outAmount = 0;
         }
         UserInputActions.updateOutAmount(outAmount);
@@ -654,38 +693,47 @@
       displayName: 'SwapbotSendItem',
       getInAmount: function() {
         var inAmount;
-        inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swap);
+        inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig);
         return inAmount;
       },
       isChooseable: function() {
+        if (this.getErrorMessage() != null) {
+          return false;
+        }
         if (this.getInAmount() > 0) {
           return true;
         }
         return false;
+      },
+      getErrorMessage: function() {
+        return swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig);
       },
       chooseSwap: function(e) {
         e.preventDefault();
         if (!this.isChooseable()) {
           return;
         }
-        UserInputActions.chooseSwapConfig(this.props.swap);
+        UserInputActions.chooseSwapConfig(this.props.swapConfig);
       },
       render: function() {
-        var inAmount, isChooseable, swap;
-        swap = this.props.swap;
+        var errorMsg, inAmount, isChooseable, swapConfig;
+        swapConfig = this.props.swapConfig;
         inAmount = this.getInAmount();
         isChooseable = this.isChooseable();
+        errorMsg = this.getErrorMessage();
         return React.createElement("li", {
           "className": 'choose-swap' + (isChooseable ? ' chooseable' : ' unchooseable')
         }, React.createElement("a", {
           "className": "choose-swap",
           "onClick": this.chooseSwap,
           "href": "#next-step"
-        }, React.createElement("div", {
+        }, (errorMsg ? React.createElement("div", {
+          "className": "item-content error"
+        }, errorMsg) : void 0), React.createElement("div", {
           "className": "item-header"
         }, "Send ", React.createElement("span", {
           "id": "token-value-1"
-        }, swapbot.formatters.formatCurrency(inAmount)), " ", swap["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
+        }, swapbot.formatters.formatCurrency(inAmount)), " ", swapConfig["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
           "className": "icon-next"
         }), React.createElement("div", {
           "className": "clearfix"
@@ -768,7 +816,7 @@
               _results.push(React.createElement(SwapbotSendItem, {
                 "key": 'swap' + offset,
                 "outAmount": this.state.userChoices.outAmount,
-                "swap": matchedSwapConfig,
+                "swapConfig": matchedSwapConfig,
                 "bot": bot
               }));
             }
@@ -1365,104 +1413,6 @@
     return exports;
   })();
 
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
-
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
     exports = {};
@@ -1963,6 +1913,104 @@
     };
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   SwapMatcher = (function() {
     var exports, swapIsMatched;
