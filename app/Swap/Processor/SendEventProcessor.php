@@ -98,7 +98,7 @@ class SendEventProcessor {
             $this->processIncomingForwardingSend($tx_process);
 
             // process all swaps
-            $this->processSwaps($tx_process);
+            $this->processMatchedSwap($tx_process);
 
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
@@ -180,10 +180,12 @@ class SendEventProcessor {
         }
     }
 
-    protected function processSwaps($tx_process) {
+    protected function processMatchedSwap($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
+
         $bot                 = $tx_process['bot'];
+        $swap                = $tx_process['swap'];
         $xchain_notification = $tx_process['xchain_notification'];
         $is_confirmed        = $tx_process['is_confirmed'];
         $destination         = $xchain_notification['destinations'][0];
@@ -191,56 +193,50 @@ class SendEventProcessor {
         $asset               = $xchain_notification['asset'];
         $confirmations       = $xchain_notification['confirmations'];
 
+        // if no matched swap was found, then log it and return
+        if (!$swap) {
+            $this->bot_event_logger->logUnknownSendTransaction($bot, $xchain_notification);
+            return;
+        }
+
 
         // get all swaps that are in state sent
         $txid = $tx_process['xchain_notification']['txid'];
-        $states = [SwapState::SENT];
-        $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
 
-        $any_swap_matched = false;
-        foreach($swaps as $swap) {
-            if ($swap['receipt']['txidOut'] == $txid) {
-                $any_swap_matched = true;
-                $receipt_update_vars = null;
+        $receipt_update_vars = null;
 
-                if ($is_confirmed) {
-                    // log the send confirmed (completed)
-                    $receipt_update_vars = [
-                        'confirmationsOut' => $tx_process['xchain_notification']['confirmations'],
-                        'assetOut'         => $tx_process['xchain_notification']['asset'],
-                        'quantityOut'      => $tx_process['xchain_notification']['quantity'],
-                    ];
-                    $swap_update_vars_for_log = ['state' => SwapState::COMPLETE, ];
-                    $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars, $swap_update_vars_for_log);
+        if ($is_confirmed) {
+            // log the send confirmed (completed)
+            $receipt_update_vars = [
+                'confirmationsOut' => $tx_process['xchain_notification']['confirmations'],
+                'assetOut'         => $tx_process['xchain_notification']['asset'],
+                'quantityOut'      => $tx_process['xchain_notification']['quantity'],
+            ];
+            $swap_update_vars_for_log = ['state' => SwapState::COMPLETE, ];
+            $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars, $swap_update_vars_for_log);
 
-                    //   move the swap into state completed
-                    $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
-                    $tx_process['tx_is_handled'] = true;
+            //   move the swap into state completed
+            $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
+            $tx_process['tx_is_handled'] = true;
 
-                    // this transaction was processed
-                    $tx_process['transaction_update_vars']['processed']     = true;
-                    $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
+            // this transaction was processed
+            $tx_process['transaction_update_vars']['processed']     = true;
+            $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
 
-                } else {
-                    // just an unconfirmed transaction
-                    $receipt_update_vars = [
-                        'confirmationsOut' => $tx_process['xchain_notification']['confirmations'],
-                        'assetOut'         => $tx_process['xchain_notification']['asset'],
-                        'quantityOut'      => $tx_process['xchain_notification']['quantity'],
-                    ];
-                    $this->bot_event_logger->logUnconfirmedSwapSend($bot, $swap, $receipt_update_vars);
-                }
-
-                // update the swap receipt
-                if ($receipt_update_vars) {
-                    $receipt_update_vars = array_merge(is_array($swap['receipt']) ? $swap['receipt'] : [], $receipt_update_vars);
-                    $this->swap_repository->update($swap, ['receipt' => $receipt_update_vars]);
-                }
-            }
+        } else {
+            // just an unconfirmed transaction
+            $receipt_update_vars = [
+                'confirmationsOut' => $tx_process['xchain_notification']['confirmations'],
+                'assetOut'         => $tx_process['xchain_notification']['asset'],
+                'quantityOut'      => $tx_process['xchain_notification']['quantity'],
+            ];
+            $this->bot_event_logger->logUnconfirmedSwapSend($bot, $swap, $receipt_update_vars);
         }
 
-        if (!$any_swap_matched) {
-            $this->bot_event_logger->logUnknownSendTransaction($bot, $xchain_notification);
+        // update the swap receipt
+        if ($receipt_update_vars) {
+            $receipt_update_vars = array_merge(is_array($swap['receipt']) ? $swap['receipt'] : [], $receipt_update_vars);
+            $this->swap_repository->update($swap, ['receipt' => $receipt_update_vars]);
         }
     }
 

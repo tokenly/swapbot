@@ -291,7 +291,7 @@ class ScenarioRunner
 
     protected function validateExpectedBotEvent($expected_bot_event, $actual_bot_event, $number) {
         PHPUnit::assertNotEmpty($actual_bot_event, "Missing bot event #{$number}: ".json_encode($expected_bot_event, 192));
-        PHPUnit::assertEquals($expected_bot_event, $actual_bot_event, "ExpectedBotEvent mismatch ({$actual_bot_event['name']})");
+        PHPUnit::assertEquals($expected_bot_event, $actual_bot_event, "ExpectedBotEvent #{$number} mismatch ({$actual_bot_event['name']})");
     }
 
 

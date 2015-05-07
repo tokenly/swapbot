@@ -1,0 +1,13 @@
+name: swap.refunding
+# msg: Received 500 LTBCOIN from SENDER01 with 1 confirmation. Refunding 500 LTBCOIN to SENDER01.
+confirmations: '2'
+destination: SENDER01
+quantityIn: 500
+assetIn: 'LTBCOIN'
+txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+quantityOut: 500
+assetOut: 'LTBCOIN'
+confirmationsOut: 0
+state: 'ready'
+isComplete: false
+isError: false

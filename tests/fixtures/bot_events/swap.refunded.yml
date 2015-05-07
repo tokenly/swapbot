@@ -5,8 +5,8 @@ confirmations: '1'
 quantityIn: 500
 assetIn: 'LTBCOIN'
 txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
-quantityOut: 0.00050000000000000001
-assetOut: 'BTC'
+quantityOut: 500
+assetOut: 'LTBCOIN'
 txidOut: '0000000000000000000000000000001111'
 confirmationsOut: 0
 state: 'refunded'

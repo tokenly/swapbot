@@ -31,7 +31,7 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### waiting on confirmation
-    meta: { baseFilename: swap.confirming-BTC-1of3.yml }
+    meta: { baseFilename: swap.confirming-LTBCOIN-1of3.yml }
   - #### CONFIRMING
     meta: { baseFilename: swap.stateChange-confirming.yml }
 
@@ -39,7 +39,7 @@ expectedBotEvents:
   - #### transaction handled previously
     meta: { baseFilename: tx.previous.yml }
   - #### waiting on confirmation
-    meta: { baseFilename: swap.confirming-BTC-2of3.yml }
+    meta: { baseFilename: swap.confirming-LTBCOIN-2of3.yml }
   - #### CONFIRMING
     meta: { baseFilename: swap.stateChange-confirming.yml }
 
@@ -48,7 +48,7 @@ expectedBotEvents:
   - #### transaction handled previously
     meta: { baseFilename: tx.previous-3.yml }
   - #### confirming swap
-    meta: { baseFilename: swap.confirmed-BTC-3.yml }
+    meta: { baseFilename: swap.confirmed-LTBCOIN-3.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

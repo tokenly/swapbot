@@ -375,7 +375,7 @@ class SwapProcessor {
 
 
         // update the local balance
-        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas']);
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $receipt_update_vars['quantityOut'], $receipt_update_vars['assetOut']);
 
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
@@ -389,13 +389,39 @@ class SwapProcessor {
     }
 
     protected function doRefund($swap_process) {
-        // log the attempt to refund
-        $this->bot_event_logger->logRefundAttempt($swap_process['bot'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $swap_process['confirmations']);
-
         // send the refund
         try {
-            list($fee, $dust_size) = $this->buildRefundFeeAndDustSize($swap_process['xchain_notification']);
-            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['in_quantity'], $swap_process['in_asset'], $fee, $dust_size);
+            list($out_quantity, $out_asset, $fee, $dust_size) = $this->buildRefundDetails($swap_process['bot'], $swap_process['xchain_notification']);
+
+            // build trial receipt vars
+            $receipt_update_vars = [
+                'type'             => 'refund',
+
+                'quantityIn'       => $swap_process['in_quantity'],
+                'assetIn'          => $swap_process['in_asset'],
+                'txidIn'           => $swap_process['transaction']['txid'],
+
+                'quantityOut'      => $out_quantity,
+                'assetOut'         => $out_asset,
+                'confirmationsOut' => 0,
+
+                'confirmations'    => $swap_process['confirmations'],
+                'destination'      => $swap_process['destination'],
+
+                'completedAt'      => time(),
+                'timestamp'        => time(),
+            ];
+
+            // log the attempt to refund
+            $this->bot_event_logger->logRefundAttempt($swap_process['bot'], $swap_process['swap'], $receipt_update_vars);
+
+            if ($out_quantity > 0) {
+                // do the send
+                $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $out_quantity, $out_asset, $fee, $dust_size);
+            } else {
+                // return quantity was less than 0 - don't send any refund
+                $send_result = ['txid' => null];
+            }
         } catch (Exception $e) {
             // move the swap into an error state
             $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
@@ -403,30 +429,15 @@ class SwapProcessor {
             throw $e;
         }
 
-        // update the swap receipts
-        $receipt_update_vars = [
-            'type'             => 'refund',
+        // update the swap receipt vars
+        $receipt_update_vars['txidOut'] = $send_result['txid'];
 
-            'quantityIn'       => $swap_process['in_quantity'],
-            'assetIn'          => $swap_process['in_asset'],
-            'txidIn'           => $swap_process['transaction']['txid'],
-
-            'quantityOut'      => $swap_process['quantity'],
-            'assetOut'         => $swap_process['asset'],
-            'txidOut'          => $send_result['txid'],
-            'confirmationsOut' => 0,
-
-            'confirmations'    => $swap_process['confirmations'],
-            'destination'      => $swap_process['destination'],
-
-            'completedAt'      => time(),
-            'timestamp'        => time(),
-        ];
+        // update the swap
         $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
         $swap_process['swap_update_vars']['completed_at'] = Carbon::now();
 
         // update the local balance
-        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $fee);
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $out_quantity, $out_asset, $fee, $dust_size);
 
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_REFUND;
@@ -439,19 +450,33 @@ class SwapProcessor {
         $swap_process['swap_was_sent'] = true;
     }
 
-    protected function buildRefundFeeAndDustSize($xchain_notification) {
-        $input_dust_size_sat = $xchain_notification['counterpartyTx']['dustSizeSat'];
-        $fee_sat = floor($input_dust_size_sat * 0.2);
-        $dust_size_sat = $input_dust_size_sat - $fee_sat;
-        return [CurrencyUtil::satoshisToValue($fee_sat), CurrencyUtil::satoshisToValue($dust_size_sat)];
+    protected function buildRefundDetails($bot, $xchain_notification) {
+        if ($xchain_notification['asset'] == 'BTC') {
+            // BTC Refund
+            $fee = $bot['return_fee'];
+            $dust_size = null;
+            $out_quantity = $xchain_notification['quantity'] - $fee;
+            $out_asset = $xchain_notification['asset'];
+
+        } else {
+            // Counterparty asset refund
+            $input_dust_size_sat = $xchain_notification['counterpartyTx']['dustSizeSat'];
+            $fee_sat = floor($input_dust_size_sat * 0.2);
+            $dust_size_sat = $input_dust_size_sat - $fee_sat;
+
+            $fee = CurrencyUtil::satoshisToValue($fee_sat);
+            $dust_size = CurrencyUtil::satoshisToValue($dust_size_sat);
+            $out_asset = $xchain_notification['asset'];
+            $out_quantity = $xchain_notification['quantity'];
+        }
+
+        return [$out_quantity, $out_asset, $fee, $dust_size];
     }
 
-    protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas, $btc_fee=null) {
-        $asset = $swap_process['asset'];
-        $quantity = $swap_process['quantity'];
+    protected function updateBalanceDeltasFromProcessedSwap($swap_process, $bot_balance_deltas, $quantity, $asset, $btc_fee=null, $dust_size=null) {
         if ($btc_fee === null) { $btc_fee = $swap_process['bot']['return_fee']; }
 
-        $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $btc_fee);
+        $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $btc_fee, $dust_size);
         return $bot_balance_deltas;
     }
 

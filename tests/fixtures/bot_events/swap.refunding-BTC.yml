@@ -1,0 +1,13 @@
+name: swap.refunding
+destination: SENDER01
+confirmations: 2
+
+quantityIn: 0.001
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 0.0009
+assetOut: 'BTC'
+confirmationsOut: 0
+state: 'ready'
+isComplete: false
+isError: false

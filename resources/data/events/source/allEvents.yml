@@ -42,14 +42,6 @@ events:
     swapEventStream: true
 
   -
-    name: swap.refunded
-    label: Swap Refunded
-    level: INFO
-    msg: Refunded {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
-    msgVars: [quantityOut,assetOut,destination]
-    swapEventStream: true
-
-  -
     name: swap.sent
     label: Swap Sent
     level: INFO
@@ -90,6 +82,23 @@ events:
     msgVars: []
     swapEventStream: true
 
+  # ### Refund
+
+  -
+    name: swap.refunding
+    label: Refunding Swap
+    level: DEBUG
+    msg: Refunding {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msgVars: [quantityOut,assetOut,destination]
+    swapEventStream: true
+
+  -
+    name: swap.refunded
+    label: Swap Refunded
+    level: INFO
+    msg: Refunded {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msgVars: [quantityOut,assetOut,destination]
+    swapEventStream: true
 
 
   # ### Bot Events ##########################################

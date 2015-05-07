@@ -2,11 +2,11 @@ name: swap.confirmed
 # msg: Received a transaction of 500 LTBCOIN from SENDER01 with 2 of 2 confirmations.  Will vend 0.0005 BTC to SENDER01.
 confirmations: '2'
 destination: 'SENDER01'
-quantityIn: 0.001
-assetIn: 'BTC'
-txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
-quantityOut: 1000
-assetOut: 'LTBCOIN'
+quantityIn: 500
+assetIn: 'LTBCOIN'
+txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+quantityOut: 0.0005
+assetOut: 'BTC'
 state: 'ready'
 isComplete: false
 isError: false

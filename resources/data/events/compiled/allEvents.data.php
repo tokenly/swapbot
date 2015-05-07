@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-07 02:49:15
+// compiled on 2015-05-07 12:50:50
 
 return array (
   'swap.new' => 
@@ -78,20 +78,6 @@ return array (
     ),
     'swapEventStream' => true,
   ),
-  'swap.refunded' => 
-  array (
-    'name' => 'swap.refunded',
-    'label' => 'Swap Refunded',
-    'level' => 'INFO',
-    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
-    'msgVars' => 
-    array (
-      0 => 'quantityOut',
-      1 => 'assetOut',
-      2 => 'destination',
-    ),
-    'swapEventStream' => true,
-  ),
   'swap.sent' => 
   array (
     'name' => 'swap.sent',
@@ -154,6 +140,34 @@ return array (
     'msg' => 'This swap could not be processed because it was not ready.',
     'msgVars' => 
     array (
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.refunding' => 
+  array (
+    'name' => 'swap.refunding',
+    'label' => 'Refunding Swap',
+    'level' => 'DEBUG',
+    'msg' => 'Refunding <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.refunded' => 
+  array (
+    'name' => 'swap.refunded',
+    'label' => 'Swap Refunded',
+    'level' => 'INFO',
+    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
     ),
     'swapEventStream' => true,
   ),

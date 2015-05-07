@@ -1,0 +1,5 @@
+txid: "00000000000000000000000000000000000000000000000000000BTCtx222222"
+type: 'receive'
+confirmations: '1'
+processed: '1'
+balances_applied: '1'

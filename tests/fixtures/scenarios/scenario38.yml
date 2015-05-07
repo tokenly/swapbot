@@ -29,8 +29,8 @@ expectedBotEvents:
     meta: { baseFilename: swap.new.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - #### swap refundFound
-    meta: { baseFilename: swap.refundFound.yml }
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding.yml }
   - #### swap refunded
     meta: { baseFilename: swap.refunded.yml }
   - #### SENT
@@ -46,8 +46,6 @@ expectedBotModels:
 
 expectedSwapModels:
   -
-    meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
-    state: refunded
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded.yml }
     receipt:
       confirmations: 1
-      type: refund

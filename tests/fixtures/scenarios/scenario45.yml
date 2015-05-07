@@ -1,5 +1,4 @@
-# A minumum amount triggers a refund
-#   with 2 confirmations
+# test refund when sending BTC
 
 ############################
 # setup bots and payment
@@ -8,19 +7,19 @@ bots:
     confirmations_required: 2
     swaps:
       -
-        in: LTBCOIN
-        out: BTC
+        in: BTC
+        out: LTBCOIN
         strategy: rate
-        rate: 0.00000100
-        min: 6000
+        rate: 1000000
+        min: 0.002
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   -
-    meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
   -
-    meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     confirmations: 2
     blockId: 300001
 
@@ -29,44 +28,49 @@ xchainNotifications:
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_LTBCOIN-refund.yml }
+    meta: { baseFilename: send_BTC-refund.yml }
 
 expectedBotEvents:
   - #### NEW
-    meta: { baseFilename: swap.new.yml }
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### waiting on confirmation
-    meta: { baseFilename: swap.confirming-LTBCOIN.yml }
+    meta: { baseFilename: swap.confirming-BTC.yml }
   - #### CONFIRMING
     meta: { baseFilename: swap.stateChange-confirming.yml }
 
 
 
   - #### transaction handled previously
-    meta: { baseFilename: tx.previous.yml }
+    meta: { baseFilename: tx.previous-BTC.yml }
   - #### confirming swap
-    meta: { baseFilename: swap.confirmed-LTBCOIN.yml }
+    meta: { baseFilename: swap.confirmed-BTC.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap refunding
-    meta: { baseFilename: swap.refunding-2confirmations.yml }
+    meta: { baseFilename: swap.refunding-BTC.yml }
   - #### swap refunded
-    meta: { baseFilename: swap.refunded-2confirmations.yml }
+    meta: { baseFilename: swap.refunded-BTC-2confirmations.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-refunded.yml }
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-BTC.yml }
     confirmations: 2
 
 expectedBotModels:
   - 
     state: active
+    balances: 
+      BTC: 1
+      LTBCOIN: 1000000
 
 expectedSwapModels:
   -
-    meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded.yml }
+    meta: { baseFilename: swap_model_BTC_LTBCOIN-refunded.yml }
+    state: refunded
     receipt:
-        confirmations: '2'
+      confirmations: '2'
+      type: refund

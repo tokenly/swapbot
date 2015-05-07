@@ -285,6 +285,10 @@ class BotEventLogger {
         // Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Sent {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.
     }
 
+    public function logRefundAttempt(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        $this->logSwapEvent('swap.refunding', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+    }
+    
     public function logSwapRefunded(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
         // log the send
         $this->logSwapEvent('swap.refunded', $bot, $swap, $receipt_update_vars, $swap_update_vars);
@@ -443,23 +447,6 @@ class BotEventLogger {
             'confirmations' => $xchain_notification['confirmations'],
         ]);
     }
-
-    ////////////////////////////////////////////////////////////////////////
-    // Refund
-
-    public function logRefundAttempt(Bot $bot, $xchain_notification, $destination, $quantity, $asset, $confirmations) {
-        // log the send
-        return $this->logLegacyBotEvent($bot, 'swap.refundFound', BotEvent::LEVEL_DEBUG, [
-            'msg'           => "Received {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]} with {$confirmations} confirmation".($confirmations==1?'':'s').". Refunding {$quantity} {$asset} to {$destination}.",
-            'txid'          => $xchain_notification['txid'],
-            'destination'   => $destination,
-            'outQty'        => $quantity,
-            'outAsset'      => $asset,
-            'confirmations' => $confirmations,
-        ]);
-    }
-    
-
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

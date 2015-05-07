@@ -1,0 +1,13 @@
+name: BTC:LTBCOIN
+state: sent
+receipt:
+    confirmations: '2'
+    type: refund
+    quantityIn: 0.001
+    assetIn: 'BTC'
+    txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+    quantityOut: 0.0009
+    assetOut: 'BTC'
+    txidOut: '0000000000000000000000000000001111'
+    destination: 'SENDER01'
+    confirmationsOut: 0
