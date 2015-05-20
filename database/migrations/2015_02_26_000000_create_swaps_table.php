@@ -23,7 +23,6 @@ class CreateSwapsTable extends Migration {
             $table->foreign('bot_id')->references('id')->on('bots');
 
             $table->integer('transaction_id')->unsigned()->index();
-            $table->foreign('transaction_id')->references('id')->on('transactions');
 
             $table->string('state');
             $table->mediumText('definition')->nullable();
