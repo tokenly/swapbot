@@ -146,6 +146,7 @@ return [
 		'Swapbot\Providers\RouteServiceProvider',
 
 		'Swapbot\Swap\Logger\OutputTransformer\Provider\BotEventOutputTransformerServiceProvider',
+		'Swapbot\Providers\Monitoring\MonitoringServiceProvider',
 
 
 		/*
@@ -156,6 +157,7 @@ return [
 		'Tokenly\LaravelApiProvider\APIServiceProvider',
 		'Tokenly\XChainClient\XChainServiceProvider',
 		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
+		'Tokenly\ConsulHealthDaemon\ServiceProvider\ConsulHealthDaemonServiceProvider',
 
 	],
 

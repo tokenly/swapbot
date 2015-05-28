@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3a7f85f37caddc81b949146d13fd6be3",
+    "hash": "c3ad19ce4ec2e73b00064090d75bc533",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -2540,6 +2540,46 @@
             "time": "2014-11-20 14:15:04"
         },
         {
+            "name": "tokenly/consul-health-daemon",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/consul-health-daemon.git",
+                "reference": "4ff81d0447245a92314cce16e4a23bb1f67467a4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/consul-health-daemon/zipball/4ff81d0447245a92314cce16e4a23bb1f67467a4",
+                "reference": "4ff81d0447245a92314cce16e4a23bb1f67467a4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Tokenly\\ConsulHealthDaemon": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "dweller@devonweller.com",
+                    "homepage": "http://devonweller.com"
+                }
+            ],
+            "description": "A library to monitor services health and report to consul",
+            "time": "2015-05-28 02:52:54"
+        },
+        {
             "name": "tokenly/hmac-auth",
             "version": "dev-master",
             "source": {
@@ -2623,7 +2663,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-02-24 13:36:56"
+            "time": "2015-04-09 20:46:44"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",
@@ -2703,7 +2743,7 @@
                 }
             ],
             "description": "An event logger provider for Laravel.",
-            "time": "2015-02-13 02:38:04"
+            "time": "2015-04-25 13:03:59"
         },
         {
             "name": "tokenly/pusher-client",
@@ -2796,7 +2836,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/0ed5da5d3b6a6d6a37220a67638f647ae0e3cd97",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/ae659b234720819f7e6fd9ce4de41ec5fef016f8",
                 "reference": "0ed5da5d3b6a6d6a37220a67638f647ae0e3cd97",
                 "shasum": ""
             },
@@ -2827,7 +2867,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-03-18 12:42:53"
+            "time": "2015-05-07 00:00:34"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -4108,6 +4148,7 @@
         "tokenly/laravel-event-log": 20,
         "tokenly/laravel-api-provider": 20,
         "tokenly/laravel-blocking-beanstalkd": 20,
+        "tokenly/consul-health-daemon": 20,
         "mockery/mockery": 20
     },
     "prefer-stable": true,

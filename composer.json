@@ -18,7 +18,8 @@
 		"linusu/bitcoin-address-validator": "~0",
 		"metabor/statemachine": "1.1.*",
 		"pda/pheanstalk": "~3",
-		"guzzlehttp/guzzle": "~5.0"
+		"guzzlehttp/guzzle": "~5.0",
+		"tokenly/consul-health-daemon": "dev-master"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",
