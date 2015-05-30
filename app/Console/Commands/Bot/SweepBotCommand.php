@@ -86,11 +86,11 @@ class SweepBotCommand extends Command {
 
         try {
             $payment_address_uuid = $bot['payment_address_id'];
-            $payment_balances = $xchain_client->getBalances($payment_address_uuid);
+            $payment_balances = $xchain_client->getBalances($bot['payment_address']);
             $this->info("payment address balances: ".json_encode($payment_balances, 192));
 
             $public_address_uuid = $bot['public_address_id'];
-            $public_balances = $xchain_client->getBalances($public_address_uuid);
+            $public_balances = $xchain_client->getBalances($bot['address']);
             $this->info("public address balances: ".json_encode($public_balances, 192));
         } catch (Exception $e) {
             $this->error($e->getMessage());
