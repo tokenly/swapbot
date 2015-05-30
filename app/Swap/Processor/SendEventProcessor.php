@@ -294,7 +294,8 @@ class SendEventProcessor {
         $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
 
         foreach($swaps as $swap) {
-            if ($swap['receipt']['txidOut'] == $txid) {
+            $receipt = $swap['receipt'];
+            if (isset($receipt['txidOut']) AND $receipt['txidOut'] == $txid) {
                 return $swap;
             }
         }
