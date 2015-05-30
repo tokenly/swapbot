@@ -1,0 +1,122 @@
+<?php
+
+namespace Swapbot\Console\Commands\Bot;
+
+use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use LinusU\Bitcoin\AddressValidator;
+use Swapbot\Models\Data\BotState;
+use Swapbot\Repositories\CustomerRepository;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+
+class SweepBotCommand extends Command {
+
+    /**
+     * The console command name.
+     *
+     * @var string
+     */
+    protected $name = 'swapbot:sweep';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Sweeps all tokens and value from the bot';
+
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+
+        return [
+            ['bot-id', InputArgument::REQUIRED, 'Bot ID'],
+            ['destination', InputArgument::REQUIRED, 'Destination Address'],
+        ];
+    }
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+
+        return [
+            ['dry-run' , 'd',  InputOption::VALUE_NONE, 'Dry Run'],
+        ];
+    }
+
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function fire()
+    {
+        $bot_id = $this->input->getArgument('bot-id');
+        $destination = $this->input->getArgument('destination');
+        if (!AddressValidator::isValid($destination)) {
+            $this->error("Destination $destination is not a valid bitcoin address");
+            return;
+        }
+        $is_dry_run = !!$this->input->getOption('dry-run');
+        if ($is_dry_run) { $this->comment("[Dry Run]"); }
+
+        // load the bot
+        $bot_repository = app('Swapbot\Repositories\BotRepository');
+        $bot = $bot_repository->findByID($bot_id);
+        if (!$bot) { $bot = $bot_repository->findByUuid($bot_id); }
+        if (!$bot) {
+            $this->error("Unable to find bot with id $bot_id");
+            return;
+        }
+
+        // get the bot balances
+        $xchain_client = app('Tokenly\XChainClient\Client');
+        $this->comment("Loading Bot Balances");
+
+        try {
+            $payment_address_uuid = $bot['payment_address_id'];
+            $payment_balances = $xchain_client->getBalances($payment_address_uuid);
+            $this->info("payment address balances: ".json_encode($payment_balances, 192));
+
+            $public_address_uuid = $bot['public_address_id'];
+            $public_balances = $xchain_client->getBalances($public_address_uuid);
+            $this->info("public address balances: ".json_encode($public_balances, 192));
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+            if (!$is_dry_run) { return; }
+        }
+
+        // do sweeps
+        if ($is_dry_run) {
+            $this->comment("[Dry Run] Would sweep all assets for payment address {$bot['payment_address']}");
+            $this->comment("[Dry Run] Would sweep all assets for public address {$bot['address']}");
+        } else {
+            $this->comment("Sweeping all assets for payment address {$bot['payment_address']}");
+            $result = $xchain_client->sweepAllAssets($payment_address_uuid, $destination);
+            $this->info("sweep payment address result: ".json_encode($result, 192));
+
+            $this->comment("Sweeping all assets for public address {$bot['address']}");
+            $result = $xchain_client->sweepAllAssets($public_address_uuid, $destination);
+            $this->info("sweep public address result: ".json_encode($result, 192));
+        }
+
+        // $update_vars = ['state' => BotState::BRAND_NEW, 'balances' => $new_balances];
+        // $bot_repository->update($bot, $update_vars);
+
+        $this->info("done");
+
+
+    }
+
+}
