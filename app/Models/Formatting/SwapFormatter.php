@@ -64,7 +64,7 @@ class SwapFormatter {
             case 'confirming':
             case 'sent':
             case 'complete':
-                if ($swap['receipt']['type'] == 'refund') {
+                if (isset($swap['receipt']['type']) && $swap['receipt']['type'] == 'refund') {
                     return 'red';
                 }
                 return 'green';
