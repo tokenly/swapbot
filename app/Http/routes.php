@@ -52,6 +52,9 @@ $router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@ind
 // Customer API
 $router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@store');
 
+// Version API
+$router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVersion');
+
 
 
 
