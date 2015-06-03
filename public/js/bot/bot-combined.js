@@ -1413,6 +1413,104 @@
     return exports;
   })();
 
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
+
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
     exports = {};
@@ -1913,104 +2011,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   SwapMatcher = (function() {
     var exports, swapIsMatched;

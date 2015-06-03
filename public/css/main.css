@@ -286,6 +286,10 @@ a {
 .wide-list .icon-qr:hover {
   opacity: 0.6;
 }
+.wide-list-short1 li {
+  padding-top: 16px;
+  padding-bottom: 0px;
+}
 .swapbot-container,
 #swapbot-container {
   font-family: 'Source Sans Pro', sans-serif;

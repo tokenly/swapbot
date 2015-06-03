@@ -56,7 +56,8 @@ class SwapFormatter {
         }
     }
 
-    public function stateDotColor($state) {
+    public function swapStateDotColor(Swap $swap) {
+        $state = $swap['state'];
         switch ($state) {
             case 'brandnew':
             case 'ready':

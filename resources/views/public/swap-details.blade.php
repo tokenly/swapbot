@@ -17,10 +17,10 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     <div class="swapbot-container">
         <div class="header">
             <div class="avatar">
-                <img src="http://robohash.org/siemano.png?set=set3">
+                <img src="http://robohash.org/{{ $bot['hash'] }}.png?set=set3">
             </div>
-            <div class="status-dot bckg-{{ $swapFormatter->stateDotColor($swap) }}"></div>
-            <h1><a href="http://raburski.com/swapbot0" target="_blank">The Sample LTBCOIN Bot</a></h1>
+            <div class="status-dot bckg-{{ $swapFormatter->swapStateDotColor($swap) }}"></div>
+            <h1><a href="{{ $bot->getPublicBotURL() }}" target="_blank">{{ $bot['name'] }}</a></h1>
         </div>
         <div class="content">
             <div class="content-header">
@@ -29,7 +29,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     @if ($swap['state'] == 'complete')
                         @if ($receipt_type == 'swap')
                             {{-- swap --}}
-                            <span><b>Successfully</b> completed exchange of <b>{{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}</b> for <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
+                            <span><b>Successfully</b> swapped <b>{{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}</b> for <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
                         @elseif ($receipt_type == 'refund')
                             {{-- refund --}}
                             <span>This swap was <b>refunded</b> <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
@@ -40,17 +40,17 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     @endif
                 </div>
             </div>
-            <ul class="wide-list">
+            <ul class="wide-list wide-list-short1">
                 <li>
                     <div class="item-header">Status</div>
                     <p>{{ $swapFormatter->formatState($swap['state']) }}</p>
                 </li>
                 <li>
-                    <div class="item-header">Began</div>
+                    <div class="item-header">Deposit Recieved</div>
                     <p>{{ $swapFormatter->formatDate($swap['created_at']) }}</p>
                 </li>
                 <li>
-                    <div class="item-header">Completed</div>
+                    <div class="item-header">Tokens Delivered</div>
                     <p>{{ $swapFormatter->formatDate($swap['completed_at']) }}</p>
                 </li>
                 <li>
