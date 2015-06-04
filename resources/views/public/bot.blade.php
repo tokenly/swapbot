@@ -85,6 +85,7 @@
 <script src="/bower_components/director/build/director.min.js"></script>
 <script src="/bower_components/moment/min/moment.min.js"></script>
 <script src="/bower_components/eventEmitter/EventEmitter.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script>
 
 {{-- pusher --}}
 <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>

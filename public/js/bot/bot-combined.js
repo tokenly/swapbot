@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, PlaceOrderInput, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, PlaceOrderInput, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -237,6 +237,37 @@
         return errorMsg;
       }
       return null;
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.zeroClipboard = (function() {
+    var exports;
+    exports = {};
+    exports.getStatusFromBot = function(bot) {
+      if (bot.state === 'active') {
+        return 'active';
+      } else {
+        return 'inactive';
+      }
+    };
+    exports.newBotStatusFromEvent = function(oldState, botEvent) {
+      var event, state;
+      state = oldState;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'bot.stateChange':
+          if (event.state === 'active') {
+            state = 'active';
+          } else {
+            state = 'inactive';
+          }
+      }
+      return state;
     };
     return exports;
   })();
@@ -618,6 +649,141 @@
     });
   })();
 
+  ReactZeroClipboard = void 0;
+
+  (function() {
+    var addZeroListener, client, eventHandlers, handleZeroClipLoad, propToEvent, readyEventHasHappened, result, waitingForScriptToLoad;
+    client = void 0;
+    waitingForScriptToLoad = [];
+    eventHandlers = {
+      copy: [],
+      afterCopy: [],
+      error: [],
+      ready: []
+    };
+    propToEvent = {
+      onCopy: 'copy',
+      onAfterCopy: 'afterCopy',
+      onError: 'error',
+      onReady: 'ready'
+    };
+    readyEventHasHappened = false;
+    handleZeroClipLoad = function(error) {
+      var ZeroClipboard, eventName, handleEvent;
+      ZeroClipboard = window.ZeroClipboard;
+      delete window.ZeroClipboard;
+      client = new ZeroClipboard;
+      handleEvent = function(eventName) {
+        client.on(eventName, function(event) {
+          var activeElement;
+          if (eventName === 'ready') {
+            eventHandlers['ready'].forEach(function(xs) {
+              xs[1](event);
+            });
+            readyEventHasHappened = true;
+            return;
+          }
+          activeElement = ZeroClipboard.activeElement();
+          eventHandlers[eventName].some(function(xs) {
+            var callback, element;
+            element = xs[0];
+            callback = xs[1];
+            if (element === activeElement) {
+              callback(event);
+              return true;
+            }
+          });
+        });
+      };
+      for (eventName in eventHandlers) {
+        handleEvent(eventName);
+      }
+      waitingForScriptToLoad.forEach(function(callback) {
+        callback();
+      });
+    };
+    result = function(fnOrValue) {
+      if (typeof fnOrValue === 'function') {
+        return fnOrValue();
+      } else {
+        return fnOrValue;
+      }
+    };
+    handleZeroClipLoad(null);
+    ReactZeroClipboard = React.createClass({
+      ready: function(cb) {
+        if (client) {
+          setTimeout(cb.bind(this), 1);
+        } else {
+          waitingForScriptToLoad.push(cb.bind(this));
+        }
+      },
+      componentWillMount: function() {
+        if (readyEventHasHappened && this.props.onReady) {
+          this.props.onReady();
+        }
+      },
+      componentDidMount: function() {
+        this.eventRemovers = [];
+        this.ready(function() {
+          var remover;
+          var el, eventName, prop, remover;
+          if (!this.isMounted()) {
+            return;
+          }
+          el = React.findDOMNode(this);
+          client.clip(el);
+          for (prop in this.props) {
+            eventName = propToEvent[prop];
+            if (eventName && typeof this.props[prop] === 'function') {
+              remover = addZeroListener(eventName, el, this.props[prop]);
+              this.eventRemovers.push(remover);
+            }
+          }
+          remover = addZeroListener('copy', el, this.handleCopy);
+          this.eventRemovers.push(remover);
+        });
+      },
+      componentWillUnmount: function() {
+        if (client) {
+          client.unclip(this.getDOMNode());
+        }
+        this.eventRemovers.forEach(function(fn) {
+          fn();
+        });
+      },
+      handleCopy: function() {
+        var html, p, richText, text;
+        p = this.props;
+        text = result(p.getText || p.text);
+        html = result(p.getHtml || p.html);
+        richText = result(p.getRichText || p.richText);
+        client.clearData();
+        richText !== null && client.setRichText(richText);
+        html !== null && client.setHtml(html);
+        text !== null && client.setText(text);
+      },
+      render: function() {
+        return React.Children.only(this.props.children);
+      }
+    });
+    addZeroListener = function(event, el, fn) {
+      eventHandlers[event].push([el, fn]);
+      return function() {
+        var handlers, i;
+        handlers = eventHandlers[event];
+        i = 0;
+        while (i < handlers.length) {
+          if (handlers[i][0] === el) {
+            handlers.splice(i, 1);
+            return;
+          }
+          i++;
+        }
+      };
+    };
+  })();
+
   SwapbotChoose = null;
 
   (function() {
@@ -842,7 +1008,8 @@
         userChoices: userChoices,
         swaps: swaps,
         matchedSwaps: matchedSwaps,
-        anyMatchedSwaps: (matchedSwaps.length > 0 ? true : false)
+        anyMatchedSwaps: (matchedSwaps.length > 0 ? true : false),
+        addressCopied: false
       };
     };
     TransactionInfo = React.createClass({
@@ -904,6 +1071,7 @@
     });
     return SwapbotReceivingTransaction = React.createClass({
       displayName: 'SwapbotReceivingTransaction',
+      copiedTimeoutRef: null,
       getInitialState: function() {
         return getViewState();
       },
@@ -917,6 +1085,22 @@
       componentWillUnmount: function() {
         SwapsStore.removeChangeListener(this._onChange);
         UserChoiceStore.removeChangeListener(this._onChange);
+      },
+      onAfterCopy: function() {
+        this.setState({
+          addressCopied: true
+        });
+        if (this.copiedTimeoutRef != null) {
+          clearTimeout(this.copiedTimeoutRef);
+        }
+        this.copiedTimeoutRef = setTimeout((function(_this) {
+          return function() {
+            _this.setState({
+              addressCopied: false
+            });
+            return _this.copiedTimeoutRef = null;
+          };
+        })(this), 2500);
       },
       render: function() {
         var bot, swap, swapConfig;
@@ -946,6 +1130,16 @@
         })), React.createElement(PlaceOrderInput, {
           "bot": bot
         }), React.createElement("div", {
+          "className": "sendInstructions"
+        }, "To begin this swap, send ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to ", bot.address, React.createElement(ReactZeroClipboard, {
+          "text": bot.address,
+          "onAfterCopy": this.onAfterCopy
+        }, React.createElement("button", {
+          "className": "copyToClipboard" + (this.state.addressCopied ? ' copied' : ''),
+          "title": "copy to clipboard"
+        }, React.createElement("i", {
+          "className": "fa fa-clipboard"
+        }), " ", (this.state.addressCopied ? 'Copied' : 'Copy')))), React.createElement("div", {
           "id": "GoBackLink"
         }, React.createElement("a", {
           "id": "go-back",
@@ -968,12 +1162,12 @@
             }));
           }
           return _results;
-        }).call(this))) : React.createElement("ul", {
+        }).call(this))) : React.createElement("div", null, React.createElement("ul", {
           "id": "transaction-wait-list",
           "className": "wide-list"
         }, React.createElement("li", null, React.createElement("div", {
           "className": "status-icon icon-pending"
-        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, ".", React.createElement("br", null)))), React.createElement("p", {
+        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, React.createElement("br", null))))), React.createElement("p", {
           "className": "description"
         }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }

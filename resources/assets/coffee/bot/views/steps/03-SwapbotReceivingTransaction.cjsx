@@ -12,6 +12,8 @@ do ()->
             swaps        : swaps
             matchedSwaps : matchedSwaps
             anyMatchedSwaps: (if matchedSwaps.length > 0 then true else false)
+
+            addressCopied: false
         }
     
 
@@ -77,6 +79,7 @@ do ()->
 
     SwapbotReceivingTransaction = React.createClass
         displayName: 'SwapbotReceivingTransaction'
+        copiedTimeoutRef: null
 
         getInitialState: ()->
             return getViewState()
@@ -99,6 +102,17 @@ do ()->
 
         # ########################################################################
 
+        onAfterCopy: () ->
+            this.setState({addressCopied: true})
+
+            if this.copiedTimeoutRef? then clearTimeout(this.copiedTimeoutRef)
+
+            this.copiedTimeoutRef = setTimeout ()=>
+                this.setState({addressCopied: false})
+                this.copiedTimeoutRef = null
+            , 2500
+
+            return
 
         render: ()->
             # console.log "SwapbotReceivingTransaction render"
@@ -120,6 +134,17 @@ do ()->
 
                     <PlaceOrderInput bot={bot} />
 
+                    <div className="sendInstructions">
+                        To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to {bot.address}
+                        <ReactZeroClipboard 
+                            text={bot.address}
+                            onAfterCopy={this.onAfterCopy}
+                        >
+                           <button className={"copyToClipboard"+(if this.state.addressCopied then ' copied' else '')} title="copy to clipboard"><i className="fa fa-clipboard"></i> {if this.state.addressCopied then 'Copied' else 'Copy'}</button>
+                        </ReactZeroClipboard>
+
+                    </div>
+
                     <div id="GoBackLink">
                         <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
                     </div>
@@ -137,13 +162,15 @@ do ()->
                                     </ul>
                                 </div>
                             else
-                                <ul id="transaction-wait-list" className="wide-list">
-                                    <li>
-                                        <div className="status-icon icon-pending"></div>
-                                        Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}.
-                                        <br/>
-                                    </li>
-                                </ul>
+                                <div>
+                                    <ul id="transaction-wait-list" className="wide-list">
+                                        <li>
+                                            <div className="status-icon icon-pending"></div>
+                                            Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}
+                                            <br/>
+                                        </li>
+                                    </ul>
+                                </div>
                     }
 
 

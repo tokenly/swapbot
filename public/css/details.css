@@ -515,6 +515,28 @@ a {
   border: 1px solid #e74c3c;
   background: url(../images/icons/fail-icon.png) center center no-repeat;
 }
+div.sendInstructions {
+  margin-top: 22px;
+  font-size: 16px;
+}
+.copyToClipboard {
+  cursor: pointer;
+}
+button.copyToClipboard {
+  margin: 0 8px;
+  padding: 3px 4px;
+  background-color: #2ea1cc;
+  color: white;
+}
+button.copyToClipboard.zeroclipboard-is-hover {
+  background-color: #2580a2;
+}
+button.copied {
+  background-color: #25a25a;
+}
+button.copied.zeroclipboard-is-hover {
+  background-color: #1b7943;
+}
 /* Global varibles */
 body {
   background-color: #f7f7f7;

@@ -526,3 +526,29 @@ a {
     border: 1px solid @flat-red;
     background:url(../images/icons/fail-icon.png) center center no-repeat;
 }
+
+
+
+div.sendInstructions {
+    margin-top: 22px;
+    font-size: 16px;
+}
+
+.copyToClipboard {
+    cursor: pointer;
+}
+button.copyToClipboard {
+    margin: 0 8px;
+    padding: 3px 4px;
+    background-color: @flat-blue;
+    color: white;
+}
+button.copyToClipboard.zeroclipboard-is-hover {
+    background-color: darken(@flat-blue, 10%);
+}
+button.copied {
+    background-color: darken(@flat-green, 10%);
+}
+button.copied.zeroclipboard-is-hover {
+    background-color: darken(@flat-green, 20%);
+}

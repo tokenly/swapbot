@@ -7,6 +7,3 @@ echo; echo "updating composer dependencies"
 
 echo; echo "updating bower dependencies"
 $(cd public && bower -q install)
-
-echo; echo "updating npm dependencies"
-$(cd public && npm install)

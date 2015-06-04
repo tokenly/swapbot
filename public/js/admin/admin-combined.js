@@ -2717,4 +2717,35 @@
     return exports;
   })();
 
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.zeroClipboard = (function() {
+    var exports;
+    exports = {};
+    exports.getStatusFromBot = function(bot) {
+      if (bot.state === 'active') {
+        return 'active';
+      } else {
+        return 'inactive';
+      }
+    };
+    exports.newBotStatusFromEvent = function(oldState, botEvent) {
+      var event, state;
+      state = oldState;
+      event = botEvent.event;
+      switch (event.name) {
+        case 'bot.stateChange':
+          if (event.state === 'active') {
+            state = 'active';
+          } else {
+            state = 'inactive';
+          }
+      }
+      return state;
+    };
+    return exports;
+  })();
+
 }).call(this);
