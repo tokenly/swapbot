@@ -2,9 +2,11 @@
 
 set -e
 
-echo; echo "updating dependencies";
+echo; echo "updating composer dependencies"
 /usr/local/bin/composer.phar install --prefer-dist --no-progress
-# ./artisan migrate
 
-echo; echo "updating bower dependencies";
+echo; echo "updating bower dependencies"
 $(cd public && bower -q install)
+
+echo; echo "updating npm dependencies"
+$(cd public && npm install)
