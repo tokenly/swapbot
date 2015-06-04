@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c3ad19ce4ec2e73b00064090d75bc533",
+    "hash": "cb5b2d857e682082adad63c2e0c1edfb",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -2787,6 +2787,47 @@
             "time": "2015-02-02 13:32:00"
         },
         {
+            "name": "tokenly/quotebot-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/quotebot-client.git",
+                "reference": "bf6fcb1d15e26189e8959e5c867d7abe69efe534"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/bf6fcb1d15e26189e8959e5c867d7abe69efe534",
+                "reference": "bf6fcb1d15e26189e8959e5c867d7abe69efe534",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "~5.0",
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Tokenly\\QuotebotClient": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "dweller@devonweller.com",
+                    "homepage": "http://devonweller.com"
+                }
+            ],
+            "description": "A quotebot client library",
+            "time": "2015-06-04 21:46:59"
+        },
+        {
             "name": "tokenly/token-generator",
             "version": "dev-master",
             "source": {
@@ -2867,7 +2908,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-05-30 12:12:39"
+            "time": "2015-05-30 12:33:02"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -4149,6 +4190,7 @@
         "tokenly/laravel-api-provider": 20,
         "tokenly/laravel-blocking-beanstalkd": 20,
         "tokenly/consul-health-daemon": 20,
+        "tokenly/quotebot-client": 20,
         "mockery/mockery": 20
     },
     "prefer-stable": true,

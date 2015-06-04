@@ -158,6 +158,7 @@ return [
 		'Tokenly\XChainClient\XChainServiceProvider',
 		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
 		'Tokenly\ConsulHealthDaemon\ServiceProvider\ConsulHealthDaemonServiceProvider',
+		'Tokenly\QuotebotClient\ServiceProvider\QuotebotServiceProvider',
 
 	],
 

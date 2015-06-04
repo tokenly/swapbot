@@ -36,6 +36,8 @@ class Kernel extends ConsoleKernel {
 
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',
+		'Tokenly\QuotebotClient\Console\PopulateQuotesCommand',
+		'Tokenly\QuotebotClient\Console\GetQuoteCommand',
 	];
 
 	/**
