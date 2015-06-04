@@ -30,6 +30,7 @@ class PublicBotController extends Controller {
             'bot'           => $bot,
             'swapFormatter' => $swap_formatter,
             'pusherUrl'     => Config::get('tokenlyPusher.clientUrl'),
+            'env'           => app()->environment(),
         ]);
     }
 

@@ -116,7 +116,11 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");
 </script>
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-<script src="http://fb.me/react-0.13.2.js"></script>
+@if ($env == 'production')
+<script src="http://fb.me/react-0.13.3.min.js"></script>
+@else
+<script src="http://fb.me/react-0.13.3.js"></script>
+@endif
 <script src="/bower_components/moment/min/moment.min.js"></script>
 
 {{-- pusher --}}

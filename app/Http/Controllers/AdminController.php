@@ -25,6 +25,7 @@ class AdminController extends Controller {
         return view('admin.index', [
             'pusherUrl'     => Config::get('tokenlyPusher.clientUrl'),
             'admin_scripts' => $admin_scripts,
+            'env'           => app()->environment(),
         ]);
     }
 

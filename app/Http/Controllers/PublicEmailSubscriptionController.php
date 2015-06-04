@@ -52,6 +52,7 @@ class PublicEmailSubscriptionController extends Controller {
                     'customer'      => $customer,
                     'swap'          => $swap,
                     'bot'           => $bot,
+                    'env'           => app()->environment(),
                 ]);
             }
             
