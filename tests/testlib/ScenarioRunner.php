@@ -79,6 +79,9 @@ class ScenarioRunner
         // set up the scenario
         $bots = $this->addBots($scenario_data['bots']);
 
+        // setup mock quotebot
+        $this->quotebot_recorder = $this->installMockQuotebot(isset($scenario_data['quotebot']) ? $scenario_data['quotebot'] : null);
+
         $events = $this->normalizeScenarioEvents($scenario_data);
         foreach($events as $event) {
             $this->executeScenarioEvent($event, $scenario_data);
@@ -880,6 +883,22 @@ class ScenarioRunner
             });
 
         return $mailer_recorder;
+    }    
+    
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Mock Quotebot
+
+    public function installMockQuotebot($rate_entries=null) {
+        $quotebot_mock_builder = app('Tokenly\QuotebotClient\Mock\MockBuilder');
+
+        if ($rate_entries !== null) {
+            $quotebot_mock_builder->setMockRates($rate_entries);
+        }
+
+        $quotebot_recorder = $quotebot_mock_builder->installQuotebotMockClient();
+        return $quotebot_recorder;
     }    
     
 

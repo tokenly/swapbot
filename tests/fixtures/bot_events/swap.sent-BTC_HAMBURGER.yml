@@ -1,0 +1,17 @@
+name: swap.sent
+
+destination: SENDER01
+confirmations: '1'
+
+quantityIn: 0.025
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+
+quantityOut: 1
+assetOut: 'HAMBURGER'
+txidOut: '0000000000000000000000000000001111'
+
+confirmationsOut: 0
+state: 'sent'
+isComplete: false
+isError: false

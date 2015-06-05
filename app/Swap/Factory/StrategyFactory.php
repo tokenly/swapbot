@@ -14,6 +14,7 @@ class StrategyFactory {
         switch (strtolower($type)) {
             case 'rate':
             case 'fixed':
+            case 'fiat':
                 return true;
                 break;
         }
