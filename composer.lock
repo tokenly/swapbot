@@ -2792,12 +2792,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/quotebot-client.git",
-                "reference": "bf6fcb1d15e26189e8959e5c867d7abe69efe534"
+                "reference": "77cfc5b7179619df31952d59a9ce9777bc47054f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/bf6fcb1d15e26189e8959e5c867d7abe69efe534",
-                "reference": "bf6fcb1d15e26189e8959e5c867d7abe69efe534",
+                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/77cfc5b7179619df31952d59a9ce9777bc47054f",
+                "reference": "77cfc5b7179619df31952d59a9ce9777bc47054f",
                 "shasum": ""
             },
             "require": {
@@ -2825,7 +2825,7 @@
                 }
             ],
             "description": "A quotebot client library",
-            "time": "2015-06-04 21:46:59"
+            "time": "2015-06-05 13:16:51"
         },
         {
             "name": "tokenly/token-generator",
