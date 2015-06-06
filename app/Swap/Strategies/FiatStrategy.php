@@ -25,8 +25,21 @@ class FiatStrategy implements Strategy {
     }
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
+        $cost = $swap_config['cost'];
         $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
-        $quantity_out = $quantity_in * $conversion_rate / $swap_config['cost'];
+        $quantity_out = $quantity_in * $conversion_rate / $cost;
+
+        $change_quantity_out = 0;
+        if (!$swap_config['divisible']) {
+            // round down and calculate change
+            $raw_quantity_out = $quantity_out;
+            $quantity_out = floor($quantity_out);
+            if ($raw_quantity_out > $quantity_out) {
+                $needed_quantity_in = $quantity_out * $cost / $conversion_rate;
+                $change_quantity_out = $quantity_in - $needed_quantity_in;
+            }
+        }
+
         $asset_out = $swap_config['out'];
 
         return [
@@ -35,6 +48,8 @@ class FiatStrategy implements Strategy {
 
             'quantityOut' => $quantity_out,
             'assetOut'    => $swap_config['out'],
+
+            'changeOut'   => $change_quantity_out,
         ];
     }
 

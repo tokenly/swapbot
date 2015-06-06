@@ -252,7 +252,8 @@ class SendEventProcessor {
     protected function handleUpdateSwapModel($swap_process) {
         // update the swap
         if ($swap_process['swap_update_vars']) {
-            $this->swap_repository->update($swap_process['swap'], $swap_process['swap_update_vars']);
+            $update_vars = $this->swap_repository->mergeUpdateVars($swap_process['swap'], $swap_process['swap_update_vars']);
+            $this->swap_repository->update($swap_process['swap'], $update_vars);
         }
     }
 

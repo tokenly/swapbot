@@ -164,7 +164,8 @@ class SwapProcessor {
                 $this->bot_event_logger->logLegacyBotEventWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
             } else {
                 EventLog::logError('swap.failed', $e);
-                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $e, $swap_process['swap_update_vars']['receipt']);
+                $receipt = isset($swap_process['swap_update_vars']['receipt']) ? $swap_process['swap_update_vars']['receipt'] : null;
+                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $e, $receipt);
             }
         }
 
@@ -352,6 +353,14 @@ class SwapProcessor {
         // log the attempt to send
         $this->bot_event_logger->logSendAttempt($swap_process['bot'], $swap_process['swap'], $swap_process['xchain_notification'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $swap_process['confirmations']);
 
+        $fee = $swap_process['bot']['return_fee'];
+
+        if (isset($swap_process['swap']['receipt']['changeOut']) AND $swap_process['swap']['receipt']['changeOut'] > 0) {
+            $dust_size = self::DEFAULT_REGULAR_DUST_SIZE + $swap_process['swap']['receipt']['changeOut'];
+        } else {
+            $dust_size = null;
+        }
+
         // update the swap receipts (before the attempt)
         $receipt_update_vars = [
             'type'             => 'swap',
@@ -374,7 +383,7 @@ class SwapProcessor {
 
         // send it
         try {
-            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $fee, $dust_size);
         } catch (Exception $e) {
             // move the swap into an error state
             $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
@@ -390,7 +399,7 @@ class SwapProcessor {
 
 
         // update the local balance
-        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $receipt_update_vars['quantityOut'], $receipt_update_vars['assetOut']);
+        $swap_process['bot_balance_deltas'] = $this->updateBalanceDeltasFromProcessedSwap($swap_process, $swap_process['bot_balance_deltas'], $receipt_update_vars['quantityOut'], $receipt_update_vars['assetOut'], $fee, $dust_size);
 
         // move the swap into the sent state
         $swap_process['state_trigger'] = SwapStateEvent::SWAP_SENT;
@@ -498,7 +507,8 @@ class SwapProcessor {
     protected function handleUpdateSwapModel($swap_process) {
         // update the swap
         if ($swap_process['swap_update_vars']) {
-            $this->swap_repository->update($swap_process['swap'], $swap_process['swap_update_vars']);
+            $update_vars = $this->swap_repository->mergeUpdateVars($swap_process['swap'], $swap_process['swap_update_vars']);
+            $this->swap_repository->update($swap_process['swap'], $update_vars);
         }
     }
 

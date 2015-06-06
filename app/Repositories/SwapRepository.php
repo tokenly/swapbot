@@ -59,6 +59,14 @@ class SwapRepository extends APIRepository
         return $this->prototype_model->where('id', $swap['id'])->lockForUpdate()->first();
     }
 
+    // merge update vars with the existing swap vars
+    public function mergeUpdateVars(Swap $swap, $update_vars) {
+        if (isset($update_vars['receipt'])) {
+            $update_vars['receipt'] = array_merge($swap['receipt'], $update_vars['receipt']);
+        }
+        
+        return $update_vars;
+    }
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

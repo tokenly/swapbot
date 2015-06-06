@@ -1,5 +1,5 @@
 # test full 2 confirmation fiat-based token purchase
-#   when exact amount was sent (how lucky!)
+#   with overpament sent and change sent back
 
 ############################
 # setup bots and payment
@@ -16,11 +16,11 @@ quotebot:
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: mempool_BTC_RECEIVE_notification_01.yml }
-    quantity: 0.025
+    quantity: 0.035
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
-    quantity: 0.025
+    quantity: 0.035
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
-    quantity: 0.025
+    quantity: 0.035
     confirmations: 2
     blockId: 300001
 
@@ -37,20 +37,25 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_HAMBURGER.yml }
+    data:
+      dust_size: 0.0100543
 
 
 expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### UNCONFIRMED TRANSACTION
     meta: { baseFilename: swap.transaction.update-BTC_HAMBURGER_unconfirmed.yml }
+    quantityIn: 0.035
 
   - #### transaction handled previously (1 confirmation)
     meta: { baseFilename: tx.previous-BTC-1.yml }
   - #### waiting on confirmation
     meta: { baseFilename: swap.confirming-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
   - #### CONFIRMING
     meta: { baseFilename: swap.stateChange-confirming.yml }
 
@@ -58,12 +63,16 @@ expectedBotEvents:
     meta: { baseFilename: tx.previous-BTC-2.yml }
   - #### confirming swap
     meta: { baseFilename: swap.confirmed-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_HAMBURGER-2confirmations.yml }
+    inQty: 0.035
+    msg: 'Received 0.035 BTC from SENDER01 with 2 confirmations. Will vend 1 HAMBURGER to SENDER01.'
   - #### swap sent
     meta: { baseFilename: swap.sent-BTC_HAMBURGER-2confirmations.yml }
+    quantityIn: 0.035
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
   - #### transaction fee paid
@@ -72,6 +81,7 @@ expectedBotEvents:
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
+    quantityIn: 0.035
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 
@@ -79,6 +89,7 @@ expectedBotEvents:
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
     confirmationsOut: 2
+    quantityIn: 0.035
 
 # check balance
 expectedBotModels:
