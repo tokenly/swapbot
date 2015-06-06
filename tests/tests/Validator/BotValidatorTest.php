@@ -145,6 +145,51 @@ class BotValidatorTest extends TestCase {
         ]);
 
 
+        // fiat
+        $fiat_sample_vars = array_replace_recursive($this->app->make('BotHelper')->sampleBotVars(), ['swaps' => [0 => [
+            'strategy'  => 'fiat',
+            'in'        => 'BTC',
+            'out'       => 'LTCOIN',
+            'cost'      => 5,
+            'min_out'   => 0,
+            'divisible' => false,
+            'type'      => 'buy',
+            'fiat'      => 'USD',
+            'source'    => 'bitcoinAverage',
+        ]]]);
+        $test_specs = array_merge($test_specs, [
+            [
+                'vars' => $fiat_sample_vars,
+                'error' => null,
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['cost' => 0,]]]),
+                'error' => 'The cost for swap #1 was not valid.',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['cost' => 'bad',]]]),
+                'error' => 'The cost for swap #1 was not valid.',
+            ],
+
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['min_out' => -1,]]]),
+                'error' => 'The minimum output value for swap #1 was not valid.',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['type' => 'sell',]]]),
+                'error' => 'Only type of buy is supported',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['fiat' => 'bad',]]]),
+                'error' => 'Only USD is supported',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['source' => 'bad',]]]),
+                'error' => 'Only bitcoinAverage is supported',
+            ],
+        ]);
+
+
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
 
         $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);

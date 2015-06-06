@@ -60,10 +60,10 @@ class FiatStrategy implements Strategy {
         $swap_config['out']       = isset($data['out'])       ? $data['out']       : null;
         $swap_config['cost']      = isset($data['cost'])      ? $data['cost']      : null;
 
-        $swap_config['type']      = isset($data['type'])      ? $data['type']      : 'buy';
         $swap_config['min_out']   = isset($data['min_out'])   ? $data['min_out']   : 0;
-        $swap_config['divisible'] = isset($data['divisible']) ? $data['divisible'] : false;
+        $swap_config['divisible'] = isset($data['divisible']) ? !!$data['divisible'] : false;
 
+        $swap_config['type']      = isset($data['type'])      ? $data['type']      : 'buy';
         $swap_config['fiat']      = isset($data['fiat'])      ? $data['fiat']      : 'USD';
         $swap_config['source']    = isset($data['source'])    ? $data['source']    : 'bitcoinAverage';
     }
@@ -74,25 +74,22 @@ class FiatStrategy implements Strategy {
             'in'        => $swap_config['in'],
             'out'       => $swap_config['out'],
             'cost'      => $swap_config['cost'],
-            'type'      => $swap_config['type'],
             'divisible' => $swap_config['divisible'],
             'min_out'   => $swap_config['min_out'],
 
+            'type'      => $swap_config['type'],
             'fiat'      => $swap_config['fiat'],
             'source'    => $swap_config['source'],
         ];
     }
 
     public function validateSwap($swap_config_number, $swap_config, MessageBag $errors) {
-        // unimplemented
-        return;
-
         $in_value   = isset($swap_config['in'])   ? $swap_config['in']   : null;
         $out_value  = isset($swap_config['out'])  ? $swap_config['out']  : null;
-        $rate_value = isset($swap_config['cost']) ? $swap_config['cost'] : null;
-        $min_value  = isset($swap_config['min'])  ? $swap_config['min']  : null;
+        $cost_value = isset($swap_config['cost']) ? $swap_config['cost'] : null;
+        $min_out_value  = isset($swap_config['min_out'])  ? $swap_config['min_out']  : null;
 
-        $exists = (strlen($in_value) OR strlen($out_value) OR strlen($rate_value));
+        $exists = (strlen($in_value) OR strlen($out_value) OR strlen($cost_value));
         if ($exists) {
             $assets_are_valid = true;
 
@@ -100,24 +97,30 @@ class FiatStrategy implements Strategy {
             if (!StrategyHelpers::validateAssetName($in_value, 'receive', $swap_config_number, 'in', $errors)) { $assets_are_valid = false; }
             if (!StrategyHelpers::validateAssetName($out_value, 'send', $swap_config_number, 'out', $errors)) { $assets_are_valid = false; }
 
-            // rate
-            if (strlen($rate_value)) {
-                if (!StrategyHelpers::isValidRate($rate_value)) {
-                    $errors->add('cost', "The rate for swap #{$swap_config_number} was not valid.");
+            // cost
+            if (strlen($cost_value)) {
+                if (!StrategyHelpers::isValidCost($cost_value)) {
+                    $errors->add('cost', "The cost for swap #{$swap_config_number} was not valid.");
                 }
             } else {
-                $errors->add('cost', "Please specify a valid rate for swap #{$swap_config_number}");
+                $errors->add('cost', "Please specify a valid cost for swap #{$swap_config_number}");
             }
 
-            // min
-            if (strlen($min_value)) {
-                if (!StrategyHelpers::isValidQuantityOrZero($min_value)) {
-                    $errors->add('min', "The minimum value for swap #{$swap_config_number} was not valid.");
+            // min_out
+            if (strlen($min_out_value)) {
+                if (!StrategyHelpers::isValidQuantityOrZero($min_out_value)) {
+                    $errors->add('min_out', "The minimum output value for swap #{$swap_config_number} was not valid.");
                 }
             } else {
-                $errors->add('min', "Please specify a valid minimum value for swap #{$swap_config_number}");
+                $errors->add('min_out', "Please specify a valid minimum value for swap #{$swap_config_number}");
             }
 
+            // 'type'      => $swap_config['type'],
+            // 'fiat'      => $swap_config['fiat'],
+            // 'source'    => $swap_config['source'],
+            if (!isset($swap_config['type']) OR $swap_config['type'] !== 'buy') { $errors->add('type', "Only type of buy is supported"); }
+            if (!isset($swap_config['fiat']) OR $swap_config['fiat'] !== 'USD') { $errors->add('type', "Only USD is supported"); }
+            if (!isset($swap_config['source']) OR $swap_config['source'] !== 'bitcoinAverage') { $errors->add('type', "Only bitcoinAverage is supported"); }
 
             // make sure assets aren't the same
             if ($assets_are_valid AND $in_value == $out_value) {

@@ -48,6 +48,13 @@ class StrategyHelpers {
         return true;
     }
 
+    public static function isValidCost($rate) {
+        $rate = floatval($rate);
+        if ($rate < 0.01) { return false; }
+
+        return true;
+    }
+
     public static function isValidQuantityOrZero($quantity) {
         return self::isValidQuantity($quantity, true);
     }

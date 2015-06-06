@@ -21,9 +21,6 @@ class SwapConfig extends ArrayObject implements APISerializeable {
     }
 
     public function unSerialize($data) {
-        // legacy conversion
-        // if (!isset($data['strategy']) AND !isset($data['in']) AND isset($data[0])) { return $this->unSerializeLegacyData($data); }
-
         // set the strategy
         $strategy_type = isset($data['strategy']) ? $data['strategy'] : 'rate';
         $this['strategy'] = $strategy_type;
@@ -58,12 +55,5 @@ class SwapConfig extends ArrayObject implements APISerializeable {
         $this->strategy_obj = $strategy;
     }
 
-    // protected function unSerializeLegacyData($data) {
-    //     $this['in']       = $data[0];
-    //     $this['out']      = $data[1];
-    //     $this['strategy'] = 'rate';
-    //     $this['rate']     = $data[2];
-    //     return $this;
-    // }
 
 }
