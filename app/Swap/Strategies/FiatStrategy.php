@@ -96,6 +96,7 @@ class FiatStrategy implements Strategy {
             // in and out assets
             if (!StrategyHelpers::validateAssetName($in_value, 'receive', $swap_config_number, 'in', $errors)) { $assets_are_valid = false; }
             if (!StrategyHelpers::validateAssetName($out_value, 'send', $swap_config_number, 'out', $errors)) { $assets_are_valid = false; }
+            if ($in_value !== 'BTC') { $errors->add('type', "Only BTC is supported"); }
 
             // cost
             if (strlen($cost_value)) {

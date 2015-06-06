@@ -5,13 +5,15 @@ do ()->
     # ### helpers #####################################
     swapGroupRenderers = {}
 
+    sharedSwapTypeFormField = (number, swap)->
+        return sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
+
     swapGroupRenderers.rate = (number, swap)->
         return m("div", {class: "asset-group"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-3"}, [
-                    sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy())),
-                ]),
+                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
+
                 m("div", {class: "col-md-3"}, [
                     sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
                 ]),
@@ -28,9 +30,8 @@ do ()->
         return m("div", {class: "asset-group"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-3"}, [
-                    sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy())),
-                ]),
+                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
+
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
                 ]),
@@ -45,6 +46,31 @@ do ()->
                 ]),
             ]),
         ])
+
+    swapGroupRenderers.fiat = (number, swap)->
+        return m("div", {class: "asset-group"}, [
+            m("h4", "Swap ##{number}"),
+            m("div", { class: "row"}, [
+                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
+
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Receives", {id: "swap_in_#{number}", }, swap.in()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("At USD Price", {id: "swap_cost_#{number}", }, '$'+swap.cost()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Minimum", {id: "swap_min_out_#{number}", }, swap.min_out()),
+                ]),
+                m("div", {class: "col-md-2"}, [
+                    sbAdmin.form.mValueDisplay("Divisible", {id: "swap_divisible_#{number}", }, swap.divisible()),
+                ]),
+            ]),
+        ])
+
 
     swapGroup = (number, swapProp)->
         return swapGroupRenderers[swapProp().strategy()](number, swapProp())

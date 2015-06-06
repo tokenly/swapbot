@@ -187,6 +187,10 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['source' => 'bad',]]]),
                 'error' => 'Only bitcoinAverage is supported',
             ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['in' => 'BAD',]]]),
+                'error' => 'Only BTC is supported',
+            ],
         ]);
 
 

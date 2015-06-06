@@ -443,7 +443,14 @@
       var inputEl, inputProps, name, options;
       inputProps = sbAdmin.utils.clone(attributes);
       name = inputProps.name || inputProps.id;
-      inputProps.onchange = m.withAttr("value", prop);
+      if (attributes.onchange != null) {
+        inputProps.onchange = function(e) {
+          attributes.onchange(e);
+          return (m.withAttr("value", prop))(e);
+        };
+      } else {
+        inputProps.onchange = m.withAttr("value", prop);
+      }
       inputProps.value = prop();
       if (inputProps["class"] == null) {
         inputProps["class"] = 'form-control';
@@ -524,6 +531,17 @@
         errorsProp(error.errors);
         return m.deferred().reject(error).promise;
       });
+    };
+    form.yesNoOptions = function() {
+      return [
+        {
+          k: "Yes",
+          v: 1
+        }, {
+          k: "No",
+          v: 0
+        }
+      ];
     };
     return form;
   })();
@@ -833,7 +851,10 @@
         rate: m.prop(swap.rate || ''),
         in_qty: m.prop(swap.in_qty || ''),
         out_qty: m.prop(swap.out_qty || ''),
-        min: m.prop(swap.min || '')
+        min: m.prop(swap.min || ''),
+        cost: m.prop(swap.cost || ''),
+        min_out: m.prop(swap.min_out || ''),
+        divisible: m.prop(swap.divisible || '')
       });
     };
     swaputils.allStrategyOptions = function() {
@@ -844,6 +865,9 @@
         }, {
           k: "By Fixed Amounts",
           v: 'fixed'
+        }, {
+          k: "By USD Amount paid in BTC",
+          v: 'fiat'
         }
       ];
     };
@@ -952,8 +976,25 @@
   window.utils = sbAdmin.utils;
 
   (function() {
-    var buildBlacklistAddressesGroup, buildIncomeRulesGroup, swapGroup, swapGroupRenderers, vm;
+    var buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildOnSwaptypeChange, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, vm;
     sbAdmin.ctrl.botForm = {};
+    buildOnSwaptypeChange = function(number, swap) {
+      return function(e) {
+        var value;
+        value = e.srcElement.value;
+        if (value === 'fiat') {
+          swap["in"]('BTC');
+        }
+      };
+    };
+    sharedSwapTypeFormField = function(number, swap) {
+      return sbAdmin.form.mFormField("Swap Type", {
+        onchange: buildOnSwaptypeChange(number, swap),
+        id: "swap_strategy_" + number,
+        type: 'select',
+        options: sbAdmin.swaputils.allStrategyOptions()
+      }, swap.strategy);
+    };
     swapGroupRenderers = {};
     swapGroupRenderers.rate = function(number, swap) {
       return m("div", {
@@ -964,13 +1005,7 @@
         }, [
           m("div", {
             "class": "col-md-3"
-          }, [
-            sbAdmin.form.mFormField("Swap Type", {
-              id: "swap_strategy_" + number,
-              type: 'select',
-              options: sbAdmin.swaputils.allStrategyOptions()
-            }, swap.strategy)
-          ]), m("div", {
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("Receives Asset", {
@@ -1033,13 +1068,7 @@
         }, [
           m("div", {
             "class": "col-md-3"
-          }, [
-            sbAdmin.form.mFormField("Swap Type", {
-              id: "swap_strategy_" + number,
-              type: 'select',
-              options: sbAdmin.swaputils.allStrategyOptions()
-            }, swap.strategy)
-          ]), m("div", {
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("Receives Asset", {
@@ -1073,6 +1102,76 @@
               id: "swap_out_qty_" + number,
               'placeholder': "1"
             }, swap.out_qty)
+          ]), m("div", {
+            "class": "col-md-1"
+          }, [
+            m("a", {
+              "class": "remove-link",
+              href: '#remove',
+              onclick: vm.buildRemoveSwapFn(number),
+              style: number === 1 ? {
+                display: 'none'
+              } : ""
+            }, [
+              m("span", {
+                "class": "glyphicon glyphicon-remove-circle",
+                title: "Remove Swap " + number
+              }, '')
+            ])
+          ])
+        ])
+      ]);
+    };
+    swapGroupRenderers.fiat = function(number, swap) {
+      return m("div", {
+        "class": "asset-group"
+      }, [
+        m("h4", "Swap #" + number), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-3"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-1"
+          }, [
+            sbAdmin.form.mValueDisplay("Receives", {
+              id: "swap_in_" + number
+            }, swap["in"]())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Sends Asset", {
+              id: "swap_out_" + number,
+              'placeholder': "MYPRODUCT"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("At USD Price", {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_cost_" + number,
+              'placeholder': "1"
+            }, swap.cost)
+          ]), m("div", {
+            "class": "col-md-1"
+          }, [
+            sbAdmin.form.mFormField("Minimum", {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_min_out_" + number,
+              'placeholder': "1"
+            }, swap.min_out)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField("Divisible", {
+              type: "select",
+              options: sbAdmin.form.yesNoOptions(),
+              id: "swap_divisible_" + number
+            }, swap.divisible)
           ]), m("div", {
             "class": "col-md-1"
           }, [
@@ -1510,9 +1609,14 @@
   })();
 
   (function() {
-    var botPublicAddress, buildBalancesMElement, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, poupupBotAddress, serializeSwaps, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
+    var botPublicAddress, buildBalancesMElement, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, poupupBotAddress, serializeSwaps, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
     sbAdmin.ctrl.botView = {};
     swapGroupRenderers = {};
+    sharedSwapTypeFormField = function(number, swap) {
+      return sbAdmin.form.mValueDisplay("Swap Type", {
+        id: "swap_strategy_" + number
+      }, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()));
+    };
     swapGroupRenderers.rate = function(number, swap) {
       return m("div", {
         "class": "asset-group"
@@ -1522,11 +1626,7 @@
         }, [
           m("div", {
             "class": "col-md-3"
-          }, [
-            sbAdmin.form.mValueDisplay("Swap Type", {
-              id: "swap_strategy_" + number
-            }, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
-          ]), m("div", {
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-3"
           }, [
             sbAdmin.form.mValueDisplay("Receives Asset", {
@@ -1560,11 +1660,7 @@
         }, [
           m("div", {
             "class": "col-md-3"
-          }, [
-            sbAdmin.form.mValueDisplay("Swap Type", {
-              id: "swap_strategy_" + number
-            }, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
-          ]), m("div", {
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-2"
           }, [
             sbAdmin.form.mValueDisplay("Receives Asset", {
@@ -1588,6 +1684,49 @@
             sbAdmin.form.mValueDisplay("Sends Quantity", {
               id: "swap_out_qty_" + number
             }, swap.out_qty())
+          ])
+        ])
+      ]);
+    };
+    swapGroupRenderers.fiat = function(number, swap) {
+      return m("div", {
+        "class": "asset-group"
+      }, [
+        m("h4", "Swap #" + number), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-3"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Receives", {
+              id: "swap_in_" + number
+            }, swap["in"]())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Sends Asset", {
+              id: "swap_out_" + number
+            }, swap.out())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("At USD Price", {
+              id: "swap_cost_" + number
+            }, '$' + swap.cost())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Minimum", {
+              id: "swap_min_out_" + number
+            }, swap.min_out())
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mValueDisplay("Divisible", {
+              id: "swap_divisible_" + number
+            }, swap.divisible())
           ])
         ])
       ]);

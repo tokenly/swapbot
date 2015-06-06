@@ -25,7 +25,12 @@ sbAdmin.form = do ()->
         inputProps = sbAdmin.utils.clone(attributes)
         name = inputProps.name or inputProps.id
 
-        inputProps.onchange = m.withAttr("value", prop)
+        if attributes.onchange?
+            inputProps.onchange = (e)->
+                (attributes.onchange)(e)
+                return (m.withAttr("value", prop))(e)
+        else
+            inputProps.onchange = m.withAttr("value", prop)
         inputProps.value = prop()
         
         # defaults
@@ -109,5 +114,10 @@ sbAdmin.form = do ()->
                 return m.deferred().reject(error).promise
         )
 
+    form.yesNoOptions = ()->
+        return [
+            {k: "Yes", v: 1}
+            {k: "No",  v: 0}
+        ]
 
     return form
