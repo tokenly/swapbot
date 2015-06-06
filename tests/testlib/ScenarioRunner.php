@@ -912,7 +912,7 @@ class ScenarioRunner
         }
 
         $actual_calls = $this->quotebot_recorder->calls;
-        PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls);
+        PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls, "QuoteClientCalls mismatch");
     }
 
 }

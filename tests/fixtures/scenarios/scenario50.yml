@@ -1,5 +1,5 @@
 # test simple fiat-based token purchase
-#   when overpament was sent and change sent back
+#   when underpaid and refunded
 
 ############################
 # setup bots and payment
@@ -16,43 +16,47 @@ quotebot:
 xchainNotifications:
   -
     meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
-    quantity: 0.035
+    quantity: 0.020
 
 
 ############################
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_HAMBURGER.yml }
+    meta: { baseFilename: send_BTC-refund.yml }
     data:
-      dust_size: 0.0100543
+      quantity: 0.0199
 
 expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
-    quantityIn: 0.035
+    quantityIn: 0.02
+    quantityOut: 0
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
-  - #### swap found
-    meta: { baseFilename: swap.found-BTC_HAMBURGER.yml }
-    inQty: 0.035
-    msg: Received 0.035 BTC from SENDER01 with 1 confirmation. Will vend 1 HAMBURGER to SENDER01.
-  - #### swap found
-    meta: { baseFilename: swap.sent-BTC_HAMBURGER.yml }
-    quantityIn: 0.035
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding-BTC.yml }
+    quantityIn: 0.02
+    quantityOut: 0.0199
+    confirmations: 1
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded-BTC.yml }
+    quantityIn: 0.02
+    quantityOut: 0.0199
   - #### SENT
-    meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
+    meta: { baseFilename: swap.stateChange-refunded.yml }
 
 # check balance
 expectedBotModels:
   - 
-    # bot should be in state active when done and have balances updated
     state: active
     balances:
-      HAMBURGER: 24
-      BTC: 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
+      HAMBURGER: 25
+      BTC: 1
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_BTC_HAMBURGER-refunded.yml }
 
 expectedQuoteClientCalls:
   - { source: bitcoinAverage, pair: USD:BTC }

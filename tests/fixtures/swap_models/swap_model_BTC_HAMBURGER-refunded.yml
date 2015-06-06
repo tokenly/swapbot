@@ -1,0 +1,13 @@
+name: BTC:HAMBURGER
+state: refunded
+receipt:
+    confirmations: '1'
+    type: refund
+    quantityIn: 0.02
+    assetIn: 'BTC'
+    txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+    quantityOut: 0.0199
+    assetOut: 'BTC'
+    txidOut: '0000000000000000000000000000001111'
+    destination: 'SENDER01'
+    confirmationsOut: 0

@@ -15,16 +15,33 @@ class FiatStrategy implements Strategy {
     }
 
     public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
-        // // if there is a minimum and the input is below this minimum
-        // //   then it should be refunded
-        // if ($quantity_in < $swap_config['min']) {
-        //     return true;
-        // }
+        $value_data = $this->buildQuantityOutAndChangeOut($swap_config, $quantity_in);
+
+        // if this input would not purchase any outAsset or is below the minimum
+        //   then it should be refunded
+        if ($value_data['quantityOut'] <= 0 OR $value_data['quantityOut'] < $swap_config['min_out']) {
+            return true;
+        }
 
         return false;
     }
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
+        $value_data = $this->buildQuantityOutAndChangeOut($swap_config, $quantity_in);
+        $asset_out = $swap_config['out'];
+
+        return [
+            'quantityIn'  => $quantity_in,
+            'assetIn'     => $swap_config['in'],
+
+            'quantityOut' => $value_data['quantityOut'],
+            'assetOut'    => $swap_config['out'],
+
+            'changeOut'   => $value_data['changeOut'],
+        ];
+    }
+
+    protected function buildQuantityOutAndChangeOut(SwapConfig $swap_config, $quantity_in) {
         $cost = $swap_config['cost'];
         $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
         $quantity_out = $quantity_in * $conversion_rate / $cost;
@@ -40,17 +57,11 @@ class FiatStrategy implements Strategy {
             }
         }
 
-        $asset_out = $swap_config['out'];
-
         return [
-            'quantityIn'  => $quantity_in,
-            'assetIn'     => $swap_config['in'],
-
             'quantityOut' => $quantity_out,
-            'assetOut'    => $swap_config['out'],
-
             'changeOut'   => $change_quantity_out,
         ];
+
     }
 
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {

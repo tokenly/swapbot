@@ -427,6 +427,7 @@ class SwapProcessor {
 
                 'quantityOut'      => $out_quantity,
                 'assetOut'         => $out_asset,
+                'changeOut'        => null,
                 'confirmationsOut' => 0,
 
                 'confirmations'    => $swap_process['confirmations'],

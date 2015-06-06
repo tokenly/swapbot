@@ -63,8 +63,15 @@ class SwapRepository extends APIRepository
     public function mergeUpdateVars(Swap $swap, $update_vars) {
         if (isset($update_vars['receipt'])) {
             $update_vars['receipt'] = array_merge($swap['receipt'], $update_vars['receipt']);
+            // unset nulls
+            foreach(array_keys($update_vars['receipt']) as $receipt_k) {
+                if (is_null($update_vars['receipt'][$receipt_k])) {
+                    unset($update_vars['receipt'][$receipt_k]);
+                }
+            }
         }
-        
+
+
         return $update_vars;
     }
 

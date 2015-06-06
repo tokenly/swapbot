@@ -49,5 +49,5 @@ expectedBotModels:
       BTC: 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
 
 expectedQuoteClientCalls:
-  - source: bitcoinAverage
-    pair: USD:BTC
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: bitcoinAverage, pair: USD:BTC }
