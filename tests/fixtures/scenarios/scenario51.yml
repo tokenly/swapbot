@@ -1,0 +1,120 @@
+# test full 2 confirmation fiat-based token purchase
+#   with divisible asset
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot03-hamburger.yml }
+    confirmations_required: 2
+    swaps:
+      -
+        strategy: fiat
+        in: BTC
+        out: HAMBURGER
+        fiat: USD
+        cost: 5.00
+        type: buy
+        divisible: true
+
+quotebot:
+  - source: bitcoinAverage
+    pair: USD:BTC
+    last: 200
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.035
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.035
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.035
+    confirmations: 2
+    blockId: 300001
+
+  - meta: { baseFilename: confirmed_HAMBURGER_SEND_notification_01.yml }
+    blockId: 300002
+  - meta: { baseFilename: confirmed_HAMBURGER_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_HAMBURGER.yml }
+    data:
+      quantity: 1.4
+
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
+    quantityOut: 1.4
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-BTC_HAMBURGER_unconfirmed.yml }
+    quantityIn: 0.035
+    quantityOut: 1.4
+
+  - #### transaction handled previously (1 confirmation)
+    meta: { baseFilename: tx.previous-BTC-1.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
+    quantityOut: 1.4
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-BTC_HAMBURGER.yml }
+    quantityIn: 0.035
+    quantityOut: 1.4
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_HAMBURGER-2confirmations.yml }
+    inQty: 0.035
+    outQty: 1.4
+    msg: 'Received 0.035 BTC from SENDER01 with 2 confirmations. Will vend 1.4 HAMBURGER to SENDER01.'
+  - #### swap sent
+    meta: { baseFilename: swap.sent-BTC_HAMBURGER-2confirmations.yml }
+    quantityIn: 0.035
+    quantityOut: 1.4
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+  - #### transaction fee paid
+    meta: { baseFilename: fee.transaction.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-HAMBURGER.yml }
+    confirmations: 2
+    quantityIn: 0.035
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+  - #### found a confirmed send transaction (2 confirmations)
+    meta: { baseFilename: send.confirmed-HAMBURGER.yml }
+    confirmations: 2
+    confirmationsOut: 2
+    quantityIn: 0.035
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      HAMBURGER: 23.6
+      BTC: 1.0348457 # 1 + 0.035 (receive) - 0.0001 (fee) - 0.00005430 (dust)
+
+expectedQuoteClientCalls:
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: bitcoinAverage, pair: USD:BTC }
