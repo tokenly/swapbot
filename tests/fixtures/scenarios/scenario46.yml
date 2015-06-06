@@ -22,8 +22,8 @@ xchainNotifications:
 ############################
 # validate the expected results
 expectedXChainCalls:
-  # - 
-  #   meta: { baseFilename: send_LTBCOIN.yml }
+  - 
+    meta: { baseFilename: send_HAMBURGER.yml }
 
 expectedBotEvents:
   - #### NEW
@@ -48,3 +48,6 @@ expectedBotModels:
       HAMBURGER: 24
       BTC: 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
 
+expectedQuoteClientCalls:
+  - source: bitcoinAverage
+    pair: USD:BTC

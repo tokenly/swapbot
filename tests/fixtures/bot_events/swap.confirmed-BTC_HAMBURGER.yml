@@ -1,0 +1,11 @@
+name: swap.confirmed
+confirmations: '2'
+destination: 'SENDER01'
+quantityIn: 0.025
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 1
+assetOut: 'HAMBURGER'
+state: 'ready'
+isComplete: false
+isError: false

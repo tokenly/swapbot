@@ -1,0 +1,15 @@
+name: send.confirmed
+# msg: Saw confirmed send of 500 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
+
+destination: SENDER01
+confirmations: '1'
+quantityIn: 0.025
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 1
+assetOut: 'HAMBURGER'
+txidOut: '0000000000000000000000000000001111'
+confirmationsOut: 1
+state: 'complete'
+isComplete: true
+isError: false

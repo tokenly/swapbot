@@ -1,0 +1,12 @@
+name: swap.found
+msg: Received 0.025 BTC from SENDER01 with 2 confirmations. Will vend 1 HAMBURGER to SENDER01.
+
+inQty: 0.025
+inAsset: BTC
+
+outQty: 1
+outAsset: HAMBURGER
+
+source: SENDER01
+destination: SENDER01
+confirmations: 2

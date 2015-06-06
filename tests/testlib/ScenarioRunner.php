@@ -96,6 +96,7 @@ class ScenarioRunner
         if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
         if (isset($scenario_data['expectedSwapModels'])) { $this->validateExpectedSwapModels($scenario_data['expectedSwapModels']); }
         if (isset($scenario_data['expectedEmails'])) { $this->validateExpectedEmails($scenario_data['expectedEmails']); }
+        if (isset($scenario_data['expectedQuoteClientCalls'])) { $this->validateExpecteQuoteClientCalls($scenario_data['expectedQuoteClientCalls']); }
     }
 
 
@@ -902,5 +903,16 @@ class ScenarioRunner
     }    
     
 
+    protected function validateExpecteQuoteClientCalls($expected_quotebot_client_calls) {
+        // normalize
+        $normalized_expected_quotebot_client_calls = [];
+        foreach($expected_quotebot_client_calls as $expected_quotebot_client_call) {
+            if (!isset($expected_quotebot_client_call['method'])) { $expected_quotebot_client_call['method'] = 'getQuote'; }
+            $normalized_expected_quotebot_client_calls[] = $expected_quotebot_client_call;
+        }
+
+        $actual_calls = $this->quotebot_recorder->calls;
+        PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls);
+    }
 
 }

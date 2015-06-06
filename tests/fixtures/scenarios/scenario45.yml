@@ -43,7 +43,7 @@ expectedBotEvents:
 
 
   - #### transaction handled previously
-    meta: { baseFilename: tx.previous-BTC.yml }
+    meta: { baseFilename: tx.previous-BTC-2.yml }
   - #### confirming swap
     meta: { baseFilename: swap.confirmed-BTC.yml }
   - #### READY

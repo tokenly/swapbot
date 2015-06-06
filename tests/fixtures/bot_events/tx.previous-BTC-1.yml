@@ -1,0 +1,6 @@
+name: tx.previous
+# msg: Transaction 00000000000000000000000000000000000000000000000000000xcptx111111 was confirmed with 2 confirmations.
+txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
+confirmations: 1
+state: 'active'
+isActive: true

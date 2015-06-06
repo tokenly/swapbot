@@ -1,0 +1,14 @@
+# a simple BTC notification
+
+txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
+network: bitcoin
+event: receive
+notifiedAddress: SWAPBOTADDR01
+notifiedAddressId: PUBLIC_RECEIVE_MONITOR_ID_01
+sources: [SENDER01]
+destinations: [botaddress000000000000000000000001]
+confirmed: false
+confirmations: 0
+asset: BTC
+quantity: 0.001
+blockId: 300000
