@@ -61,10 +61,9 @@ class ReconcileSwapStateHandler {
 
     public function swapBalanceIsSufficient($swap) {
         $bot = $swap->bot;
-        $xchain_notification = $swap->transaction['xchain_notification'];
 
-        $swap_config = $swap->getSwapConfig();
-        list($desired_quantity, $desired_asset) = $swap_config->getStrategy()->buildSwapOutputQuantityAndAsset($swap_config, $xchain_notification['quantity']);
+        $desired_quantity = $swap['receipt']['quantityOut'];
+        $desired_asset    = $swap['receipt']['assetOut'];
 
         $actual_quantity = $bot->getBalance($desired_asset);
 

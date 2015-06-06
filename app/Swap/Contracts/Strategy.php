@@ -7,16 +7,13 @@ use Swapbot\Models\Data\SwapConfig;
 
 interface Strategy {
 
-    public function shouldRefundTransaction(SwapConfig $swap, $in_quantity);
+    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in);
 
-    public function buildSwapOutputQuantityAndAsset($swap, $in_quantity);
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in);
 
-    public function unSerializeDataToSwap($data, SwapConfig $swap);
+    public function unSerializeDataToSwap($data, SwapConfig $swap_config);
     public function serializeSwap(SwapConfig $swap);
 
-
-
     public function validateSwap($swap_number, $swap, MessageBag $errors);
-
 
 }

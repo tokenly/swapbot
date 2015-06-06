@@ -90,9 +90,11 @@ class CustomerEmailHandler {
     protected function buildEmailVariables($swap, $customer) {
         $bot = $swap->bot;
 
-        $swap_config = $swap->getSwapConfig();
+        $out_quantity = $swap['receipt']['quantityOut'];
+        $out_asset    = $swap['receipt']['assetOut'];
 
-        list($out_quantity, $out_asset) = $swap_config->getStrategy()->buildSwapOutputQuantityAndAsset($swap_config, $swap['in_qty']);
+        // change will be here
+
         $host = Config::get('swapbot.site_host');
         $unsubscribe_link = "$host/public/unsubscribe/{$customer['uuid']}/{$customer['unsubscribe_token']}";
         $bot_url = $bot->getPublicBotURL();

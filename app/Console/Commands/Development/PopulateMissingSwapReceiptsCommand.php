@@ -111,8 +111,9 @@ EOF
             'asset'               => null,
         ];
 
-        // calculate the receipient's quantity and asset
-        list($swap_process['quantity'], $swap_process['asset']) = $swap_process['swap_config']->getStrategy()->buildSwapOutputQuantityAndAsset($swap_process['swap_config'], $swap_process['in_quantity']);
+        // get the receipient's quantity and asset
+        $swap_process['quantity'] = $existing_receipt['quantityOut'];
+        $swap_process['asset']    = $existing_receipt['assetOut'];
 
         // find the "swap.sent" event
         $event_repo = app('Swapbot\Repositories\BotEventRepository');

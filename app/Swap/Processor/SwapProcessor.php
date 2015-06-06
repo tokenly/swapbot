@@ -62,7 +62,13 @@ class SwapProcessor {
 
     public function createNewSwap($swap_config, Bot $bot, Transaction $transaction) {
         // swap variables
-        $swap_name      = $swap_config->buildName();
+        $swap_name = $swap_config->buildName();
+
+        // let the swap strategy initialize the receipt
+        //   this locks in any quotes if quotes are used
+        $strategy = $swap_config->getStrategy();
+        $in_quantity = $transaction['xchain_notification']['quantity'];
+        $initial_receipt_vars = $strategy->caculateInitialReceiptValues($swap_config, $in_quantity);
 
         // new swap vars
         $new_swap = $this->swap_repository->create([
@@ -71,6 +77,7 @@ class SwapProcessor {
             'state'          => 'brandnew',
             'bot_id'         => $bot['id'],
             'transaction_id' => $transaction['id'],
+            'receipt'        => $initial_receipt_vars,
         ]);
 
         // log the new Swap
@@ -123,7 +130,8 @@ class SwapProcessor {
             ]);
 
             // calculate the receipient's quantity and asset
-            list($swap_process['quantity'], $swap_process['asset']) = $swap_process['swap_config']->getStrategy()->buildSwapOutputQuantityAndAsset($swap_process['swap_config'], $swap_process['in_quantity']);
+            $swap_process['quantity'] = $swap['receipt']['quantityOut'];
+            $swap_process['asset']    = $swap['receipt']['assetOut'];
 
             // check the swap state
             $this->resetSwapStateForProcessing($swap_process);
@@ -203,25 +211,13 @@ class SwapProcessor {
             $swap_process['swap_was_handled'] = true;
 
             // mark details
-            $receipt_update_vars = [
-                'type'          => 'pending',
-
-                'quantityIn'    => $swap_process['in_quantity'],
-                'assetIn'       => $swap_process['in_asset'],
-                'txidIn'        => $swap_process['transaction']['txid'],
-
-                'quantityOut'   => $swap_process['quantity'],
-                'assetOut'      => $swap_process['asset'],
-
-                'confirmations' => $swap_process['confirmations'],
-                'destination'   => $swap_process['destination'],
-            ];
+            $receipt_update_vars = $this->buildReceiptUpdateVars('type', $swap_process);
 
             // determine if this is an update
             $any_changed = false;
             $previous_receipt = $swap_process['swap']['receipt'];
             foreach($receipt_update_vars as $k => $v) {
-                if ($v != $previous_receipt[$k]) { $any_changed = true; }
+                if (!isset($previous_receipt[$k]) OR $v != $previous_receipt[$k]) { $any_changed = true; }
             }
 
             // only update if something has changed
@@ -230,6 +226,25 @@ class SwapProcessor {
                 $this->bot_event_logger->logSwapTransactionUpdate($swap_process['bot'], $swap_process['swap'], $receipt_update_vars);
             }
         }
+    }
+
+    protected function buildReceiptUpdateVars($type, $swap_process, $overrides=null) {
+        $receipt_update_vars = [
+            'type'          => $type,
+
+            'quantityIn'    => $swap_process['in_quantity'],
+            'assetIn'       => $swap_process['in_asset'],
+            'txidIn'        => $swap_process['transaction']['txid'],
+
+            'quantityOut'   => $swap_process['quantity'],
+            'assetOut'      => $swap_process['asset'],
+
+            'confirmations' => $swap_process['confirmations'],
+            'destination'   => $swap_process['destination'],
+        ];
+
+        if ($overrides !== null) { $receipt_update_vars = array_merge($receipt_update_vars, $overrides); }
+        return $receipt_update_vars;
     }
 
     ////////////////////////////////////////////////////////////////////////

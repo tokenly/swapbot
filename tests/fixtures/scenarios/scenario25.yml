@@ -34,6 +34,10 @@ expectedBotModels:
 
 expectedSwapModels:
   -
-    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+    meta: { baseFilename: swap_model_BTC_LTBCOIN-no-receipt.yml }
     state: outofstock
-    receipt: ~
+    receipt:
+      quantityIn: 0.001
+      assetIn: 'BTC'
+      quantityOut: 1000
+      assetOut: 'LTBCOIN'

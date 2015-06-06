@@ -63,6 +63,10 @@ expectedSwapModels:
     meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
     state: sent
   -
-    meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-no-receipt.yml }
     state: brandnew
-    receipt: ~
+    receipt:
+      quantityIn: 500
+      assetIn: 'LTBCOIN'
+      quantityOut: 0.00050000000000000001
+      assetOut: 'BTC'

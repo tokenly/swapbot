@@ -9,47 +9,52 @@ use Swapbot\Swap\Strategies\StrategyHelpers;
 
 class RateStrategy implements Strategy {
 
-    public function shouldRefundTransaction(SwapConfig $swap, $in_quantity) {
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
         // if there is a minimum and the input is below this minimum
         //   then it should be refunded
-        if ($in_quantity < $swap['min']) {
+        if ($quantity_in < $swap_config['min']) {
             return true;
         }
 
         return false;
     }
 
-    public function buildSwapOutputQuantityAndAsset($swap, $in_quantity) {
-        $quantity = $in_quantity * $swap['rate'];
-        $asset = $swap['out'];
+    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
+        $quantity_out = $quantity_in * $swap_config['rate'];
 
-        return [$quantity, $asset];
-    }
-
-    public function unSerializeDataToSwap($data, SwapConfig $swap) {
-        // strategy is already set
-
-        $swap['in']   = isset($data['in'])   ? $data['in']   : null;
-        $swap['out']  = isset($data['out'])  ? $data['out']  : null;
-        $swap['rate'] = isset($data['rate']) ? $data['rate'] : null;
-        $swap['min']  = isset($data['min'])  ? $data['min']  : 0;
-    }
-
-    public function serializeSwap(SwapConfig $swap) {
         return [
-            'strategy' => $swap['strategy'],
-            'in'       => $swap['in'],
-            'out'      => $swap['out'],
-            'rate'     => $swap['rate'],
-            'min'      => $swap['min'],
+            'quantityIn'  => $quantity_in,
+            'assetIn'     => $swap_config['in'],
+
+            'quantityOut' => $quantity_out,
+            'assetOut'    => $swap_config['out'],
         ];
     }
 
-    public function validateSwap($swap_number, $swap, MessageBag $errors) {
-        $in_value   = isset($swap['in'])   ? $swap['in']   : null;
-        $out_value  = isset($swap['out'])  ? $swap['out']  : null;
-        $rate_value = isset($swap['rate']) ? $swap['rate'] : null;
-        $min_value  = isset($swap['min'])  ? $swap['min']  : null;
+    public function unSerializeDataToSwap($data, SwapConfig $swap_config) {
+        // strategy is already set
+
+        $swap_config['in']   = isset($data['in'])   ? $data['in']   : null;
+        $swap_config['out']  = isset($data['out'])  ? $data['out']  : null;
+        $swap_config['rate'] = isset($data['rate']) ? $data['rate'] : null;
+        $swap_config['min']  = isset($data['min'])  ? $data['min']  : 0;
+    }
+
+    public function serializeSwap(SwapConfig $swap_config) {
+        return [
+            'strategy' => $swap_config['strategy'],
+            'in'       => $swap_config['in'],
+            'out'      => $swap_config['out'],
+            'rate'     => $swap_config['rate'],
+            'min'      => $swap_config['min'],
+        ];
+    }
+
+    public function validateSwap($swap_number, $swap_config, MessageBag $errors) {
+        $in_value   = isset($swap_config['in'])   ? $swap_config['in']   : null;
+        $out_value  = isset($swap_config['out'])  ? $swap_config['out']  : null;
+        $rate_value = isset($swap_config['rate']) ? $swap_config['rate'] : null;
+        $min_value  = isset($swap_config['min'])  ? $swap_config['min']  : null;
 
         $exists = (strlen($in_value) OR strlen($out_value) OR strlen($rate_value));
         if ($exists) {

@@ -34,6 +34,8 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
+    quantityIn: 0.1
+    quantityOut: 100000
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

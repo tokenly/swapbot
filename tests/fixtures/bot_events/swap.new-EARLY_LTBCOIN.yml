@@ -4,7 +4,7 @@ isComplete: false
 isError: false
 txidIn: "00000000000000000000000000000000000000000000000000000xcptx111111"
 
-quantityIn: 500
-assetIn: 'LTBCOIN'
-quantityOut: 0.0005
-assetOut: 'BTC'
+quantityIn: 1
+assetIn: 'EARLY'
+quantityOut: 10000
+assetOut: 'LTBCOIN'

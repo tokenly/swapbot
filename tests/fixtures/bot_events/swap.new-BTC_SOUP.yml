@@ -6,5 +6,5 @@ txidIn: "00000000000000000000000000000000000000000000000000000BTCtx222222"
 
 quantityIn: 0.001
 assetIn: 'BTC'
-quantityOut: 1000
-assetOut: 'LTBCOIN'
+quantityOut: 5000
+assetOut: 'SOUP'

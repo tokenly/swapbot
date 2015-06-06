@@ -21,7 +21,13 @@ class SwapHelper  {
                 'strategy' => 'rate',
                 'rate'     => 0.00000150,
             ],
-            'receipt'    => [],
+            'receipt'    => [
+                'quantityIn'  => 0.001,
+                'assetIn'     => 'BTC',
+
+                'quantityOut' => 0.001 / 0.0000015,
+                'assetOut'    => 'LTBCOIN',
+            ],
 
             'completed_at' => null,
         ];

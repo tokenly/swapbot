@@ -4,3 +4,7 @@ state: 'outofstock'
 isComplete: false
 isError: true
 
+quantityIn: 0.001
+assetIn: 'BTC'
+quantityOut: 1000
+assetOut: 'LTBCOIN'

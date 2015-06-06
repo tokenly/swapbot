@@ -24,7 +24,9 @@ expectedXChainCalls:
 
 expectedBotEvents:
   - #### NEW
-    meta: { baseFilename: swap.new.yml }
+    meta: { baseFilename: swap.new-LTBCOIN_EARLY.yml }
+    quantityIn: 20001
+    quantityOut: 2
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

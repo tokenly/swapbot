@@ -1,5 +1,5 @@
 # test simple fiat-based token purchase
-#   exact amount was sent (how lucky!)
+#   when exact amount was sent (how lucky!)
 
 ############################
 # setup bots and payment
@@ -27,7 +27,7 @@ expectedXChainCalls:
 
 expectedBotEvents:
   - #### NEW
-    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
+    meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
