@@ -536,10 +536,10 @@
       return [
         {
           k: "Yes",
-          v: 1
+          v: '1'
         }, {
           k: "No",
-          v: 0
+          v: '0'
         }
       ];
     };
@@ -844,6 +844,7 @@
       if (swap == null) {
         swap = {};
       }
+      console.log("divisible: " + (swap.divisible != null ? (swap.divisible ? '1' : '0') : '0'));
       return m.prop({
         strategy: m.prop(swap.strategy || 'rate'),
         "in": m.prop(swap["in"] || ''),
@@ -854,7 +855,7 @@
         min: m.prop(swap.min || ''),
         cost: m.prop(swap.cost || ''),
         min_out: m.prop(swap.min_out || ''),
-        divisible: m.prop(swap.divisible || '')
+        divisible: m.prop(swap.divisible != null ? (swap.divisible ? '1' : '0') : '0')
       });
     };
     swaputils.allStrategyOptions = function() {
@@ -1716,7 +1717,7 @@
               id: "swap_cost_" + number
             }, '$' + swap.cost())
           ]), m("div", {
-            "class": "col-md-2"
+            "class": "col-md-1"
           }, [
             sbAdmin.form.mValueDisplay("Minimum", {
               id: "swap_min_out_" + number
@@ -1726,7 +1727,7 @@
           }, [
             sbAdmin.form.mValueDisplay("Divisible", {
               id: "swap_divisible_" + number
-            }, swap.divisible())
+            }, swap.divisible() === '1' ? 'YES' : 'NO')
           ])
         ])
       ]);

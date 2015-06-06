@@ -116,8 +116,8 @@ sbAdmin.form = do ()->
 
     form.yesNoOptions = ()->
         return [
-            {k: "Yes", v: 1}
-            {k: "No",  v: 0}
+            {k: "Yes", v: '1'}
+            {k: "No",  v: '0'}
         ]
 
     return form

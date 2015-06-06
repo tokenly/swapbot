@@ -62,11 +62,11 @@ do ()->
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mValueDisplay("At USD Price", {id: "swap_cost_#{number}", }, '$'+swap.cost()),
                 ]),
-                m("div", {class: "col-md-2"}, [
+                m("div", {class: "col-md-1"}, [
                     sbAdmin.form.mValueDisplay("Minimum", {id: "swap_min_out_#{number}", }, swap.min_out()),
                 ]),
                 m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mValueDisplay("Divisible", {id: "swap_divisible_#{number}", }, swap.divisible()),
+                    sbAdmin.form.mValueDisplay("Divisible", {id: "swap_divisible_#{number}", }, if swap.divisible() == '1' then 'YES' else 'NO'),
                 ]),
             ]),
         ])
