@@ -93,7 +93,9 @@
 
 {{-- app --}}
 <script src="/js/bot/bot-combined.js"></script>
-<script>BotApp.init({!! json_encode($bot->serializeForAPI('public'), JSON_HEX_APOS) !!})</script>
+<script>
+    BotApp.init({!! json_encode($bot->serializeForAPI('public'), JSON_HEX_APOS) !!}, {url: '{!! $quotebot['url'] !!}', apiToken: '{!! $quotebot['apiToken'] !!}'}, '{!! $quotebotPusherUrl !!}')
+</script>
 
 
 

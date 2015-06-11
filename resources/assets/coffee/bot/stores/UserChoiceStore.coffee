@@ -8,6 +8,7 @@ UserChoiceStore = do ()->
         inAsset       : null
         outAmount     : null
         outAsset      : null
+        lockedInRate  : null
         swap          : null
         allowAutoMatch: true
 
@@ -29,6 +30,7 @@ UserChoiceStore = do ()->
         userChoices.inAsset        = null
         userChoices.outAmount      = null
         userChoices.outAsset       = null
+        userChoices.lockedInRate   = null
         userChoices.swap           = null
         userChoices.allowAutoMatch = true
         resetEmailChoices()
@@ -55,13 +57,14 @@ UserChoiceStore = do ()->
 
         return
 
-    updateChosenSwapConfig = (newChosenSwapConfig)->
+    updateChosenSwapConfig = (newChosenSwapConfig, currentRate)->
         newName = newChosenSwapConfig.in+':'+newChosenSwapConfig.out
         if not userChoices.swapConfig? or userChoices.swapConfig.name != newName
 
             # set the new swapConfig
             userChoices.swapConfig = newChosenSwapConfig
             userChoices.swapConfig.name = newName
+            userChoices.lockedInRate = currentRate
 
             # calculate the new inAmount based on the outAmount
             _recalculateSwapConfigArtifacts()
@@ -247,7 +250,7 @@ UserChoiceStore = do ()->
     _recalculateSwapConfigArtifacts = ()->
         # calculate the new inAmount based on the outAmount
         if userChoices.outAmount? and userChoices.swapConfig?
-            userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig)
+            userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig, userChoices.lockedInRate)
 
         if userChoices.swapConfig
             userChoices.outAsset = userChoices.swapConfig.out
@@ -344,6 +347,12 @@ UserChoiceStore = do ()->
 
     # #############################################
 
+    onQuotebotPriceUpdated = ()->
+        price = QuotebotStore.getCurrentPrice()
+        return
+
+    # #############################################
+
     exports.init = ()->
         # init emitter
         eventEmitter = new window.EventEmitter()
@@ -356,7 +365,7 @@ UserChoiceStore = do ()->
                     updateChosenOutAsset(action.outAsset)
 
                 when BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG
-                    updateChosenSwapConfig(action.swapConfig)
+                    updateChosenSwapConfig(action.swapConfig, action.currentRate)
 
                 when BotConstants.BOT_USER_CHOOSE_SWAP
                     updateChosenSwap(action.swap)

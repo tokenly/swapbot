@@ -3,7 +3,7 @@ SwapMatcher = do ()->
 
 
     swapIsMatched = (swap, userChoices)->
-        if swap.assetIn = userChoices.inAsset and swap.quantityIn == userChoices.inAmount
+        if swap.assetIn = userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)
             return true
         return false
 

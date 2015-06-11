@@ -537,6 +537,9 @@ button.copied {
 button.copied.zeroclipboard-is-hover {
   background-color: #1b7943;
 }
+.wide-list .exchange-description {
+  padding-right: 48px;
+}
 /* Global varibles */
 body {
   background-color: #f7f7f7;

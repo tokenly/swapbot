@@ -844,7 +844,6 @@
       if (swap == null) {
         swap = {};
       }
-      console.log("divisible: " + (swap.divisible != null ? (swap.divisible ? '1' : '0') : '0'));
       return m.prop({
         strategy: m.prop(swap.strategy || 'rate'),
         "in": m.prop(swap["in"] || ''),
@@ -2694,6 +2693,9 @@
       if (currencyPostfix == null) {
         currencyPostfix = '';
       }
+      if ((value == null) || isNaN(value)) {
+        return '';
+      }
       return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
     return exports;
@@ -2754,10 +2756,15 @@
   swapbot.pusher = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(chanelName, callbackFn) {
+    exports.subscribeToPusherChanel = function(pusherURL, channelName, callbackFn) {
       var client;
-      client = new window.Faye.Client(window.PUSHER_URL + "/public");
-      client.subscribe("/" + chanelName, function(data) {
+      if (callbackFn == null) {
+        callbackFn = channelName;
+        channelName = pusherURL;
+        pusherURL = window.PUSHER_URL;
+      }
+      client = new window.Faye.Client(pusherURL + "/public");
+      client.subscribe("/" + channelName, function(data) {
         callbackFn(data);
       });
       return client;
@@ -2788,6 +2795,13 @@
       formatCurrency = swapbot.formatters.formatCurrency;
       return "This bot will send you " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit.";
     };
+    buildDesc.fiat = function(swapConfig) {
+      var cost, formatCurrency, outAmount;
+      formatCurrency = swapbot.formatters.formatCurrency;
+      outAmount = 1;
+      cost = swapConfig.cost;
+      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every $" + (formatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit.";
+    };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
       var inAmount;
@@ -2803,6 +2817,28 @@
         return 0;
       }
       inAmount = outAmount / (swapConfig.out_qty / swapConfig.in_qty);
+      return inAmount;
+    };
+    buildInAmountFromOutAmount.fiat = function(outAmount, swapConfig, currentRate) {
+      var cost, inAmount, marketBuffer, maxMarketBuffer, maxMarketBufferValue;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      if (currentRate === 0) {
+        return 0;
+      }
+      cost = swapConfig.cost;
+      if (swapConfig.divisible) {
+        marketBuffer = 0;
+      } else {
+        marketBuffer = 0.02;
+        maxMarketBufferValue = cost * 0.40;
+        maxMarketBuffer = maxMarketBufferValue / outAmount;
+        if (marketBuffer > maxMarketBuffer) {
+          marketBuffer = maxMarketBuffer;
+        }
+      }
+      inAmount = outAmount * cost / currentRate * (1 + marketBuffer);
       return inAmount;
     };
     validateOutAmount = {};
@@ -2836,11 +2872,23 @@
       }
       return null;
     };
+    validateOutAmount.fiat = function(outAmount, swapConfig) {
+      var errorMsg, formatCurrency;
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      if ((swapConfig.min_out != null) && outAmount > 0 && outAmount < swapConfig.min_out) {
+        formatCurrency = swapbot.formatters.formatCurrency;
+        return "To use this swap, you must purchase at least " + (formatCurrency(swapConfig.min_out)) + " " + swapConfig.out + ".";
+      }
+      return null;
+    };
     exports.exchangeDescription = function(swapConfig) {
       return buildDesc[swapConfig.strategy](swapConfig);
     };
-    exports.inAmountFromOutAmount = function(inAmount, swapConfig) {
-      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig);
+    exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
+      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
       if (inAmount === NaN) {
         inAmount = 0;
       }

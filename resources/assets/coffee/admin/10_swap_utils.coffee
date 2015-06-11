@@ -5,7 +5,7 @@ sbAdmin.swaputils = do ()->
     # clone an object
     swaputils.newSwapProp = (swap={})->
         # all possible properties
-        console.log "divisible: "+(if swap.divisible? then (if swap.divisible then '1' else '0') else '0')
+        # console.log "divisible: "+(if swap.divisible? then (if swap.divisible then '1' else '0') else '0')
         return m.prop({
             strategy : m.prop(swap.strategy  or 'rate')
             in       : m.prop(swap.in        or '')

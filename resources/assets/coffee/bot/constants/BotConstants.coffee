@@ -16,6 +16,8 @@ BotConstants = do ()->
 
     exports.BOT_GO_BACK                      = 'BOT_GO_BACK';
 
+    exports.BOT_ADD_NEW_QUOTE                = 'BOT_ADD_NEW_QUOTE';
+
 
     # #############################################
     return exports

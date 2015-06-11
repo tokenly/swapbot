@@ -3,7 +3,10 @@ SwapbotPlaceOrder = null
 do ()->
 
     getViewState = ()->
-        return { userChoices: UserChoiceStore.getUserChoices() }
+        return { 
+            userChoices: UserChoiceStore.getUserChoices() 
+            currentBTCPrice: QuotebotStore.getCurrentPrice() 
+        }
 
     
     # ############################################################################################################
@@ -13,7 +16,7 @@ do ()->
         displayName: 'SwapbotSendItem'
 
         getInAmount: ()->
-            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig)
+            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
             return inAmount
 
         isChooseable: ()->
@@ -33,7 +36,7 @@ do ()->
             e.preventDefault()
             return if not this.isChooseable()
 
-            UserInputActions.chooseSwapConfig(this.props.swapConfig)
+            UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentBTCPrice)
 
             return
 
@@ -77,6 +80,20 @@ do ()->
                 getViewState()
             )
 
+        _onChange: ()->
+            this.setState(getViewState())
+            return
+
+        componentDidMount: ()->
+            UserChoiceStore.addChangeListener(this._onChange)
+            QuotebotStore.addChangeListener(this._onChange)
+            return
+
+        componentWillUnmount: ()->
+            UserChoiceStore.removeChangeListener(this._onChange)
+            QuotebotStore.removeChangeListener(this._onChange)
+            return
+
 
         getMatchingSwapConfigsForOutputAsset: ()->
             filteredSwapConfigs = []
@@ -96,7 +113,7 @@ do ()->
             return if not matchingSwapConfigs
 
             if matchingSwapConfigs.length == 1
-                UserInputActions.chooseSwapConfig(matchingSwapConfigs[0])
+                UserInputActions.chooseSwapConfigAtRate(matchingSwapConfigs[0], this.state.currentBTCPrice)
 
             return
 
@@ -128,7 +145,7 @@ do ()->
                         { 
                             if matchingSwapConfigs
                                 for matchedSwapConfig, offset in matchingSwapConfigs
-                                        <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} swapConfig={matchedSwapConfig} bot={bot} />
+                                        <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
                         }
                     </ul>
 

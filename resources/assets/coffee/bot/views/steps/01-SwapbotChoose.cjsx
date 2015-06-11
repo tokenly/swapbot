@@ -44,7 +44,7 @@ do ()->
                                                 <a href="#choose-swap" onClick={this.buildChooseOutAsset(swapConfig.out)}>
                                                     <div>
                                                         <div className="item-header">{ swapConfig.out } <small>({ swapbot.formatters.formatCurrency(bot.balances[swapConfig.out]) } available)</small></div>
-                                                        <p>{ swapbot.swapUtils.exchangeDescription(swapConfig) }</p>
+                                                        <p className="exchange-description">{ swapbot.swapUtils.exchangeDescription(swapConfig) }</p>
                                                         <div className="icon-next"></div>
                                                     </div>
                                                 </a>

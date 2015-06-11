@@ -8,10 +8,11 @@ UserInputActions = do ()->
         })
         return
 
-    exports.chooseSwapConfig = (chosenSwapConfig)->
+    exports.chooseSwapConfigAtRate = (chosenSwapConfig, currentRate)->
         Dispatcher.dispatch({
-            actionType: BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG
-            swapConfig: chosenSwapConfig
+            actionType:  BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG
+            swapConfig:  chosenSwapConfig
+            currentRate: currentRate
         })
         return
 

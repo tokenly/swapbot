@@ -19,8 +19,13 @@ swapbot.swapUtils = do ()->
 
     buildDesc.fixed = (swapConfig)->
         formatCurrency = swapbot.formatters.formatCurrency
-        # return "#{swapConfig.out_qty} #{swapConfig.out} for #{swapConfig.in_qty} #{swapConfig.in}"
         return "This bot will send you #{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in} you deposit."
+
+    buildDesc.fiat = (swapConfig)->
+        formatCurrency = swapbot.formatters.formatCurrency
+        outAmount = 1
+        cost = swapConfig.cost
+        return "This bot will send you #{formatCurrency(outAmount)} #{swapConfig.out} for every $#{formatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit."
 
 
     buildInAmountFromOutAmount = {}
@@ -38,6 +43,32 @@ swapbot.swapUtils = do ()->
 
         inAmount = outAmount / (swapConfig.out_qty / swapConfig.in_qty)
 
+        return inAmount
+
+    buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentRate)->
+        if not outAmount? or isNaN(outAmount)
+            return 0
+
+        if currentRate == 0
+            return 0
+
+        cost = swapConfig.cost
+
+        if swapConfig.divisible
+            marketBuffer = 0
+        else
+            marketBuffer = 0.02
+
+            # if marketBuffer is more 40% of the cost of a single token, then adjust it
+            maxMarketBufferValue = cost * 0.40
+            maxMarketBuffer = maxMarketBufferValue / outAmount
+            if marketBuffer > maxMarketBuffer
+                # console.log "maxMarketBuffer adjusted downwards from #{marketBuffer} to #{maxMarketBuffer}"
+                marketBuffer = maxMarketBuffer
+
+        inAmount = outAmount * cost / currentRate * (1 + marketBuffer)
+
+        # console.log "currentRate=#{currentRate}.  inAmount=#{inAmount}"
         return inAmount
 
 
@@ -64,6 +95,15 @@ swapbot.swapUtils = do ()->
 
         return null
 
+    validateOutAmount.fiat = (outAmount, swapConfig)->
+        errorMsg = validateOutAmount.shared(outAmount, swapConfig) 
+        if errorMsg? then return errorMsg
+
+        if swapConfig.min_out? and outAmount > 0 and outAmount < swapConfig.min_out
+            formatCurrency = swapbot.formatters.formatCurrency
+            return "To use this swap, you must purchase at least #{formatCurrency(swapConfig.min_out)} #{swapConfig.out}."
+
+        return null
 
 
     # #############################################
@@ -72,8 +112,8 @@ swapbot.swapUtils = do ()->
     exports.exchangeDescription = (swapConfig)->
         return buildDesc[swapConfig.strategy](swapConfig)
     
-    exports.inAmountFromOutAmount = (inAmount, swapConfig)->
-        inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig)
+    exports.inAmountFromOutAmount = (inAmount, swapConfig, currentRate)->
+        inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate)
         inAmount = 0 if inAmount == NaN
         return inAmount
 

@@ -26,11 +26,17 @@ class PublicBotController extends Controller {
     {
         list($user, $bot) = $this->requireUserAndBot($username, $botid);
 
+        $pusher_url = Config::get('tokenlyPusher.clientUrl');
         return view('public.bot', [
-            'bot'           => $bot,
-            'swapFormatter' => $swap_formatter,
-            'pusherUrl'     => Config::get('tokenlyPusher.clientUrl'),
-            'env'           => app()->environment(),
+            'bot'               => $bot,
+            'quotebot'          => [
+                'url'      => rtrim(Config::get('quotebot.connection_url'), '/'),
+                'apiToken' => Config::get('quotebot.api_token'),
+            ],
+            'swapFormatter'     => $swap_formatter,
+            'pusherUrl'         => $pusher_url,
+            'quotebotPusherUrl' => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
+            'env'               => app()->environment(),
         ]);
     }
 
