@@ -72,5 +72,18 @@ UserInputActions = do ()->
         return
 
 
+    exports.showAllTransactionsOnClick = (e)->
+        e.preventDefault()
+        exports.showAllTransactions()
+        return
+
+    exports.showAllTransactions = ()->
+        Dispatcher.dispatch({
+            actionType: BotConstants.BOT_SHOW_ALL_TRANSACTIONS
+        })
+        return
+
+
+
     # #############################################
     return exports

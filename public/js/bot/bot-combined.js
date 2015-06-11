@@ -1231,7 +1231,15 @@
           "className": "wide-list"
         }, React.createElement("li", null, React.createElement("div", {
           "className": "status-icon icon-pending"
-        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, React.createElement("br", null))))), React.createElement("p", {
+        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, React.createElement("div", {
+          "className": "i-paid-link",
+          "id": "IPaidLink"
+        }, React.createElement("a", {
+          "id": "i-paid",
+          "onClick": UserInputActions.showAllTransactionsOnClick,
+          "href": "#i-paid",
+          "className": "shadow-link"
+        }, "I\u2019ve Paid")))))), React.createElement("p", {
           "className": "description"
         }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
@@ -1614,6 +1622,92 @@
         actionType: BotConstants.BOT_GO_BACK
       });
     };
+    exports.showAllTransactionsOnClick = function(e) {
+      e.preventDefault();
+      exports.showAllTransactions();
+    };
+    exports.showAllTransactions = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_SHOW_ALL_TRANSACTIONS
+      });
+    };
+    return exports;
+  })();
+
+  BotAPIActionCreator = (function() {
+    var exports, handleBotstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleBotstreamEvents = function(botstreamEvents) {
+      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    };
+    exports.subscribeToBotstream = function(botId) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
+        return handleBotstreamEvents([botstreamEvent]);
+      });
+      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
+        return function(botstreamEvents) {
+          botstreamEvents.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
+          handleBotstreamEvents(botstreamEvents);
+        };
+      })(this));
+    };
+    return exports;
+  })();
+
+  QuotebotActionCreator = (function() {
+    var exports, subscriberId;
+    exports = {};
+    subscriberId = null;
+    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
+      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
+        return function(quotesJSON) {
+          var quote, _i, _len, _ref;
+          if (quotesJSON.quotes != null) {
+            _ref = quotesJSON.quotes;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              quote = _ref[_i];
+              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
+                QuotebotEventActions.addNewQuote(quote);
+              }
+            }
+          }
+        };
+      })(this));
+      subscriberId = swapbot.pusher.subscribeToPusherChanel(pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
+        QuotebotEventActions.addNewQuote(quote);
+      });
+    };
+    return exports;
+  })();
+
+  SwapAPIActionCreator = (function() {
+    var exports, handleSwapstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleSwapstreamEvents = function(swapstreamEvents) {
+      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
+    };
+    exports.loadSwapsFromAPI = function(botId) {
+      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
+        SwapstreamEventActions.addNewSwaps(swapsData);
+      });
+    };
+    exports.subscribeToSwapstream = function(botId) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
+        handleSwapstreamEvents([swapstreamEvent]);
+      });
+      $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
+        return function(swapstreamEvents) {
+          swapstreamEvents.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
+          handleSwapstreamEvents(swapstreamEvents);
+        };
+      })(this));
+    };
     return exports;
   })();
 
@@ -1715,83 +1809,6 @@
     }
   };
 
-  BotAPIActionCreator = (function() {
-    var exports, handleBotstreamEvents, subscriberId;
-    exports = {};
-    subscriberId = null;
-    handleBotstreamEvents = function(botstreamEvents) {
-      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
-    };
-    exports.subscribeToBotstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
-        return handleBotstreamEvents([botstreamEvent]);
-      });
-      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
-        return function(botstreamEvents) {
-          botstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
-          handleBotstreamEvents(botstreamEvents);
-        };
-      })(this));
-    };
-    return exports;
-  })();
-
-  QuotebotActionCreator = (function() {
-    var exports, subscriberId;
-    exports = {};
-    subscriberId = null;
-    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
-      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
-        return function(quotesJSON) {
-          var quote, _i, _len, _ref;
-          if (quotesJSON.quotes != null) {
-            _ref = quotesJSON.quotes;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              quote = _ref[_i];
-              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
-                QuotebotEventActions.addNewQuote(quote);
-              }
-            }
-          }
-        };
-      })(this));
-      subscriberId = swapbot.pusher.subscribeToPusherChanel(pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
-        QuotebotEventActions.addNewQuote(quote);
-      });
-    };
-    return exports;
-  })();
-
-  SwapAPIActionCreator = (function() {
-    var exports, handleSwapstreamEvents, subscriberId;
-    exports = {};
-    subscriberId = null;
-    handleSwapstreamEvents = function(swapstreamEvents) {
-      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
-    };
-    exports.loadSwapsFromAPI = function(botId) {
-      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
-        SwapstreamEventActions.addNewSwaps(swapsData);
-      });
-    };
-    exports.subscribeToSwapstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
-        handleSwapstreamEvents([swapstreamEvent]);
-      });
-      $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
-        return function(swapstreamEvents) {
-          swapstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
-          handleSwapstreamEvents(swapstreamEvents);
-        };
-      })(this));
-    };
-    return exports;
-  })();
-
   BotConstants = (function() {
     var exports;
     exports = {};
@@ -1807,6 +1824,7 @@
     exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
     exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
     exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
     exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
     return exports;
   })();
@@ -2040,6 +2058,7 @@
       lockedInRate: null,
       swap: null,
       allowAutoMatch: true,
+      showAllPossibleSwapMatches: true,
       email: {
         value: '',
         submitting: false,
@@ -2058,6 +2077,7 @@
       userChoices.lockedInRate = null;
       userChoices.swap = null;
       userChoices.allowAutoMatch = true;
+      userChoices.showAllPossibleSwapMatches = false;
       resetEmailChoices();
     };
     resetEmailChoices = function() {
@@ -2169,6 +2189,7 @@
       emitChange();
     };
     goBack = function() {
+      console.log("goBack userChoices.step=" + userChoices.step);
       switch (userChoices.step) {
         case 'place':
           resetUserChoices();
@@ -2179,6 +2200,7 @@
           userChoices.inAmount = null;
           userChoices.inAsset = null;
           userChoices.allowAutoMatch = true;
+          userChoices.showAllPossibleSwapMatches = false;
           router.setRoute('/place');
           break;
         case 'wait':
@@ -2322,6 +2344,7 @@
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();
             userChoices.allowAutoMatch = false;
+            userChoices.showAllPossibleSwapMatches = true;
             routeToStepOrEmitChange('receive');
             break;
           case BotConstants.BOT_USER_RESET_SWAP:
@@ -2338,6 +2361,12 @@
             break;
           case BotConstants.BOT_GO_BACK:
             goBack();
+            break;
+          case BotConstants.BOT_SHOW_ALL_TRANSACTIONS:
+            clearChosenSwap();
+            userChoices.allowAutoMatch = false;
+            userChoices.showAllPossibleSwapMatches = true;
+            routeToStepOrEmitChange('receive');
         }
       });
       resetUserChoices();
@@ -2359,12 +2388,22 @@
   })();
 
   SwapMatcher = (function() {
-    var exports, swapIsMatched;
+    var exports, swapIsComplete, swapIsMatched;
     exports = {};
     swapIsMatched = function(swap, userChoices) {
+      if (swap.isComplete) {
+        return false;
+      }
+      if (userChoices.showAllPossibleSwapMatches) {
+        return true;
+      }
       if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
         return true;
       }
+      return false;
+    };
+    swapIsComplete = function(swap) {
+      console.log("swapIsComplete swap", swap);
       return false;
     };
     exports.buildMatchedSwaps = function(swaps, userChoices) {

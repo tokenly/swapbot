@@ -149,6 +149,7 @@ do ()->
                         <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
                     </div>
 
+                    
 
                     {
                             if this.state.anyMatchedSwaps
@@ -167,7 +168,9 @@ do ()->
                                         <li>
                                             <div className="status-icon icon-pending"></div>
                                             Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}
-                                            <br/>
+                                            <div className="i-paid-link" id="IPaidLink">
+                                                <a id="i-paid" onClick={UserInputActions.showAllTransactionsOnClick} href="#i-paid" className="shadow-link">I&rsquo;ve Paid</a>
+                                            </div>
                                         </li>
                                     </ul>
                                 </div>

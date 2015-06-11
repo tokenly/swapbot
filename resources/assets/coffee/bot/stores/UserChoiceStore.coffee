@@ -2,15 +2,16 @@ UserChoiceStore = do ()->
     exports = {}
 
     userChoices = {
-        step          : 'choose'
-        swapConfig    : {}
-        inAmount      : null
-        inAsset       : null
-        outAmount     : null
-        outAsset      : null
-        lockedInRate  : null
-        swap          : null
-        allowAutoMatch: true
+        step                      : 'choose'
+        swapConfig                : {}
+        inAmount                  : null
+        inAsset                   : null
+        outAmount                 : null
+        outAsset                  : null
+        lockedInRate              : null
+        swap                      : null
+        allowAutoMatch            : true
+        showAllPossibleSwapMatches: true
 
         email:
             value     : ''
@@ -25,14 +26,15 @@ UserChoiceStore = do ()->
 
     resetUserChoices = ()->
         # does not reset the step
-        userChoices.swapConfig     = null
-        userChoices.inAmount       = null
-        userChoices.inAsset        = null
-        userChoices.outAmount      = null
-        userChoices.outAsset       = null
-        userChoices.lockedInRate   = null
-        userChoices.swap           = null
-        userChoices.allowAutoMatch = true
+        userChoices.swapConfig                 = null
+        userChoices.inAmount                   = null
+        userChoices.inAsset                    = null
+        userChoices.outAmount                  = null
+        userChoices.outAsset                   = null
+        userChoices.lockedInRate               = null
+        userChoices.swap                       = null
+        userChoices.allowAutoMatch             = true
+        userChoices.showAllPossibleSwapMatches = false
         resetEmailChoices()
         return
 
@@ -185,21 +187,24 @@ UserChoiceStore = do ()->
 
 
     goBack = ()->
+        console.log "goBack userChoices.step=#{userChoices.step}"
         switch userChoices.step
             when 'place'
                 resetUserChoices()
                 router.setRoute('/choose')
             when 'receive'
-                userChoices.swapConfig     = null
-                userChoices.inAmount       = null
-                userChoices.inAsset        = null
-                userChoices.allowAutoMatch = true
+                userChoices.swapConfig                 = null
+                userChoices.inAmount                   = null
+                userChoices.inAsset                    = null
+                userChoices.allowAutoMatch             = true
+                userChoices.showAllPossibleSwapMatches = false
 
                 router.setRoute('/place')
             when 'wait'
                 clearChosenSwap()
                 router.setRoute('/receive')
         return
+
 
 
 
@@ -375,6 +380,7 @@ UserChoiceStore = do ()->
 
                     # disable automatching
                     userChoices.allowAutoMatch = false
+                    userChoices.showAllPossibleSwapMatches = true
 
                     # go back to the wait step if we aren't there
                     routeToStepOrEmitChange('receive')
@@ -396,6 +402,16 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_GO_BACK
                     goBack()
+
+                when BotConstants.BOT_SHOW_ALL_TRANSACTIONS
+                    clearChosenSwap()
+
+                    # disable automatching
+                    userChoices.allowAutoMatch = false
+                    userChoices.showAllPossibleSwapMatches = true
+
+                    # go back to the wait step if we aren't there
+                    routeToStepOrEmitChange('receive')
 
                 # else
                 #     console.log "unknown action: #{action.actionType}"
