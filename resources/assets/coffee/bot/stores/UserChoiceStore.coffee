@@ -15,6 +15,7 @@ UserChoiceStore = do ()->
         swap                : null
         swapMatchMode       : MATCH_AUTO
         swapIDsToIgnore     : {}
+        numberOfIgnoredSwaps: 0
         numberOfMatchedSwaps: null
 
         email:
@@ -39,6 +40,7 @@ UserChoiceStore = do ()->
         userChoices.swap                 = null
         userChoices.swapMatchMode        = MATCH_AUTO
         userChoices.swapIDsToIgnore      = {}
+        userChoices.numberOfIgnoredSwaps = 0
         userChoices.numberOfMatchedSwaps = null
 
         userChoices.z = false
@@ -205,6 +207,7 @@ UserChoiceStore = do ()->
                 userChoices.inAsset              = null
                 userChoices.swapMatchMode        = MATCH_AUTO
                 userChoices.swapIDsToIgnore      = {}
+                userChoices.numberOfIgnoredSwaps = 0
                 userChoices.numberOfMatchedSwaps = null
 
                 router.setRoute('/place')
@@ -216,7 +219,9 @@ UserChoiceStore = do ()->
     ignoreAllSwaps = ()->
         # ignore all the swaps that we've matched so far
         for swap in SwapsStore.getSwaps()
-            userChoices.swapIDsToIgnore[swap.id] = true
+            if not userChoices.swapIDsToIgnore[swap.id]?
+                userChoices.swapIDsToIgnore[swap.id] = true
+                ++userChoices.numberOfIgnoredSwaps
 
         return
 

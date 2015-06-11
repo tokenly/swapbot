@@ -12,16 +12,12 @@ SwapMatcher = do ()->
             return false
 
         # always match when mode is MATCH_SHOW_ALL
-        if userChoices.swapMatchMode == userChoices.MATCH_SHOW_ALL
+        if userChoices.swapMatchMode == UserChoiceStore.MATCH_SHOW_ALL
             return true
 
         if swap.assetIn = userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)
             return true
 
-        return false
-
-    swapIsComplete = (swap)->
-        console.log "swapIsComplete swap", swap
         return false
 
     # #############################################
@@ -31,6 +27,7 @@ SwapMatcher = do ()->
         for swap in swaps
             if swapIsMatched(swap, userChoices)
                 matchedSwaps.push(swap)
+        console.log "matchedSwaps=", matchedSwaps
         return matchedSwaps
 
     # #############################################
