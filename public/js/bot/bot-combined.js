@@ -641,198 +641,6 @@
     });
   })();
 
-  PlaceOrderInput = null;
-
-  (function() {
-    var getViewState;
-    getViewState = function() {
-      return {
-        userChoices: UserChoiceStore.getUserChoices()
-      };
-    };
-    return PlaceOrderInput = React.createClass({
-      displayName: 'PlaceOrderInput',
-      getInitialState: function() {
-        return $.extend({}, getViewState());
-      },
-      updateAmount: function(e) {
-        var outAmount;
-        outAmount = parseFloat($(e.target).val());
-        if (outAmount < 0 || isNaN(outAmount)) {
-          outAmount = 0;
-        }
-        UserInputActions.updateOutAmount(outAmount);
-      },
-      checkEnter: function(e) {
-        if (e.keyCode === 13) {
-          if (this.props.onOrderInput != null) {
-            this.props.onOrderInput();
-          }
-        }
-      },
-      render: function() {
-        var bot, defaultValue, outAsset, swapConfigIsChosen;
-        bot = this.props.bot;
-        defaultValue = this.state.userChoices.outAmount;
-        outAsset = this.state.userChoices.outAsset;
-        swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
-        return React.createElement("div", null, React.createElement("table", {
-          "className": "fieldset"
-        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-available"
-        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
-          "id": "token-available"
-        }, swapbot.formatters.formatCurrency(bot.balances[outAsset]), " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-amount"
-        }, "I would like to purchase: ")), React.createElement("td", null, (swapConfigIsChosen ? React.createElement("div", {
-          "className": "chosenInputAmount"
-        }, swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset) : React.createElement("div", null, React.createElement("input", {
-          "onChange": this.updateAmount,
-          "onKeyUp": this.checkEnter,
-          "type": "text",
-          "id": "token-amount",
-          "placeholder": '0',
-          "defaultValue": defaultValue
-        }), "\u00a0", outAsset))))));
-      }
-    });
-  })();
-
-  ReactZeroClipboard = void 0;
-
-  (function() {
-    var addZeroListener, client, eventHandlers, handleZeroClipLoad, propToEvent, readyEventHasHappened, result, waitingForScriptToLoad;
-    client = void 0;
-    waitingForScriptToLoad = [];
-    eventHandlers = {
-      copy: [],
-      afterCopy: [],
-      error: [],
-      ready: []
-    };
-    propToEvent = {
-      onCopy: 'copy',
-      onAfterCopy: 'afterCopy',
-      onError: 'error',
-      onReady: 'ready'
-    };
-    readyEventHasHappened = false;
-    handleZeroClipLoad = function(error) {
-      var ZeroClipboard, eventName, handleEvent;
-      ZeroClipboard = window.ZeroClipboard;
-      delete window.ZeroClipboard;
-      client = new ZeroClipboard;
-      handleEvent = function(eventName) {
-        client.on(eventName, function(event) {
-          var activeElement;
-          if (eventName === 'ready') {
-            eventHandlers['ready'].forEach(function(xs) {
-              xs[1](event);
-            });
-            readyEventHasHappened = true;
-            return;
-          }
-          activeElement = ZeroClipboard.activeElement();
-          eventHandlers[eventName].some(function(xs) {
-            var callback, element;
-            element = xs[0];
-            callback = xs[1];
-            if (element === activeElement) {
-              callback(event);
-              return true;
-            }
-          });
-        });
-      };
-      for (eventName in eventHandlers) {
-        handleEvent(eventName);
-      }
-      waitingForScriptToLoad.forEach(function(callback) {
-        callback();
-      });
-    };
-    result = function(fnOrValue) {
-      if (typeof fnOrValue === 'function') {
-        return fnOrValue();
-      } else {
-        return fnOrValue;
-      }
-    };
-    handleZeroClipLoad(null);
-    ReactZeroClipboard = React.createClass({
-      ready: function(cb) {
-        if (client) {
-          setTimeout(cb.bind(this), 1);
-        } else {
-          waitingForScriptToLoad.push(cb.bind(this));
-        }
-      },
-      componentWillMount: function() {
-        if (readyEventHasHappened && this.props.onReady) {
-          this.props.onReady();
-        }
-      },
-      componentDidMount: function() {
-        this.eventRemovers = [];
-        this.ready(function() {
-          var remover;
-          var el, eventName, prop, remover;
-          if (!this.isMounted()) {
-            return;
-          }
-          el = React.findDOMNode(this);
-          client.clip(el);
-          for (prop in this.props) {
-            eventName = propToEvent[prop];
-            if (eventName && typeof this.props[prop] === 'function') {
-              remover = addZeroListener(eventName, el, this.props[prop]);
-              this.eventRemovers.push(remover);
-            }
-          }
-          remover = addZeroListener('copy', el, this.handleCopy);
-          this.eventRemovers.push(remover);
-        });
-      },
-      componentWillUnmount: function() {
-        if (client) {
-          client.unclip(this.getDOMNode());
-        }
-        this.eventRemovers.forEach(function(fn) {
-          fn();
-        });
-      },
-      handleCopy: function() {
-        var html, p, richText, text;
-        p = this.props;
-        text = result(p.getText || p.text);
-        html = result(p.getHtml || p.html);
-        richText = result(p.getRichText || p.richText);
-        client.clearData();
-        richText !== null && client.setRichText(richText);
-        html !== null && client.setHtml(html);
-        text !== null && client.setText(text);
-      },
-      render: function() {
-        return React.Children.only(this.props.children);
-      }
-    });
-    addZeroListener = function(event, el, fn) {
-      eventHandlers[event].push([el, fn]);
-      return function() {
-        var handlers, i;
-        handlers = eventHandlers[event];
-        i = 0;
-        while (i < handlers.length) {
-          if (handlers[i][0] === el) {
-            handlers.splice(i, 1);
-            return;
-          }
-          i++;
-        }
-      };
-    };
-  })();
-
   SwapbotChoose = null;
 
   (function() {
@@ -1210,7 +1018,17 @@
           "onClick": UserInputActions.goBackOnClick,
           "href": "#go-back",
           "className": "shadow-link"
-        }, "Go Back")), (this.state.anyMatchedSwaps ? React.createElement("div", null, React.createElement("h4", null, "We\u2019ve detected one or multiple orders that might be yours, please select the correct one to continue."), React.createElement("ul", {
+        }, "Go Back")), (this.state.anyMatchedSwaps ? React.createElement("div", null, React.createElement("h4", {
+          "id": "DetectedMultiple"
+        }, "We\u2019ve detected one or multiple orders that might be yours, please select the correct one to continue."), React.createElement("div", {
+          "className": "not-paid-yet-link",
+          "id": "NotPaidYetLink"
+        }, React.createElement("a", {
+          "id": "not-paid-yet",
+          "onClick": UserInputActions.ignoreAllSwapsOnClick,
+          "href": "#not-paid-yet",
+          "className": "shadow-link"
+        }, "I haven\u2019t paid yet")), React.createElement("ul", {
           "id": "transaction-confirm-list",
           "className": "wide-list"
         }, (function() {
@@ -1231,7 +1049,7 @@
           "className": "wide-list"
         }, React.createElement("li", null, React.createElement("div", {
           "className": "status-icon icon-pending"
-        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, React.createElement("div", {
+        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, (this.state.userChoices.numberOfMatchedSwaps > 0 ? React.createElement("div", {
           "className": "i-paid-link",
           "id": "IPaidLink"
         }, React.createElement("a", {
@@ -1239,7 +1057,7 @@
           "onClick": UserInputActions.showAllTransactionsOnClick,
           "href": "#i-paid",
           "className": "shadow-link"
-        }, "I\u2019ve Paid")))))), React.createElement("p", {
+        }, "I\u2019ve Paid")) : void 0))))), React.createElement("p", {
           "className": "description"
         }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
@@ -1501,6 +1319,198 @@
     });
   })();
 
+  PlaceOrderInput = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {
+        userChoices: UserChoiceStore.getUserChoices()
+      };
+    };
+    return PlaceOrderInput = React.createClass({
+      displayName: 'PlaceOrderInput',
+      getInitialState: function() {
+        return $.extend({}, getViewState());
+      },
+      updateAmount: function(e) {
+        var outAmount;
+        outAmount = parseFloat($(e.target).val());
+        if (outAmount < 0 || isNaN(outAmount)) {
+          outAmount = 0;
+        }
+        UserInputActions.updateOutAmount(outAmount);
+      },
+      checkEnter: function(e) {
+        if (e.keyCode === 13) {
+          if (this.props.onOrderInput != null) {
+            this.props.onOrderInput();
+          }
+        }
+      },
+      render: function() {
+        var bot, defaultValue, outAsset, swapConfigIsChosen;
+        bot = this.props.bot;
+        defaultValue = this.state.userChoices.outAmount;
+        outAsset = this.state.userChoices.outAsset;
+        swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
+        return React.createElement("div", null, React.createElement("table", {
+          "className": "fieldset"
+        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-available"
+        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
+          "id": "token-available"
+        }, swapbot.formatters.formatCurrency(bot.balances[outAsset]), " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-amount"
+        }, "I would like to purchase: ")), React.createElement("td", null, (swapConfigIsChosen ? React.createElement("div", {
+          "className": "chosenInputAmount"
+        }, swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset) : React.createElement("div", null, React.createElement("input", {
+          "onChange": this.updateAmount,
+          "onKeyUp": this.checkEnter,
+          "type": "text",
+          "id": "token-amount",
+          "placeholder": '0',
+          "defaultValue": defaultValue
+        }), "\u00a0", outAsset))))));
+      }
+    });
+  })();
+
+  ReactZeroClipboard = void 0;
+
+  (function() {
+    var addZeroListener, client, eventHandlers, handleZeroClipLoad, propToEvent, readyEventHasHappened, result, waitingForScriptToLoad;
+    client = void 0;
+    waitingForScriptToLoad = [];
+    eventHandlers = {
+      copy: [],
+      afterCopy: [],
+      error: [],
+      ready: []
+    };
+    propToEvent = {
+      onCopy: 'copy',
+      onAfterCopy: 'afterCopy',
+      onError: 'error',
+      onReady: 'ready'
+    };
+    readyEventHasHappened = false;
+    handleZeroClipLoad = function(error) {
+      var ZeroClipboard, eventName, handleEvent;
+      ZeroClipboard = window.ZeroClipboard;
+      delete window.ZeroClipboard;
+      client = new ZeroClipboard;
+      handleEvent = function(eventName) {
+        client.on(eventName, function(event) {
+          var activeElement;
+          if (eventName === 'ready') {
+            eventHandlers['ready'].forEach(function(xs) {
+              xs[1](event);
+            });
+            readyEventHasHappened = true;
+            return;
+          }
+          activeElement = ZeroClipboard.activeElement();
+          eventHandlers[eventName].some(function(xs) {
+            var callback, element;
+            element = xs[0];
+            callback = xs[1];
+            if (element === activeElement) {
+              callback(event);
+              return true;
+            }
+          });
+        });
+      };
+      for (eventName in eventHandlers) {
+        handleEvent(eventName);
+      }
+      waitingForScriptToLoad.forEach(function(callback) {
+        callback();
+      });
+    };
+    result = function(fnOrValue) {
+      if (typeof fnOrValue === 'function') {
+        return fnOrValue();
+      } else {
+        return fnOrValue;
+      }
+    };
+    handleZeroClipLoad(null);
+    ReactZeroClipboard = React.createClass({
+      ready: function(cb) {
+        if (client) {
+          setTimeout(cb.bind(this), 1);
+        } else {
+          waitingForScriptToLoad.push(cb.bind(this));
+        }
+      },
+      componentWillMount: function() {
+        if (readyEventHasHappened && this.props.onReady) {
+          this.props.onReady();
+        }
+      },
+      componentDidMount: function() {
+        this.eventRemovers = [];
+        this.ready(function() {
+          var remover;
+          var el, eventName, prop, remover;
+          if (!this.isMounted()) {
+            return;
+          }
+          el = React.findDOMNode(this);
+          client.clip(el);
+          for (prop in this.props) {
+            eventName = propToEvent[prop];
+            if (eventName && typeof this.props[prop] === 'function') {
+              remover = addZeroListener(eventName, el, this.props[prop]);
+              this.eventRemovers.push(remover);
+            }
+          }
+          remover = addZeroListener('copy', el, this.handleCopy);
+          this.eventRemovers.push(remover);
+        });
+      },
+      componentWillUnmount: function() {
+        if (client) {
+          client.unclip(this.getDOMNode());
+        }
+        this.eventRemovers.forEach(function(fn) {
+          fn();
+        });
+      },
+      handleCopy: function() {
+        var html, p, richText, text;
+        p = this.props;
+        text = result(p.getText || p.text);
+        html = result(p.getHtml || p.html);
+        richText = result(p.getRichText || p.richText);
+        client.clearData();
+        richText !== null && client.setRichText(richText);
+        html !== null && client.setHtml(html);
+        text !== null && client.setText(text);
+      },
+      render: function() {
+        return React.Children.only(this.props.children);
+      }
+    });
+    addZeroListener = function(event, el, fn) {
+      eventHandlers[event].push([el, fn]);
+      return function() {
+        var handlers, i;
+        handlers = eventHandlers[event];
+        i = 0;
+        while (i < handlers.length) {
+          if (handlers[i][0] === el) {
+            handlers.splice(i, 1);
+            return;
+          }
+          i++;
+        }
+      };
+    };
+  })();
+
   window.BotApp = {
     init: function(bot, quotebotCredentials, pusherURL) {
       SwapsStore.init();
@@ -1521,6 +1531,83 @@
       }), document.getElementById('SwapPurchaseStepsComponent'));
     }
   };
+
+  BotAPIActionCreator = (function() {
+    var exports, handleBotstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleBotstreamEvents = function(botstreamEvents) {
+      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    };
+    exports.subscribeToBotstream = function(botId) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
+        return handleBotstreamEvents([botstreamEvent]);
+      });
+      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
+        return function(botstreamEvents) {
+          botstreamEvents.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
+          handleBotstreamEvents(botstreamEvents);
+        };
+      })(this));
+    };
+    return exports;
+  })();
+
+  QuotebotActionCreator = (function() {
+    var exports, subscriberId;
+    exports = {};
+    subscriberId = null;
+    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
+      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
+        return function(quotesJSON) {
+          var quote, _i, _len, _ref;
+          if (quotesJSON.quotes != null) {
+            _ref = quotesJSON.quotes;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              quote = _ref[_i];
+              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
+                QuotebotEventActions.addNewQuote(quote);
+              }
+            }
+          }
+        };
+      })(this));
+      subscriberId = swapbot.pusher.subscribeToPusherChanel(pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
+        QuotebotEventActions.addNewQuote(quote);
+      });
+    };
+    return exports;
+  })();
+
+  SwapAPIActionCreator = (function() {
+    var exports, handleSwapstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleSwapstreamEvents = function(swapstreamEvents) {
+      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
+    };
+    exports.loadSwapsFromAPI = function(botId) {
+      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
+        SwapstreamEventActions.addNewSwaps(swapsData);
+      });
+    };
+    exports.subscribeToSwapstream = function(botId) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
+        handleSwapstreamEvents([swapstreamEvent]);
+      });
+      $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
+        return function(swapstreamEvents) {
+          swapstreamEvents.sort(function(a, b) {
+            return a.serial - b.serial;
+          });
+          handleSwapstreamEvents(swapstreamEvents);
+        };
+      })(this));
+    };
+    return exports;
+  })();
 
   BotstreamEventActions = (function() {
     var exports;
@@ -1631,83 +1718,36 @@
         actionType: BotConstants.BOT_SHOW_ALL_TRANSACTIONS
       });
     };
-    return exports;
-  })();
-
-  BotAPIActionCreator = (function() {
-    var exports, handleBotstreamEvents, subscriberId;
-    exports = {};
-    subscriberId = null;
-    handleBotstreamEvents = function(botstreamEvents) {
-      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    exports.ignoreAllSwapsOnClick = function(e) {
+      e.preventDefault();
+      exports.ignoreAllSwaps();
     };
-    exports.subscribeToBotstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
-        return handleBotstreamEvents([botstreamEvent]);
-      });
-      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
-        return function(botstreamEvents) {
-          botstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
-          handleBotstreamEvents(botstreamEvents);
-        };
-      })(this));
-    };
-    return exports;
-  })();
-
-  QuotebotActionCreator = (function() {
-    var exports, subscriberId;
-    exports = {};
-    subscriberId = null;
-    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
-      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
-        return function(quotesJSON) {
-          var quote, _i, _len, _ref;
-          if (quotesJSON.quotes != null) {
-            _ref = quotesJSON.quotes;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              quote = _ref[_i];
-              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
-                QuotebotEventActions.addNewQuote(quote);
-              }
-            }
-          }
-        };
-      })(this));
-      subscriberId = swapbot.pusher.subscribeToPusherChanel(pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
-        QuotebotEventActions.addNewQuote(quote);
+    exports.ignoreAllSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS
       });
     };
     return exports;
   })();
 
-  SwapAPIActionCreator = (function() {
-    var exports, handleSwapstreamEvents, subscriberId;
+  BotConstants = (function() {
+    var exports;
     exports = {};
-    subscriberId = null;
-    handleSwapstreamEvents = function(swapstreamEvents) {
-      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
-    };
-    exports.loadSwapsFromAPI = function(botId) {
-      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
-        SwapstreamEventActions.addNewSwaps(swapsData);
-      });
-    };
-    exports.subscribeToSwapstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
-        handleSwapstreamEvents([swapstreamEvent]);
-      });
-      $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
-        return function(swapstreamEvents) {
-          swapstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
-          handleSwapstreamEvents(swapstreamEvents);
-        };
-      })(this));
-    };
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
     return exports;
   })();
 
@@ -1809,26 +1849,6 @@
     }
   };
 
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    return exports;
-  })();
-
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
     exports = {};
@@ -1847,7 +1867,6 @@
         } else {
           allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
         }
-        console.log("BotstreamStore allMyBotstreamEventsById[" + eventId + "] = ", allMyBotstreamEventsById[eventId]);
         anyChanged = true;
       }
       if (anyChanged) {
@@ -2046,8 +2065,10 @@
   })();
 
   UserChoiceStore = (function() {
-    var autoMatchTransaction, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
+    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
     exports = {};
+    exports.MATCH_AUTO = MATCH_AUTO = 'AUTO';
+    exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL';
     userChoices = {
       step: 'choose',
       swapConfig: {},
@@ -2057,8 +2078,9 @@
       outAsset: null,
       lockedInRate: null,
       swap: null,
-      allowAutoMatch: true,
-      showAllPossibleSwapMatches: true,
+      swapMatchMode: MATCH_AUTO,
+      swapIDsToIgnore: {},
+      numberOfMatchedSwaps: null,
       email: {
         value: '',
         submitting: false,
@@ -2076,8 +2098,10 @@
       userChoices.outAsset = null;
       userChoices.lockedInRate = null;
       userChoices.swap = null;
-      userChoices.allowAutoMatch = true;
-      userChoices.showAllPossibleSwapMatches = false;
+      userChoices.swapMatchMode = MATCH_AUTO;
+      userChoices.swapIDsToIgnore = {};
+      userChoices.numberOfMatchedSwaps = null;
+      userChoices.z = false;
       resetEmailChoices();
     };
     resetEmailChoices = function() {
@@ -2199,8 +2223,9 @@
           userChoices.swapConfig = null;
           userChoices.inAmount = null;
           userChoices.inAsset = null;
-          userChoices.allowAutoMatch = true;
-          userChoices.showAllPossibleSwapMatches = false;
+          userChoices.swapMatchMode = MATCH_AUTO;
+          userChoices.swapIDsToIgnore = {};
+          userChoices.numberOfMatchedSwaps = null;
           router.setRoute('/place');
           break;
         case 'wait':
@@ -2208,28 +2233,40 @@
           router.setRoute('/receive');
       }
     };
+    ignoreAllSwaps = function() {
+      var swap, _i, _len, _ref;
+      _ref = SwapsStore.getSwaps();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        swap = _ref[_i];
+        userChoices.swapIDsToIgnore[swap.id] = true;
+      }
+    };
+    changeSwapMatchMode = function(newSwapMatchMode) {
+      userChoices.swapMatchMode = newSwapMatchMode;
+      checkForAutoMatch();
+    };
     checkForAutoMatch = function() {
-      var matchedSingleSwap;
-      if (!userChoices.allowAutoMatch) {
+      var matchedSingleSwap, matchedSwaps;
+      matchedSwaps = refreshMatchedSwaps();
+      if (userChoices.swapMatchMode !== MATCH_AUTO) {
         return false;
       }
-      matchedSingleSwap = autoMatchTransaction();
-      if (matchedSingleSwap) {
+      if (userChoices.numberOfMatchedSwaps === 1) {
+        matchedSingleSwap = matchedSwaps[0];
         updateChosenSwap(matchedSingleSwap);
         return true;
       }
       return false;
     };
-    autoMatchTransaction = function() {
+    refreshMatchedSwaps = function() {
       var matchedSwaps;
+      userChoices.numberOfMatchedSwaps = 0;
       if ((userChoices.inAsset == null) || !userChoices.inAmount) {
         return null;
       }
       matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices);
-      if (matchedSwaps.length === 1) {
-        return matchedSwaps[0];
-      }
-      return null;
+      userChoices.numberOfMatchedSwaps = matchedSwaps.length;
+      return matchedSwaps;
     };
     swapIsComplete = function(newChosenSwap) {
       if (newChosenSwap.isComplete) {
@@ -2343,8 +2380,7 @@
             break;
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();
-            userChoices.allowAutoMatch = false;
-            userChoices.showAllPossibleSwapMatches = true;
+            changeSwapMatchMode(MATCH_SHOW_ALL);
             routeToStepOrEmitChange('receive');
             break;
           case BotConstants.BOT_USER_RESET_SWAP:
@@ -2362,10 +2398,14 @@
           case BotConstants.BOT_GO_BACK:
             goBack();
             break;
+          case BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS:
+            ignoreAllSwaps();
+            changeSwapMatchMode(MATCH_AUTO);
+            routeToStepOrEmitChange('receive');
+            break;
           case BotConstants.BOT_SHOW_ALL_TRANSACTIONS:
             clearChosenSwap();
-            userChoices.allowAutoMatch = false;
-            userChoices.showAllPossibleSwapMatches = true;
+            changeSwapMatchMode(MATCH_SHOW_ALL);
             routeToStepOrEmitChange('receive');
         }
       });
@@ -2394,7 +2434,10 @@
       if (swap.isComplete) {
         return false;
       }
-      if (userChoices.showAllPossibleSwapMatches) {
+      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+        return false;
+      }
+      if (userChoices.swapMatchMode === userChoices.MATCH_SHOW_ALL) {
         return true;
       }
       if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {

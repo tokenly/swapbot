@@ -16,6 +16,7 @@ BotConstants = do ()->
 
     exports.BOT_GO_BACK                      = 'BOT_GO_BACK';
     exports.BOT_SHOW_ALL_TRANSACTIONS        = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS    = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
 
     exports.BOT_ADD_NEW_QUOTE                = 'BOT_ADD_NEW_QUOTE';
 

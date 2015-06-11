@@ -1,17 +1,21 @@
 UserChoiceStore = do ()->
     exports = {}
 
+    exports.MATCH_AUTO     = MATCH_AUTO     = 'AUTO'
+    exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL'
+
     userChoices = {
-        step                      : 'choose'
-        swapConfig                : {}
-        inAmount                  : null
-        inAsset                   : null
-        outAmount                 : null
-        outAsset                  : null
-        lockedInRate              : null
-        swap                      : null
-        allowAutoMatch            : true
-        showAllPossibleSwapMatches: true
+        step                : 'choose'
+        swapConfig          : {}
+        inAmount            : null
+        inAsset             : null
+        outAmount           : null
+        outAsset            : null
+        lockedInRate        : null
+        swap                : null
+        swapMatchMode       : MATCH_AUTO
+        swapIDsToIgnore     : {}
+        numberOfMatchedSwaps: null
 
         email:
             value     : ''
@@ -26,15 +30,18 @@ UserChoiceStore = do ()->
 
     resetUserChoices = ()->
         # does not reset the step
-        userChoices.swapConfig                 = null
-        userChoices.inAmount                   = null
-        userChoices.inAsset                    = null
-        userChoices.outAmount                  = null
-        userChoices.outAsset                   = null
-        userChoices.lockedInRate               = null
-        userChoices.swap                       = null
-        userChoices.allowAutoMatch             = true
-        userChoices.showAllPossibleSwapMatches = false
+        userChoices.swapConfig           = null
+        userChoices.inAmount             = null
+        userChoices.inAsset              = null
+        userChoices.outAmount            = null
+        userChoices.outAsset             = null
+        userChoices.lockedInRate         = null
+        userChoices.swap                 = null
+        userChoices.swapMatchMode        = MATCH_AUTO
+        userChoices.swapIDsToIgnore      = {}
+        userChoices.numberOfMatchedSwaps = null
+
+        userChoices.z = false
         resetEmailChoices()
         return
 
@@ -193,11 +200,12 @@ UserChoiceStore = do ()->
                 resetUserChoices()
                 router.setRoute('/choose')
             when 'receive'
-                userChoices.swapConfig                 = null
-                userChoices.inAmount                   = null
-                userChoices.inAsset                    = null
-                userChoices.allowAutoMatch             = true
-                userChoices.showAllPossibleSwapMatches = false
+                userChoices.swapConfig           = null
+                userChoices.inAmount             = null
+                userChoices.inAsset              = null
+                userChoices.swapMatchMode        = MATCH_AUTO
+                userChoices.swapIDsToIgnore      = {}
+                userChoices.numberOfMatchedSwaps = null
 
                 router.setRoute('/place')
             when 'wait'
@@ -205,32 +213,45 @@ UserChoiceStore = do ()->
                 router.setRoute('/receive')
         return
 
+    ignoreAllSwaps = ()->
+        # ignore all the swaps that we've matched so far
+        for swap in SwapsStore.getSwaps()
+            userChoices.swapIDsToIgnore[swap.id] = true
 
+        return
 
 
     # #############################################
 
-    checkForAutoMatch = ()->
-        # console.log "userChoices.allowAutoMatch=#{userChoices.allowAutoMatch}"
-        if not userChoices.allowAutoMatch then return false
+    changeSwapMatchMode = (newSwapMatchMode)->
+        userChoices.swapMatchMode = newSwapMatchMode
+        checkForAutoMatch()
+        return
 
-        matchedSingleSwap = autoMatchTransaction()
-        if matchedSingleSwap
+
+    checkForAutoMatch = ()->
+        matchedSwaps = refreshMatchedSwaps()
+
+        if userChoices.swapMatchMode != MATCH_AUTO then return false
+
+        if userChoices.numberOfMatchedSwaps == 1
+            matchedSingleSwap = matchedSwaps[0]
             # console.log "Auto match found"
             updateChosenSwap(matchedSingleSwap)
             return true
 
         return false
 
-    autoMatchTransaction = ()->
+    refreshMatchedSwaps = ()->
+        userChoices.numberOfMatchedSwaps = 0
+
         if not userChoices.inAsset? or not userChoices.inAmount
             return null
 
         matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices)
-        if matchedSwaps.length == 1
-            return matchedSwaps[0]
+        userChoices.numberOfMatchedSwaps = matchedSwaps.length
+        return matchedSwaps
 
-        return null
     
     swapIsComplete = (newChosenSwap)->
         return true if newChosenSwap.isComplete
@@ -379,8 +400,7 @@ UserChoiceStore = do ()->
                     clearChosenSwap()
 
                     # disable automatching
-                    userChoices.allowAutoMatch = false
-                    userChoices.showAllPossibleSwapMatches = true
+                    changeSwapMatchMode(MATCH_SHOW_ALL)
 
                     # go back to the wait step if we aren't there
                     routeToStepOrEmitChange('receive')
@@ -403,12 +423,20 @@ UserChoiceStore = do ()->
                 when BotConstants.BOT_GO_BACK
                     goBack()
 
+                when BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS
+                    ignoreAllSwaps()
+
+                    # enable automatching
+                    changeSwapMatchMode(MATCH_AUTO)
+
+                    # go back to the wait step if we aren't there
+                    routeToStepOrEmitChange('receive')
+
                 when BotConstants.BOT_SHOW_ALL_TRANSACTIONS
                     clearChosenSwap()
 
                     # disable automatching
-                    userChoices.allowAutoMatch = false
-                    userChoices.showAllPossibleSwapMatches = true
+                    changeSwapMatchMode(MATCH_SHOW_ALL)
 
                     # go back to the wait step if we aren't there
                     routeToStepOrEmitChange('receive')

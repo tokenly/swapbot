@@ -84,6 +84,18 @@ UserInputActions = do ()->
         return
 
 
+    exports.ignoreAllSwapsOnClick = (e)->
+        e.preventDefault()
+        exports.ignoreAllSwaps()
+        return
+
+    exports.ignoreAllSwaps = ()->
+        Dispatcher.dispatch({
+            actionType: BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS
+        })
+        return
+
+
 
     # #############################################
     return exports

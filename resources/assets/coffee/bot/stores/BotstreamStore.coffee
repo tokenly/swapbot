@@ -18,7 +18,7 @@ BotstreamStore = do ()->
                 # new event
                 allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper)
 
-            console.log "BotstreamStore allMyBotstreamEventsById[#{eventId}] = ",allMyBotstreamEventsById[eventId]
+            # console.log "BotstreamStore allMyBotstreamEventsById[#{eventId}] = ",allMyBotstreamEventsById[eventId]
 
             anyChanged = true
 

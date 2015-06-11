@@ -7,8 +7,12 @@ SwapMatcher = do ()->
         if swap.isComplete
             return false
 
-        # always match when showAllPossibleSwapMatches flag is set
-        if userChoices.showAllPossibleSwapMatches
+        # ignore old swaps
+        if userChoices.swapIDsToIgnore[swap.id]?
+            return false
+
+        # always match when mode is MATCH_SHOW_ALL
+        if userChoices.swapMatchMode == userChoices.MATCH_SHOW_ALL
             return true
 
         if swap.assetIn = userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)

@@ -543,6 +543,10 @@ button.copied.zeroclipboard-is-hover {
 #transaction-wait-list div.i-paid-link {
   margin-top: 6px;
 }
+h4#DetectedMultiple {
+  margin-top: 20px;
+  margin-bottom: 0;
+}
 /* Global varibles */
 body {
   background-color: #f7f7f7;

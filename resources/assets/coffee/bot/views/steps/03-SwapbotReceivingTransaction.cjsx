@@ -154,7 +154,10 @@ do ()->
                     {
                             if this.state.anyMatchedSwaps
                                 <div>
-                                    <h4>We&rsquo;ve detected one or multiple orders that might be yours, please select the correct one to continue.</h4>
+                                    <h4 id="DetectedMultiple">We&rsquo;ve detected one or multiple orders that might be yours, please select the correct one to continue.</h4>
+                                    <div className="not-paid-yet-link" id="NotPaidYetLink">
+                                        <a id="not-paid-yet" onClick={UserInputActions.ignoreAllSwapsOnClick} href="#not-paid-yet" className="shadow-link">I haven&rsquo;t paid yet</a>
+                                    </div>
                                     <ul id="transaction-confirm-list" className="wide-list">
                                         {
                                             for swap in this.state.matchedSwaps
@@ -168,9 +171,12 @@ do ()->
                                         <li>
                                             <div className="status-icon icon-pending"></div>
                                             Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}
-                                            <div className="i-paid-link" id="IPaidLink">
-                                                <a id="i-paid" onClick={UserInputActions.showAllTransactionsOnClick} href="#i-paid" className="shadow-link">I&rsquo;ve Paid</a>
-                                            </div>
+                                            {
+                                                if this.state.userChoices.numberOfMatchedSwaps > 0
+                                                    <div className="i-paid-link" id="IPaidLink">
+                                                        <a id="i-paid" onClick={UserInputActions.showAllTransactionsOnClick} href="#i-paid" className="shadow-link">I&rsquo;ve Paid</a>
+                                                    </div>
+                                            }
                                         </li>
                                     </ul>
                                 </div>

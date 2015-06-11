@@ -543,6 +543,10 @@ button.copied.zeroclipboard-is-hover {
 #transaction-wait-list div.i-paid-link {
   margin-top: 6px;
 }
+h4#DetectedMultiple {
+  margin-top: 20px;
+  margin-bottom: 0;
+}
 body {
   background-color: #f7f7f7;
   font-family: 'Source Sans Pro', sans-serif;
@@ -735,7 +739,7 @@ ul.swaps-list li p {
   padding-top: 16px;
 }
 #swapbot-container div#GoBackLink {
-  margin-top: 20px;
+  margin-top: 8px;
 }
 .content .x-button {
   float: right;
