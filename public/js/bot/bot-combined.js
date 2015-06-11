@@ -1307,7 +1307,9 @@
           "className": "shadow-link"
         }, "Not your transaction?")), React.createElement("p", null, "\u00a0"), (userChoices.email.emailErrorMsg ? React.createElement("p", {
           "className": "error"
-        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("p", null, React.createElement("strong", null, "Email address submitted."), "  Please check your email.") : React.createElement("div", null, React.createElement("p", null, "Don\u2019t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+        }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("div", null, React.createElement("p", null, React.createElement("strong", null, "Email Address Received"), React.createElement("br", null), "Thanks for using Swapbot, you\u2019ll quickly receive the first of three updates designed to keep you informed of your order."), React.createElement("p", null, "We hope you enjoy the rest of your day.  Any comments or questions can be directed to ", React.createElement("a", {
+          "href": "mailto:team@tokenly.com"
+        }, "team@tokenly.com"), "."), React.createElement("p", null, "\u00a0")) : React.createElement("div", null, React.createElement("p", null, "Don\u2019t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
           "action": "#submit-email",
           "onSubmit": this.submitEmailFn,
           "style": (userChoices.email.submittingEmail ? {
@@ -1345,10 +1347,10 @@
         UserChoiceStore.removeChangeListener(this._onChange);
       },
       render: function() {
-        var bot, defaultValue, outAsset, swapConfig;
+        var bot, outAmount, outAsset, swapConfig;
         bot = this.props.bot;
         swapConfig = this.state.userChoices.swapConfig;
-        defaultValue = this.state.userChoices.outAmount;
+        outAmount = this.state.userChoices.outAmount;
         outAsset = this.state.userChoices.outAsset;
         if (!swapConfig) {
           return null;
@@ -1359,7 +1361,9 @@
         }, React.createElement("div", {
           "id": "swap-step-3",
           "className": "content"
-        }, React.createElement("h2", null, "Waiting for confirmations"), React.createElement("div", {
+        }, React.createElement("h2", null, "Confirming Payment \& Delivering Your Tokens"), React.createElement("div", {
+          "className": "details"
+        }, "You\u2019re done! Either leave this window open to track your order or enter your email \nand we\u2019ll let you know when your ", swapbot.formatters.formatCurrency(outAmount), " ", outAsset, " has been delivered."), React.createElement("div", {
           "className": "segment-control"
         }, React.createElement("div", {
           "className": "line"
@@ -1375,7 +1379,7 @@
           "className": "icon-loading center"
         }), React.createElement("div", {
           "className": "chosenInputAmount"
-        }, "Purchasing", ' ' + swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset), (this.state.userChoices.swap != null ? React.createElement(SingleTransactionInfo, {
+        }, "Purchasing", ' ' + swapbot.formatters.formatCurrency(outAmount), "\u00a0", outAsset), (this.state.userChoices.swap != null ? React.createElement(SingleTransactionInfo, {
           "bot": bot,
           "userChoices": this.state.userChoices
         }) : React.createElement("div", null, "No transaction found")), React.createElement("p", {

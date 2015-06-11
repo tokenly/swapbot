@@ -70,9 +70,16 @@ do ()->
 
                     {
                         if userChoices.email.submittedEmail
+                            <div>
                             <p>
-                                <strong>Email address submitted.</strong>  Please check your email.
+                                <strong>Email Address Received</strong><br />
+                                Thanks for using Swapbot, you&rsquo;ll quickly receive the first of three updates designed to keep you informed of your order.
                             </p>
+                            <p>
+                                We hope you enjoy the rest of your day.  Any comments or questions can be directed to <a href="mailto:team@tokenly.com">team@tokenly.com</a>.
+                            </p>
+                            <p>&nbsp;</p>
+                            </div>
                         else
                             <div>
                             <p>
@@ -128,13 +135,20 @@ do ()->
             # console.log "SwapbotWait render"
             bot = this.props.bot
             swapConfig = this.state.userChoices.swapConfig
-            defaultValue = this.state.userChoices.outAmount
+            outAmount = this.state.userChoices.outAmount
             outAsset = this.state.userChoices.outAsset
             return null if not swapConfig
 
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-3" className="content">
-                    <h2>Waiting for confirmations</h2>
+                    <h2>Confirming Payment &amp; Delivering Your Tokens</h2>
+
+                    <div className="details">
+                        You&rsquo;re done! Either leave this window open to track your order or enter your email 
+                        and we&rsquo;ll let you know when your {swapbot.formatters.formatCurrency(outAmount)} {outAsset} has been delivered.
+                    </div>
+
+
                     <div className="segment-control">
                         <div className="line"></div>
                         <br/>
@@ -143,11 +157,12 @@ do ()->
                         <div className="dot selected"></div>
                         <div className="dot"></div>
                     </div>
+
                     <div className="icon-loading center"></div>
 
                     <div className="chosenInputAmount">
                         Purchasing
-                        {' '+swapbot.formatters.formatCurrency(defaultValue)}
+                        {' '+swapbot.formatters.formatCurrency(outAmount)}
                         &nbsp;
                         {outAsset}
                     </div>
