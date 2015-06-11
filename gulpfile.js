@@ -2,6 +2,7 @@ var del = require('del');
 var elixir = require('laravel-elixir');
 var gulp = require("gulp");
 var concat = require("gulp-concat");
+var order = require("gulp-order");
 var coffee = require("gulp-coffee");
 var cjsx = require('gulp-cjsx');
 var Notification = require('laravel-elixir/ingredients/commands/Notification');
@@ -30,15 +31,19 @@ var onError = function(e) {
 // combine admin
 elixir.extend("combineAdmin", function() {
     gulp.task('combineAdmin', function() {
-        // es.merge(
-        //     gulp.src('resources/assets/coffee/admin/*.coffee'),
-        //     gulp.src('resources/assets/coffee/shared/*.coffee')
-        // )
+        // gulp.src([
+        //     'resources/assets/coffee/admin/*.coffee',
+        //     'resources/assets/coffee/shared/*.coffee'
+        // ])
+
         gulp.src([
             'resources/assets/coffee/admin/*.coffee',
             'resources/assets/coffee/shared/*.coffee'
         ])
-      // gulp.src('resources/assets/coffee/admin/*.coffee')
+        .pipe(order([
+            'resources/assets/coffee/admin/*.coffee',
+            'resources/assets/coffee/shared/*.coffee'
+        ]))
         .pipe(concat('admin-combined.coffee'))
         .pipe(coffee({}).on('error', onError))
         .pipe(gulp.dest('public/js/admin'))
