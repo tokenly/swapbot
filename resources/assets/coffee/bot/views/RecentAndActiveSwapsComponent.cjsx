@@ -54,10 +54,10 @@ do ()->
                         <div className="date">{this.state.fromNow}</div>
                         <span>
                             {
-                                if swap.isError
+                                if swap.isError or not swap.isComplete
                                     swap.message
                                 else
-                                    "Sold #{swap.quantityOut} #{swap.assetOut} for #{swap.quantityIn} #{swap.assetIn}"
+                                    "Sold #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut} for #{swapbot.formatters.formatCurrency(swap.quantityIn)} #{swap.assetIn}"
                             }
                             
                             { if swap.isComplete
