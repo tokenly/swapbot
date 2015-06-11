@@ -196,7 +196,6 @@ UserChoiceStore = do ()->
 
 
     goBack = ()->
-        console.log "goBack userChoices.step=#{userChoices.step}"
         switch userChoices.step
             when 'place'
                 resetUserChoices()

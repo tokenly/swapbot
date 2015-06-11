@@ -949,9 +949,7 @@
           "className": "item-content error"
         }, errorMsg) : void 0), React.createElement("div", {
           "className": "item-header"
-        }, "Send ", React.createElement("span", {
-          "id": "token-value-1"
-        }, swapbot.formatters.formatCurrency(inAmount)), " ", swapConfig["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
+        }, "To purchase ", swapbot.formatters.formatCurrency(this.props.outAmount), " ", swapConfig.out, ", send ", swapbot.formatters.formatCurrency(inAmount), " ", swapConfig["in"]), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
           "className": "icon-next"
         }), React.createElement("div", {
           "className": "clearfix"
@@ -1033,7 +1031,7 @@
           "onClick": UserInputActions.goBackOnClick,
           "href": "#go-back",
           "className": "shadow-link"
-        }, "Go Back")), React.createElement("ul", {
+        }, "Go Back")), ((this.state.userChoices.outAmount != null) && this.state.userChoices.outAmount > 0 ? React.createElement("div", null, React.createElement("ul", {
           "id": "transaction-select-list",
           "className": "wide-list"
         }, ((function() {
@@ -1054,7 +1052,7 @@
           }
         }).call(this))), React.createElement("p", {
           "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")) : void 0)));
       }
     });
   })();
@@ -2215,7 +2213,6 @@
       emitChange();
     };
     goBack = function() {
-      console.log("goBack userChoices.step=" + userChoices.step);
       switch (userChoices.step) {
         case 'place':
           resetUserChoices();
@@ -2460,7 +2457,6 @@
           matchedSwaps.push(swap);
         }
       }
-      console.log("matchedSwaps=", matchedSwaps);
       return matchedSwaps;
     };
     return exports;

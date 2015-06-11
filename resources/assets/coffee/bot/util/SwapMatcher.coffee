@@ -27,7 +27,6 @@ SwapMatcher = do ()->
         for swap in swaps
             if swapIsMatched(swap, userChoices)
                 matchedSwaps.push(swap)
-        console.log "matchedSwaps=", matchedSwaps
         return matchedSwaps
 
     # #############################################

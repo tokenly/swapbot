@@ -53,7 +53,9 @@ do ()->
                             {errorMsg}
                         </div>
                     }
-                    <div className="item-header">Send <span id="token-value-1">{swapbot.formatters.formatCurrency(inAmount)}</span> {swapConfig.in}</div>
+                    <div className="item-header">
+                        To purchase {swapbot.formatters.formatCurrency(this.props.outAmount)} {swapConfig.out}, send {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}
+                    </div>
                     <p>
                         { 
                             if isChooseable
@@ -141,15 +143,19 @@ do ()->
                         <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
                     </div>
                     
-                    <ul id="transaction-select-list" className="wide-list">
-                        { 
-                            if matchingSwapConfigs
-                                for matchedSwapConfig, offset in matchingSwapConfigs
-                                        <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
-                        }
-                    </ul>
+                    { if this.state.userChoices.outAmount? and this.state.userChoices.outAmount > 0
+                        <div>
+                            <ul id="transaction-select-list" className="wide-list">
+                                { 
+                                    if matchingSwapConfigs
+                                        for matchedSwapConfig, offset in matchingSwapConfigs
+                                                <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
+                                }
+                            </ul>
+                            <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                        </div>
+                    }
 
-                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
                 </div>
             </div>
 
