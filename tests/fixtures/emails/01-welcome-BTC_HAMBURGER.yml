@@ -1,0 +1,4 @@
+subject: Swap Request Received
+body: you sent Hamburger Selling Bot 0.035 BTC and will be receiving 1 HAMBURGER along with 0.01 BTC in change shortly
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

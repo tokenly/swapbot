@@ -12,7 +12,7 @@
 
 <p>When you’re ready, log into your wallet to use, send or redeem them as you see fit.</p>
 
-<p>To recap your order, you sent {!! $botLink !!} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}.</p>
+<p>To recap your order, you sent {!! $botLink !!} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}{{ $hasChange ? " along with {$swap['receipt']['changeOut']} {$inAsset} in change" : ''}}.</p>
 
 <p>&nbsp;</p>
 <h4>What Happens Next?</h4>

@@ -73,6 +73,7 @@ class EmailSenderTest extends TestCase {
             'inAsset'         => 'BTC',
             'outQty'          => 2000,
             'outAsset'        => 'LTBCOIN',
+            'hasChange'       => false,
             'unsubscribeLink' => 'http://foo.bar/public/unsubscribe/12345-67890/foo123',
             'robohashUrl'     => 'http://robohash.org/5a8e7572b37212f8d32817f40409a29fb9849c0e2336c6df19f4bfde9ebc720a.png?set=set3',
             'botUrl'          => 'http://foo.bar',

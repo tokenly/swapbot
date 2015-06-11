@@ -1,5 +1,6 @@
 # test full 2 confirmation fiat-based token purchase
-#   with overpament sent and change sent back
+#   with overpayment sent and change sent back
+#   and emails
 
 ############################
 # setup bots and payment
@@ -29,6 +30,11 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_HAMBURGER_SEND_notification_01.yml }
     confirmations: 2
     blockId: 300003
+
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
+  - {type: xchainNotification, startOffset: 1}
 
 
 
@@ -103,3 +109,8 @@ expectedBotModels:
 expectedQuoteClientCalls:
   - { source: bitcoinAverage, pair: USD:BTC }
   - { source: bitcoinAverage, pair: USD:BTC }
+
+expectedEmails:
+  - meta: { baseFilename: 01-welcome-BTC_HAMBURGER.yml }
+  - meta: { baseFilename: 02-received-BTC_HAMBURGER.yml }
+  - meta: { baseFilename: 03-complete-BTC_HAMBURGER.yml }

@@ -100,9 +100,12 @@ class CustomerEmailHandler {
         $bot_url = $bot->getPublicBotURL();
         $bot_link = '<a href="'.$bot_url.'">'.$bot['name'].'</a>';
 
+        $serialized_swap = $swap->serializeForAPI();
+        Log::debug('$serialized_swap='.json_encode($serialized_swap, 192));
         $email_vars = [
             'customer'        => $customer->serializeForAPI(),
-            'swap'            => $swap->serializeForAPI(),
+            'swap'            => $serialized_swap,
+            'hasChange'       => isset($serialized_swap['receipt']['changeOut']) AND $serialized_swap['receipt']['changeOut'] > 0,
             'bot'             => $bot->serializeForAPI(),
             'inQty'           => $swap['in_qty'],
             'inAsset'         => $swap['in_asset'],

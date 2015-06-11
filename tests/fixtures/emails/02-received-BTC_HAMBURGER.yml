@@ -1,0 +1,6 @@
+subject: SwapBot Payment Received
+body: 
+    - Your recent order from Hamburger Selling Bot has been received
+    - To recap your order, you sent Hamburger Selling Bot 0.035 BTC and we’ve just sent you 1 HAMBURGER along with 0.01 BTC in change
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

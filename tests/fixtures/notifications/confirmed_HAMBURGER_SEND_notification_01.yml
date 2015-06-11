@@ -19,5 +19,5 @@ counterpartyTx:
   quantity: 1
   quantitySat: 100000000
   asset: HAMBURGER
-  dustSize: 0.00001
-  dustSizeSat: 1000
+  dustSize: 0.0100543
+  dustSizeSat: 1005430

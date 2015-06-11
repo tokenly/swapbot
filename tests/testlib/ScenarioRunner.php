@@ -797,6 +797,7 @@ class ScenarioRunner
 
         // placeholder
         $normalized_expected_email_model = $expected_email_model;
+        if (!isset($normalized_expected_email_model['text'])) { $normalized_expected_email_model['text'] = $normalized_expected_email_model['body']; }
 
 
         // ///////////////////
@@ -818,13 +819,37 @@ class ScenarioRunner
 
         ///////////////////
         // JUST NEEDS TO MATCH
-        $must_match_fields = ['body'];
+        $must_match_fields = ['body', 'text',];
+        $fields_matched = ['body' => false, 'text' => false, ];
         foreach ($must_match_fields as $field) {
             if (isset($actual_email_model[$field])) {
-                if (stristr($actual_email_model[$field], $normalized_expected_email_model[$field]) !== false) {
+                $required_text_matches = [];
+                if (is_array($normalized_expected_email_model[$field])) {
+                    $required_text_matches = $normalized_expected_email_model[$field];
+                } else {
+                    $required_text_matches = [$normalized_expected_email_model[$field]];
+                }
+
+                $all_matched = true;
+                foreach($required_text_matches as $required_text_match) {
+                    if (stristr($actual_email_model[$field], $required_text_match) === false) {
+                        $all_matched = false;
+                        break;
+                    }
+                }
+
+
+                if ($all_matched) {
                     $normalized_expected_email_model[$field] = $actual_email_model[$field];
+                    $fields_matched[$field] = true;
+                } else {
+                    $normalized_expected_email_model[$field] = join(' [AND] ', $normalized_expected_email_model[$field]);
                 }
             }
+        }
+        if (!$fields_matched['body'] AND !$fields_matched['text'] AND $normalized_expected_email_model['text'] == $normalized_expected_email_model['body']) {
+            // normalize the body so only the text shows in the error
+            $normalized_expected_email_model['body'] = $actual_email_model['body'];
         }
         ///////////////////
 
@@ -872,14 +897,25 @@ class ScenarioRunner
         $mock
             ->shouldReceive('send')
             ->andReturnUsing(function(\Swift_Message $msg) use ($mailer_recorder) {
+                $plain_text_content = '';
+                $children = $msg->getChildren();
+                if ($children) {
+                    foreach($children as $child) {
+                        if ($child->getContentType() == 'text/plain') {
+                            $plain_text_content = $child->getBody();
+                            break;
+                        }
+                    }
+                }
+
                 $email = [
                     'subject' => $msg->getSubject(),
                     'to'      => $msg->getTo(),
                     'from'    => $msg->getFrom(),
                     'body'    => $msg->getBody(),
+                    'text'    => $plain_text_content,
                 ];
                 $mailer_recorder->emails[] = $email;
-
                 // app('Illuminate\Mail\Transport\LogTransport')->send($msg);
             });
 

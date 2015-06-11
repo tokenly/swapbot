@@ -10,7 +10,7 @@
 
 <p>Your recent order from {{ $bot['name'] }} has been received!  In fact, we’re sending out your tokens right now!</p>
 
-<p>To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}.</p>
+<p>To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}{{ $hasChange ? " along with {$swap['receipt']['changeOut']} {$inAsset} in change" : ''}}.</p>
 
 <p>&nbsp;</p>
 <h4>What Happens Next?</h4>

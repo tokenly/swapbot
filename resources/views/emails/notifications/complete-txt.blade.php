@@ -9,7 +9,7 @@ The tokens you recently purchased from {{ $bot['name'] }} have been delivered.
 
 When you’re ready, log into your wallet to use, send or redeem them as you see fit.
 
-To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}.
+To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}{{ $hasChange ? " along with {$swap['receipt']['changeOut']} {$inAsset} in change" : ''}}.
 
 
 What Happens Next?

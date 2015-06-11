@@ -1,0 +1,6 @@
+subject: Swap Complete
+body: 
+    - have been delivered
+    - just sent you 1 HAMBURGER along with 0.01 BTC in change
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}
