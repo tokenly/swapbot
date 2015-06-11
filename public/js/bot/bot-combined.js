@@ -491,7 +491,7 @@
           "className": "status-content"
         }, React.createElement("span", null, React.createElement("div", {
           "className": "date"
-        }, this.state.fromNow), React.createElement("span", null, swap.message, (swap.isComplete ? React.createElement("a", {
+        }, this.state.fromNow), React.createElement("span", null, (swap.isError ? swap.message : "Sold " + swap.quantityOut + " " + swap.assetOut + " for " + swap.quantityIn + " " + swap.assetIn), (swap.isComplete ? React.createElement("a", {
           "href": "/public/" + bot.username + "/swap/" + swap.id,
           "className": "details-link",
           "target": "_blank"
