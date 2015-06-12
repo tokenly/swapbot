@@ -83,8 +83,8 @@ class SweepBotCommand extends Command {
 
         // load the bot
         $bot_repository = app('Swapbot\Repositories\BotRepository');
-        $bot = $bot_repository->findByID($bot_id);
-        if (!$bot) { $bot = $bot_repository->findByUuid($bot_id); }
+        $bot = $bot_repository->findByUuid($bot_id);
+        if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
         if (!$bot) {
             $this->error("Unable to find bot with id $bot_id");
             return;

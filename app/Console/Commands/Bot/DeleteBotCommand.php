@@ -67,8 +67,8 @@ class DeleteBotCommand extends Command {
 
         // load the bot
         $bot_repository = app('Swapbot\Repositories\BotRepository');
-        $bot = $bot_repository->findByID($bot_id);
-        if (!$bot) { $bot = $bot_repository->findByUuid($bot_id); }
+        $bot = $bot_repository->findByUuid($bot_id);
+        if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
         if (!$bot) {
             $this->error("Unable to find bot with id $bot_id");
             return;
@@ -78,6 +78,12 @@ class DeleteBotCommand extends Command {
             if ($is_dry_run) {
                 $this->comment("[Dry Run] Would delete bot {$bot['name']} ({$bot['uuid']})");
             } else {
+                $confirmed = $this->confirm("Are you sure you want to delete bot {$bot['name']} ({$bot['uuid']})?", false);
+                if (!$confirmed) {
+                    $this->error("Aborting");
+                    return;
+                }
+
                 $this->comment("Deleting bot {$bot['name']} ({$bot['uuid']})");
                 $this->dispatch(new DeleteBot($bot));
             }

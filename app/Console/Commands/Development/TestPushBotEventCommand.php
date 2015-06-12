@@ -76,11 +76,8 @@ EOF
         }
 
         $bot_repository = $this->laravel->make('Swapbot\Repositories\BotRepository');
-        $bot = $bot_repository->findByID($bot_id);
-        if (!$bot) {
-            // try uuid
-            $bot = $bot_repository->findByUuid($bot_id);
-        }
+        $bot = $bot_repository->findByUuid($bot_id);
+        if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
         if (!$bot) {
             throw new Exception("Unable to find bot", 1);
         }

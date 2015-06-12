@@ -60,11 +60,8 @@ class UpdateBotPaymentAccount extends Command {
 
             $bot_repository = app('Swapbot\Repositories\BotRepository');
 
-            $bot = $bot_repository->findByID($bot_id);
-            if (!$bot) {
-                // try uuid
-                $bot = $bot_repository->findByUuid($bot_id);
-            }
+            $bot = $bot_repository->findByUuid($bot_id);
+            if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
             if (!$bot) { throw new Exception("Unable to find bot", 1); }
 
             $this->info('Applying payment of '.$amount.' to bot '.$bot['name']);;

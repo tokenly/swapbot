@@ -64,11 +64,8 @@ class ResetBotHistoryCommand extends Command {
     {
         $bot_id = $this->input->getArgument('bot-id');
         $bot_repository = app('Swapbot\Repositories\BotRepository');
-        $bot = $bot_repository->findByID($bot_id);
-        if (!$bot) {
-            // try uuid
-            $bot = $bot_repository->findByUuid($bot_id);
-        }
+        $bot = $bot_repository->findByUuid($bot_id);
+        if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
         if (!$bot) { throw new Exception("Unable to find bot", 1); }
 
 
