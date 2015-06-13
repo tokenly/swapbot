@@ -2585,12 +2585,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/hmac-auth.git",
-                "reference": "cd48913038b735b0ebe2d04d535a0e01db6d131d"
+                "reference": "afeb35cadfd0aad269f7eab5b1785b4140b21191"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/cd48913038b735b0ebe2d04d535a0e01db6d131d",
-                "reference": "cd48913038b735b0ebe2d04d535a0e01db6d131d",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/afeb35cadfd0aad269f7eab5b1785b4140b21191",
+                "reference": "afeb35cadfd0aad269f7eab5b1785b4140b21191",
                 "shasum": ""
             },
             "require": {
