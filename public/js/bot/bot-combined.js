@@ -1239,7 +1239,7 @@
           "className": "wide-list"
         }, React.createElement("li", null, React.createElement("div", {
           "className": "status-icon icon-pending"
-        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, (this.state.userChoices.numberOfIgnoredSwaps === 0 ? React.createElement("div", {
+        }), "Waiting for ", React.createElement("strong", null, swapbot.formatters.formatCurrency(this.state.userChoices.inAmount), " ", this.state.userChoices.inAsset), " to be sent to ", bot.address, (this.state.userChoices.numberOfIgnoredSwaps === 0 && this.state.userChoices.numberOfValidSwaps > 0 ? React.createElement("div", {
           "className": "i-paid-link",
           "id": "IPaidLink"
         }, React.createElement("a", {
@@ -2083,7 +2083,8 @@
       swapMatchMode: MATCH_AUTO,
       swapIDsToIgnore: {},
       numberOfIgnoredSwaps: 0,
-      numberOfMatchedSwaps: null,
+      numberOfMatchedSwaps: 0,
+      numberOfValidSwaps: 0,
       email: {
         value: '',
         submitting: false,
@@ -2104,7 +2105,8 @@
       userChoices.swapMatchMode = MATCH_AUTO;
       userChoices.swapIDsToIgnore = {};
       userChoices.numberOfIgnoredSwaps = 0;
-      userChoices.numberOfMatchedSwaps = null;
+      userChoices.numberOfMatchedSwaps = 0;
+      userChoices.numberOfValidSwaps = 0;
       userChoices.z = false;
       resetEmailChoices();
     };
@@ -2229,7 +2231,8 @@
           userChoices.swapMatchMode = MATCH_AUTO;
           userChoices.swapIDsToIgnore = {};
           userChoices.numberOfIgnoredSwaps = 0;
-          userChoices.numberOfMatchedSwaps = null;
+          userChoices.numberOfMatchedSwaps = 0;
+          userChoices.numberOfValidSwaps = 0;
           router.setRoute('/place');
           break;
         case 'wait':
@@ -2266,13 +2269,16 @@
       return false;
     };
     refreshMatchedSwaps = function() {
-      var matchedSwaps;
+      var matchedSwaps, validSwaps;
       userChoices.numberOfMatchedSwaps = 0;
+      userChoices.numberOfValidSwaps = 0;
       if ((userChoices.inAsset == null) || !userChoices.inAmount) {
         return null;
       }
       matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices);
       userChoices.numberOfMatchedSwaps = matchedSwaps.length;
+      validSwaps = SwapMatcher.buildValidSwaps(SwapsStore.getSwaps(), userChoices);
+      userChoices.numberOfValidSwaps = validSwaps.length;
       return matchedSwaps;
     };
     swapIsComplete = function(newChosenSwap) {
@@ -2435,13 +2441,10 @@
   })();
 
   SwapMatcher = (function() {
-    var exports, swapIsMatched;
+    var exports, swapIsMatched, swapIsValid;
     exports = {};
     swapIsMatched = function(swap, userChoices) {
-      if (swap.isComplete) {
-        return false;
-      }
-      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+      if (!swapIsValid(swap, userChoices)) {
         return false;
       }
       if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
@@ -2451,6 +2454,15 @@
         return true;
       }
       return false;
+    };
+    swapIsValid = function(swap, userChoices) {
+      if (swap.isComplete) {
+        return false;
+      }
+      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+        return false;
+      }
+      return true;
     };
     exports.buildMatchedSwaps = function(swaps, userChoices) {
       var matchedSwaps, swap, _i, _len;
@@ -2462,6 +2474,17 @@
         }
       }
       return matchedSwaps;
+    };
+    exports.buildValidSwaps = function(swaps, userChoices) {
+      var swap, validSwaps, _i, _len;
+      validSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsValid(swap, userChoices)) {
+          validSwaps.push(swap);
+        }
+      }
+      return validSwaps;
     };
     return exports;
   })();

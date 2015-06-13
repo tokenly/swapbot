@@ -16,7 +16,8 @@ UserChoiceStore = do ()->
         swapMatchMode       : MATCH_AUTO
         swapIDsToIgnore     : {}
         numberOfIgnoredSwaps: 0
-        numberOfMatchedSwaps: null
+        numberOfMatchedSwaps: 0
+        numberOfValidSwaps  : 0
 
         email:
             value     : ''
@@ -41,7 +42,8 @@ UserChoiceStore = do ()->
         userChoices.swapMatchMode        = MATCH_AUTO
         userChoices.swapIDsToIgnore      = {}
         userChoices.numberOfIgnoredSwaps = 0
-        userChoices.numberOfMatchedSwaps = null
+        userChoices.numberOfMatchedSwaps = 0
+        userChoices.numberOfValidSwaps   = 0
 
         userChoices.z = false
         resetEmailChoices()
@@ -207,7 +209,8 @@ UserChoiceStore = do ()->
                 userChoices.swapMatchMode        = MATCH_AUTO
                 userChoices.swapIDsToIgnore      = {}
                 userChoices.numberOfIgnoredSwaps = 0
-                userChoices.numberOfMatchedSwaps = null
+                userChoices.numberOfMatchedSwaps = 0
+                userChoices.numberOfValidSwaps   = 0
 
                 router.setRoute('/place')
             when 'wait'
@@ -248,12 +251,17 @@ UserChoiceStore = do ()->
 
     refreshMatchedSwaps = ()->
         userChoices.numberOfMatchedSwaps = 0
+        userChoices.numberOfValidSwaps = 0
 
         if not userChoices.inAsset? or not userChoices.inAmount
             return null
 
         matchedSwaps = SwapMatcher.buildMatchedSwaps(SwapsStore.getSwaps(), userChoices)
         userChoices.numberOfMatchedSwaps = matchedSwaps.length
+
+        validSwaps = SwapMatcher.buildValidSwaps(SwapsStore.getSwaps(), userChoices)
+        userChoices.numberOfValidSwaps = validSwaps.length
+
         return matchedSwaps
 
     
