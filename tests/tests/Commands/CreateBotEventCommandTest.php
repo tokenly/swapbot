@@ -11,6 +11,8 @@ class CreateBotEventCommandTest extends TestCase {
 
     public function testCreateBotEventCommand()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         // make a bot
         $bot = app('BotHelper')->newSampleBot();
 

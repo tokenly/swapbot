@@ -14,6 +14,8 @@ class BotStateTest extends TestCase {
 
     public function testBotStateTransitions()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         // install xchain mocks
         app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
 

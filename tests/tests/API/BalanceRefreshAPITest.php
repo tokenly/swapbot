@@ -10,6 +10,9 @@ class BalanceRefreshAPITest extends TestCase {
 
     public function testBalanceRefreshAPI()
     {
+        // install pusher mock
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         $sample_bot = $this->app->make('BotHelper')->newSampleBot(null, ['address' => '1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx']);
 
         // setup the API tester

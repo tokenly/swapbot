@@ -10,6 +10,8 @@ class SwapStateTest extends TestCase {
 
     public function testSwapStateTransitions()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         // install xchain mocks
         app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
 

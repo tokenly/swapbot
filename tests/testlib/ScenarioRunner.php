@@ -52,6 +52,9 @@ class ScenarioRunner
             // setup mock mailer
             $this->mock_mailer_recorder = $this->installMockMailer();
 
+            // mock pusher client
+            app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($test_case);
+
             // clear bot events
             $this->clearBotEvents();
         }

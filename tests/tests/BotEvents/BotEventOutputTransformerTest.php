@@ -9,6 +9,7 @@ class BotEventOutputTransformerTest extends TestCase {
 
     public function testBotEventOutputTransformer()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
         $logger = app('Swapbot\Swap\Logger\BotEventLogger');
         $swap = app('SwapHelper')->newSampleSwap();
 

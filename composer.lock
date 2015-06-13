@@ -2751,12 +2751,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/pusher-client.git",
-                "reference": "8cd40f570f9f162327066dfce1ee0ccbf531e692"
+                "reference": "5ef54911c16ee8c0b63c773829f2e9ce31da3c7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/pusher-client/zipball/8cd40f570f9f162327066dfce1ee0ccbf531e692",
-                "reference": "8cd40f570f9f162327066dfce1ee0ccbf531e692",
+                "url": "https://api.github.com/repos/tokenly/pusher-client/zipball/5ef54911c16ee8c0b63c773829f2e9ce31da3c7f",
+                "reference": "5ef54911c16ee8c0b63c773829f2e9ce31da3c7f",
                 "shasum": ""
             },
             "require": {
@@ -2784,7 +2784,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-02-02 13:32:00"
+            "time": "2015-06-13 16:27:40"
         },
         {
             "name": "tokenly/quotebot-client",

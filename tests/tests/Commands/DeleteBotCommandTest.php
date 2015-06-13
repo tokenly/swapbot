@@ -12,6 +12,8 @@ class DeleteBotCommandTest extends TestCase {
 
     public function testDeleteBotCommand()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         // make a bot
         $bot = app('BotHelper')->newSampleBot();
         $bot_id = $bot['id'];
@@ -28,6 +30,8 @@ class DeleteBotCommandTest extends TestCase {
 
     public function testDeleteBotWithOtherTablesCommand()
     {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
         $bot_repository = app('Swapbot\Repositories\BotRepository');
 
         app('ScenarioRunner')->init(null)->runScenarioByNumber(44);
