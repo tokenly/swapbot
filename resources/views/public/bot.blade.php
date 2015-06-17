@@ -21,13 +21,13 @@
         <div id="details">
             <div id="details-avatar">
                 @if ($bot['hash'])
-                <img src="{{ $bot->getRobohashURL() }}" class="center">
+                <a href="{{ $bot->getPublicBotURL() }}" title="Return to the bot home page"><img src="{{ $bot->getRobohashURL() }}" class="center"></a>
                 @else
                 <span data-no-image></span>
                 @endif
             </div>
             <div id="details-content">
-                <h1>{{ $bot['name'] }}</h1>
+                <h1><a href="{{ $bot->getPublicBotURL() }}" title="Return to the bot home page">{{ $bot['name'] }}</a></h1>
                 <div class="name">Status: </div>
                 <div id="BotStatusComponent" class="value">
                     {{-- REACT --}}

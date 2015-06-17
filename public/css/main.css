@@ -617,7 +617,7 @@ body {
   border: 2px solid black;
   background: #fefefe;
 }
-#details #details-avatar > img {
+#details #details-avatar img {
   width: 90%;
   height: 90%;
   margin-left: 5%;
