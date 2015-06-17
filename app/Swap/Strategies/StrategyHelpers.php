@@ -33,6 +33,7 @@ class StrategyHelpers {
 
     public static function isValidAssetName($name) {
         if ($name === 'BTC') { return true; }
+        if ($name === 'XCP') { return true; }
         if (!preg_match('!^[A-Z]+$!', $name)) { return false; }
         if (strlen($name) < 4) { return false; }
         if (substr($name, 0, 1) == 'A') { return false; }
