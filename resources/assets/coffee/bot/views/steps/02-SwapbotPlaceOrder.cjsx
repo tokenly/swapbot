@@ -29,7 +29,14 @@ do ()->
             return false
 
         getErrorMessage: ()->
-            return swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig)
+            errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig)
+            return errors if errors?
+
+            errors = swapbot.swapUtils.validateInAmount(this.getInAmount(), this.props.swapConfig)
+            return errors if errors?
+
+            return null
+
 
 
         chooseSwap: (e)->

@@ -165,8 +165,9 @@
   }
 
   swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports, validateOutAmount;
+    var HARD_MINIMUM, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
     exports = {};
+    HARD_MINIMUM = 0.00000001;
     buildDesc = {};
     buildDesc.rate = function(swapConfig) {
       var formatCurrency, inAmount, outAmount;
@@ -269,6 +270,47 @@
       }
       return null;
     };
+    validateInAmount = {};
+    validateInAmount.shared = function(inAmount, swapConfig) {
+      if (("" + inAmount).length === 0) {
+        return null;
+      }
+      if (isNaN(inAmount)) {
+        return 'The amount to send does not look like a number.';
+      }
+      if (inAmount < HARD_MINIMUM) {
+        return 'The amount to send is too small.';
+      }
+      return null;
+    };
+    validateInAmount.rate = function(inAmount, swapConfig) {
+      var errorMsg, formatCurrency;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      if ((swapConfig.min != null) && inAmount < swapConfig.min) {
+        formatCurrency = swapbot.formatters.formatCurrency;
+        return "This swap must be purchased by sending at least " + (formatCurrency(swapConfig.min)) + " " + swapConfig["in"] + ".";
+      }
+      return null;
+    };
+    validateInAmount.fixed = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    validateInAmount.fiat = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
     exports.exchangeDescription = function(swapConfig) {
       return buildDesc[swapConfig.strategy](swapConfig);
     };
@@ -282,6 +324,14 @@
     exports.validateOutAmount = function(outAmount, swapConfig) {
       var errorMsg;
       errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    exports.validateInAmount = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount[swapConfig.strategy](inAmount, swapConfig);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -924,7 +974,16 @@
         return false;
       },
       getErrorMessage: function() {
-        return swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig);
+        var errors;
+        errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig);
+        if (errors != null) {
+          return errors;
+        }
+        errors = swapbot.swapUtils.validateInAmount(this.getInAmount(), this.props.swapConfig);
+        if (errors != null) {
+          return errors;
+        }
+        return null;
       },
       chooseSwap: function(e) {
         e.preventDefault();
@@ -1732,6 +1791,27 @@
     return exports;
   })();
 
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    return exports;
+  })();
+
   Dispatcher = (function() {
     var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
     exports = {};
@@ -1829,76 +1909,6 @@
       throw error;
     }
   };
-
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    return exports;
-  })();
-
-  SwapMatcher = (function() {
-    var exports, swapIsMatched, swapIsValid;
-    exports = {};
-    swapIsMatched = function(swap, userChoices) {
-      if (!swapIsValid(swap, userChoices)) {
-        return false;
-      }
-      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
-        return true;
-      }
-      if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
-        return true;
-      }
-      return false;
-    };
-    swapIsValid = function(swap, userChoices) {
-      if (swap.isComplete) {
-        return false;
-      }
-      if (userChoices.swapIDsToIgnore[swap.id] != null) {
-        return false;
-      }
-      return true;
-    };
-    exports.buildMatchedSwaps = function(swaps, userChoices) {
-      var matchedSwaps, swap, _i, _len;
-      matchedSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsMatched(swap, userChoices)) {
-          matchedSwaps.push(swap);
-        }
-      }
-      return matchedSwaps;
-    };
-    exports.buildValidSwaps = function(swaps, userChoices) {
-      var swap, validSwaps, _i, _len;
-      validSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsValid(swap, userChoices)) {
-          validSwaps.push(swap);
-        }
-      }
-      return validSwaps;
-    };
-    return exports;
-  })();
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -2485,6 +2495,55 @@
     };
     exports.removeChangeListener = function(callback) {
       eventEmitter.removeListener('change', callback);
+    };
+    return exports;
+  })();
+
+  SwapMatcher = (function() {
+    var exports, swapIsMatched, swapIsValid;
+    exports = {};
+    swapIsMatched = function(swap, userChoices) {
+      if (!swapIsValid(swap, userChoices)) {
+        return false;
+      }
+      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
+        return true;
+      }
+      if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
+        return true;
+      }
+      return false;
+    };
+    swapIsValid = function(swap, userChoices) {
+      if (swap.isComplete) {
+        return false;
+      }
+      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+        return false;
+      }
+      return true;
+    };
+    exports.buildMatchedSwaps = function(swaps, userChoices) {
+      var matchedSwaps, swap, _i, _len;
+      matchedSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsMatched(swap, userChoices)) {
+          matchedSwaps.push(swap);
+        }
+      }
+      return matchedSwaps;
+    };
+    exports.buildValidSwaps = function(swaps, userChoices) {
+      var swap, validSwaps, _i, _len;
+      validSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsValid(swap, userChoices)) {
+          validSwaps.push(swap);
+        }
+      }
+      return validSwaps;
     };
     return exports;
   })();

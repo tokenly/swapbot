@@ -4,6 +4,8 @@ swapbot = {} if not swapbot?
 swapbot.swapUtils = do ()->
     exports = {}
 
+    HARD_MINIMUM = 0.00000001
+
     # #############################################
     # local
 
@@ -105,6 +107,41 @@ swapbot.swapUtils = do ()->
 
         return null
 
+    validateInAmount = {}
+    validateInAmount.shared = (inAmount, swapConfig)->
+        if (""+inAmount).length == 0 then return null
+        if isNaN(inAmount)
+            return 'The amount to send does not look like a number.'
+        if (inAmount) < HARD_MINIMUM
+            return 'The amount to send is too small.'
+        return null
+
+    validateInAmount.rate = (inAmount, swapConfig)->
+        errorMsg = validateInAmount.shared(inAmount, swapConfig) 
+        if errorMsg? then return errorMsg
+
+        if swapConfig.min? and inAmount < swapConfig.min
+            formatCurrency = swapbot.formatters.formatCurrency
+            return "This swap must be purchased by sending at least #{formatCurrency(swapConfig.min)} #{swapConfig.in}."
+
+        return null
+
+    validateInAmount.fixed = (inAmount, swapConfig)->
+        errorMsg = validateInAmount.shared(inAmount, swapConfig) 
+        if errorMsg? then return errorMsg
+
+        # ratio = inAmount / swapConfig.out_qty
+        # if ratio != Math.floor(ratio)
+        #     formatCurrency = swapbot.formatters.formatCurrency
+        #     return "This swap must be purchased at a rate of exactly #{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in}."
+
+        return null
+
+    validateInAmount.fiat = (inAmount, swapConfig)->
+        errorMsg = validateInAmount.shared(inAmount, swapConfig) 
+        if errorMsg? then return errorMsg
+        return null
+
 
     # #############################################
     # exports
@@ -119,6 +156,13 @@ swapbot.swapUtils = do ()->
 
     exports.validateOutAmount = (outAmount, swapConfig)->
         errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig)
+        if errorMsg? then return errorMsg
+
+        # no error
+        return null
+
+    exports.validateInAmount = (inAmount, swapConfig)->
+        errorMsg = validateInAmount[swapConfig.strategy](inAmount, swapConfig)
         if errorMsg? then return errorMsg
 
         # no error

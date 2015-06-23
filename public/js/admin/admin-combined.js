@@ -2780,8 +2780,9 @@
   }
 
   swapbot.swapUtils = (function() {
-    var buildDesc, buildInAmountFromOutAmount, exports, validateOutAmount;
+    var HARD_MINIMUM, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
     exports = {};
+    HARD_MINIMUM = 0.00000001;
     buildDesc = {};
     buildDesc.rate = function(swapConfig) {
       var formatCurrency, inAmount, outAmount;
@@ -2884,6 +2885,47 @@
       }
       return null;
     };
+    validateInAmount = {};
+    validateInAmount.shared = function(inAmount, swapConfig) {
+      if (("" + inAmount).length === 0) {
+        return null;
+      }
+      if (isNaN(inAmount)) {
+        return 'The amount to send does not look like a number.';
+      }
+      if (inAmount < HARD_MINIMUM) {
+        return 'The amount to send is too small.';
+      }
+      return null;
+    };
+    validateInAmount.rate = function(inAmount, swapConfig) {
+      var errorMsg, formatCurrency;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      if ((swapConfig.min != null) && inAmount < swapConfig.min) {
+        formatCurrency = swapbot.formatters.formatCurrency;
+        return "This swap must be purchased by sending at least " + (formatCurrency(swapConfig.min)) + " " + swapConfig["in"] + ".";
+      }
+      return null;
+    };
+    validateInAmount.fixed = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    validateInAmount.fiat = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount.shared(inAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
     exports.exchangeDescription = function(swapConfig) {
       return buildDesc[swapConfig.strategy](swapConfig);
     };
@@ -2897,6 +2939,14 @@
     exports.validateOutAmount = function(outAmount, swapConfig) {
       var errorMsg;
       errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      if (errorMsg != null) {
+        return errorMsg;
+      }
+      return null;
+    };
+    exports.validateInAmount = function(inAmount, swapConfig) {
+      var errorMsg;
+      errorMsg = validateInAmount[swapConfig.strategy](inAmount, swapConfig);
       if (errorMsg != null) {
         return errorMsg;
       }
