@@ -1,0 +1,51 @@
+# don't try to vend 0
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot02.yml }
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    quantity: 100
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN-refund.yml }
+    data:
+      quantity: 100
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-LTBCOIN_EARLY.yml }
+    quantityIn: 100
+    quantityOut: 0
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding.yml }
+    quantityIn: 100
+    quantityOut: 100
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded.yml }
+    quantityIn: 100
+    quantityOut: 100
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-refunded.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }
+
+expectedBotModels:
+  - 
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_EARLY-refunded.yml }

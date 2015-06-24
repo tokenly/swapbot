@@ -16,6 +16,11 @@ class RateStrategy implements Strategy {
             return true;
         }
 
+        $swap_vars = $this->caculateInitialReceiptValues($swap_config, $quantity_in);
+
+        // never try to send 0 of an asset
+        if ($swap_vars['quantityOut'] <= 0) { return true; }
+
         return false;
     }
 

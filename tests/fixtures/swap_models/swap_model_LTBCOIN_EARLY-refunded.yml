@@ -1,0 +1,15 @@
+name: LTBCOIN:EARLY
+state: refunded
+receipt:
+    confirmations: '1'
+    type: refund
+    quantityIn: 100
+    assetIn: 'LTBCOIN'
+    txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
+    quantityOut: 100
+    assetOut: 'LTBCOIN'
+    txidOut: '0000000000000000000000000000001111'
+    destination: 'SENDER01'
+    confirmationsOut: 0
+
+
