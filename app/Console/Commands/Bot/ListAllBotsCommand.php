@@ -24,18 +24,28 @@ class ListAllBotsCommand extends Command {
 
 
     /**
-     * {@inheritdoc}
+     * Get the console command arguments.
+     *
+     * @return array
      */
-    protected function configure()
+    protected function getArguments()
     {
-        parent::configure();
+        return [
+        ];
+    }
 
-        $this
-            ->addOption('id', 'i', InputOption::VALUE_OPTIONAL, 'Filter by ID')
-            ->setHelp(<<<EOF
-Show all bots
-EOF
-        );
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+
+        return [
+            ['id', 'i', InputOption::VALUE_OPTIONAL, 'Filter by ID'],
+            ['full', 'f', InputOption::VALUE_NONE, 'Show Full Bot Details'],
+        ];
     }
 
     /**
@@ -59,8 +69,20 @@ EOF
             $bots = $bot_repository->findAll();
         }
 
+        $show_full = !!$this->input->getOption('full');
+
         foreach($bots as $bot) {
-            $this->line(json_encode($bot, 192));
+            if ($show_full) {
+                $output = json_encode($bot, 192);
+            } else {
+                $fields = ['id', 'uuid', 'name', 'username', 'address', 'state'];
+                $short_bot = [];
+                foreach($fields as $field) {
+                    $short_bot[$field] = $bot[$field];
+                }
+                $output = json_encode($short_bot, 192);
+            }
+            $this->line($output);
         }
     }
 
