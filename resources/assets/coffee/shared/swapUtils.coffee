@@ -4,6 +4,10 @@ swapbot = {} if not swapbot?
 swapbot.swapUtils = do ()->
     exports = {}
 
+    exports.SATOSHI = 100000000
+    SATOSHI = exports.SATOSHI
+
+
     HARD_MINIMUM = 0.00000001
 
     # #############################################
@@ -35,7 +39,10 @@ swapbot.swapUtils = do ()->
         if not outAmount? or isNaN(outAmount)
             return 0
 
-        inAmount = outAmount / swapConfig.rate
+        console.log "raw inAmount: ",outAmount / swapConfig.rate
+        inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI
+        console.log "rounded inAmount: ",inAmount
+
         return inAmount
 
     # this needs to be refined further

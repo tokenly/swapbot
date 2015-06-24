@@ -2668,9 +2668,8 @@
   }
 
   swapbot.formatters = (function() {
-    var SATOSHI, exports;
+    var exports;
     exports = {};
-    SATOSHI = 100000000;
     exports.formatConfirmations = function(confirmations) {
       if (confirmations == null) {
         return 0;
@@ -2684,9 +2683,11 @@
       return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     exports.satoshisToValue = function(amount, currencyPostfix) {
+      var SATOSHI;
       if (currencyPostfix == null) {
         currencyPostfix = 'BTC';
       }
+      SATOSHI = swapbot.swapUtils.SATOSHI;
       return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
     };
     exports.formatCurrency = function(value, currencyPostfix) {
@@ -2780,8 +2781,10 @@
   }
 
   swapbot.swapUtils = (function() {
-    var HARD_MINIMUM, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
+    var HARD_MINIMUM, SATOSHI, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
     exports = {};
+    exports.SATOSHI = 100000000;
+    SATOSHI = exports.SATOSHI;
     HARD_MINIMUM = 0.00000001;
     buildDesc = {};
     buildDesc.rate = function(swapConfig) {
@@ -2809,7 +2812,9 @@
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      inAmount = outAmount / swapConfig.rate;
+      console.log("raw inAmount: ", outAmount / swapConfig.rate);
+      inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI;
+      console.log("rounded inAmount: ", inAmount);
       return inAmount;
     };
     buildInAmountFromOutAmount.fixed = function(outAmount, swapConfig) {

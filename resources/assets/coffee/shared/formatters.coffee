@@ -7,8 +7,6 @@ swapbot.formatters = do ()->
     # #############################################
     # local
 
-    SATOSHI = 100000000
-
     # #############################################
     # exports
 
@@ -23,6 +21,7 @@ swapbot.formatters = do ()->
         return "confirmation#{if bot.confirmationsRequired == 1 then '' else 's'}"
     
     exports.satoshisToValue = (amount, currencyPostfix='BTC') ->
+        SATOSHI = swapbot.swapUtils.SATOSHI
         return exports.formatCurrency(amount / SATOSHI, currencyPostfix)
 
     exports.formatCurrency = (value, currencyPostfix='') ->
