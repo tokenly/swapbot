@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Swapbot</title>
+    <title>Swapbot | {{ $bot['name'] }}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link href="/css/main.css" rel="stylesheet">

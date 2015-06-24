@@ -6,7 +6,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
 
 <head>
     <meta charset="utf-8">
-    <title>Swapbot | Transaction details</title>
+    <title>Swapbot | {{ $bot['name'] }} Swap Details</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="/css/details.css">
