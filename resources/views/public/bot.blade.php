@@ -36,12 +36,12 @@
                     @else
                     <div class="status-dot bckg-red"></div>Inactive
                     @endif
-                    <button class="button-question"></button>
+                    {{-- <button class="button-question"></button> --}}
                 </div>
                 <div class="name">Address: </div>
                 <div class="value">
-                    <a class="swap-address" href="bitcoin:{{ $bot['address'] }}">{{ $bot['address'] }} </a>
-                    <button class="button-question"></button>
+                    <div id="BotCopyableAddress">{{-- REACT --}}</div>
+                    {{-- <button class="button-question"></button> --}}
                 </div>
                 <div class="clearfix"></div>
             </div>
