@@ -14,6 +14,9 @@ window.BotApp =
 
         # render the components
 
+        # Bot copyable address
+        React.render <BotCopyableAddress            bot={bot} />, document.getElementById('BotCopyableAddress')
+
         # Bot status (active/inactive)
         React.render <BotStatusComponent            bot={bot} />, document.getElementById('BotStatusComponent')
 

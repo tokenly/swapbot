@@ -2812,9 +2812,7 @@
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      console.log("raw inAmount: ", outAmount / swapConfig.rate);
       inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI;
-      console.log("rounded inAmount: ", inAmount);
       return inAmount;
     };
     buildInAmountFromOutAmount.fixed = function(outAmount, swapConfig) {

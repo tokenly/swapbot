@@ -42,6 +42,8 @@ do ()->
                     else
                         <div><div className="status-dot bckg-red"></div>Inactive</div>
                 }
-                <button className="button-question"></button>
             </div>
+
+
+# <button className="button-question"></button>
 

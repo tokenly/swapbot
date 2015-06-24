@@ -537,6 +537,22 @@ button.copied {
 button.copied.zeroclipboard-is-hover {
   background-color: #1b7943;
 }
+#details .copyToClipboard {
+  margin-left: 6px;
+  padding: 1px 6px;
+}
+a.copied .copyToClipboard {
+  background-color: rgba(37, 162, 90, 0.65);
+  border-radius: 4px;
+}
+a.copied.zeroclipboard-is-hover .copyToClipboard {
+  background-color: rgba(27, 121, 67, 0.65);
+  border-radius: 4px;
+}
+#details a .copyToClipboard {
+  font-size: 12px;
+  font-weight: 500;
+}
 .wide-list .exchange-description {
   padding-right: 48px;
 }
@@ -546,6 +562,9 @@ button.copied.zeroclipboard-is-hover {
 h4#DetectedMultiple {
   margin-top: 20px;
   margin-bottom: 0;
+}
+a:focus {
+  outline: none;
 }
 /* Global varibles */
 body {

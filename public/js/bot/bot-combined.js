@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, PlaceOrderInput, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapTestView, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, PlaceOrderInput, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -197,9 +197,7 @@
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
-      console.log("raw inAmount: ", outAmount / swapConfig.rate);
       inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI;
-      console.log("rounded inAmount: ", inAmount);
       return inAmount;
     };
     buildInAmountFromOutAmount.fixed = function(outAmount, swapConfig) {
@@ -452,6 +450,56 @@
     return exports;
   })();
 
+  BotCopyableAddress = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {
+        addressCopied: false
+      };
+    };
+    BotCopyableAddress = React.createClass({
+      displayName: 'BotCopyableAddress',
+      handleOnClick: function(e) {
+        e.preventDefault();
+      },
+      getInitialState: function() {
+        return getViewState();
+      },
+      onAfterCopy: function() {
+        this.setState({
+          addressCopied: true
+        });
+        if (this.copiedTimeoutRef != null) {
+          clearTimeout(this.copiedTimeoutRef);
+        }
+        this.copiedTimeoutRef = setTimeout((function(_this) {
+          return function() {
+            _this.setState({
+              addressCopied: false
+            });
+            return _this.copiedTimeoutRef = null;
+          };
+        })(this), 2500);
+      },
+      render: function() {
+        var bot;
+        bot = this.props.bot;
+        return React.createElement(ReactZeroClipboard, {
+          "text": bot.address,
+          "onAfterCopy": this.onAfterCopy
+        }, React.createElement("a", {
+          "className": "swap-address" + (this.state.addressCopied ? ' copied' : ''),
+          "onClick": this.handleOnClick,
+          "href": "#copy-address"
+        }, React.createElement("span", null, " ", bot.address), React.createElement("span", {
+          "className": "copyToClipboard"
+        }, (this.state.addressCopied ? React.createElement("span", null, "Copied") : React.createElement("span", null)))));
+      }
+    });
+  })();
+
   BotStatusComponent = null;
 
   (function() {
@@ -483,9 +531,7 @@
           "className": "status-dot bckg-green"
         }), "Active") : React.createElement("div", null, React.createElement("div", {
           "className": "status-dot bckg-red"
-        }), "Inactive")), React.createElement("button", {
-          "className": "button-question"
-        }));
+        }), "Inactive")));
       }
     });
   })();
@@ -651,47 +697,6 @@
         }, React.createElement("button", {
           "className": "button-load-more"
         }, "Load more swaps..."))));
-      }
-    });
-  })();
-
-  SwapTestView = null;
-
-  (function() {
-    var getViewState;
-    getViewState = function() {
-      return {
-        swaps: SwapsStore.getSwaps()
-      };
-    };
-    SwapTestView = React.createClass({
-      displayName: 'SwapTestView',
-      getInitialState: function() {
-        return getViewState();
-      },
-      _onChange: function() {
-        return this.setState(getViewState());
-      },
-      componentDidMount: function() {
-        SwapsStore.addChangeListener(this._onChange);
-      },
-      componentWillUnmount: function() {
-        SwapsStore.removeChangeListener(this._onChange);
-      },
-      render: function() {
-        var swap;
-        return React.createElement("div", null, React.createElement("h2", null, "All Swaps"), React.createElement("ul", null, (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.state.swaps;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            swap = _ref[_i];
-            _results.push(React.createElement("li", {
-              "key": swap.id
-            }, swap.address, " (", swap.id, ")"));
-          }
-          return _results;
-        }).call(this)));
       }
     });
   })();
@@ -1586,6 +1591,9 @@
       BotAPIActionCreator.subscribeToBotstream(bot.id);
       SwapAPIActionCreator.subscribeToSwapstream(bot.id);
       QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL);
+      React.render(React.createElement(BotCopyableAddress, {
+        "bot": bot
+      }), document.getElementById('BotCopyableAddress'));
       React.render(React.createElement(BotStatusComponent, {
         "bot": bot
       }), document.getElementById('BotStatusComponent'));
@@ -1816,6 +1824,104 @@
     exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -2405,104 +2511,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   SwapMatcher = (function() {
     var exports, swapIsMatched, swapIsValid;

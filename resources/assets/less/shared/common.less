@@ -553,6 +553,29 @@ button.copied.zeroclipboard-is-hover {
     background-color: darken(@flat-green, 20%);
 }
 
+#details .copyToClipboard {
+    margin-left: 6px;
+    padding: 1px 6px;
+    // span {
+    //     margin-left: 3px;
+    // }
+}
+// #details a.zeroclipboard-is-hover {
+//     color: lighten(@flat-green, 40%);
+// }
+a.copied .copyToClipboard {
+    background-color: fade(darken(@flat-green, 10%), 65%);
+    border-radius: 4px;
+}
+a.copied.zeroclipboard-is-hover .copyToClipboard {
+    background-color: fade(darken(@flat-green, 20%), 65%);
+    border-radius: 4px;
+}
+#details a .copyToClipboard {
+    font-size: 12px;
+    font-weight: 500;
+}
+
 .wide-list .exchange-description {
     padding-right: 48px;
 }
@@ -564,3 +587,7 @@ h4#DetectedMultiple {
     margin-top: 20px;
     margin-bottom: 0;
 }
+
+
+
+a:focus { outline: none; }
