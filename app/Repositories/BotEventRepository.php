@@ -36,6 +36,13 @@ class BotEventRepository extends APIRepository
     }
 
 
+    public function findBySwapId($swap_id) {
+        return call_user_func([$this->model_type, 'where'], 'swap_id', $swap_id)
+            ->orderBy('serial', 'desc')
+            ->get();
+    }
+
+
 
     protected function modifyAttributesBeforeCreate($attributes) {
         $attributes['serial'] = round(microtime(true) * 1000);
