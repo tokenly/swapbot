@@ -14,6 +14,7 @@ class BotLedgerEntryHelper  {
         return [
             'is_credit'    => false,
             'amount'       => 100000000,
+            'asset'        => 'BTC',
             'user_id'      => null,
             'bot_id'       => null,
             'bot_event_id' => null,

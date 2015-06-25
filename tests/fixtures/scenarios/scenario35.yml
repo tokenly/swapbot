@@ -44,8 +44,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-100.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
   - #### income forwarded failed
     meta: { baseFilename: income.forward.failed.yml }
 

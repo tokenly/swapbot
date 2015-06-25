@@ -1,4 +1,5 @@
 name: payment.previous
-msg: Payment transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 was confirmed with 3 confirmations.
 txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
 confirmations: 3
+state: lowfuel
+isActive: false

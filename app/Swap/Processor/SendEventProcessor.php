@@ -91,8 +91,8 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
-            // process fuel send
-            $this->processFuelSend($tx_process);
+            // // process fuel send
+            // $this->processFuelSend($tx_process);
 
             // process income forwarding send
             $this->processIncomingForwardingSend($tx_process);
@@ -137,27 +137,27 @@ class SendEventProcessor {
     }
 
 
-    protected function processFuelSend($tx_process) {
-        if ($tx_process['tx_is_handled']) { return; }
+    // protected function processFuelSend($tx_process) {
+    //     if ($tx_process['tx_is_handled']) { return; }
 
-        // see if this is a BTC send from the payment address
-        //   to the public address
-        $bot                 = $tx_process['bot'];
-        $xchain_notification = $tx_process['xchain_notification'];
+    //     // see if this is a BTC send from the payment address
+    //     //   to the public address
+    //     $bot                 = $tx_process['bot'];
+    //     $xchain_notification = $tx_process['xchain_notification'];
 
-        if (
-            $xchain_notification['asset'] == 'BTC'
-            AND in_array($bot['payment_address'], $xchain_notification['sources'])
-            AND in_array($bot['address'], $xchain_notification['destinations'])
-        ) {
-            $this->bot_event_logger->logFuelTXSent($bot, $xchain_notification);
-            $tx_process['tx_is_handled'] = true;
+    //     if (
+    //         $xchain_notification['asset'] == 'BTC'
+    //         AND in_array($bot['payment_address'], $xchain_notification['sources'])
+    //         AND in_array($bot['address'], $xchain_notification['destinations'])
+    //     ) {
+    //         $this->bot_event_logger->logFuelTXSent($bot, $xchain_notification);
+    //         $tx_process['tx_is_handled'] = true;
 
-            if ($tx_process['is_confirmed']) {
-                $tx_process['transaction_update_vars']['processed'] = true;
-            }
-        }
-    }
+    //         if ($tx_process['is_confirmed']) {
+    //             $tx_process['transaction_update_vars']['processed'] = true;
+    //         }
+    //     }
+    // }
 
     protected function processIncomingForwardingSend($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }

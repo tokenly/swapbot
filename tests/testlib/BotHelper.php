@@ -32,7 +32,7 @@ class BotHelper  {
             'public_receive_monitor_id'  => null,
             'public_send_monitor_id'     => null,
 
-            'payment_plan'               => 'txfee001',
+            'payment_plan'               => 'monthly001',
             'payment_address'            => null,
             'payment_address_id'         => null,
             'payment_receive_monitor_id' => null,

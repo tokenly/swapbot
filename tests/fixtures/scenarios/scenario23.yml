@@ -7,6 +7,7 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    leases: ~
     balances:
         LTBCOIN: 0
         BTC: 0
@@ -25,7 +26,7 @@ xchainNotifications:
 
   # confirm that the fuel was received
   - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
-    quantity: 0.0009
+    quantity: 0.00019
     blockId: 300002
 
 
@@ -34,7 +35,7 @@ xchainNotifications:
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+    meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
 
 
 expectedBotEvents:
@@ -42,25 +43,19 @@ expectedBotEvents:
     meta: { baseFilename: payment.unconfirmed.yml }
   - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
-  - #### move fuel transaction created
-    meta: { baseFilename: payment.moveFuelCreated.yml }
-  - #### creation fee paid
-    meta: { baseFilename: payment.creationFeePaid.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased.yml }
+  - #### first monthly fee paid
+    meta: { baseFilename: payment.firstMonthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
   - #### fuel transaction confirmed
     meta: { baseFilename: payment.moveFuelConfirmed.yml }
-    msg: Received swapbot fuel of 0.0009 BTC from the payment address with transaction ID 00000000000000000000000000000000000000000000000000000BTCtx333333.
-    qty: 0.0009
-
-expectedBotLedgerEntries:
-  - 
-    meta: { baseFilename: bot_ledger_entry_model_01.yml }
-  - ### Debit - Sent Fuel
-    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
-  - ### Debit - Paid Creation Fee
-    meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
-
+    inQty: 0.00019
 
 
 expectedBotModels:

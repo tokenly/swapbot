@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Metabor\Statemachine\Command;
 use Swapbot\Models\Bot;
+use Swapbot\Repositories\BotLeaseEntryRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
@@ -45,5 +46,11 @@ class BotCommand extends Command {
         if (!isset($this->xchain_client)) { $this->xchain_client = app('Tokenly\XChainClient\Client'); }
         return $this->xchain_client;
     }
+
+    public function getBotLeaseEntryRepository() {
+        if (!isset($this->bot_lease_entry_repository)) { $this->bot_lease_entry_repository = app('Swapbot\Repositories\BotLeaseEntryRepository'); }
+        return $this->bot_lease_entry_repository;
+    }
+
 
 }

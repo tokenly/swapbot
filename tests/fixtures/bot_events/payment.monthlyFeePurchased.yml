@@ -1,0 +1,6 @@
+name: payment.monthlyFeePurchased
+months: 2
+cost: 0.07
+asset: BTC
+state: brandnew
+isActive: false

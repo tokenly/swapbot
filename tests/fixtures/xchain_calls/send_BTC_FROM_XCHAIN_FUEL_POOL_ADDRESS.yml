@@ -1,8 +1,8 @@
 method: POST
-path: /sends/PAYMENT_ADDRESS_ID_01
+path: /sends/XCHAIN_FUEL_POOL_ADDRESS_01
 data:
     destination: botaddress000000000000000000000001
-    quantity: 0.01
+    quantity: 0.001
     asset: BTC
     sweep: false
     fee: 0.0001

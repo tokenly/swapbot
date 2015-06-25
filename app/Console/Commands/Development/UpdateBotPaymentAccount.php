@@ -48,6 +48,7 @@ class UpdateBotPaymentAccount extends Command {
         try {
             $bot_id = $this->input->getArgument('bot-id');
             $amount = $this->input->getArgument('amount');
+            $asset  = $this->input->getArgument('asset');
 
             $mock_xchain = $this->input->getOption('mock-xchain');
             $is_credit = !$this->input->getOption('debit');
@@ -69,7 +70,7 @@ class UpdateBotPaymentAccount extends Command {
             // apply a payment
             // echo "\$bot:\n".json_encode($bot, 192)."\n";
             $bot_event = app('Swapbot\Swap\Logger\BotEventLogger')->logManualPayment($bot, $amount, $is_credit, $message);
-            $this->dispatch(new UpdateBotPaymentAccountCommand($bot, $amount, $is_credit, $bot_event));
+            $this->dispatch(new UpdateBotPaymentAccountCommand($bot, $amount, $asset, $is_credit, $bot_event));
 
         } catch (Exception $e) {
             $this->error('Error: '.$e->getMessage());
@@ -87,6 +88,7 @@ class UpdateBotPaymentAccount extends Command {
         return [
             ['bot-id', InputArgument::REQUIRED, 'Bot ID'],
             ['amount', InputArgument::REQUIRED, 'Amount'],
+            ['asset', InputArgument::REQUIRED, 'Asset'],
         ];
     }
 

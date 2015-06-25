@@ -1,0 +1,7 @@
+name: payment.confirmed
+source: SENDER01
+inQty: 60000
+inAsset: LTBCOIN
+confirmations: 1
+state: brandnew
+isActive: false

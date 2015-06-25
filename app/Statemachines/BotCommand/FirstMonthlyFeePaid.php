@@ -10,28 +10,34 @@ use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Statemachines\BotCommand\BotCommand;
+use Swapbot\Swap\DateProvider\Facade\DateProvider;
 
 
 /*
-* CreationFeePaid
+* FirstMonthlyFeePaid
 */
-class CreationFeePaid extends BotCommand {
+class FirstMonthlyFeePaid extends BotCommand {
 
     /**
      */
     public function __invoke(Bot $bot)
     {
         DB::transaction(function() use ($bot) {
-            // move the fuel
-            $this->moveInitialFuel($bot);
+            // log and debit the month fee
+            $AMOUNT = 1;
+            $bot_event = $this->getBotEventLogger()->logFirstMonthlyFeePaid($bot, $AMOUNT, 'SWAPBOTMONTH');
+            $this->getBotLedgerEntryRepository()->addDebit($bot, $AMOUNT, 'SWAPBOTMONTH', $bot_event);
 
-            // log and debit the fee
-            $amount = $bot->getCreationFee();
-            $bot_event = $this->getBotEventLogger()->logInitialCreationFeePaid($bot, $amount, 'BTC');
-            $this->getBotLedgerEntryRepository()->addDebit($bot, $amount, $bot_event);
+            // add a lease
+            $bot_lease_entry_repository = $this->getBotLeaseEntryRepository();
+            $new_lease = $bot_lease_entry_repository->addNewLease($bot, $bot_event, DateProvider::now());
+            $this->getBotEventLogger()->logLeaseCreated($bot, $new_lease);
 
             // update the bot state in the database
             $this->updateBotState($bot, BotState::LOW_FUEL);
+
+            // move the initial fuel
+            $this->moveInitialFuel($bot);
         });
     }
 
@@ -41,15 +47,17 @@ class CreationFeePaid extends BotCommand {
      */
     public function __toString()
     {
-        return 'Creation Fee Paid';
+        return 'First Monthly Fee Paid';
     }
 
 
+    // move initial fuel from the swapbot reserve
+    //   to this bot's public address
     protected function moveInitialFuel($bot) {
         $fuel_needed = $bot->getStartingBTCFuel();
 
         // call XChain
-        $payment_address_id = $bot['payment_address_id'];
+        $payment_address_id = Config::get('swapbot.xchain_fuel_pool_address_id');
         $destination = $bot['address'];
         $quantity = $bot->getStartingBTCFuel();
         $asset = 'BTC';
@@ -59,10 +67,7 @@ class CreationFeePaid extends BotCommand {
 
             // log event
             $bot_event = $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);
-
-            // debit the payment balance
-            $this->getBotLedgerEntryRepository()->addDebit($bot, $quantity + $fee, $bot_event);
-            
+           
         } catch (Exception $e) {
             $this->getBotEventLogger()->logMoveInitialFuelTXFailed($bot, $e);
         }

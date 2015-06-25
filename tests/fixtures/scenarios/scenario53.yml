@@ -1,0 +1,85 @@
+# after 1 month of operation
+#   another SWAPBOTMONTH token is deducted
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    state: brandnew
+    payments: ~
+    leases: ~
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
+  # now, after a month has passed, receive a block notification
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333280
+  # now, after a month has passed, receive a block notification
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 335100
+
+events:
+  - {type: setDate, date: "2015-06-01" }
+  - {type: xchainNotification, offset: 0}
+
+  - {type: setDate, date: "2015-06-05" }
+  - {type: xchainNotification, offset: 1}
+
+  - {type: setDate, date: "2015-07-01" }
+  - {type: xchainNotification, startOffset: 2}
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
+
+
+expectedBotEvents:
+  - #### confirmed payment received
+    meta: { baseFilename: payment.confirmed.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased.yml }
+  - #### first monthly fee paid
+    meta: { baseFilename: payment.firstMonthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated.yml }
+  - #### LOWFUEL
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+  - #### ACTIVE
+    meta: { baseFilename: bot.stateChange-active.yml }
+  - #### UNPAID
+    meta: { baseFilename: bot.stateChange-unpaid.yml }
+  - #### monthly fee paid
+    meta: { baseFilename: payment.monthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated-MONTH_2.yml }
+  - #### ACTIVE
+    meta: { baseFilename: bot.stateChange-active.yml }
+
+
+expectedBotLedgerEntries:
+  - ### Credit - receive BTC payment 
+    meta: { baseFilename: bot_ledger_entry_model_01.yml }
+  - ### Debit - Paid 2 months
+    meta: { baseFilename: bot_ledger_entry_model_2_MONTH_SWAPBOT_RENTAL_BTC_DEBIT.yml }
+  - ### Credit - 2 SWAPBOTMONTH
+    meta: { baseFilename: bot_ledger_entry_model_2_SWAPBOTMONTH_CREDIT.yml }
+  - ### Debit - 1 SWAPBOTMONTH Pyament
+    meta: { baseFilename: bot_ledger_entry_model_1_SWAPBOTMONTH_DEBIT.yml }
+  - ### Debit - 1 SWAPBOTMONTH Pyament
+    meta: { baseFilename: bot_ledger_entry_model_1_SWAPBOTMONTH_DEBIT.yml }
+
+expectedLeaseEntries:
+  - ### standard month
+    meta: { baseFilename: bot_lease_model_01.yml }
+  - ### 1 extra month
+    meta: { baseFilename: bot_lease_model_01-1_MONTH.yml }

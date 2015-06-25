@@ -1,4 +1,5 @@
 events:
+
   # ### Swap Events ##########################################
   -
     name: swap.new
@@ -107,7 +108,7 @@ events:
     label: Previous Transaction
     level: DEBUG
     msgVars: [txid, confirmations]
-    msg: Transaction {{ $txid }} was confirmed with {{ $confirmations }} confirmations.
+    msg: Transaction {{ $txid }} was confirmed with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     botEventStream: true
   -
     name: bot.stateChange
@@ -116,6 +117,79 @@ events:
     msg: Bot entered state {{ $state }}.
     msgVars: [state]
     botEventStream: true
+
+
+    # ### Fuel Events
+  -
+    name: payment.unconfirmedMoveFuel
+    label: Unconfirmed Swapbot Fuel Received
+    level: INFO
+    msg: Unconfirmed swapbot fuel of {{$inQty}} {{$inAsset}} received from {{$source}} with transaction ID {{$txid}}.
+    msgVars: [inQty,inAsset,source,txid]
+  -
+    name: payment.moveFuelConfirmed
+    label: Swapbot Fuel Received
+    level: INFO
+    msg: Swapbot fuel of {{$inQty}} {{$inAsset}} received from {{$source}} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msgVars: [inQty,inAsset,source,txid,confirmations]
+
+
+    # ### Payment Events
+  -
+    name: payment.leaseCreated
+    label: Lease Created
+    level: INFO
+    msg: Swapbot lease activated from {{$start_date}} until {{$end_date}}.
+    msgVars: [start_date, end_date]
+  -
+    name: payment.monthlyFeePurchased
+    label: Monthly Fee Purchased
+    level: INFO
+    msg: Purchased {{$months}} {{ str_plural('month', $months) }} of swapbot rental for {{$cost}} {{$asset}}.
+    msgVars: [months,cost,asset]
+  -
+    name: payment.firstMonthlyFeePaid
+    label: First Monthly Fee Paid
+    level: INFO
+    msg: Paid {{$qty}} {{$asset}} as a monthly fee.
+    msgVars: [qty,asset]
+  -
+    name: payment.monthlyFeePaid
+    label: Monthly Fee Paid
+    level: INFO
+    msg: Paid {{$qty}} {{$asset}} as a monthly fee.
+    msgVars: [qty,asset]
+
+  -
+    name: payment.unconfirmed
+    label: Unconfirmed Payment Received
+    level: INFO
+    msg: Received an unconfirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
+    msgVars: [inQty,inAsset,source]
+  -
+    name: payment.confirmed
+    label: Confirmed Payment Received
+    level: INFO
+    msg: Received an confirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
+    msgVars: [inQty,inAsset,source]
+  -
+    name: payment.previous
+    label: Confirmed Payment Received
+    level: DEBUG
+    msg: Payment transaction {{$txid}} was confirmed with {{$confirmations}} {{ str_plural('confirmation', $confirmations) }}.
+    msgVars: [txid, confirmations]
+  -
+    name: payment.unknown
+    label: Confirmed Payment Received
+    level: WARNING
+    msg: Received a payment of {{$inQty}} {{$inAsset}} from {{$source}} with transaction ID {{$txid}}. This was not a valid payment.
+    msgVars: [inQty,inAsset,source,txid]
+  -
+    name: payment.moveFuelCreated
+    label: Move Fuel Transaction Created
+    level: DEBUG
+    msg: Moving initial swapbot fuel.  Sent {{$outQty}} {{$outAsset}} to {{$destination}} with transaction ID {{$txid}}
+    msgVars: [outQty, outAsset, destination, txid]
 
 
 

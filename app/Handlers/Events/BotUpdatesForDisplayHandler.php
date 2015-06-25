@@ -52,8 +52,6 @@ class BotUpdatesForDisplayHandler {
 
     public function sendAccountUpdatedToPusher(Event $event) {
         $bot   = $event->bot;
-
-        // Log::debug("sending to ".'/swapbot_account_updates_'.$bot['uuid']);
         $this->pusher_client->send('/swapbot_account_updates_'.$bot['uuid'], ['accountUpdated' => true]);
     }
 

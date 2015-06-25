@@ -32,8 +32,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-BTC.yml }

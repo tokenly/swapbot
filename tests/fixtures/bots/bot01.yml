@@ -2,7 +2,7 @@ name: Sample Bot One
 description: Just a Sample Bot
 active: true
 state: active
-payment_plan: txfee001
+payment_plan: monthly001
 confirmations_required: 1
 
 address: botaddress000000000000000000000001
@@ -43,4 +43,7 @@ income_rules:
     address: INCOME_FORWARDING_ADDRESS_0000001
 
 payments:
-  - {credit: true, amount: 1.0}
+  - {credit: true, amount: 1.0, asset: 'SWAPBOTMONTH'}
+
+leases:
+  - {start_date: '2015-06-01', length: '1 month'}

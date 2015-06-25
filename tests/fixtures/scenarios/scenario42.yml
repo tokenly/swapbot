@@ -40,7 +40,7 @@ xchainNotifications:
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+    meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
 
 
 expectedBotEvents:
@@ -48,26 +48,21 @@ expectedBotEvents:
     meta: { baseFilename: payment.unconfirmed.yml }
   - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
-  - #### move fuel transaction created
-    meta: { baseFilename: payment.moveFuelCreated.yml }
-  - #### creation fee paid
-    meta: { baseFilename: payment.creationFeePaid.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased.yml }
+  - #### first monthly fee paid
+    meta: { baseFilename: payment.firstMonthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+
   - #### previous payment confirmed
     meta: { baseFilename: payment.previous.yml }
   - #### previous payment confirmed
     meta: { baseFilename: payment.previous-3.yml }
-
-
-expectedBotLedgerEntries:
-  ### No Setup
-  - ### Credit - Receive Payment
-    meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT.yml }
-  - ### Debit - Sent Fuel
-    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
-  - ### Debit - Paid Creation Fee
-    meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
 
 
 expectedBotModels:

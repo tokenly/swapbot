@@ -76,7 +76,7 @@ $router->resource('api/v1/users', 'API\User\UserController', ['except' => ['crea
 
 // Payments API
 $router->get('api/v1/payments/{botuuid}/all', 'API\Payments\PaymentsController@index');
-$router->get('api/v1/payments/{botuuid}/balance', 'API\Payments\PaymentsController@balance');
+$router->get('api/v1/payments/{botuuid}/balances', 'API\Payments\PaymentsController@balances');
 
 
 // webhook notifications

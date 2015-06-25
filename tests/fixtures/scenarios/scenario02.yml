@@ -41,8 +41,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:
   - 

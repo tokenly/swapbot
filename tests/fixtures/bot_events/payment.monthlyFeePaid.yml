@@ -1,0 +1,5 @@
+name: payment.monthlyFeePaid
+qty: 1
+asset: SWAPBOTMONTH
+state: unpaid
+isActive: false

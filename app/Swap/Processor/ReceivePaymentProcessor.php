@@ -92,7 +92,7 @@ class ReceivePaymentProcessor {
         if (!$tx_process['should_process_payment']) { return; }
 
         if ($tx_process['transaction']['processed']) {
-            $this->swap_event_logger->logPreviousPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']['txid'], $tx_process['confirmations']);
+            $this->swap_event_logger->logPreviousPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']);
             $tx_process['should_process_payment']    = false;
             $tx_process['should_update_transaction'] = true;
         }
@@ -101,8 +101,12 @@ class ReceivePaymentProcessor {
     protected function validatePayment($tx_process) {
         if (!$tx_process['should_process_payment']) { return; }
 
-        // make sure this is BTC
-        if ($tx_process['xchain_notification']['asset'] != 'BTC') {
+        // make sure this is an asset we accept
+        $bot = $tx_process['bot'];
+        $payment_plan = $bot->getPaymentPlan();
+        $asset = $tx_process['xchain_notification']['asset'];
+
+        if (!$payment_plan->isAssetAccepted($asset)) {
             $this->swap_event_logger->logUnknownPaymentTransaction($tx_process['bot'], $tx_process['xchain_notification']);
 
             $tx_process['should_process_payment'] = false;
@@ -114,14 +118,11 @@ class ReceivePaymentProcessor {
         if (!$tx_process['should_process_payment']) { return; }
 
         // fire off a payment command
-
-        // sanity check
-        if ($tx_process['xchain_notification']['asset'] != 'BTC') { throw new Exception("Only BTC accepted", 1); }
-
         $amount = $tx_process['xchain_notification']['quantity'];
+        $asset = $tx_process['xchain_notification']['asset'];
         $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
         $is_credit = true;
-        $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $is_credit, $bot_event));
+        $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $asset, $is_credit, $bot_event));
 
         $tx_process['should_update_transaction'] = true;
     }

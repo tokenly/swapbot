@@ -28,51 +28,33 @@ class BotStateTest extends TestCase {
         // no transition yet
         PHPUnit::assertEquals(BotState::BRAND_NEW, $state_machine->getCurrentState()->getName());
 
-        // transition
-        $state_machine->triggerEvent(BotStateEvent::CREATION_FEE_PAID);
+        // transition to LOW_FUEL
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FIRST_MONTHLY_FEE_PAID, BotState::LOW_FUEL);
 
-        // now we are in the low fuel state
-        PHPUnit::assertEquals(BotState::LOW_FUEL, $state_machine->getCurrentState()->getName());
+        // go to unpaid state
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::UNPAID);
 
-        // bot state is updated in the db
-        PHPUnit::assertEquals(BotState::LOW_FUEL, $bot['state']);
-        PHPUnit::assertEquals(BotState::LOW_FUEL, app('Swapbot\Repositories\BotRepository')->findByID($bot['id'])['state']);
-
-        // receive payment again (OK)
-        $state_machine->triggerEvent(BotStateEvent::CREATION_FEE_PAID);
-
-        // still low fuel
-        PHPUnit::assertEquals(BotState::LOW_FUEL, $state_machine->getCurrentState()->getName());
-
-
-        // receive fuel
-        $state_machine->triggerEvent(BotStateEvent::FUELED);
-
-        // bot is now active
-        PHPUnit::assertEquals(BotState::ACTIVE, $state_machine->getCurrentState()->getName());
-
+        // receive payment again
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::MONTHLY_FEE_PAID, BotState::ACTIVE);
 
         // fuel is exhausted
-        $state_machine->triggerEvent(BotStateEvent::FUEL_EXHAUSTED);
-        PHPUnit::assertEquals(BotState::LOW_FUEL, $state_machine->getCurrentState()->getName());
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FUEL_EXHAUSTED, BotState::LOW_FUEL);
 
         // receive fuel
-        $state_machine->triggerEvent(BotStateEvent::FUELED);
-        PHPUnit::assertEquals(BotState::ACTIVE, $state_machine->getCurrentState()->getName());
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FUELED, BotState::ACTIVE);
 
-        
         // go to unpaid state
-        $state_machine->triggerEvent(BotStateEvent::PAYMENT_EXHAUSTED);
-        PHPUnit::assertEquals(BotState::UNPAID, $state_machine->getCurrentState()->getName());
-
-
-        // pay up
-        $state_machine->triggerEvent(BotStateEvent::PAID);
-        PHPUnit::assertEquals(BotState::ACTIVE, $state_machine->getCurrentState()->getName());
-
-
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::UNPAID);
 
     }
 
+    protected function runTransitionTest($state_machine, $bot, $event, $new_state) {
+        $state_machine->triggerEvent($event);
+
+        // now we are in the low fuel state
+        PHPUnit::assertEquals($new_state, $state_machine->getCurrentState()->getName());
+        PHPUnit::assertEquals($new_state, $bot['state']);
+        PHPUnit::assertEquals($new_state, app('Swapbot\Repositories\BotRepository')->findByID($bot['id'])['state']);
+    }
 
 }

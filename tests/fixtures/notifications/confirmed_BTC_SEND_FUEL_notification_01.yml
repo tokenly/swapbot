@@ -3,12 +3,12 @@
 txid: 00000000000000000000000000000000000000000000000000000BTCtx333333
 network: bitcoin
 event: send
-notifiedAddress: paymentaddress00000000000000000001
-notifiedAddressId: PAYMENT_SEND_MONITOR_ID_01
-sources: [paymentaddress00000000000000000001]
+notifiedAddress: swapbotpooladdress0000000000000001
+notifiedAddressId: SWAPBOT_POOL_SEND_MONITOR_ID_01
+sources: [swapbotpooladdress0000000000000001]
 destinations: [botaddress000000000000000000000001]
 confirmed: true
 confirmations: 1
 asset: BTC
-quantity: 0.005
+quantity: 0.001
 blockId: 300000

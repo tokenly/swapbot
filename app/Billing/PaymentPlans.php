@@ -17,35 +17,12 @@ class PaymentPlans {
         $this->cache_store     = $cache_store;
     }
 
-    /**
-    * $1 creation fee + .001BTC fee per TX (22 cents) ($110 for 500 swaps)
-    * $10 creation fee + .0005BTC fee per TX (10 cents) ($50 for 500 swaps)
-    * $100 creation fee + .0001BTC fee per TX (2 cents) ($10 for 500 swaps)
-    */
+    public function allPaymentPlanNames() {
+        return ['monthly001'];
+    }
+
     public function allPaymentPlans() {
         return [
-            'txfee001' => [
-                'id'       => 'txfee001',
-                'type'     => 'tx',
-                'name'     => '0.005 BTC creation fee + .001 BTC per TX',
-                'setupFee' => 0.005,
-                'txFee'    => 0.001,
-            ],
-            'txfee002' => [
-                'id'       => 'txfee002',
-                'type'     => 'tx',
-                'name'     => '0.05 BTC creation fee + .0005 BTC per TX',
-                'setupFee' => 0.05,
-                'txFee'    => 0.0005,
-            ],
-            'txfee003' => [
-                'id'       => 'txfee003',
-                'type'     => 'tx',
-                'name'     => '0.5 BTC creation fee + .0001 BTC per TX',
-                'setupFee' => 0.5,
-                'txFee'    => 0.0001,
-            ],
-
             'monthly001' => [
                 'id'           => 'monthly001',
                 'type'         => 'monthly',
@@ -88,6 +65,7 @@ class PaymentPlans {
 
                 $fiat_rate_info = ['asset' => $rate_info['asset'], 'quantity' => 0, 'strategy' => $rate_info['strategy'], ];
                 $quote_entry = $this->quotebot_client->getQuote('bitcoinAverage', ['USD', 'BTC']);
+
                 $quantity = $rate_info['fiatAmount'] / $quote_entry['last'];
                 $fiat_rate_info['quantity'] = $quantity;
                 $rates[$rate_id] = $fiat_rate_info;

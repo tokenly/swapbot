@@ -1,4 +1,4 @@
-# bad payment type (trying to pay with LTBCOIN instead of BTC)
+# bad payment type (trying to pay with FOOCOIN instead of something we accept)
 
 ############################
 # setup bots and payment
@@ -6,23 +6,20 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    leases: ~
 
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   # receive a payment of an incorrect type
-  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
-    notifiedAddress: paymentaddress00000000000000000001
-    notifiedAddressId: PAYMENT_RECEIVE_MONITOR_ID_01
-    destinations: [paymentaddress00000000000000000001]
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_PAYMENT_notification_01.yml }
+    asset: FOOCOIN
 
 
 ############################
 # validate the expected results
-expectedXChainCalls:
-  # - 
-  #   meta: { baseFilename: get_balances.yml }
+expectedXChainCalls: ~
 
 
 expectedBotEvents:

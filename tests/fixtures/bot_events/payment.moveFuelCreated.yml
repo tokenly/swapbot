@@ -1,7 +1,8 @@
 name: payment.moveFuelCreated
-msg: Moving initial swapbot fuel.  Sent 0.01 BTC to botaddress000000000000000000000001 with transaction ID 0000000000000000000000000000001111.
 destination: botaddress000000000000000000000001
-outQty: 0.01
+outQty: 0.001
 outAsset: BTC
 fee: 0.0001
-sentTxID: "0000000000000000000000000000001111"
+txid: "0000000000000000000000000000001111"
+state: lowfuel
+isActive: false

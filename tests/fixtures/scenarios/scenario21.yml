@@ -1,4 +1,4 @@
-# a payment puts the bot into a low fuel state
+# receiving an LTBCOIN payment puts the bot into a low fuel state
 
 ############################
 # setup bots and payment
@@ -6,37 +6,57 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    leases: ~
     balances:
         LTBCOIN: 0
         BTC: 0
 
 
+
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  # receive a payment
-  - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
-  # now receive an incoming tx
-  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  # receive a confirmed payment
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_PAYMENT_notification_01.yml }
+    quantity: 60000
+
+
 
 
 ############################
 # validate the expected results
 expectedXChainCalls:
-  # - 
-  #   meta: { baseFilename: get_balances.yml }
+  - 
+    meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
 
 
 expectedBotEvents:
   - #### confirmed payment received
-    meta: { baseFilename: payment.confirmed.yml }
-  - #### move fuel transaction created
-    meta: { baseFilename: payment.moveFuelCreated.yml }
-  - #### creation fee paid
-    meta: { baseFilename: payment.creationFeePaid.yml }
+    meta: { baseFilename: payment.confirmed-LTBCOIN.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased-LTBCOIN.yml }
+  - #### first monthly fee paid
+    meta: { baseFilename: payment.firstMonthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
-  - # transaction ignored due to lowfuel state
-    meta: { baseFilename: bot.lowfuel.yml }
-  - #### NEW
-    meta: { baseFilename: swap.new.yml }
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
+
+
+expectedBotLedgerEntries:
+  - ### Credit - receive BTC payment 
+    meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT-LTBCOIN.yml }
+  - ### Debit - Paid 1 months
+    meta: { baseFilename: bot_ledger_entry_model_1_MONTH_SWAPBOT_RENTAL_LTBCOIN_DEBIT.yml }
+  - ### Credit - 1 SWAPBOTMONTH
+    meta: { baseFilename: bot_ledger_entry_model_1_SWAPBOTMONTH_CREDIT.yml }
+  - ### Debit - 1 SWAPBOTMONTH Pyament
+    meta: { baseFilename: bot_ledger_entry_model_1_SWAPBOTMONTH_DEBIT.yml }
+
+
+expectedBotModels:
+  - 
+    # bot should be in state lowfuel when done
+    state: lowfuel

@@ -1,0 +1,7 @@
+name: payment.confirmed
+source: SENDER01
+inQty: 0.1
+inAsset: BTC
+confirmations: 1
+state: unpaid
+isActive: false

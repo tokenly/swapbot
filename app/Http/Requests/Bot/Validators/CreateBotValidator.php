@@ -20,7 +20,7 @@ class CreateBotValidator extends BotValidator {
 
     protected function initValidatorRules() {
         $payment_plans = app('Swapbot\Billing\PaymentPlans');
-        $ids = array_keys($payment_plans->allPaymentPlans());
+        $ids = $payment_plans->allPaymentPlanNames();
         $this->rules['payment_plan'] .= '|in:'.implode(',', $ids);
     }
 

@@ -4,6 +4,7 @@ use Exception;
 use Illuminate\Database\QueryException;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Repositories\NotificationReceiptRepository;
+use Swapbot\Swap\Processor\BlockEventProcessor;
 use Swapbot\Swap\Processor\ReceiveEventProcessor;
 use Swapbot\Swap\Processor\SendEventProcessor;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -15,10 +16,11 @@ class ReceiveWebhookHandler {
      *
      * @return void
      */
-    public function __construct(ReceiveEventProcessor $receive_event_processor, SendEventProcessor $send_event_processor, NotificationReceiptRepository $notification_receipt_repository)
+    public function __construct(ReceiveEventProcessor $receive_event_processor, SendEventProcessor $send_event_processor, BlockEventProcessor $block_event_processor, NotificationReceiptRepository $notification_receipt_repository)
     {
         $this->receive_event_processor         = $receive_event_processor;
         $this->send_event_processor            = $send_event_processor;
+        $this->block_event_processor           = $block_event_processor;
         $this->notification_receipt_repository = $notification_receipt_repository;
     }
 
@@ -43,8 +45,8 @@ class ReceiveWebhookHandler {
         switch ($payload['event']) {
             case 'block':
                 // new block event
-                //  don't do anything here
                 EventLog::log('block.received', $payload);
+                $this->block_event_processor->handleBlock($payload);
                 break;
 
             case 'receive':

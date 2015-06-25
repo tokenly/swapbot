@@ -6,6 +6,7 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    leases: ~
 
 
 ############################

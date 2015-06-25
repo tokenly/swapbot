@@ -1,5 +1,7 @@
 name: payment.unconfirmed
-msg: Received an unconfirmed payment of 0.1 BTC from SENDER01.
 source: SENDER01
 inQty: 0.1
 inAsset: BTC
+confirmations: 0
+state: brandnew
+isActive: false

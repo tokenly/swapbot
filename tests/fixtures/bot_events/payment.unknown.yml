@@ -1,6 +1,7 @@
 name: payment.unknown
-msg: Received a payment of 500 LTBCOIN with transaction ID 00000000000000000000000000000000000000000000000000000xcptx111111. This was not a valid payment.
 source: SENDER01
 inQty: 500
-inAsset: LTBCOIN
+inAsset: FOOCOIN
 confirmations: 1
+state: brandnew
+isActive: false

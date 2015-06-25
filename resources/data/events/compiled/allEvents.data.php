@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-05-07 12:50:50
+// compiled on 2015-06-25 19:17:06
 
 return array (
   'swap.new' => 
@@ -181,7 +181,7 @@ return array (
       0 => 'txid',
       1 => 'confirmations',
     ),
-    'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> confirmations.',
+    'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'botEventStream' => true,
   ),
   'bot.stateChange' => 
@@ -195,6 +195,150 @@ return array (
       0 => 'state',
     ),
     'botEventStream' => true,
+  ),
+  'payment.unconfirmedMoveFuel' => 
+  array (
+    'name' => 'payment.unconfirmedMoveFuel',
+    'label' => 'Unconfirmed Swapbot Fuel Received',
+    'level' => 'INFO',
+    'msg' => 'Unconfirmed swapbot fuel of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'inQty',
+      1 => 'inAsset',
+      2 => 'source',
+      3 => 'txid',
+    ),
+  ),
+  'payment.moveFuelConfirmed' => 
+  array (
+    'name' => 'payment.moveFuelConfirmed',
+    'label' => 'Swapbot Fuel Received',
+    'level' => 'INFO',
+    'msg' => 'Swapbot fuel of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'inQty',
+      1 => 'inAsset',
+      2 => 'source',
+      3 => 'txid',
+      4 => 'confirmations',
+    ),
+  ),
+  'payment.leaseCreated' => 
+  array (
+    'name' => 'payment.leaseCreated',
+    'label' => 'Lease Created',
+    'level' => 'INFO',
+    'msg' => 'Swapbot lease activated from <?php echo e($start_date); ?> until <?php echo e($end_date); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'start_date',
+      1 => 'end_date',
+    ),
+  ),
+  'payment.monthlyFeePurchased' => 
+  array (
+    'name' => 'payment.monthlyFeePurchased',
+    'label' => 'Monthly Fee Purchased',
+    'level' => 'INFO',
+    'msg' => 'Purchased <?php echo e($months); ?> <?php echo e(str_plural(\'month\', $months)); ?> of swapbot rental for <?php echo e($cost); ?> <?php echo e($asset); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'months',
+      1 => 'cost',
+      2 => 'asset',
+    ),
+  ),
+  'payment.firstMonthlyFeePaid' => 
+  array (
+    'name' => 'payment.firstMonthlyFeePaid',
+    'label' => 'First Monthly Fee Paid',
+    'level' => 'INFO',
+    'msg' => 'Paid <?php echo e($qty); ?> <?php echo e($asset); ?> as a monthly fee.',
+    'msgVars' => 
+    array (
+      0 => 'qty',
+      1 => 'asset',
+    ),
+  ),
+  'payment.monthlyFeePaid' => 
+  array (
+    'name' => 'payment.monthlyFeePaid',
+    'label' => 'Monthly Fee Paid',
+    'level' => 'INFO',
+    'msg' => 'Paid <?php echo e($qty); ?> <?php echo e($asset); ?> as a monthly fee.',
+    'msgVars' => 
+    array (
+      0 => 'qty',
+      1 => 'asset',
+    ),
+  ),
+  'payment.unconfirmed' => 
+  array (
+    'name' => 'payment.unconfirmed',
+    'label' => 'Unconfirmed Payment Received',
+    'level' => 'INFO',
+    'msg' => 'Received an unconfirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
+    'msgVars' => 
+    array (
+      0 => 'inQty',
+      1 => 'inAsset',
+      2 => 'source',
+    ),
+  ),
+  'payment.confirmed' => 
+  array (
+    'name' => 'payment.confirmed',
+    'label' => 'Confirmed Payment Received',
+    'level' => 'INFO',
+    'msg' => 'Received an confirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
+    'msgVars' => 
+    array (
+      0 => 'inQty',
+      1 => 'inAsset',
+      2 => 'source',
+    ),
+  ),
+  'payment.previous' => 
+  array (
+    'name' => 'payment.previous',
+    'label' => 'Confirmed Payment Received',
+    'level' => 'DEBUG',
+    'msg' => 'Payment transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'txid',
+      1 => 'confirmations',
+    ),
+  ),
+  'payment.unknown' => 
+  array (
+    'name' => 'payment.unknown',
+    'label' => 'Confirmed Payment Received',
+    'level' => 'WARNING',
+    'msg' => 'Received a payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>. This was not a valid payment.',
+    'msgVars' => 
+    array (
+      0 => 'inQty',
+      1 => 'inAsset',
+      2 => 'source',
+      3 => 'txid',
+    ),
+  ),
+  'payment.moveFuelCreated' => 
+  array (
+    'name' => 'payment.moveFuelCreated',
+    'label' => 'Move Fuel Transaction Created',
+    'level' => 'DEBUG',
+    'msg' => 'Moving initial swapbot fuel.  Sent <?php echo e($outQty); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
+    'msgVars' => 
+    array (
+      0 => 'outQty',
+      1 => 'outAsset',
+      2 => 'destination',
+      3 => 'txid',
+    ),
   ),
 );
 

@@ -1,21 +1,25 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Mockery as m;
 use Swapbot\Commands\ReceiveWebhook;
 use Swapbot\Events\CustomerAddedToSwap;
 use Swapbot\Repositories\BotEventRepository;
+use Swapbot\Repositories\BotLeaseEntryRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
+use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\parse;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\XChainClient\Mock\MockBuilder;
 use \PHPUnit_Framework_Assert as PHPUnit;
-use Mockery as m;
 
 /**
 *  ScenarioRunner
@@ -27,7 +31,7 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -37,6 +41,7 @@ class ScenarioRunner
         $this->bot_event_repository        = $bot_event_repository;
         $this->bot_repository              = $bot_repository;
         $this->swap_repository             = $swap_repository;
+        $this->bot_lease_entry_repository  = $bot_lease_entry_repository;
         $this->bot_ledger_entry_helper     = $bot_ledger_entry_helper;
         $this->mock_builder                = $mock_builder;
 
@@ -57,6 +62,10 @@ class ScenarioRunner
 
             // clear bot events
             $this->clearBotEvents();
+
+            // set mock config
+            Config::set('swapbot.xchain_fuel_pool_address_id', 'XCHAIN_FUEL_POOL_ADDRESS_01');
+            Config::set('swapbot.xchain_fuel_pool_address',    'swapbotpooladdress0000000000000001');
         }
 
 
@@ -79,11 +88,14 @@ class ScenarioRunner
     }
 
     public function runScenario($scenario_data) {
-        // set up the scenario
-        $bots = $this->addBots($scenario_data['bots']);
-
-        // setup mock quotebot
+        // setup mock quotebot (first)
         $this->quotebot_recorder = $this->installMockQuotebot(isset($scenario_data['quotebot']) ? $scenario_data['quotebot'] : null);
+
+        // set now
+        DateProvider::setNow(Carbon::parse('2015-06-01'));
+
+        // set up the scenario
+        $bots = $this->addBots(isset($scenario_data['bots']) ? $scenario_data['bots'] : []);
 
         $events = $this->normalizeScenarioEvents($scenario_data);
         foreach($events as $event) {
@@ -100,6 +112,7 @@ class ScenarioRunner
         if (isset($scenario_data['expectedSwapModels'])) { $this->validateExpectedSwapModels($scenario_data['expectedSwapModels']); }
         if (isset($scenario_data['expectedEmails'])) { $this->validateExpectedEmails($scenario_data['expectedEmails']); }
         if (isset($scenario_data['expectedQuoteClientCalls'])) { $this->validateExpecteQuoteClientCalls($scenario_data['expectedQuoteClientCalls']); }
+        if (isset($scenario_data['expectedLeaseEntries'])) { $this->validateExpectedBotLeaseEntryModels($scenario_data['expectedLeaseEntries']); }
     }
 
 
@@ -133,6 +146,7 @@ class ScenarioRunner
     protected function executeScenarioEvent_xchainNotification($event, $scenario_data) {
         // process notifications
         $all_xchain_notifications = $scenario_data['xchainNotifications'];
+        if (!$all_xchain_notifications) { $all_xchain_notifications = []; }
         $xchain_notifications = $this->resolveOffset($all_xchain_notifications, $event);
 
         foreach ($xchain_notifications as $raw_notification) {
@@ -163,6 +177,19 @@ class ScenarioRunner
         }
     }
 
+    protected function executeScenarioEvent_addCustomer($event, $scenario_data) {
+        $customer_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "customers"), isset($event['data']) ? $event['data'] : []);
+        $swap = $this->resolveSwap($event, $scenario_data);
+
+        $customer = $this->customer_helper->newSampleCustomer($swap, $customer_attributes);
+        Event::fire(new CustomerAddedToSwap($customer, $swap));
+    }
+
+    protected function executeScenarioEvent_setDate($event, $scenario_data) {
+        DateProvider::setNow(Carbon::parse($event['date']));
+    }
+
+
     protected function resolveOffset($all_xchain_notifications, $event) {
         if (isset($event['offset'])) {
             return [$all_xchain_notifications[$event['offset']]];
@@ -173,14 +200,6 @@ class ScenarioRunner
         }
 
         throw new Exception("Unable to resolve offset for event: ".json_encode($event, 192), 1);
-    }
-
-    protected function executeScenarioEvent_addCustomer($event, $scenario_data) {
-        $customer_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "customers"), isset($event['data']) ? $event['data'] : []);
-        $swap = $this->resolveSwap($event, $scenario_data);
-
-        $customer = $this->customer_helper->newSampleCustomer($swap, $customer_attributes);
-        Event::fire(new CustomerAddedToSwap($customer, $swap));
     }
 
     protected function resolveSwap($event, $scenario_data) {
@@ -202,14 +221,25 @@ class ScenarioRunner
             $bot_attributes = $this->loadBaseFilename($bot_entry, "bots");
             unset($bot_entry['meta']);
             $bot_attributes = array_replace_recursive($bot_attributes, $bot_entry);
+
             $payments = isset($bot_attributes['payments']) ? $bot_attributes['payments'] : null;
             unset($bot_attributes['payments']);
+
+            $leases = isset($bot_attributes['leases']) ? $bot_attributes['leases'] : null;
+            unset($bot_attributes['leases']);
+
             $bot = $this->bot_helper->newSampleBot($this->getSampleUser(), $bot_attributes);
             $this->bot_models[] = $bot;
 
             if ($payments) {
                 foreach($payments as $payment) {
                     $this->addPayment($bot, $payment);
+                }
+            }
+
+            if ($leases) {
+                foreach($leases as $lease) {
+                    $this->addLease($bot, $lease);
                 }
             }
         }
@@ -219,14 +249,20 @@ class ScenarioRunner
     protected function addPayment($bot, $payment) {
         $is_credit = isset($payment['credit']) ? $payment['credit'] : true;
         $amount = $payment['amount'];
+        $asset = $payment['asset'];
 
         $bot_event = app('BotEventHelper')->newSampleBotEvent($bot, ['event' => ['name' => 'test.payment.setup', 'msg' => 'scenario starting payment']]);
 
         if ($is_credit) {
-            $this->bot_ledger_entry_repository->addCredit($bot, $amount, $bot_event);
+            $this->bot_ledger_entry_repository->addCredit($bot, $amount, $asset, $bot_event);
         } else {
-            $this->bot_ledger_entry_repository->addDebit($bot, $amount, $bot_event);
+            $this->bot_ledger_entry_repository->addDebit($bot, $amount, $asset, $bot_event);
         }
+    }
+
+    protected function addLease($bot, $lease) {
+        $bot_event = app('BotEventHelper')->newSampleBotEvent($bot, ['event' => ['name' => 'test.lease.setup', 'msg' => 'scenario starting lease']]);
+        $this->bot_lease_entry_repository->addNewLease($bot, $bot_event, Carbon::parse($lease['start_date']), $lease['length']);
     }
 
 
@@ -276,6 +312,7 @@ class ScenarioRunner
             $event_vars = $bot_event->toArray()['event'];
             // ignore the test payment setup
             if ($event_vars['name'] == 'test.payment.setup') { continue; }
+            if ($event_vars['name'] == 'test.lease.setup') { continue; }
             $actual_bot_events[] = $event_vars;
         }
         // Log::debug("\$actual_bot_events=".json_encode($actual_bot_events, 192));
@@ -879,6 +916,89 @@ class ScenarioRunner
 
 
         return $normalized_expected_email_model;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // ExpectedBotLeaseEntryModels
+
+    protected function validateExpectedBotLeaseEntryModels($expected_bot_lease_entries) {
+        $actual_bot_lease_entries = [];
+        foreach ($this->bot_lease_entry_repository->findAll() as $bot_lease_entry_model) {
+            $actual_bot_lease_entries[] = $bot_lease_entry_model->toArray();
+        }
+
+        foreach ($expected_bot_lease_entries as $offset => $raw_expected_bot_lease_entry_model) {
+            $actual_bot_lease_entry_model = isset($actual_bot_lease_entries[$offset]) ? $actual_bot_lease_entries[$offset] : null;
+
+            $expected_bot_lease_entry_model = $raw_expected_bot_lease_entry_model;
+            unset($expected_bot_lease_entry_model['meta']);
+            $expected_bot_lease_entry_model = array_replace_recursive($this->loadBaseFilename($raw_expected_bot_lease_entry_model, "bot_lease_models"), $expected_bot_lease_entry_model);
+
+            $expected_bot_lease_entry_model = $this->normalizeExpectedBotLeaseEntryRecord($expected_bot_lease_entry_model, $actual_bot_lease_entry_model);
+            
+            $this->validateExpectedBotLeaseEntryRecord($expected_bot_lease_entry_model, $actual_bot_lease_entry_model);
+        }
+
+        // make sure the counts are the same
+        PHPUnit::assertCount(count($expected_bot_lease_entries), $actual_bot_lease_entries, "Did not find the correct number of BotLeaseEntry models");
+
+    }
+
+    protected function validateExpectedBotLeaseEntryRecord($expected_bot_lease_entry_model, $actual_bot_lease_entry_model) {
+        PHPUnit::assertNotEmpty($actual_bot_lease_entry_model, "Missing lease entry model ".json_encode($expected_bot_lease_entry_model, 192));
+        PHPUnit::assertEquals($expected_bot_lease_entry_model, $actual_bot_lease_entry_model, "ExpectedBotLeaseEntryRecord mismatch");
+    }
+
+
+
+
+    protected function normalizeExpectedBotLeaseEntryRecord($expected_bot_lease_entry_model, $actual_bot_lease_entry_model) {
+        $normalized_expected_bot_lease_entry_model = [];
+
+        // placeholder
+        $normalized_expected_bot_lease_entry_model = $expected_bot_lease_entry_model;
+
+
+        // ///////////////////
+        // // EXPECTED
+        // foreach (['txid','quantity','asset','notifiedAddress','event','network',] as $field) {
+        //     if (isset($expected_bot_lease_entry_model[$field])) { $normalized_expected_bot_lease_entry_model[$field] = $expected_bot_lease_entry_model[$field]; }
+        // }
+        // ///////////////////
+
+
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = ['id','uuid','user_id','bot_id','created_at',];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_bot_lease_entry_model[$field])) { $normalized_expected_bot_lease_entry_model[$field] = $expected_bot_lease_entry_model[$field]; }
+                else if (isset($actual_bot_lease_entry_model[$field])) { $normalized_expected_bot_lease_entry_model[$field] = $actual_bot_lease_entry_model[$field]; }
+        }
+        ///////////////////
+
+        ///////////////////
+        // JUST NEEDS TO EXIST
+        $must_exist_fields = ['bot_event_id',];
+        foreach ($must_exist_fields as $field) {
+            if (isset($actual_bot_lease_entry_model[$field])) { $normalized_expected_bot_lease_entry_model[$field] = $actual_bot_lease_entry_model[$field]; }
+        }
+        ///////////////////
+
+
+
+        // ///////////////////
+        // // Special
+        // // build satoshis
+        // $normalized_expected_bot_lease_entry_model['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_bot_lease_entry_model['quantity']);
+        // // blockhash
+        // if (isset($expected_bot_lease_entry_model['blockhash'])) {
+        //     $normalized_expected_bot_lease_entry_model['bitcoinTx']['blockhash'] = $expected_bot_lease_entry_model['blockhash'];
+        // }
+        // ///////////////////
+
+
+
+        return $normalized_expected_bot_lease_entry_model;
     }
 
 

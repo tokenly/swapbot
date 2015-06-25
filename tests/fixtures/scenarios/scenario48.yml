@@ -42,8 +42,6 @@ expectedBotEvents:
     quantityIn: 0.035
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
 # check balance
 expectedBotModels:

@@ -54,19 +54,20 @@ class PaymentAccountAPITest extends TestCase {
         $tester = $this->setupAPITester($sample_bot);
 
         // require user authentication
-        $tester->testRequiresUser('/balance');
+        $tester->testRequiresUser('/balances');
         $tester->cleanup();
         
         // manually add a couple of balance entries
         $repo = app('Swapbot\Repositories\BotLedgerEntryRepository');
-        $repo->addCredit($sample_bot, 1600, app('BotEventHelper')->newSampleBotEvent($sample_bot));
-        $repo->addDebit($sample_bot, 200, app('BotEventHelper')->newSampleBotEvent($sample_bot));
+        $repo->addCredit($sample_bot, 1600, 'BTC', app('BotEventHelper')->newSampleBotEvent($sample_bot));
+        $repo->addDebit($sample_bot, 200, 'BTC', app('BotEventHelper')->newSampleBotEvent($sample_bot));
+        $repo->addCredit($sample_bot, 5, 'TOKENLY', app('BotEventHelper')->newSampleBotEvent($sample_bot));
 
         // get the balance
-        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/payments/'.$sample_bot['uuid'].'/balance');
+        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/payments/'.$sample_bot['uuid'].'/balances');
         PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$sample_bot['uuid'].'/balance');
         $actual_response_from_api = json_decode($response->getContent(), true);
-        PHPUnit::assertEquals(1400, $actual_response_from_api['balance']);
+        PHPUnit::assertEquals(['BTC' => 1400, 'TOKENLY' => 5], $actual_response_from_api['balances']);
 
     }
 

@@ -1,6 +1,8 @@
 # bot is out of fuel for longer than 6 confirmations and then is refueled
 #   all the unresolved transactions should then be processed
 
+### NEEDS TO BE FIXED ###
+
 ############################
 # setup bots and payment
 bots:
@@ -62,8 +64,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-0001.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
   ####
   # the second swap should now be handled
@@ -76,7 +76,5 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-025.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
 

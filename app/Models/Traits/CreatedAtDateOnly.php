@@ -4,9 +4,8 @@ namespace Swapbot\Models\Traits;
 
 trait CreatedAtDateOnly {
 
-
     public function getDates() {
-        return [static::CREATED_AT];
+        return array_merge($this->dates, [static::CREATED_AT]);
     }
 
     public function setUpdatedAt($value) { }

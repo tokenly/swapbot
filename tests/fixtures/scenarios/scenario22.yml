@@ -7,10 +7,10 @@ bots:
   - meta: { baseFilename: bot01.yml }
     state: brandnew
     payments: ~
+    leases: ~
     balances:
         LTBCOIN: 0
         BTC: 0
-
 
 
 ############################
@@ -24,25 +24,14 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300001
 
-  # mempool fuel sent
-  - meta: { baseFilename: mempool_BTC_SEND_FUEL_notification_01.yml }
-    quantity: 0.005
-    blockId: 300002
-
   # mempool fuel received
   - meta: { baseFilename: mempool_BTC_RECEIVE_FUEL_notification_01.yml }
-    quantity: 0.005
-    blockId: 300002
-
-
-  # confirm that the fuel was sent
-  - meta: { baseFilename: confirmed_BTC_SEND_FUEL_notification_01.yml }
-    quantity: 0.005
+    quantity: 0.001
     blockId: 300002
 
   # confirm that the fuel was received
   - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
-    quantity: 0.005
+    quantity: 0.001
     blockId: 300002
 
 
@@ -52,7 +41,7 @@ xchainNotifications:
 # validate the expected results
 expectedXChainCalls:
   - 
-    meta: { baseFilename: send_BTC_FROM_PAYMENT_ADDRESS.yml }
+    meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
 
 
 expectedBotEvents:
@@ -60,22 +49,19 @@ expectedBotEvents:
     meta: { baseFilename: payment.unconfirmed.yml }
   - #### confirmed payment received
     meta: { baseFilename: payment.confirmed.yml }
-  - #### move fuel transaction created
-    meta: { baseFilename: payment.moveFuelCreated.yml }
-  - #### creation fee paid
-    meta: { baseFilename: payment.creationFeePaid.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased.yml }
+  - #### first monthly fee paid
+    meta: { baseFilename: payment.firstMonthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated.yml }
   - #### LOWFUEL
     meta: { baseFilename: bot.stateChange-lowfuel.yml }
-
-  - #### fuel send (mempool)
-    meta: { baseFilename: payment.moveFuelSent.yml }
-    confirmations: 0
+  - #### move fuel transaction created
+    meta: { baseFilename: payment.moveFuelCreated.yml }
 
   - #### fuel received (mempool)
     meta: { baseFilename: payment.unconfirmedMoveFuel.yml }
-
-  - #### fuel send (confirmed)
-    meta: { baseFilename: payment.moveFuelSent.yml }
 
   - #### fuel transaction (confirmed)
     meta: { baseFilename: payment.moveFuelConfirmed.yml }
@@ -85,12 +71,14 @@ expectedBotEvents:
 
 
 expectedBotLedgerEntries:
-  - 
+  - ### Credit - receive BTC payment 
     meta: { baseFilename: bot_ledger_entry_model_01.yml }
-  - ### Debit - Sent Fuel
-    meta: { baseFilename: bot_ledger_entry_model_FUEL_DEBIT.yml }
-  - ### Debit - Paid Creation Fee
-    meta: { baseFilename: bot_ledger_entry_model_CREATION_FEE_DEBIT.yml }
+  - ### Debit - Paid 3 months
+    meta: { baseFilename: bot_ledger_entry_model_2_MONTH_SWAPBOT_RENTAL_BTC_DEBIT.yml }
+  - ### Credit - 3 SWAPBOTMONTH
+    meta: { baseFilename: bot_ledger_entry_model_2_SWAPBOTMONTH_CREDIT.yml }
+  - ### Debit - 1 SWAPBOTMONTH Pyament
+    meta: { baseFilename: bot_ledger_entry_model_1_SWAPBOTMONTH_DEBIT.yml }
 
 
 expectedBotModels:

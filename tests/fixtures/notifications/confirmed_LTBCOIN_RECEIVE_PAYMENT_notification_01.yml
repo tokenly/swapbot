@@ -1,0 +1,23 @@
+# a simple XCP notification
+
+txid: 00000000000000000000000000000000000000000000000000xcptx0p0222222
+network: counterparty
+event: receive
+notifiedAddress: paymentaddress00000000000000000001
+notifiedAddressId: PAYMENT_RECEIVE_MONITOR_ID_01
+sources: [SENDER01]
+destinations: [botaddress000000000000000000000001]
+confirmed: true
+confirmations: 1
+asset: LTBCOIN
+quantity: 500
+blockId: 300000
+counterpartyTx:
+  type: send
+  sources: [SENDER01]
+  destinations: [paymentaddress00000000000000000001]
+  quantity: 500
+  quantitySat: 50000000000
+  asset: LTBCOIN
+  dustSize: 0.00001
+  dustSizeSat: 1000

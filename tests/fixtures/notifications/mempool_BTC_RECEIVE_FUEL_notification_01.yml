@@ -5,7 +5,7 @@ network: bitcoin
 event: receive
 notifiedAddress: SWAPBOTADDR01
 notifiedAddressId: PUBLIC_RECEIVE_MONITOR_ID_01
-sources: [paymentaddress00000000000000000001]
+sources:      [swapbotpooladdress0000000000000001]
 destinations: [botaddress000000000000000000000001]
 confirmed: false
 confirmations: 0

@@ -1,0 +1,6 @@
+name: payment.monthlyFeePurchased
+months: 1
+cost: 60000
+asset: LTBCOIN
+state: brandnew
+isActive: false

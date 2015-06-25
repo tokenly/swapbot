@@ -74,11 +74,11 @@ class Bot extends APIModel {
 
 
     public function getStartingBTCFuel() {
-        return 0.01;
+        return 0.001;
     }
 
     public function getMinimumBTCFuel() {
-        return 0.001;
+        return 0.0002;
     }
 
     public function getBalance($asset) {

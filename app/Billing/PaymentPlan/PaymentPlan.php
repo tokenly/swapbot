@@ -15,16 +15,34 @@ class PaymentPlan extends ArrayObject {
         parent::__construct($data);
     }
 
-    public function getCreationFee() {
-        return $this['setupFee'];
-    }
-
-    public function getTXFee() {
-        return $this['txFee'];
-    }
-
     public function isMonthly() {
         return ($this['type'] == 'monthly');
+    }
+
+    public function calculateMonthlyPurchaseDetails($amount, $asset) {
+        if (!$this->isMonthly()) { return false; }
+
+        foreach ($this['monthlyRates'] as $_id => $rate_details) {
+            if ($rate_details['asset'] == $asset AND $amount >= $rate_details['quantity']) {
+                $months = floor($amount / $rate_details['quantity']);
+                return [
+                    'months' => $months,
+                    'cost'   => $months * $rate_details['quantity'],
+                    'asset'  => $asset,
+                ];
+            }
+        }
+
+        return false;
+    }
+
+    public function isAssetAccepted($asset) {
+        // assumes monthly
+        foreach ($this['monthlyRates'] as $_id => $rate_details) {
+            if ($rate_details['asset'] == $asset) { return true; }
+        }
+
+        return false;
     }
 
 }

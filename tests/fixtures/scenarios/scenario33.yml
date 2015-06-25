@@ -5,8 +5,7 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
-    payments: # just enough for one swap
-      - {credit: true, amount: 0.001}
+    payments: ~ # bot does not have any credits for another month
 
 ############################
 # receive notifications from xchain
@@ -17,6 +16,12 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300002
 
+events:
+  - {type: setDate, date: "2015-06-01" }
+  - {type: xchainNotification, offset: 0}
+
+  - {type: setDate, date: "2015-07-02" }
+  - {type: xchainNotification, startOffset: 1}
 
 ############################
 # validate the expected results
@@ -35,8 +40,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
   #### now the bot is out of payment
 
@@ -53,7 +56,13 @@ expectedBotEvents:
     meta: { baseFilename: swap.new.yml }
     txidIn: "00000000000000000000000000000000000000000000000000000xcptx222222"
   - #### confirmed payment received
-    meta: { baseFilename: payment.confirmed.yml }
+    meta: { baseFilename: payment.confirmed-unpaid.yml }
+  - #### monthly fee purchased
+    meta: { baseFilename: payment.monthlyFeePurchased-unpaid.yml }
+  - #### monthly fee paid
+    meta: { baseFilename: payment.monthlyFeePaid.yml }
+  - #### lease created
+    meta: { baseFilename: payment.leaseCreated-MONTH_2.yml }
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
 
@@ -68,8 +77,6 @@ expectedBotEvents:
     txidIn: 00000000000000000000000000000000000000000000000000000xcptx222222
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
 expectedTransactionModels:
   - 

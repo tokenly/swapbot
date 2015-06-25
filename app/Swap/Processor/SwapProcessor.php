@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\BillBotForTransaction;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\SwapConfig;
@@ -172,9 +171,6 @@ class SwapProcessor {
         // if a state change was triggered, then update the swap state
         //   this can happen even if there was an error
         $this->handleUpdateSwapState($swap_process);
-
-        // if the swaps are finished, then bill the bot
-        $this->handleBotBilling($swap_process);
 
         // processed this swap
         return $swap;
@@ -521,16 +517,6 @@ class SwapProcessor {
 
     }
 
-    protected function handleBotBilling($swap_process) {
-        // billing only happens when the last swap is sent
-        if (!$swap_process['swap_was_sent']) { return; }
-
-        // bill the bot if all the swaps are now complete for this transaction
-        if ($this->allSwapsAreComplete($swap_process['transaction'])) {
-            $this->billBot($swap_process['bot'], $swap_process['transaction']);
-        }
-    }
-
     protected function handleUpdateBotBalances($swap_process) {
         if ($swap_process['bot_balance_deltas']) {
             $this->balance_updater->updateBotBalances($swap_process['bot'], $swap_process['bot_balance_deltas']);
@@ -566,9 +552,6 @@ class SwapProcessor {
         return $all_complete;
     }
 
-    protected function billBot($bot, $transaction) {
-        $this->dispatch(new BillBotForTransaction($bot, $transaction));
-    }
 
     
     

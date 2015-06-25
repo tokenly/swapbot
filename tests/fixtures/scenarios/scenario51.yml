@@ -90,8 +90,6 @@ expectedBotEvents:
     quantityOut: 1.4
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }

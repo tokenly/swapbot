@@ -26,7 +26,8 @@
 		"phpunit/phpunit": "~4.0",
 		"graphp/graphviz": "~0.2.0",
 		"phpspec/phpspec": "~2.1",
-		"mockery/mockery": "0.9.*@dev"
+		"mockery/mockery": "0.9.*@dev",
+	    "doctrine/dbal": "~2.3"
 	},
 	"autoload": {
 		"classmap": [

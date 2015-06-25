@@ -56,18 +56,18 @@ class PaymentsController extends APIController {
     }
 
 
-    public function balance($botuuid, Guard $auth, BotRepository $bot_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, APIControllerHelper $api_helper)
+    public function balances($botuuid, Guard $auth, BotRepository $bot_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, APIControllerHelper $api_helper)
     {
         $user = $auth->getUser();
 
         // get the bot
         $bot = $api_helper->requireResourceOwnedByUser($botuuid, $user, $bot_repository);
 
-        // get the balance for this bot
-        $balance = $bot_ledger_entry_repository->sumCreditsAndDebits($bot);
+        // get all payment balances for this bot
+        $balances = $bot_ledger_entry_repository->sumCreditsAndDebitsByAsset($bot);
 
         // format for API
-        return $api_helper->transformValueForOutput(['balance' => $balance]);
+        return $api_helper->transformValueForOutput(['balances' => $balances]);
     }
 
 

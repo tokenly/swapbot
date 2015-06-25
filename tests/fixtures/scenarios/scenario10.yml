@@ -36,8 +36,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
 
   - #### found an unconfirmed send transaction

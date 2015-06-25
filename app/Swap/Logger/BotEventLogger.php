@@ -4,6 +4,7 @@ namespace Swapbot\Swap\Logger;
 
 use Exception;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\CreateBotEvent;
 use Swapbot\Events\BotEventCreated;
 use Swapbot\Events\BotstreamEventCreated;
@@ -11,11 +12,13 @@ use Swapbot\Events\SwapEventCreated;
 use Swapbot\Events\SwapstreamEventCreated;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
+use Swapbot\Models\BotLeaseEntry;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Swap;
 use Swapbot\Models\Transaction;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Swap\Logger\OutputTransformer\Facade\BotEventOutputTransformer;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class BotEventLogger {
@@ -35,53 +38,7 @@ class BotEventLogger {
     // bot
 
     public function logBotStateChange(Bot $bot, $new_state) {
-        $this->logStandardBotEvent('bot.stateChange', $bot, ['state' => $new_state]);
-
-    }
-
-
-    public function logUnconfirmedPaymentTx(Bot $bot, $xchain_notification) {
-        return $this->logLegacyBotEvent($bot, 'payment.unconfirmed', BotEvent::LEVEL_INFO, [
-            'msg'         => "Received an unconfirmed payment of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.",
-            'txid'        => $xchain_notification['txid'],
-            'source'      => $xchain_notification['sources'][0],
-            'inQty'       => $xchain_notification['quantity'],
-            'inAsset'     => $xchain_notification['asset'],
-        ]);
-    }
-
-    public function logConfirmedPaymentTx(Bot $bot, $xchain_notification) {
-        return $this->logLegacyBotEvent($bot, 'payment.confirmed', BotEvent::LEVEL_INFO, [
-            'msg'           => "Received a confirmed payment of {$xchain_notification['quantity']} {$xchain_notification['asset']} from {$xchain_notification['sources'][0]}.",
-            'txid'          => $xchain_notification['txid'],
-            'source'        => $xchain_notification['sources'][0],
-            'inQty'         => $xchain_notification['quantity'],
-            'inAsset'       => $xchain_notification['asset'],
-            'confirmations' => $xchain_notification['confirmations'],
-        ]);
-    }
-
-    public function logPreviousPaymentTransaction(Bot $bot, $tx_id, $confirmations) {
-        $this->logLegacyBotEvent($bot, 'payment.previous', BotEvent::LEVEL_DEBUG, [
-            'msg'           => "Payment transaction {$tx_id} was confirmed with $confirmations confirmations.",
-            'txid'          => $tx_id,
-            'confirmations' => $confirmations
-        ]);
-    }
-
-    public function logUnknownPaymentTransaction(Bot $bot, $xchain_notification) {
-        $confirmations = $xchain_notification['confirmations'];
-        $quantity = $xchain_notification['quantity'];
-        $asset = $xchain_notification['asset'];
-
-        return $this->logLegacyBotEvent($bot, 'payment.unknown', BotEvent::LEVEL_WARNING, [
-            'msg'           => "Received a payment of {$quantity} {$asset} with transaction ID {$xchain_notification['txid']}. This was not a valid payment.",
-            'txid'          => $xchain_notification['txid'],
-            'confirmations' => $confirmations,
-            'source'        => $xchain_notification['sources'][0],
-            'inQty'         => $quantity,
-            'inAsset'       => $asset,
-        ]);
+        return $this->logStandardBotEvent('bot.stateChange', $bot, ['state' => $new_state]);
     }
 
     public function logInactiveBotState(Bot $bot, $xchain_notification, BotState $bot_state) {
@@ -138,7 +95,7 @@ class BotEventLogger {
     }
 
     public function logPreviousTransaction(Bot $bot, $xchain_notification) {
-        $this->logXChainBotEvent('tx.previous', $bot, $xchain_notification);
+        return $this->logXChainBotEvent('tx.previous', $bot, $xchain_notification);
     }
 
     public function logUnknownReceiveTransaction(Bot $bot, $xchain_notification) {
@@ -175,16 +132,105 @@ class BotEventLogger {
 
 
 
+
+    public function logUnconfirmedFuelTXReceived(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.unconfirmedMoveFuel', $bot, $xchain_notification, [
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+        ]);
+    }
+
+
+    public function logFuelTXReceived(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.moveFuelConfirmed', $bot, $xchain_notification, [
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+        ]);
+    }
+
+    // public function logFuelTXSent(Bot $bot, $xchain_notification) {
+    //     $quantity = $xchain_notification['quantity'];
+    //     $asset    = $xchain_notification['asset'];
+    //     $tx_id    = $xchain_notification['txid'];
+    //     return $this->logLegacyBotEvent($bot, 'payment.moveFuelSent', BotEvent::LEVEL_DEBUG, [
+    //         'msg'           => "Sent swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
+    //         'qty'           => $quantity,
+    //         'asset'         => $asset,
+    //         'txid'          => $tx_id,
+    //         'confirmations' => $xchain_notification['confirmations'],
+    //     ]);
+
+    // }
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // payment
+
+    public function logFirstMonthlyFeePaid(Bot $bot, $quantity, $asset) {
+        return $this->logStandardBotEvent('payment.firstMonthlyFeePaid', $bot, ['qty' => $quantity, 'asset' => $asset,]);
+    }
+
+    public function logMonthlyFeePaid(Bot $bot, $quantity, $asset) {
+        return $this->logStandardBotEvent('payment.monthlyFeePaid', $bot, ['qty' => $quantity, 'asset' => $asset,]);
+    }
+
+    public function logMonthlyFeePurchased(Bot $bot, $months, $cost, $asset) {
+        return $this->logStandardBotEvent('payment.monthlyFeePurchased', $bot, [
+            'months' => $months,
+            'cost'   => $cost,
+            'asset'  => $asset,
+        ]);
+    }
+
+    public function logLeaseCreated(Bot $bot, BotLeaseEntry $lease_entry) {
+        return $this->logStandardBotEvent('payment.leaseCreated', $bot, [
+            'start_date' => (string)$lease_entry['start_date'],
+            'end_date'   => (string)$lease_entry['end_date'],
+        ]);
+    }
+
+    public function logUnconfirmedPaymentTx(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.unconfirmed', $bot, $xchain_notification, [
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+        ]);
+    }
+
+    public function logConfirmedPaymentTx(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.confirmed', $bot, $xchain_notification, [
+            'source'      => $xchain_notification['sources'][0],
+            'inQty'       => $xchain_notification['quantity'],
+            'inAsset'     => $xchain_notification['asset'],
+        ]);
+    }
+
+    public function logPreviousPaymentTransaction(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.previous', $bot, $xchain_notification);
+    }
+
+    public function logUnknownPaymentTransaction(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('payment.unknown', $bot, $xchain_notification, [
+            'source'  => $xchain_notification['sources'][0],
+            'inQty'   => $xchain_notification['quantity'],
+            'inAsset' => $xchain_notification['asset'],
+        ]);
+    }
+
+
     public function logMoveInitialFuelTXCreated(Bot $bot, $quantity, $asset, $destination, $fee, $tx_id) {
-        return $this->logLegacyBotEvent($bot, 'payment.moveFuelCreated', BotEvent::LEVEL_DEBUG, [
-            'msg'         => "Moving initial swapbot fuel.  Sent {$quantity} {$asset} to {$destination} with transaction ID {$tx_id}.",
+        return $this->logStandardBotEvent('payment.moveFuelCreated', $bot, [
             'destination' => $destination,
             'outQty'      => $quantity,
             'outAsset'    => $asset,
             'fee'         => $fee,
-            'sentTxID'    => $tx_id,
+            'txid'        => $tx_id,
         ]);
-
     }
 
     public function logMoveInitialFuelTXFailed(Bot $bot, Exception $e) {
@@ -194,61 +240,6 @@ class BotEventLogger {
         ]);
 
     }
-
-    public function logUnconfirmedFuelTXReceived(Bot $bot, $xchain_notification) {
-        $quantity = $xchain_notification['quantity'];
-        $asset    = $xchain_notification['asset'];
-        $tx_id    = $xchain_notification['txid'];
-        return $this->logLegacyBotEvent($bot, 'payment.unconfirmedMoveFuel', BotEvent::LEVEL_INFO, [
-            'msg'           => "Received an unconfirmed transaction with swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
-            'qty'           => $quantity,
-            'asset'         => $asset,
-            'txid'          => $tx_id,
-            'confirmations' => $xchain_notification['confirmations'],
-        ]);
-
-    }
-
-
-    public function logFuelTXReceived(Bot $bot, $xchain_notification) {
-        $quantity = $xchain_notification['quantity'];
-        $asset    = $xchain_notification['asset'];
-        $tx_id    = $xchain_notification['txid'];
-        return $this->logLegacyBotEvent($bot, 'payment.moveFuelConfirmed', BotEvent::LEVEL_INFO, [
-            'msg'           => "Received swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
-            'qty'           => $quantity,
-            'asset'         => $asset,
-            'txid'          => $tx_id,
-            'confirmations' => $xchain_notification['confirmations'],
-        ]);
-
-    }
-
-    public function logFuelTXSent(Bot $bot, $xchain_notification) {
-        $quantity = $xchain_notification['quantity'];
-        $asset    = $xchain_notification['asset'];
-        $tx_id    = $xchain_notification['txid'];
-        return $this->logLegacyBotEvent($bot, 'payment.moveFuelSent', BotEvent::LEVEL_DEBUG, [
-            'msg'           => "Sent swapbot fuel of {$quantity} {$asset} from the payment address with transaction ID {$tx_id}.",
-            'qty'           => $quantity,
-            'asset'         => $asset,
-            'txid'          => $tx_id,
-            'confirmations' => $xchain_notification['confirmations'],
-        ]);
-
-    }
-
-
-
-    public function logInitialCreationFeePaid(Bot $bot, $quantity, $asset) {
-        return $this->logLegacyBotEvent($bot, 'payment.creationFeePaid', BotEvent::LEVEL_INFO, [
-            'msg'   => "Paid {$quantity} {$asset} as a creation fee.",
-            'qty'   => $quantity,
-            'asset' => $asset,
-        ]);
-
-    }
-
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -539,42 +530,49 @@ class BotEventLogger {
     // Log Bot Event
 
 
-    protected function logStandardBotEvent($event_name, Bot $bot, $bot_update_vars_for_event_log=null, $write_to_application_log=true) {
-        $bot_details_for_event_log = $this->buildStandardBotDetailsForLog($bot, $bot_update_vars_for_event_log);
-        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, null, $write_to_application_log);
+    protected function logStandardBotEvent($event_name, Bot $bot, $event_vars=null, $write_to_application_log=true) {
+        $bot_details_for_event_log = $this->buildStandardBotEventDetailsForLog($bot, $event_vars);
+        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, $write_to_application_log);
     }
 
-    protected function logXChainBotEvent($event_name, Bot $bot, $xchain_notification, $write_to_application_log=true) {
-        $bot_details_for_event_log = $this->buildXChainBotDetailsForLog($bot, $xchain_notification);
-        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, null, $write_to_application_log);
+    protected function logXChainBotEvent($event_name, Bot $bot, $xchain_notification, $event_vars=null, $write_to_application_log=true) {
+        $bot_details_for_event_log = $this->buildXChainBotEventDetailsForLog($bot, $xchain_notification, $event_vars);
+        return $this->logBotEvent($event_name, $bot, $bot_details_for_event_log, $write_to_application_log);
     }
 
-    protected function buildStandardBotDetailsForLog($bot, $bot_update_vars_for_event_log=null) {
+    protected function buildStandardBotEventDetailsForLog($bot, $event_vars=null) {
         // get the state
-        $state = ($bot_update_vars_for_event_log !== null AND isset($bot_update_vars_for_event_log['state'])) ? $bot_update_vars_for_event_log['state'] : $bot['state'];
+        $state = ($event_vars !== null AND isset($event_vars['state'])) ? $event_vars['state'] : $bot['state'];
 
-        $bot_details_for_log = [
+        $event_details_for_log = [
             'state'    => $bot['state'],
             'isActive' => $bot->isActive($state),
         ];
 
-        return $bot_details_for_log;
+        // merge the bot update vars
+        if ($event_vars !== null) { $event_details_for_log = array_merge($event_vars, $event_details_for_log); }
+
+        return $event_details_for_log;
     }
 
-    protected function buildXChainBotDetailsForLog($bot, $xchain_notification, $event_vars=null) {
+    protected function buildXChainBotEventDetailsForLog($bot, $xchain_notification, $event_vars=null) {
+        // get the state
+        $state = ($event_vars !== null AND isset($event_vars['state'])) ? $event_vars['state'] : $bot['state'];
+
         $event_details_for_log = [
             'txid'          => $xchain_notification['txid'],
             'confirmations' => $xchain_notification['confirmations'],
 
-            'state'         => $bot['state'],
-            'isActive'      => $bot->isActive(),
+            'state'         => $state,
+            'isActive'      => $bot->isActive($state),
         ];
+
+        // merge the bot update vars
+        if ($event_vars !== null) { $event_details_for_log = array_merge($event_vars, $event_details_for_log); }
 
         // filter null values
         $filtered_event_details = $event_details_for_log;
-        foreach(array_keys($event_details_for_log) as $key) {
-            if ($filtered_event_details[$key] === null) { unset($filtered_event_details[$key]); }
-        }
+        foreach(array_keys($event_details_for_log) as $key) { if ($filtered_event_details[$key] === null) { unset($filtered_event_details[$key]); }; }
         $event_details_for_log = $filtered_event_details;
 
         return $event_details_for_log;
@@ -587,20 +585,23 @@ class BotEventLogger {
     protected function logBotEvent($event_name, Bot $bot, $event_vars=null, $write_to_application_log=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
-        // log the bot event
-        if ($write_to_application_log) { EventLog::log($event_name, $event_vars); }
-
         // save the bot event
         $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, null, $event_vars);
-        $serialized_bot_event_model = $bot_event_model->serializeForAPI();
 
-        if ($event_template_data['botEventStream'] ) {
+        // log the bot event
+        if ($write_to_application_log) { EventLog::log($event_name, array_merge(['msg' => BotEventOutputTransformer::buildMessage($bot_event_model)], $event_vars)); }
+
+
+        $serialized_bot_event_model = $bot_event_model->serializeForAPI();
+        if (isset($event_template_data['botEventStream']) AND $event_template_data['botEventStream']) {
             // publish to event stream
             Event::fire(new BotstreamEventCreated($bot, $serialized_bot_event_model));
         }
 
         // fire a bot event
         Event::fire(new BotEventCreated($bot, $serialized_bot_event_model));
+
+        return $bot_event_model;
     }
 
     protected function saveBotEventToRepository($event_name, $bot, $swap, $event_vars) {

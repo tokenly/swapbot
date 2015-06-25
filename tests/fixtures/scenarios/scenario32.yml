@@ -4,14 +4,21 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
-    payments: # just enough for one swap
-      - {credit: true, amount: 0.001}
+    payments: ~ # bot does not have any credits for another month
 
 ############################
 # receive notifications from xchain
+
 xchainNotifications:
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_02.yml }
+
+
+events:
+  - {type: setDate, date: "2015-06-01" }
+  - {type: xchainNotification, offset: 0}
+  - {type: setDate, date: "2015-07-02" }
+  - {type: xchainNotification, startOffset: 1}
 
 
 ############################
@@ -31,8 +38,6 @@ expectedBotEvents:
     meta: { baseFilename: swap.sent.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
-  - #### transaction fee paid
-    meta: { baseFilename: fee.transaction.yml }
 
   #### now the bot is out of payment
 

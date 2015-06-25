@@ -5,6 +5,7 @@ namespace Swapbot\Swap\Processor;
 use ArrayObject;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
@@ -90,7 +91,6 @@ class ReceiveEventProcessor {
                 'transaction'                      => $transaction_model,
                 'xchain_notification'              => $xchain_notification,
                 'bot'                              => $bot,
-                'statemachine'                     => $bot->stateMachine(),
 
                 'confirmations'                    => $xchain_notification['confirmations'],
                 'is_confirmed'                     => $xchain_notification['confirmed'],
@@ -198,7 +198,7 @@ class ReceiveEventProcessor {
         if ($tx_process['tx_is_handled']) { return; }
         if ($tx_process['transaction']['processed']) { return; }
 
-        if ($tx_process['xchain_notification']['asset'] == 'BTC' AND in_array($tx_process['bot']['payment_address'], $tx_process['xchain_notification']['sources'])) {
+        if ($tx_process['xchain_notification']['asset'] == 'BTC' AND in_array(Config::get('swapbot.xchain_fuel_pool_address'), $tx_process['xchain_notification']['sources'])) {
             $confirmed = $tx_process['is_confirmed'];
 
             // this is a fuel transaction
@@ -247,8 +247,8 @@ class ReceiveEventProcessor {
     protected function checkBotState($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
-        $bot_state = $tx_process['statemachine']->getCurrentState();
-        // Log::debug('bot_state: '.$bot_state->getName());
+        $bot_state = $tx_process['bot']->stateMachine()->getCurrentState();
+        // Log::debug('checkBotState bot_state: '.$bot_state->getName());
 
         // if the bot is not active, then mark it as handled
         if (!$bot_state->isActive()) {
@@ -333,6 +333,9 @@ class ReceiveEventProcessor {
         if ($tx_process['should_reconcile_bot_state']) {
             // the bot state might have changed, so check it now
             $this->dispatch(new ReconcileBotState($tx_process['bot']));
+
+            // reload the bot
+            $this->reloadBot($tx_process);
         }
     }
     protected function handleReconcileSwapStates($tx_process) {
@@ -340,6 +343,10 @@ class ReceiveEventProcessor {
             // some swap states might have changed, so check those
             $this->dispatch(new ReconcileBotSwapStates($tx_process['bot']));
         }
+    }
+
+    protected function reloadBot($tx_process) {
+        $tx_process['bot'] = $this->bot_repository->findByID($tx_process['bot']['id']);
     }
 
 }

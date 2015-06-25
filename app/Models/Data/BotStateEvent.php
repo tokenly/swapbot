@@ -5,11 +5,11 @@ namespace Swapbot\Models\Data;
 
 class BotStateEvent {
 
-    const CREATION_FEE_PAID = 'creationFeePaid';
-    const FUELED            = 'botFueled';
-    const FUEL_EXHAUSTED    = 'fuelExhausted';
-    const PAYMENT_EXHAUSTED = 'paymentExhausted';
-    const PAID              = 'paid';
+    const FIRST_MONTHLY_FEE_PAID = 'firstMonthlyFeePaid';
+    const MONTHLY_FEE_PAID       = 'monthlyFeePaid';
+    const FUELED                 = 'botFueled';
+    const FUEL_EXHAUSTED         = 'fuelExhausted';
+    const LEASE_EXPIRED      = 'paymentExhausted';
 
 
 }
