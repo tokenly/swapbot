@@ -148,6 +148,7 @@ return [
 		'Swapbot\Swap\Settings\Provider\BotSettingsServiceProvider',
 		'Swapbot\Swap\Logger\OutputTransformer\Provider\BotEventOutputTransformerServiceProvider',
 		'Swapbot\Providers\Monitoring\MonitoringServiceProvider',
+		'Swapbot\Providers\Billing\PaymentPlansServiceProvider',
 
 
 		/*

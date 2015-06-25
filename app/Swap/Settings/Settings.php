@@ -24,6 +24,19 @@ class Settings {
         return array_get([$name => $values], $settings_key);
     }
 
+    public function put($name, $settings_value) {
+        $this->setting_repository->createOrUpdate($name, $settings_value);
+    }
+
+    public function delete($name) {
+        $settings = $this->setting_repository->findByName($name);
+        if ($settings) {
+            $this->setting_repository->delete($settings);
+            return $settings;
+        }
+
+        return false;
+    }
 
     protected function extractSettingsName($settings_key) {
         $pieces = explode('.', $settings_key);

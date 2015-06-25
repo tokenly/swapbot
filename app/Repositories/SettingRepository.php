@@ -2,6 +2,8 @@
 
 namespace Swapbot\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 use Swapbot\Models\Setting;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
@@ -31,6 +33,26 @@ class SettingRepository extends APIRepository
         }
 
 
+        return $model;
+    }
+
+
+
+    public function update(Model $model, $attributes) {
+        $out = parent::update($model, $attributes);
+        Event::fire('settings.updated.'.$model['name'], $model);
+        return $out;
+    }
+
+    public function delete(Model $model) {
+        $out = parent::delete($model);
+        Event::fire('settings.deleted.'.$model['name'], $model);
+        return $out;
+    }
+
+    public function create($attributes) {
+        $model = parent::create($attributes);
+        Event::fire('settings.created.'.$model['name'], $model);
         return $model;
     }
 

@@ -4,6 +4,8 @@ use \PHPUnit_Framework_Assert as PHPUnit;
 
 class BotValidatorTest extends TestCase {
 
+    protected $use_database = true;
+
     public function testBotCreateValidator()
     {
         // most be a user
