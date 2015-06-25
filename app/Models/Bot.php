@@ -5,6 +5,7 @@ namespace Swapbot\Models;
 use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Billing\PaymentPlan\PaymentPlan;
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStatusDetails;
@@ -23,6 +24,7 @@ class Bot extends APIModel {
 
     protected $state_machine        = null;
     protected $payment_plan_details = null;
+    protected $payment_plan_object  = null;
 
     public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
     public function getSwapsAttribute() { return $this->unSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
@@ -70,13 +72,6 @@ class Bot extends APIModel {
 
     }
 
-    public function getCreationFee() {
-        return $this->paymentPlanDetails()['setupFee'];
-    }
-
-    public function getTXFee() {
-        return $this->paymentPlanDetails()['txFee'];
-    }
 
     public function getStartingBTCFuel() {
         return 0.01;
@@ -216,6 +211,13 @@ class Bot extends APIModel {
             $this->payment_plan_details = isset($plans[$this['payment_plan']]) ? $plans[$this['payment_plan']] : [];
         }
         return $this->payment_plan_details;
+    }
+
+    public function getPaymentPlan() {
+        if (!isset($this->payment_plan_object)) {
+            $this->payment_plan_object = new PaymentPlan($this->paymentPlanDetails());
+        }
+        return $this->payment_plan_object;
     }
 
 

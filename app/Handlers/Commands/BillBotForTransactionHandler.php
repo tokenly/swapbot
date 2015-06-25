@@ -38,7 +38,7 @@ class BillBotForTransactionHandler {
 
         DB::transaction(function() use ($bot, $transaction) {
             // debit the bot's payment account (when any transaction was processed)
-            $debit_amount = $bot->getTXFee();
+            $debit_amount = $bot->getPaymentPlan()->getTXFee();
             $is_credit = false;
             $bot_event = $this->bot_event_logger->logTransactionFee($bot, $debit_amount, $transaction['id']);
 

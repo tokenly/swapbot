@@ -26,18 +26,21 @@ class PaymentPlans {
         return [
             'txfee001' => [
                 'id'       => 'txfee001',
+                'type'     => 'tx',
                 'name'     => '0.005 BTC creation fee + .001 BTC per TX',
                 'setupFee' => 0.005,
                 'txFee'    => 0.001,
             ],
             'txfee002' => [
                 'id'       => 'txfee002',
+                'type'     => 'tx',
                 'name'     => '0.05 BTC creation fee + .0005 BTC per TX',
                 'setupFee' => 0.05,
                 'txFee'    => 0.0005,
             ],
             'txfee003' => [
                 'id'       => 'txfee003',
+                'type'     => 'tx',
                 'name'     => '0.5 BTC creation fee + .0001 BTC per TX',
                 'setupFee' => 0.5,
                 'txFee'    => 0.0001,
@@ -45,6 +48,7 @@ class PaymentPlans {
 
             'monthly001' => [
                 'id'           => 'monthly001',
+                'type'         => 'monthly',
                 'name'         => 'Monthly SwapBot Rental',
                 'setupFee'     => 0,
                 'txFee'        => 0,

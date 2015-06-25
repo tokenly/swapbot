@@ -94,7 +94,7 @@ class ReconcileBotStateHandler {
     protected function paymentAddressHasEnoughForCreationFee($bot) {
         $balance = $this->bot_ledger_entry_repository->sumCreditsAndDebits($bot);
         $fuel_needed = $bot->getStartingBTCFuel();
-        $required = $bot->getCreationFee() + $fuel_needed;
+        $required = $bot->getPaymentPlan()->getCreationFee() + $fuel_needed;
         if ($balance >= $required) {
             return true;
         }
@@ -104,7 +104,7 @@ class ReconcileBotStateHandler {
 
     protected function paymentAddressHasEnoughForNextTransaction($bot) {
         $balance = $this->bot_ledger_entry_repository->sumCreditsAndDebits($bot);
-        $required = $bot->getTXFee();
+        $required = $bot->getPaymentPlan()->getTXFee();
         if ($balance >= $required) {
             return true;
         }
