@@ -54,9 +54,7 @@ class FirstMonthlyFeePaid extends BotCommand {
     // move initial fuel from the swapbot reserve
     //   to this bot's public address
     protected function moveInitialFuel($bot) {
-        $fuel_needed = $bot->getStartingBTCFuel();
-
-        // call XChain
+        // call XChain to move the initial fuel
         $payment_address_id = Config::get('swapbot.xchain_fuel_pool_address_id');
         $destination = $bot['address'];
         $quantity = $bot->getStartingBTCFuel();
