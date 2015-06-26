@@ -32,6 +32,13 @@ sbAdmin.nav = do ()->
             ])
         return null
 
+    buildSettingsNavLink = (user)->
+        if user.privileges?.manageSettings
+            return m("li", { class: ""}, [
+                m("a[href='/admin/settings']", {class: "", config: m.route}, "Settings"),
+            ])
+        return null
+
     # clone an object
     nav.buildNav = ()->
         user = sbAdmin.auth.getUser()
@@ -50,6 +57,7 @@ sbAdmin.nav = do ()->
                         m("a[href='/admin/edit/bot/new']", {class: "", config: m.route}, "New Bot"),
                     ]),
                     buildUsersNavLink(user),
+                    buildSettingsNavLink(user),
                 ]),
                 buildRightNav(user),
             ]),

@@ -77,6 +77,18 @@
     api.getUser = function(id) {
       return api.send('GET', "users/" + id);
     };
+    api.newSettings = function(settingAttributes) {
+      return api.send('POST', 'settings', settingAttributes);
+    };
+    api.updateSettings = function(id, settingAttributes) {
+      return api.send('PUT', "settings/" + id, settingAttributes);
+    };
+    api.getAllSettings = function() {
+      return api.send('GET', 'settings');
+    };
+    api.getSettings = function(id) {
+      return api.send('GET', "settings/" + id);
+    };
     api.getBotPaymentBalances = function(id) {
       return api.send('GET', "payments/" + id + "/balances");
     };
@@ -550,7 +562,7 @@
   })();
 
   sbAdmin.nav = (function() {
-    var buildRightNav, buildUsersNavLink, nav;
+    var buildRightNav, buildSettingsNavLink, buildUsersNavLink, nav;
     nav = {};
     buildRightNav = function(user) {
       var username;
@@ -615,6 +627,20 @@
       }
       return null;
     };
+    buildSettingsNavLink = function(user) {
+      var ref;
+      if ((ref = user.privileges) != null ? ref.manageSettings : void 0) {
+        return m("li", {
+          "class": ""
+        }, [
+          m("a[href='/admin/settings']", {
+            "class": "",
+            config: m.route
+          }, "Settings")
+        ]);
+      }
+      return null;
+    };
     nav.buildNav = function() {
       var user;
       user = sbAdmin.auth.getUser();
@@ -648,7 +674,7 @@
                 "class": "",
                 config: m.route
               }, "New Bot")
-            ]), buildUsersNavLink(user)
+            ]), buildUsersNavLink(user), buildSettingsNavLink(user)
           ]), buildRightNav(user)
         ])
       ]);
@@ -2246,7 +2272,7 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-6 col-lg-4"
+            "class": "col-md-10 col-lg-8"
           }, [
             m("ul", {
               "class": "list-unstyled striped-list bot-list"
@@ -2400,6 +2426,182 @@
             }, "Return to Login")
           ])
         ])
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.settingsForm = {};
+    vm = sbAdmin.ctrl.settingsForm.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        var id;
+        vm.errorMessages = m.prop([]);
+        vm.formStatus = m.prop('active');
+        vm.resourceId = m.prop('');
+        vm.name = m.prop('');
+        vm.value = m.prop('');
+        id = m.route.param('id');
+        if (id !== 'new') {
+          sbAdmin.api.getSettings(id).then(function(settingsData) {
+            var v;
+            vm.resourceId(settingsData.id);
+            vm.name(settingsData.name);
+            v = settingsData.value;
+            console.log("typeof v=", typeof v);
+            if ((v != null) && typeof v === 'object') {
+              console.log("stringify");
+              v = window.JSON.stringify(v, null, 2);
+            }
+            console.log("v=", v);
+            vm.value(v);
+          }, function(errorResponse) {
+            vm.errorMessages(errorResponse.errors);
+          });
+        }
+        vm.save = function(e) {
+          var apiArgs, apiCall, attributes;
+          e.preventDefault();
+          attributes = {
+            name: vm.name(),
+            value: vm.value()
+          };
+          if (vm.resourceId().length > 0) {
+            apiCall = sbAdmin.api.updateSettings;
+            apiArgs = [vm.resourceId(), attributes];
+          } else {
+            apiCall = sbAdmin.api.newSettings;
+            apiArgs = [attributes];
+          }
+          return sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then(function() {
+            m.route('/admin/settings');
+          });
+        };
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.settingsForm.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.settingsForm.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12"
+          }, [
+            m("h2", vm.resourceId() ? "Edit Setting " + (vm.name()) : "Create New Settings"), m("div", {
+              "class": "spacer1"
+            }), sbAdmin.form.mForm({
+              errors: vm.errorMessages,
+              status: vm.formStatus
+            }, {
+              onsubmit: vm.save
+            }, [
+              sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  sbAdmin.form.mFormField("Name", {
+                    id: 'name',
+                    'placeholder': "Name",
+                    required: true
+                  }, vm.name)
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  sbAdmin.form.mFormField("Value", {
+                    type: 'textarea',
+                    id: 'value',
+                    'placeholder': "{}",
+                    style: {
+                      height: '300px'
+                    },
+                    required: true
+                  }, vm.value)
+                ])
+              ]), m("div", {
+                "class": "spacer1"
+              }), sbAdmin.form.mSubmitBtn("Save Settings"), m("a[href='/admin/settings']", {
+                "class": "btn btn-default pull-right",
+                config: m.route
+              }, "Return without Saving")
+            ])
+          ])
+        ])
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.settingsView = {};
+    vm = sbAdmin.ctrl.settingsView.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        vm.settings = m.prop([]);
+        sbAdmin.api.getAllSettings().then(function(settingsList) {
+          vm.settings(settingsList);
+        });
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.settingsView.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.settingsView.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("h2", "Global Swapbot Settings"), m("div", {
+          "class": "spacer1"
+        }), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-6 col-lg-4"
+          }, [
+            m("ul", {
+              "class": "list-unstyled striped-list setting-list"
+            }, [
+              vm.settings().map(function(setting) {
+                return m("li", {}, [
+                  m("div", {}, [
+                    m("a[href='/admin/edit/setting/" + setting.id + "']", {
+                      "class": "",
+                      config: m.route
+                    }, "" + setting.name), " ", m("a[href='/admin/edit/setting/" + setting.id + "']", {
+                      "class": "settingsView-edit-link pull-right",
+                      config: m.route
+                    }, [
+                      m("span", {
+                        "class": "glyphicon glyphicon-edit",
+                        title: "Edit Setting " + setting.name
+                      }, ''), " Edit"
+                    ])
+                  ])
+                ]);
+              }), vm.settings().length === 0 ? m("li", {}, [m("div", {}, ["No settings found"])]) : void 0
+            ])
+          ])
+        ]), m("div", {
+          "class": "spacer1"
+        }), m("a[href='/admin/edit/setting/new']", {
+          "class": "btn btn-primary",
+          config: m.route
+        }, "Create a new setting")
       ]);
       return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
@@ -2651,7 +2853,9 @@
     "/admin/view/bot/:id": sbAdmin.ctrl.botView,
     "/admin/payments/bot/:id": sbAdmin.ctrl.botPaymentsView,
     "/admin/users": sbAdmin.ctrl.usersView,
-    "/admin/edit/user/:id": sbAdmin.ctrl.userForm
+    "/admin/edit/user/:id": sbAdmin.ctrl.userForm,
+    "/admin/settings": sbAdmin.ctrl.settingsView,
+    "/admin/edit/setting/:id": sbAdmin.ctrl.settingsForm
   });
 
   if (swapbot == null) {

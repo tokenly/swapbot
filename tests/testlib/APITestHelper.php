@@ -221,9 +221,18 @@ class APITestHelper  {
 
 
         // only check the updated attributes
-        $expected_model_vars = $update_attributes;
+        $expected_model_vars = [];
+        foreach(array_keys($update_attributes) as $k) {
+            $v = $update_attributes[$k];
+            $decoded = (substr($v,0,1) == '{' OR substr($v,0,1) == '[') ? json_decode($v,1) : null;
+            if ($decoded !== null) {
+                $expected_model_vars[$k] = $decoded;
+            } else {
+                $expected_model_vars[$k] = $update_attributes[$k];
+            }
+        }
         $actual_model_vars = [];
-        foreach(array_keys($update_attributes) as $k) { $actual_model_vars[$k] = $reloaded_model[$k]; }
+        foreach(array_keys($update_attributes) as $k) {$actual_model_vars[$k] = $reloaded_model[$k]; }
         PHPUnit::assertEquals($expected_model_vars, $actual_model_vars);
 
         // return the model

@@ -83,6 +83,19 @@ sbAdmin.api = do ()->
         return api.send('GET', "users/#{id}")
 
 
+    api.newSettings = (settingAttributes)->
+        return api.send('POST', 'settings', settingAttributes)
+
+    api.updateSettings = (id, settingAttributes)->
+        return api.send('PUT', "settings/#{id}", settingAttributes)
+
+    api.getAllSettings = ()->
+        return api.send('GET', 'settings')
+
+    api.getSettings = (id)->
+        return api.send('GET', "settings/#{id}")
+
+
     api.getBotPaymentBalances = (id)->
         return api.send('GET', "payments/#{id}/balances")
 

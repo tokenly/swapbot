@@ -44,7 +44,7 @@ do ()->
             m("p", {class: ""}, "Here is a list of your Swapbots:"),
 
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-6 col-lg-4"}, [
+                m("div", {class: "col-md-10 col-lg-8"}, [
                     m("ul", {class: "list-unstyled striped-list bot-list"}, [
                         vm.bots().map((bot)->
                             return m("li", {}, [

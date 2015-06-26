@@ -77,6 +77,9 @@ $router->get('api/v1/botevents/{botuuid}', 'API\BotEvents\BotEventsController@in
 // User API
 $router->resource('api/v1/users', 'API\User\UserController', ['except' => ['create','edit']]);
 
+// Settings API
+$router->resource('api/v1/settings', 'API\Settings\SettingsController', ['except' => ['create','edit']]);
+
 // Payments API
 $router->get('api/v1/payments/{botuuid}/all', 'API\Payments\PaymentsController@index');
 $router->get('api/v1/payments/{botuuid}/balances', 'API\Payments\PaymentsController@balances');
