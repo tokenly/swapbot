@@ -18,7 +18,7 @@ class SettingHelper  {
     public function newSampleSetting($vars=[]) {
         if (!isset($this->setting_uuid)) { $this->setting_uuid = 0; }
             else { ++$this->setting_uuid; }
-        $attributes = array_replace_recursive($this->sampleSettingVars(), ['name' => 'foo'.(($this->setting_uuid > 0) ? ('_'.$this->setting_uuid) : '')], $vars);
+        $attributes = array_merge($this->sampleSettingVars(), ['name' => 'foo'.(($this->setting_uuid > 0) ? ('_'.$this->setting_uuid) : '')], $vars);
 
         // create the model
         return $this->setting_repository->create($attributes);

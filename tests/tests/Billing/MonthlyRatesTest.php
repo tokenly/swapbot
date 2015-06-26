@@ -33,8 +33,8 @@ class MonthlyRatesTest extends TestCase {
         app('SettingHelper')->newSampleSetting([
             'name'  => 'rates:monthly001',
             'value' => [
-                'tokenly' => ['asset' => 'TOKENLY', 'quantity' => 2,      'strategy' => 'fixed', ],
-                'ltbcoin' => ['asset' => 'LTBCOIN', 'quantity' => 30000,  'strategy' => 'fixed', ],
+                'tokenly' => ['asset' => 'TOKENLY', 'quantity' => 2,       'strategy' => 'fixed', ],
+                'ltbcoin' => ['asset' => 'LTBCOIN', 'quantity' => 30000,   'strategy' => 'fixed', ],
                 'btc'     => ['asset' => 'BTC',     'fiatAmount' => 10.00, 'strategy' => 'fiat',  ],
             ],
         ]);
