@@ -1323,7 +1323,7 @@
         vm.name = m.prop('');
         vm.description = m.prop('');
         vm.hash = m.prop('');
-        vm.paymentPlan = m.prop('');
+        vm.paymentPlan = m.prop('monthly001');
         vm.returnFee = m.prop(0.0001);
         vm.confirmationsRequired = m.prop(2);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
