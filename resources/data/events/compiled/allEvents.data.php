@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-06-25 19:17:06
+// compiled on 2015-06-26 12:55:32
 
 return array (
   'swap.new' => 
@@ -292,7 +292,7 @@ return array (
     'name' => 'payment.confirmed',
     'label' => 'Confirmed Payment Received',
     'level' => 'INFO',
-    'msg' => 'Received an confirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
+    'msg' => 'Received a confirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
     'msgVars' => 
     array (
       0 => 'inQty',

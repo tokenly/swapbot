@@ -170,7 +170,7 @@ events:
     name: payment.confirmed
     label: Confirmed Payment Received
     level: INFO
-    msg: Received an confirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
+    msg: Received a confirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
     msgVars: [inQty,inAsset,source]
   -
     name: payment.previous
