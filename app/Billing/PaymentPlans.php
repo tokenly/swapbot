@@ -42,9 +42,9 @@ class PaymentPlans {
 
         // build rates
         $default_rates = [
+            'btc'     => ['asset' => 'BTC',     'fiatAmount' => 7.00, 'strategy' => 'fiat',  ],
             'tokenly' => ['asset' => 'TOKENLY', 'quantity' => 1,      'strategy' => 'fixed', ],
             'ltbcoin' => ['asset' => 'LTBCOIN', 'quantity' => 60000,  'strategy' => 'fixed', ],
-            'btc'     => ['asset' => 'BTC',     'fiatAmount' => 7.00, 'strategy' => 'fiat',  ],
         ];
 
         // apply settings if they exist
@@ -63,14 +63,16 @@ class PaymentPlans {
                 // BTC only
                 if ($rate_info['asset'] != 'BTC') { throw new Exception("Only BTC is supported for fiat based rates", 1); }
 
-                $fiat_rate_info = ['asset' => $rate_info['asset'], 'quantity' => 0, 'strategy' => $rate_info['strategy'], ];
+                $fiat_rate_info = ['asset' => $rate_info['asset'], 'quantity' => 0, 'strategy' => $rate_info['strategy'], 'fiatAmount' => $rate_info['fiatAmount'], ];
                 $quote_entry = $this->quotebot_client->getQuote('bitcoinAverage', ['USD', 'BTC']);
 
                 $quantity = $rate_info['fiatAmount'] / $quote_entry['last'];
                 $fiat_rate_info['quantity'] = $quantity;
+                $fiat_rate_info['description'] = round($quantity, 8).' ($'.money_format('%i', $rate_info['fiatAmount']).') in '.$rate_info['asset'];
                 $rates[$rate_id] = $fiat_rate_info;
             } else {
                 // pass through
+                $rate_info['description'] = $rate_info['quantity'].' '.$rate_info['asset'];
                 $rates[$rate_id] = $rate_info;
             }
         }

@@ -12,9 +12,12 @@ do ()->
             return
 
     updateAllAccountPayments = (id)->
-        sbAdmin.api.getBotPaymentBalance(id).then(
+        sbAdmin.api.getBotPaymentBalances(id).then(
             (apiResponse)->
-                vm.paymentBalance(apiResponse.balance)
+                paymentBalances = []
+                for asset, val of apiResponse.balances
+                    paymentBalances.push({asset: asset, val: val})
+                vm.paymentBalances(paymentBalances)
                 return
             , (errorResponse)->
                 vm.errorMessages(errorResponse.errors)
@@ -59,7 +62,7 @@ do ()->
             vm.paymentAddress = m.prop('')
             vm.paymentPlan = m.prop('')
             vm.state = m.prop('')
-            vm.paymentBalance = m.prop('')
+            vm.paymentBalances = m.prop('')
             vm.payments = m.prop([])
 
             # if there is an id, then load it from the api
@@ -120,11 +123,11 @@ do ()->
                             m("div", {class: "col-md-4"}, [
                                 sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())),
                             ]),
-                            m("div", {class: "col-md-6"}, [
+                            m("div", {class: "col-md-5"}, [
                                 sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
                             ]),
-                            m("div", {class: "col-md-2"}, [
-                                sbAdmin.form.mValueDisplay("Account Balance", {id: 'value',  }, if vm.paymentBalance() == '' then '-' else sbAdmin.currencyutils.formatValue(vm.paymentBalance(), 'BTC')),
+                            m("div", {class: "col-md-3"}, [
+                                sbAdmin.form.mValueDisplay("Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
                             ]),
                     ]),
 

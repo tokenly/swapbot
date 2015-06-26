@@ -83,11 +83,15 @@ sbAdmin.api = do ()->
         return api.send('GET', "users/#{id}")
 
 
-    api.getBotPaymentBalance = (id)->
-        return api.send('GET', "payments/#{id}/balance")
+    api.getBotPaymentBalances = (id)->
+        return api.send('GET', "payments/#{id}/balances")
 
     api.getAllBotPayments = (id)->
         return api.send('GET', "payments/#{id}/all")
+
+
+    api.getAllPlansData = ()->
+        return api.send('GET', "plans")
 
 
     api.send = (method, apiPathSuffix, params=null, additionalOpts={})->

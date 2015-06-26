@@ -65,6 +65,9 @@ $router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVe
 // Bot API
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);
 
+// Bot Plans API
+$router->get('api/v1/plans', 'API\Bot\PlansController@getPaymentPlans');
+
 // Balance Refresh
 $router->post('api/v1/balancerefresh/{botuuid}', 'API\BalanceRefresh\BalanceRefreshController@refresh');
 

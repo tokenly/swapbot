@@ -161,9 +161,12 @@ do ()->
             return
 
     updateBotAccountBalance = (id)->
-        sbAdmin.api.getBotPaymentBalance(id).then(
+        sbAdmin.api.getBotPaymentBalances(id).then(
             (apiResponse)->
-                vm.paymentBalance(apiResponse.balance)
+                paymentBalances = []
+                for asset, val of apiResponse.balances
+                    paymentBalances.push({asset: asset, val: val})
+                vm.paymentBalances(paymentBalances)
                 return
             , (errorResponse)->
                 vm.errorMessages(errorResponse.errors)
@@ -183,25 +186,6 @@ do ()->
             when 600 then return m('span', {class: "label label-danger danger"}, "Emergency")
         return m('span', {class: "label label-danger danger"}, "Code #{levelNumber}")
 
-    buildBalancesMElement = (balances)->
-        if vm.balances().length > 0
-            return m("table", {class: "table table-condensed table-striped"}, [
-                m("thead", {}, [
-                    m("tr", {}, [
-                        m('th', {style: {width:'40%'}}, 'Asset'),
-                        m('th', {style: {width:'60%'}}, 'Balance'),
-                    ]),
-                ]),
-                m("tbody", {}, [
-                    vm.balances().map (balance, index)->
-                        return m("tr", {}, [
-                            m('td', balance.asset),
-                            m('td', balance.val),
-                        ])
-                ]),
-            ])
-        else
-            return m("div", {class: "form-group"}, "No Balances Found")
 
 
 
@@ -249,6 +233,7 @@ do ()->
             vm.pusherClient = m.prop(null)
             vm.botEvents = m.prop([])
             vm.showDebug = false
+            vm.allPlansData = m.prop(null)
 
             # fields
             vm.name = m.prop('')
@@ -263,7 +248,7 @@ do ()->
             vm.balances = m.prop(buildBalancesPropValue([]))
             vm.confirmationsRequired = m.prop('')
             vm.returnFee = m.prop('')
-            vm.paymentBalance = m.prop('')
+            vm.paymentBalances = m.prop('')
 
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
@@ -302,6 +287,16 @@ do ()->
             sbAdmin.api.getBotEvents(id).then(
                 (apiResponse)->
                     vm.botEvents(apiResponse)
+                    return
+                , (errorResponse)->
+                    vm.errorMessages(errorResponse.errors)
+                    return
+            )
+
+            # and the plan options
+            sbAdmin.api.getAllPlansData().then(
+                (apiResponse)->
+                    vm.allPlansData(apiResponse)
                     return
                 , (errorResponse)->
                     vm.errorMessages(errorResponse.errors)
@@ -415,7 +410,7 @@ do ()->
 
                         # #### Balances
                         m("div", {class: "col-md-4"}, [
-                            sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, buildBalancesMElement(vm.balances())),
+                            sbAdmin.form.mValueDisplay("Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.balances())),
                         ]),
                     ]),
 
@@ -468,13 +463,13 @@ do ()->
                         m("h3", "Payment Status"),
                         m("div", { class: "row"}, [
                                 m("div", {class: "col-md-4"}, [
-                                    sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())),
+                                    sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
                                 ]),
-                                m("div", {class: "col-md-6"}, [
+                                m("div", {class: "col-md-5"}, [
                                     sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
                                 ]),
-                                m("div", {class: "col-md-2"}, [
-                                    sbAdmin.form.mValueDisplay("Account Balance", {id: 'value',  }, if vm.paymentBalance() == '' then '-' else vm.paymentBalance()+' BTC'),
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
                                 ]),
                         ]),
                     ]),

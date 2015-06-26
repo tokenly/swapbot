@@ -83,6 +83,25 @@ sbAdmin.utils = do ()->
                 cols.push(overrideCol)
         return cols
 
+    utils.buildBalancesMElement = (balances)->
+        if balances.length > 0
+            return m("table", {class: "table table-condensed table-striped"}, [
+                m("thead", {}, [
+                    m("tr", {}, [
+                        m('th', {style: {width:'40%'}}, 'Asset'),
+                        m('th', {style: {width:'60%'}}, 'Balance'),
+                    ]),
+                ]),
+                m("tbody", {}, [
+                    balances.map (balance, index)->
+                        return m("tr", {}, [
+                            m('td', balance.asset),
+                            m('td', balance.val),
+                        ])
+                ]),
+            ])
+        else
+            return m("div", {class: "form-group"}, "No Balances Found")
 
 
 

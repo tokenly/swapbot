@@ -55,6 +55,19 @@ class BotAPITest extends TestCase {
         PHPUnit::assertEquals(403, $response->getStatusCode());
     }
 
+    public function testBotPlansAPI() {
+        // mock quotebot
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        // setup the API tester
+        $tester = $this->setupAPITester();
+
+        $response = $tester->callAPIWithAuthentication('GET', '/api/v1/plans');
+        PHPUnit::assertEquals(200, $response->getStatusCode());
+        $actual_response = json_decode($response->getContent(), true);
+        PHPUnit::assertEquals('TOKENLY', $actual_response['monthly001']['monthlyRates']['tokenly']['asset']);
+    }
+
     public function setupAPITester() {
         $bot_helper = $this->app->make('BotHelper');
         $tester = $this->app->make('APITestHelper');

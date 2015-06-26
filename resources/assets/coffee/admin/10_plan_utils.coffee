@@ -2,48 +2,43 @@
 sbAdmin.planutils = do ()->
     planutils = {}
 
-    planutils.paymentPlanDesc = (planID)->
-        return planutils.planData(planID)?.name or 'unknown'
+    # load plans
 
-    planutils.planData = (planID)->
-        plans = planutils.allPlansData()
+    planutils.paymentPlanDesc = (planID, allPlansData)->
+        return planutils.planData(planID, allPlansData)?.name or 'unknown plan '+planID
+
+    planutils.planData = (planID, allPlansData)->
+        plans = allPlansData
         if plans[planID]?
             return plans[planID]
 
         return null
 
-    planutils.allPlansData = ()->
-        initialFuel = 0.01
-
-        return {
-            txfee001: {
-                id: "txfee001"
-                name: "0.005 BTC creation fee + .001 BTC per TX"
-                creationFee: 0.005
-                txFee: 0.001
-                initialFuel: initialFuel
-            }
-            txfee002: {
-                id: "txfee002"
-                name: "0.05 BTC creation fee + .0005 BTC per TX"
-                creationFee: 0.05
-                txFee: 0.0005
-                initialFuel: initialFuel
-            }
-            txfee003: {
-                id: "txfee003"
-                name: "0.5 BTC creation fee + .0001 BTC per TX"
-                creationFee: 0.5
-                txFee: 0.0001
-                initialFuel: initialFuel
-            }
-        }
+    # planutils.allPlansData = ()->
+    #     return {
+    #         monthly001: {
+    #             id: "monthly001"
+    #             name: "Monthly SwapBot Rental.  $7 in BTC / 60,000 LTBCOIN / 1 TOKENLY"
+    #             type: "monthly"
+    #         }
+    #     }
 
 
-    planutils.allPlanOptions = ()->
-        opts = [{k: '- Choose One -', v: ''}]
-        for k, v of planutils.allPlansData()
-            opts.push({k: v.name, v: v.id}    )
+    planutils.allPlanOptions = (allPlansData)->
+        opts = []
+        for k, v of allPlansData
+            description = ''
+            if v.type == 'monthly'
+                description += ' / '
+                first = true
+                for mrk, mrv of v.monthlyRates
+                    description += if first then '' else ', '
+                    description += mrv.description
+                    first = false
+                
+            opts.push({k: v.name+description, v: v.id})
+        if opts.length == 0
+            opts = [{k: '- No Plans Available -', v: ''}]
 
         return opts
         

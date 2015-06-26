@@ -175,6 +175,7 @@ do ()->
             vm.errorMessages = m.prop([])
             vm.formStatus = m.prop('active')
             vm.resourceId = m.prop('')
+            vm.allPlansData = m.prop(null)
 
             # fields
             vm.name = m.prop('')
@@ -213,6 +214,17 @@ do ()->
                         vm.errorMessages(errorResponse.errors)
                         return
                 )
+
+            # get the plan options
+            sbAdmin.api.getAllPlansData().then(
+                (apiResponse)->
+                    vm.allPlansData(apiResponse)
+                    return
+                , (errorResponse)->
+                    vm.errorMessages(errorResponse.errors)
+                    return
+            )
+
 
             vm.addSwap = (e)->
                 e.preventDefault()
@@ -336,8 +348,8 @@ do ()->
                         # m("p", [m("small", "Choose a payment plan.")]),
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-12"}, [
-                                (if vm.isNew then sbAdmin.form.mFormField("Payment Plan", {id: "payment_plan", type: 'select', options: sbAdmin.planutils.allPlanOptions()}, vm.paymentPlan) else null),
-                                (if not vm.isNew then sbAdmin.form.mValueDisplay("Payment Plan", {id: 'payment_plan',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())) else null),
+                                (if vm.isNew then sbAdmin.form.mFormField("Payment Plan", {id: "payment_plan", type: 'select', options: sbAdmin.planutils.allPlanOptions(vm.allPlansData())}, vm.paymentPlan) else null),
+                                (if not vm.isNew then sbAdmin.form.mValueDisplay("Payment Plan", {id: 'payment_plan',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())) else null),
                             ]),
                         ]),
 
