@@ -352,15 +352,16 @@ class BotEventLogger {
     ////////////////////////////////////////////////////////////////////////
     // payments
 
-    public function logManualPayment(Bot $bot, $amount, $is_credit=true, $msg=null) {
+    public function logManualPayment(Bot $bot, $amount, $asset, $is_credit=true, $msg=null) {
         if ($msg === null) {
             if ($is_credit) {
-                $msg = "Applied a credit of {$amount}.";
+                $msg = "Applied a credit of {$amount} {$asset}.";
             } else {
-                $msg = "Applied a debit of {$amount}.";
+                $msg = "Applied a debit of {$amount} {$asset}.";
             }
         } else {
             $msg = str_replace('{{amount}}', $amount, $msg);
+            $msg = str_replace('{{asset}}', $asset, $msg);
         }
 
         return $this->logLegacyBotEvent($bot, 'payment.manual', BotEvent::LEVEL_INFO, [

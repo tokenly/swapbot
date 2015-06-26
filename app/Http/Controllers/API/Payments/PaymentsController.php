@@ -9,6 +9,7 @@ use Swapbot\Http\Controllers\API\Base\APIController;
 use Swapbot\Models\BotLedgerEntry;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Swap\Logger\OutputTransformer\Facade\BotEventOutputTransformer;
 use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 
 class PaymentsController extends APIController {
@@ -46,8 +47,8 @@ class PaymentsController extends APIController {
             // }
             $event = json_decode($resource->event, true);
             // $row['id'] = $resource->uuid;
-            $row['msg'] = $event['msg'];
 
+            $row['msg'] = BotEventOutputTransformer::buildMessageFromEventDetails($resource->event);
             $out[] = $row;
         }
 

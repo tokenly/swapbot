@@ -55,6 +55,7 @@ do ()->
             vm.errorMessages = m.prop([])
             vm.resourceId = m.prop('')
             vm.pusherClient = m.prop(null)
+            vm.allPlansData = m.prop(null)
 
             # fields
             vm.name = m.prop('')
@@ -84,6 +85,17 @@ do ()->
                     vm.errorMessages(errorResponse.errors)
                     return
             )
+
+            # and the plan options
+            sbAdmin.api.getAllPlansData().then(
+                (apiResponse)->
+                    vm.allPlansData(apiResponse)
+                    return
+                , (errorResponse)->
+                    vm.errorMessages(errorResponse.errors)
+                    return
+            )
+
 
             vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
             updateAllAccountPayments(id)
@@ -121,7 +133,7 @@ do ()->
                     m("h3", "Payment Status"),
                     m("div", { class: "row"}, [
                             m("div", {class: "col-md-4"}, [
-                                sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan())),
+                                sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
                             ]),
                             m("div", {class: "col-md-5"}, [
                                 sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
@@ -142,7 +154,7 @@ do ()->
                                 return m("li", {class: "bot-list-entry payment"}, [
                                     m("div", {class: "labelWrapper"}, buildPaymentTypeLabel(botPaymentObj.isCredit)),
                                     m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
-                                    m("span", {class: "amount"}, sbAdmin.currencyutils.satoshisToValue(botPaymentObj.amount)),
+                                    m("span", {class: "amount"}, sbAdmin.currencyutils.satoshisToValue(botPaymentObj.amount, botPaymentObj.asset)),
                                     m("span", {class: "msg"}, botPaymentObj.msg),
                                 ])
                         ]),

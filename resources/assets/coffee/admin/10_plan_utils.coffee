@@ -9,7 +9,7 @@ sbAdmin.planutils = do ()->
 
     planutils.planData = (planID, allPlansData)->
         plans = allPlansData
-        if plans[planID]?
+        if plans?[planID]?
             return plans[planID]
 
         return null

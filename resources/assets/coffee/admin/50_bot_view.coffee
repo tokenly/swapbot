@@ -360,7 +360,7 @@ do ()->
                 m("div", {class: "spacer1"}),
 
                 m("div", {class: "bot-status"}, [
-                    sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), vm.paymentPlan(), vm.paymentAddress(), vm.address()))
+                    sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), sbAdmin.planutils.planData(vm.paymentPlan(), vm.allPlansData()), vm.paymentAddress(), vm.address()))
                 ]),
 
                 m("div", {class: "spacer1"}),

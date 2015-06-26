@@ -709,7 +709,7 @@
     planutils.planData = function(planID, allPlansData) {
       var plans;
       plans = allPlansData;
-      if (plans[planID] != null) {
+      if ((plans != null ? plans[planID] : void 0) != null) {
         return plans[planID];
       }
       return null;
@@ -801,8 +801,8 @@
           return "Inactive";
       }
     };
-    stateutils.buildStateDetails = function(stateValue, planName, paymentAddress, botAddress) {
-      var amount, details, initialPaymentsAmount, initialPaymentsCount, planDetails;
+    stateutils.buildStateDetails = function(stateValue, planDetails, paymentAddress, botAddress) {
+      var details, initialPaymentsCount;
       details = {
         label: '',
         subtitle: '',
@@ -810,12 +810,9 @@
       };
       switch (stateValue) {
         case 'brandnew':
-          planDetails = sbAdmin.planutils.planData(planName);
           initialPaymentsCount = 20;
-          initialPaymentsAmount = planDetails.txFee * initialPaymentsCount;
-          amount = planDetails.creationFee + planDetails.initialFuel + initialPaymentsAmount;
           details.label = stateutils.buildStateLabel(stateValue);
-          details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of " + (sbAdmin.currencyutils.formatValue(amount)) + " to " + paymentAddress + ".  This is a payment of " + planDetails.creationFee + " BTC for the creation of the bot, " + planDetails.initialFuel + " BTC as fuel to send transactions and " + initialPaymentsAmount + " BTC for your first " + initialPaymentsCount + " transactions.";
+          details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a monthly payment to " + paymentAddress + ".";
           details["class"] = "panel-warning inactive new";
           break;
         case 'lowfuel':
@@ -1567,6 +1564,7 @@
         vm.errorMessages = m.prop([]);
         vm.resourceId = m.prop('');
         vm.pusherClient = m.prop(null);
+        vm.allPlansData = m.prop(null);
         vm.name = m.prop('');
         vm.address = m.prop('');
         vm.paymentAddress = m.prop('');
@@ -1582,6 +1580,11 @@
           vm.paymentAddress(botData.paymentAddress);
           vm.paymentPlan(botData.paymentPlan);
           vm.state(botData.state);
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+        sbAdmin.api.getAllPlansData().then(function(apiResponse) {
+          vm.allPlansData(apiResponse);
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
@@ -1613,7 +1616,7 @@
             }, [
               sbAdmin.form.mValueDisplay("Payment Plan", {
                 id: 'rate'
-              }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan()))
+              }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData()))
             ]), m("div", {
               "class": "col-md-5"
             }, [
@@ -1650,7 +1653,7 @@
                     title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
                   }, dateObj.format('MMM D h:mm a')), m("span", {
                     "class": "amount"
-                  }, sbAdmin.currencyutils.satoshisToValue(botPaymentObj.amount)), m("span", {
+                  }, sbAdmin.currencyutils.satoshisToValue(botPaymentObj.amount, botPaymentObj.asset)), m("span", {
                     "class": "msg"
                   }, botPaymentObj.msg)
                 ]);
@@ -2050,7 +2053,7 @@
           "class": "spacer1"
         }), m("div", {
           "class": "bot-status"
-        }, [sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), vm.paymentPlan(), vm.paymentAddress(), vm.address()))]), m("div", {
+        }, [sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), sbAdmin.planutils.planData(vm.paymentPlan(), vm.allPlansData()), vm.paymentAddress(), vm.address()))]), m("div", {
           "class": "spacer1"
         }), m("div", {
           "class": "bot-view"

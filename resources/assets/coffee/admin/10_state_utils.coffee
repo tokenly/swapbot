@@ -27,7 +27,7 @@ sbAdmin.stateutils = do ()->
                 return "Inactive"
         
 
-    stateutils.buildStateDetails = (stateValue, planName, paymentAddress, botAddress)->
+    stateutils.buildStateDetails = (stateValue, planDetails, paymentAddress, botAddress)->
         details = {
             label: ''
             subtitle: ''
@@ -36,12 +36,20 @@ sbAdmin.stateutils = do ()->
 
         switch stateValue
             when 'brandnew'
-                planDetails = sbAdmin.planutils.planData(planName)
                 initialPaymentsCount = 20
-                initialPaymentsAmount = planDetails.txFee * initialPaymentsCount
-                amount = planDetails.creationFee + planDetails.initialFuel + initialPaymentsAmount
+
+                # if planDetails
+                #     initialPaymentsAmount = planDetails.txFee * initialPaymentsCount
+                #     amount = planDetails.creationFee + planDetails.initialFuel + initialPaymentsAmount
+                #     creationFee = planDetails.creationFee
+                #     initialFuel = planDetails.initialFuel
+                # else
+                #     initialPaymentsAmount = '[unknown]'
+                #     amount = '[unknown]'
+                #     creationFee = '[unknown]'
+                #     initialFuel = '[unknown]'
                 details.label = stateutils.buildStateLabel(stateValue)
-                details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a payment of #{sbAdmin.currencyutils.formatValue(amount)} to #{paymentAddress}.  This is a payment of #{planDetails.creationFee} BTC for the creation of the bot, #{planDetails.initialFuel} BTC as fuel to send transactions and #{initialPaymentsAmount} BTC for your first #{initialPaymentsCount} transactions."
+                details.subtitle = "This is a new swapbot and needs to be paid to be activated.  Please send a monthly payment to #{paymentAddress}."
                 details.class = "panel-warning inactive new"
             when 'lowfuel'
                 details.label = stateutils.buildStateLabel(stateValue)

@@ -9,7 +9,7 @@ class BotLedgerEntry extends APIModel {
 
     use CreatedAtDateOnly;
 
-    protected $api_attributes = ['id', 'created_at', 'is_credit', 'amount',];
+    protected $api_attributes = ['id', 'created_at', 'is_credit', 'amount', 'asset',];
 
 
 

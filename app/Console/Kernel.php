@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\TestReceiveFromXChainTemplateCommand',
 		'Swapbot\Console\Commands\Development\PopulateMissingSwapReceiptsCommand',
 		'Swapbot\Console\Commands\Development\ResetBotHistoryCommand',
+		'Swapbot\Console\Commands\Development\UpgradeBotToMonthlyCommand',
 
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',

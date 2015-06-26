@@ -69,7 +69,7 @@ class UpdateBotPaymentAccount extends Command {
 
             // apply a payment
             // echo "\$bot:\n".json_encode($bot, 192)."\n";
-            $bot_event = app('Swapbot\Swap\Logger\BotEventLogger')->logManualPayment($bot, $amount, $is_credit, $message);
+            $bot_event = app('Swapbot\Swap\Logger\BotEventLogger')->logManualPayment($bot, $amount, $asset, $is_credit, $message);
             $this->dispatch(new UpdateBotPaymentAccountCommand($bot, $amount, $asset, $is_credit, $bot_event));
 
         } catch (Exception $e) {

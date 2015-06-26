@@ -4,6 +4,7 @@ namespace Swapbot\Swap\Logger\OutputTransformer;
 
 use Exception;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
@@ -20,7 +21,16 @@ class BotEventOutputTransformer {
 
     public function buildMessage(BotEvent $event) {
         $event_details = $event['event'];
-        $message_template = $this->getEventTemplate($event_details['name']);
+        return $this->buildMessageFromEventDetails($event_details, $event);
+    }
+
+    public function buildMessageFromEventDetails($event_details) {
+        if (is_string($event_details)) { $event_details = json_decode($event_details, true); }
+
+        $name = (isset($event_details['name']) ? $event_details['name'] : 'undefined');
+        Log::debug('$event_details='.json_encode($event_details, 192));
+
+        $message_template = $this->getEventTemplate($name);
         if (!$message_template) {
             // use the existing message
             return isset($event_details['msg']) ? $event_details['msg'] : null;
@@ -34,7 +44,7 @@ class BotEventOutputTransformer {
             if (!isset($event_details[$var_name])) { $event_details[$var_name] = ''; }
         }
 
-        $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $event_details, $event);
+        $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $event_details);
         return $resolved_message;
     }
 
@@ -52,14 +62,14 @@ class BotEventOutputTransformer {
 
 
 
-    protected function resolveBladeSrc($__compiled_blade_src, $__data, $__event) {
+    protected function resolveBladeSrc($__compiled_blade_src, $__data) {
         try {
             ob_start();
             extract($__data);
             eval('?>'.$__compiled_blade_src.'<?php ');
             return ltrim(ob_get_clean());
         } catch (Exception $e) {
-            EventLog::logError('botevent.render.error', $e, ['eventId' => $__event['id'], 'eventName' => $__event['event']['name'], ]);
+            EventLog::logError('botevent.render.error', $e, ['eventName' => $__data['name'], ]);
             throw $e;
         }
     } 
