@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
-use Swapbot\Swap\Lock\Facade\RecordLock;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
+use Tokenly\RecordLock\Facade\RecordLock;
 use \Exception;
 
 /*

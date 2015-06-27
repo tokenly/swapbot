@@ -5,7 +5,7 @@ namespace Swapbot\Repositories;
 use Illuminate\Support\Facades\DB;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Swap;
-use Swapbot\Swap\Lock\Facade\RecordLock;
+use Tokenly\RecordLock\Facade\RecordLock;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 

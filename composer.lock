@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5b56122ff804d26616ad654790fa449b",
+    "hash": "d344692a9b5fcc03021f4c4ab4a527d6",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -2589,7 +2589,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/afeb35cadfd0aad269f7eab5b1785b4140b21191",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/1d8e26f6e62d37bce16935bcca658cebc73d3421",
                 "reference": "afeb35cadfd0aad269f7eab5b1785b4140b21191",
                 "shasum": ""
             },
@@ -2744,6 +2744,46 @@
             ],
             "description": "An event logger provider for Laravel.",
             "time": "2015-04-25 13:03:59"
+        },
+        {
+            "name": "tokenly/laravel-record-lock",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/laravel-record-lock.git",
+                "reference": "a408f6d820faf355fe681d9483beb3dec16ef741"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/laravel-record-lock/zipball/a408f6d820faf355fe681d9483beb3dec16ef741",
+                "reference": "a408f6d820faf355fe681d9483beb3dec16ef741",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Tokenly\\RecordLock": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "devon@tokenly.com",
+                    "homepage": "http://tokenly.com"
+                }
+            ],
+            "description": "A library for locking records in a database",
+            "time": "2015-06-27 16:29:57"
         },
         {
             "name": "tokenly/pusher-client",
@@ -4593,6 +4633,7 @@
         "tokenly/laravel-blocking-beanstalkd": 20,
         "tokenly/consul-health-daemon": 20,
         "tokenly/quotebot-client": 20,
+        "tokenly/laravel-record-lock": 20,
         "mockery/mockery": 20
     },
     "prefer-stable": true,

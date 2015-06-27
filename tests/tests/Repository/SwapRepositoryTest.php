@@ -1,6 +1,6 @@
 <?php
 
-use Swapbot\Swap\Lock\Facade\RecordLock;
+use Tokenly\RecordLock\Facade\RecordLock;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use \PHPUnit_Framework_Assert as PHPUnit;
 

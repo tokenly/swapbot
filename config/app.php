@@ -150,7 +150,6 @@ return [
 		'Swapbot\Providers\Monitoring\MonitoringServiceProvider',
 		'Swapbot\Providers\Billing\PaymentPlansServiceProvider',
 		'Swapbot\Swap\DateProvider\Provider\DateProviderServiceProvider',
-		'Swapbot\Swap\Lock\Provider\RecordLockServiceProvider',
 
 
 		/*
@@ -163,6 +162,7 @@ return [
 		'Tokenly\PusherClient\Provider\PusherClientServiceProvider',
 		'Tokenly\ConsulHealthDaemon\ServiceProvider\ConsulHealthDaemonServiceProvider',
 		'Tokenly\QuotebotClient\ServiceProvider\QuotebotServiceProvider',
+		'Tokenly\RecordLock\Provider\RecordLockServiceProvider',
 
 	],
 
