@@ -290,7 +290,7 @@ class APITestHelper  {
     public function createAPIRequest($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null) {
         // convert a POST to json
         if ($parameters AND in_array($method, ['POST', 'PUT', 'PATCH'])) {
-            $content = json_encode($parameters);
+            $content = json_encode($parameters, JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
             $server['CONTENT_TYPE'] = 'application/json';
             $parameters = [];
         }

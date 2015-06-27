@@ -5,7 +5,7 @@ namespace Swapbot\Http\Requests\Customer\Validators;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Factory;
-use Illuminate\Validation\Validator;
+use Illuminate\Contracts\Validation\Validator;
 
 
 class CustomerValidator {

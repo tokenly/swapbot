@@ -5,7 +5,7 @@ namespace Swapbot\Http\Requests\Bot\Validators;
 use Illuminate\Contracts\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Factory;
-use Illuminate\Validation\Validator;
+use Illuminate\Contracts\Validation\Validator;
 use LinusU\Bitcoin\AddressValidator;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Strategies\StrategyHelpers;

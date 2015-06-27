@@ -25,6 +25,8 @@ class EmailSenderTest extends TestCase {
     {
         // mock
         $mock = m::mock('Swift_Mailer');
+        $mock->shouldReceive('getTransport')->andReturn($transport = m::mock('Swift_Transport'));
+        $transport->shouldReceive('stop');
         app('mailer')->setSwiftMailer($mock);
 
         // expect
