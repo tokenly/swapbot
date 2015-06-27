@@ -87,6 +87,7 @@ class SwapProcessor {
 
     public function processSwap(Swap $swap) {
         try {
+            $swap_process = null;
 
             // start by checking the status of the bot
             //   if the bot is not active, don't process anything else
@@ -163,8 +164,11 @@ class SwapProcessor {
                 $this->bot_event_logger->logLegacyBotEventWithoutEventLog($swap_process['bot'], $e->getErrorName(), $e->getErrorLevel(), $e->getErrorData());
             } else {
                 EventLog::logError('swap.failed', $e);
-                $receipt = isset($swap_process['swap_update_vars']['receipt']) ? $swap_process['swap_update_vars']['receipt'] : null;
-                $this->bot_event_logger->logSwapFailed($swap_process['bot'], $swap, $e, $receipt);
+                if ($swap_process !== null) {
+                    $receipt = (isset($swap_process['swap_update_vars']['receipt'])) ? $swap_process['swap_update_vars']['receipt'] : null;
+                    $bot = (isset($swap_process['bot'])) ? $swap_process['bot'] : null;
+                    $this->bot_event_logger->logSwapFailed($bot, $swap, $e, $receipt);
+                }
             }
         }
 

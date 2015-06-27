@@ -79,7 +79,7 @@ class ReceiveEventProcessor {
     }
 
     public function handlePublicAddressReceive($xchain_notification, $bot) {
-        $tx_process = DB::transaction(function() use ($xchain_notification, $bot) {
+        $tx_process = $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
 
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'receive');

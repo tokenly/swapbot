@@ -60,7 +60,7 @@ class SendEventProcessor {
         if (!$found) { throw new Exception("Unable to find bot for send monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
-        DB::transaction(function() use ($xchain_notification, $bot) {
+        $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
 
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'send');

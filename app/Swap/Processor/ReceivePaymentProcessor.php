@@ -11,6 +11,7 @@ use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
+use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -24,8 +25,9 @@ class ReceivePaymentProcessor {
      *
      * @return void
      */
-    public function __construct(BotEventLogger $swap_event_logger, BotLedgerEntryRepository $bot_ledger_entry_repository, TransactionRepository $transaction_repository)
+    public function __construct(BotRepository $bot_repository, BotEventLogger $swap_event_logger, BotLedgerEntryRepository $bot_ledger_entry_repository, TransactionRepository $transaction_repository)
     {
+        $this->bot_repository              = $bot_repository;
         $this->swap_event_logger           = $swap_event_logger;
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->transaction_repository      = $transaction_repository;
@@ -33,7 +35,7 @@ class ReceivePaymentProcessor {
 
 
     public function handlePaymentAddressReceive($xchain_notification, $bot) {
-        DB::transaction(function() use ($xchain_notification, $bot) {
+        $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'receive');
             if (!$transaction_model) { throw new Exception("Unable to access database", 1); }

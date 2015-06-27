@@ -34,29 +34,32 @@ class ProcessIncomeForwardingForAllBotsHandler {
     public function handle(ProcessIncomeForwardingForAllBots $command)
     {
         foreach ($this->bot_repository->findAll() as $bot) {
-            // check balance
-            foreach ($bot['income_rules'] as $income_rule_config) {
-                if ($bot->getBalance($income_rule_config['asset']) >= $income_rule_config['minThreshold']) {
-                    try {
-                        // send the transaction
-                        $asset = $income_rule_config['asset'];
-                        $destination = $income_rule_config['address'];
-                        $quantity = $income_rule_config['paymentAmount'];
-                        $fee = $bot['return_fee'];
-                        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee);
+            $this->bot_repository->executeWithLockedBot($bot, function($bot) {
+                // check balance
+                foreach ($bot['income_rules'] as $income_rule_config) {
+                    if ($bot->getBalance($income_rule_config['asset']) >= $income_rule_config['minThreshold']) {
+                        try {
+                            // send the transaction
+                            $asset = $income_rule_config['asset'];
+                            $destination = $income_rule_config['address'];
+                            $quantity = $income_rule_config['paymentAmount'];
+                            $fee = $bot['return_fee'];
+                            $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee);
 
-                        // log the event
-                        $this->bot_event_logger->logIncomeForwardingResult($bot, $send_result, $destination, $quantity, $asset);
+                            // log the event
+                            $this->bot_event_logger->logIncomeForwardingResult($bot, $send_result, $destination, $quantity, $asset);
 
-                        // update the balance
-                        $balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $fee);
-                        $this->balance_updater->updateBotBalances($bot, $balance_deltas);
-                    } catch (Exception $e) {
-                        // log failure
-                        $this->bot_event_logger->logIncomeForwardingFailed($bot, $e);
+                            // update the balance
+                            $balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $fee);
+                            $this->balance_updater->updateBotBalances($bot, $balance_deltas);
+                        } catch (Exception $e) {
+                            // log failure
+                            $this->bot_event_logger->logIncomeForwardingFailed($bot, $e);
+                        }
                     }
                 }
-            }
+            });
+
         }
 
 

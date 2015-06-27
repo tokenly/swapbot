@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
+use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
 
 class ReconcileSwapStateHandler {
@@ -15,9 +16,10 @@ class ReconcileSwapStateHandler {
      *
      * @return void
      */
-    public function __construct(BotEventLogger $bot_event_logger)
+    public function __construct(SwapRepository $swap_repository, BotEventLogger $bot_event_logger)
     {
-        $this->bot_event_logger            = $bot_event_logger;
+        $this->swap_repository  = $swap_repository;
+        $this->bot_event_logger = $bot_event_logger;
 
     }
 
@@ -32,28 +34,24 @@ class ReconcileSwapStateHandler {
         $swap = $command->swap;
 
         DB::transaction(function () use ($swap) {
-            switch ($swap['state']) {
-                case SwapState::BRAND_NEW:
-                case SwapState::OUT_OF_STOCK:
-                    if ($this->swapBalanceIsSufficient($swap)) {
-                        $swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
-                    } else if ($swap['state'] == SwapState::BRAND_NEW) {
-                        $swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
-                    }
-                    break;
+            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
+                switch ($locked_swap['state']) {
+                    case SwapState::BRAND_NEW:
+                    case SwapState::OUT_OF_STOCK:
+                        if ($this->swapBalanceIsSufficient($locked_swap)) {
+                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+                        } else if ($locked_swap['state'] == SwapState::BRAND_NEW) {
+                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                        }
+                        break;
 
-                // case SwapState::CONFIRMING:
-                //     if (!$this->swapHasBeenConfirmed($swap)) {
-                //         $swap->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
-                //     }
-                //     break;
-                
-                case SwapState::READY:
-                    if (!$this->swapBalanceIsSufficient($swap)) {
-                        $swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
-                    }
-                    break;
-            }
+                    case SwapState::READY:
+                        if (!$this->swapBalanceIsSufficient($locked_swap)) {
+                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                        }
+                        break;
+                }
+            });
         });
     }
 

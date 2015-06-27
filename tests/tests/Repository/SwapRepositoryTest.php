@@ -1,5 +1,6 @@
 <?php
 
+use Swapbot\Swap\Lock\Facade\RecordLock;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
@@ -128,6 +129,29 @@ class SwapRepositoryTest extends TestCase {
         PHPUnit::assertEquals($swap5->toArray(), $loaded_models[1]->toArray());
         PHPUnit::assertEquals($swap6->toArray(), $loaded_models[2]->toArray());
     }
+
+
+    public function testGetLockedSwap()
+    {
+
+        $helper = $this->createRepositoryTestHelper();
+
+        $bot = app('BotHelper')->newSampleBot();
+        $transaction = app('TransactionHelper')->newSampleTransaction($bot);
+        $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
+        $swap2 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar', 'name' => 'BTC:SOUP']);
+
+        $swap_repository = app('Swapbot\Repositories\SwapRepository');
+        $counter = 0;
+        $swap_repository->executeWithLockedSwap($swap1, function($locked_swap) use (&$counter) {
+            ++$counter;
+        });
+        $swap_repository->executeWithLockedSwap($swap2, function($locked_swap) use (&$counter) {
+            ++$counter;
+        });
+        PHPUnit::assertEquals(2, $counter);
+    }
+
 
 
 

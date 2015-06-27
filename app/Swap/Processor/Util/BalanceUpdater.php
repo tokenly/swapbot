@@ -67,31 +67,20 @@ class BalanceUpdater {
     public function updateBotBalances($bot, $balance_deltas) {
         if ($balance_deltas) {
             DB::transaction(function() use ($bot, $balance_deltas) {
+                $this->bot_repository->executeWithLockedBot($bot, function($locked_bot) use ($balance_deltas, &$balances_in_memory) {
+                    $balances = $locked_bot['balances'];
 
-                $balances_in_memory = $bot['balances'];
+                    // build the new balances
+                    foreach($balance_deltas as $asset => $balance_delta) {
+                        if (!isset($balances[$asset])) { $balances[$asset] = 0; }
+                        $balances[$asset] = $balances[$asset] + $balance_delta;
+                    }
 
-                $locked_bot = $this->bot_repository->getLockedBot($bot);
-                $balances = $locked_bot['balances'];
-
-                // build the new balances
-                foreach($balance_deltas as $asset => $balance_delta) {
-                    if (!isset($balances_in_memory[$asset])) { $balances_in_memory[$asset] = 0; }
-                    $balances_in_memory[$asset] = $balances_in_memory[$asset] + $balance_delta;
-
-                    if (!isset($balances[$asset])) { $balances[$asset] = 0; }
-                    $balances[$asset] = $balances[$asset] + $balance_delta;
-                }
-
-                // update the bot in the DB
-                $this->bot_repository->update($locked_bot, ['balances' => $balances]);
-
-                // also update the bot in memory
-                $bot['balances'] = $balances_in_memory;
+                    // update the bot in the DB
+                    $this->bot_repository->update($locked_bot, ['balances' => $balances]);
+                });
             });
         }
     }
-
-        // $btc_fee = $bot['return_fee'];
-
 
 }

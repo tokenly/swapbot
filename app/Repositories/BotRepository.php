@@ -3,9 +3,11 @@
 namespace Swapbot\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
+use Swapbot\Swap\Lock\Facade\RecordLock;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 
@@ -53,11 +55,22 @@ class BotRepository extends APIRepository
     }
 
 
-    public function getLockedBot(Bot $bot) {
-        return $this->prototype_model->where('id', $bot['id'])->lockForUpdate()->first();
+
+    // locks the bot, then executes $func inside the lock
+    //   does not modify the passed Bot
+    public function executeWithLockedBot(Bot $bot, Callable $func) {
+        return DB::transaction(function() use ($bot, $func) {
+            return RecordLock::acquireAndExecute('bot'.$bot['id'], function() use ($bot, $func) {
+                $locked_bot = $this->prototype_model->where('id', $bot['id'])->first();
+                $out = $func($locked_bot);
+
+                // update $bot in memory from any changes made to $locked_bot
+                $bot->setRawAttributes($locked_bot->getAttributes());
+
+                return $out;
+            });
+        });
     }
-
-
 
 
     public function create($attributes) {

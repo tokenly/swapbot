@@ -2,8 +2,10 @@
 
 namespace Swapbot\Repositories;
 
+use Illuminate\Support\Facades\DB;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Swap;
+use Swapbot\Swap\Lock\Facade\RecordLock;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 
@@ -55,8 +57,20 @@ class SwapRepository extends APIRepository
         
     }
 
-    public function getLockedSwap(Swap $swap) {
-        return $this->prototype_model->where('id', $swap['id'])->lockForUpdate()->first();
+    // locks the swap, then executes $func inside the lock
+    //   does not modify the passed Swap
+    public function executeWithLockedSwap(Swap $swap, Callable $func) {
+        return DB::transaction(function() use ($swap, $func) {
+            return RecordLock::acquireAndExecute('swap'.$swap['id'], function() use ($swap, $func) {
+                $locked_swap = $this->prototype_model->where('id', $swap['id'])->first();
+                $out = $func($locked_swap);
+
+                // update $swap in memory from any changes made to $locked_swap
+                $swap->setRawAttributes($locked_swap->getAttributes());
+
+                return $out;
+            });
+        });
     }
 
     // merge update vars with the existing swap vars

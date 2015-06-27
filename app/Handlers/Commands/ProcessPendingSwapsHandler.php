@@ -31,24 +31,22 @@ class ProcessPendingSwapsHandler {
      */
     public function handle(ProcessPendingSwaps $command)
     {
-        $all_swaps = $this->swap_repository->findAll();
-        $debug_swaps_text = '';
-        foreach($all_swaps as $all_swap) {
-            $debug_swaps_text .= "Swap {$all_swap['id']}: {$all_swap['name']} - state: {$all_swap['state']}\n";
-        }
+        // $all_swaps = $this->swap_repository->findAll();
+        // $debug_swaps_text = '';
+        // foreach($all_swaps as $all_swap) {
+        //     $debug_swaps_text .= "Swap {$all_swap['id']}: {$all_swap['name']} - state: {$all_swap['state']}\n";
+        // }
 
-        DB::transaction(function () {
-            $swaps = $this->swap_repository->findByStates(SwapState::allPendingStates());
-            
-            foreach($swaps as $swap) {
-                $locked_swap = $this->swap_repository->getLockedSwap($swap);
-                // Log::debug('$locked_swap='.$locked_swap['name']);
+        $swaps = $this->swap_repository->findByStates(SwapState::allPendingStates());
+        
+        foreach($swaps as $swap) {
+            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
                 if ($locked_swap->isPending()) {
                     // handle this swap
                     $this->swap_processor->processSwap($locked_swap);
                 }
-            }
-        });
+            });
+        }
     }
 
 }
