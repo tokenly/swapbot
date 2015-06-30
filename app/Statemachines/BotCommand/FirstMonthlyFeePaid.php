@@ -11,6 +11,7 @@ use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Statemachines\BotCommand\BotCommand;
 use Swapbot\Swap\DateProvider\Facade\DateProvider;
+use Swapbot\Swap\Util\RequestIDGenerator;
 
 
 /*
@@ -61,7 +62,8 @@ class FirstMonthlyFeePaid extends BotCommand {
         $asset = 'BTC';
         $fee = Config::get('swapbot.defaultFee');
         try {
-            $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee);
+            $request_id = RequestIDGenerator::generateSendHash('initialfuel'.','.$bot['uuid'], $destination, $quantity, $asset);
+            $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee, null, $request_id);
 
             // log event
             $bot_event = $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);

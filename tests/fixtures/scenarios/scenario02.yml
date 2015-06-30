@@ -24,6 +24,8 @@ events:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_BTC.yml }
+    data:
+      requestId: "buildFn:swap"
 
 expectedBotEvents:
   - #### NEW

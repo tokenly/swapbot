@@ -23,6 +23,8 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_LTBCOIN-refund.yml }
+    data:
+      requestId: "buildFn:refund"
 
 expectedBotEvents:
   - #### NEW

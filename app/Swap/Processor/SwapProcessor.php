@@ -19,6 +19,7 @@ use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Exception\SwapStrategyException;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Swapbot\Swap\Processor\Util\BalanceUpdater;
+use Swapbot\Swap\Util\RequestIDGenerator;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
@@ -383,7 +384,8 @@ class SwapProcessor {
 
         // send it
         try {
-            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $fee, $dust_size);
+            $request_id = $this->generateSendHash('swap', $swap_process['bot'], $swap_process['swap'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset']);
+            $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $swap_process['quantity'], $swap_process['asset'], $fee, $dust_size, $request_id);
         } catch (Exception $e) {
             // move the swap into an error state
             $swap_process['state_trigger'] = SwapStateEvent::SWAP_ERRORED;
@@ -442,7 +444,8 @@ class SwapProcessor {
 
             if ($out_quantity > 0) {
                 // do the send
-                $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $out_quantity, $out_asset, $fee, $dust_size);
+                $request_id = $this->generateSendHash('refund', $swap_process['bot'], $swap_process['swap'], $swap_process['destination'], $out_quantity, $out_asset);
+                $send_result = $this->sendAssets($swap_process['bot'], $swap_process['destination'], $out_quantity, $out_asset, $fee, $dust_size, $request_id);
             } else {
                 // return quantity was less than 0 - don't send any refund
                 $send_result = ['txid' => null];
@@ -527,12 +530,16 @@ class SwapProcessor {
         }
     }
 
-    protected function sendAssets($bot, $destination, $quantity, $asset, $fee=null, $dust_size=null) {
+    protected function sendAssets($bot, $destination, $quantity, $asset, $fee, $dust_size, $request_id) {
         // call xchain
         if ($fee === null) { $fee = $bot['return_fee']; }
-        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee, $dust_size);
+        $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee, $dust_size, $request_id);
 
         return $send_result;
+    }
+
+    protected function generateSendHash($type, Bot $bot, Swap $swap, $destination, $quantity, $asset) {
+        return RequestIDGenerator::generateSendHash($type.','.$bot['uuid'].','.$swap['uuid'], $destination, $quantity, $asset);
     }
 
 

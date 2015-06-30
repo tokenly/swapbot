@@ -39,6 +39,8 @@ events:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_BTC_FROM_XCHAIN_FUEL_POOL_ADDRESS.yml }
+    data:
+      requestId: "buildFn:initialfuel"
 
 
 expectedBotEvents:

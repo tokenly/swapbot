@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Mockery as m;
@@ -15,6 +16,7 @@ use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\DateProvider\Facade\DateProvider;
+use Swapbot\Swap\Util\RequestIDGenerator;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\parse;
 use Tokenly\CurrencyLib\CurrencyUtil;
@@ -412,7 +414,7 @@ class ScenarioRunner
             $expected_xchain_call = array_replace_recursive($this->loadBaseFilename($raw_expected_xchain_call, "xchain_calls"), $expected_xchain_call);
 
             $expected_xchain_call = $this->normalizeExpectedXChainCall($expected_xchain_call, $actual_xchain_call);
-            
+
             $this->validateExpectedXChainCall($expected_xchain_call, $actual_xchain_call);
         }
 
@@ -443,29 +445,83 @@ class ScenarioRunner
         // }
         // ///////////////////
 
-        // ///////////////////
-        // // OPTIONAL
-        // foreach (['confirmations','confirmed','counterpartyTx','bitcoinTx','transactionTime','notificationId','notifiedAddressId','webhookEndpoint','blockSeq','confirmationTime',] as $field) {
-        //     if (isset($expected_xchain_call[$field])) { $normalized_expected_xchain_call[$field] = $expected_xchain_call[$field]; }
-        //         else if (isset($actual_notification[$field])) { $normalized_expected_xchain_call[$field] = $actual_notification[$field]; }
-        // }
-        // ///////////////////
+        ///////////////////
+        // NOT REQUIRED
+        $optional_fields = ['requestId',];
+        foreach ($optional_fields as $field) {
+            if (isset($expected_xchain_call['data'][$field])) { $normalized_expected_xchain_call['data'][$field] = $expected_xchain_call['data'][$field]; }
+                else if (isset($actual_xchain_call['data'][$field])) { $normalized_expected_xchain_call['data'][$field] = $actual_xchain_call['data'][$field]; }
+        }
+        ///////////////////
 
-        // ///////////////////
-        // // Special
-        // // build satoshis
-        // $normalized_expected_xchain_call['quantitySat'] = CurrencyUtil::valueToSatoshis($normalized_expected_xchain_call['quantity']);
-        // // blockhash
-        // if (isset($expected_xchain_call['blockhash'])) {
-        //     $normalized_expected_xchain_call['bitcoinTx']['blockhash'] = $expected_xchain_call['blockhash'];
-        // }
-        // ///////////////////
-
-
+        ///////////////////
+        // Special
+        if (isset($expected_xchain_call['data']['requestId']) AND substr($expected_xchain_call['data']['requestId'],0,8) == 'buildFn:' AND $actual_xchain_call) {
+            $validate_type = substr($expected_xchain_call['data']['requestId'],8);
+            $normalized_expected_xchain_call['data']['requestId'] = $this->{"validateXchainCallRequestId_{$validate_type}"}($actual_xchain_call);
+        }
+        ///////////////////
 
         return $normalized_expected_xchain_call;
     }
 
+    protected function validateXchainCallRequestId_swap($actual_xchain_call) {
+        return $this->validateXchainCallRequestId('swap', $actual_xchain_call);
+    }
+
+    protected function validateXchainCallRequestId_refund($actual_xchain_call) {
+        return $this->validateXchainCallRequestId('refund', $actual_xchain_call);
+    }
+
+    protected function validateXchainCallRequestId($type, $actual_xchain_call) {
+        $actual_request_id = $actual_xchain_call['data']['requestId'];
+        $expected_request_id = 'nope';
+
+        // last bot
+        $all_bots = iterator_to_array($this->bot_repository->findAll());
+        $bot = $all_bots[count($all_bots) - 1];
+
+        // last swap
+        $all_swaps = iterator_to_array($this->swap_repository->findAll());
+        $swap = $all_swaps[count($all_swaps) - 1];
+
+        // build expected request id
+        $destination = $actual_xchain_call['data']['destination'];
+        $quantity = $actual_xchain_call['data']['quantity'];
+        $asset = $actual_xchain_call['data']['asset'];
+        $text_to_be_hashed = $type.','.$bot['uuid'].','.$swap['uuid'].','.$destination.','.$quantity.','.$asset;
+        $expected_request_id = md5($text_to_be_hashed);
+        return $expected_request_id;
+    }
+
+    protected function validateXchainCallRequestId_initialFuel($actual_xchain_call) {
+        // last bot
+        $all_bots = iterator_to_array($this->bot_repository->findAll());
+        $bot = $all_bots[count($all_bots) - 1];
+
+        $prefix = 'initialfuel'.','.$bot['uuid'];
+        $destination = $actual_xchain_call['data']['destination'];
+        $quantity = $actual_xchain_call['data']['quantity'];
+        $asset = $actual_xchain_call['data']['asset'];
+
+        return RequestIDGenerator::generateSendHash($prefix, $destination, $quantity, $asset);
+    }
+
+    protected function validateXchainCallRequestId_incomeForward($actual_xchain_call) {
+
+        // last bot
+        $all_bots = iterator_to_array($this->bot_repository->findAll());
+        $bot = $all_bots[count($all_bots) - 1];
+
+        $send_uuid = DateProvider::microtimeNow();
+
+        $prefix = 'incomeforward'.','.$bot['uuid'].','.$send_uuid;
+        $destination = $actual_xchain_call['data']['destination'];
+        $quantity = $actual_xchain_call['data']['quantity'];
+        $asset = $actual_xchain_call['data']['asset'];
+
+        return RequestIDGenerator::generateSendHash($prefix, $destination, $quantity, $asset);
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // ExpectedTransactionModels

@@ -26,6 +26,12 @@ class DateProvider {
         $this->now = $now;
     }
 
+    public function microtimeNow() {
+        if ($this->now !== null) { return $this->now->getTimestamp(); }
+
+        return microtime(true);
+    }
+
 }
 
 

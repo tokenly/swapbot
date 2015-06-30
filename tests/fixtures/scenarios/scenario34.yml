@@ -32,6 +32,8 @@ expectedXChainCalls:
       quantity: 100000
   - 
     meta: { baseFilename: send_BTC_TO_FORWARDING_ADDRESS.yml }
+    data:
+      requestId: "buildFn:incomeForward"
 
 expectedBotEvents:
   - #### NEW
