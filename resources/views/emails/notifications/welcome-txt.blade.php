@@ -15,7 +15,7 @@ You’ll receive a second email when your payment has been successfully confirme
 
 When your tokens have been delivered and are ready to use, we’ll send you one last email letting you know they’re waiting in your wallet.
 
-That’s it!  If you have any questions or comments email the team@tokenly.co.
+That’s it!  If you have any questions or comments email the team@tokenly.com.
 
 
 If you did not leave your email address after making a purchase at swapbot.co please use this link to unsubscribe:

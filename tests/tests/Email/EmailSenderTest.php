@@ -46,7 +46,6 @@ class EmailSenderTest extends TestCase {
     }
 
 
-
     ////////////////////////////////////////////////////////////////////////
 
     public function setUp()

@@ -20,7 +20,7 @@
 
 <p>When your tokens have been delivered and are ready to use, we’ll send you one last email letting you know they’re waiting in your wallet.</p>
 
-<p>That’s it!  If you have any questions or comments email the team@tokenly.co.</p>
+<p>That’s it!  If you have any questions or comments email the team@tokenly.com.</p>
 
 <p>&nbsp;</p>
 

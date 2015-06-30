@@ -74,7 +74,9 @@ class SwapFormatter {
     }
 
     public function formatDate($date) {
-        if ($date instanceof Carbon) {
+        if (!($date instanceof Carbon)) { $date = Carbon::parse($date); }
+
+        if (($date instanceof Carbon) AND $date->getTimestamp() > 0) {
             return $date->format('D, M j, Y g:i A T');
         }
         return $date;

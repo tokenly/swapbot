@@ -11,6 +11,7 @@ use Swapbot\Events\Event;
 use Swapbot\Events\SwapWasCompleted;
 use Swapbot\Events\SwapWasConfirmed;
 use Swapbot\Models\Customer;
+use Swapbot\Models\Formatting\SwapFormatter;
 use Swapbot\Models\Swap;
 use Swapbot\Repositories\CustomerRepository;
 use Tokenly\PusherClient\Client;
@@ -20,8 +21,9 @@ class CustomerEmailHandler {
 
     use DispatchesCommands;
 
-    function __construct(CustomerRepository $customer_repository) {
+    function __construct(CustomerRepository $customer_repository, SwapFormatter $swap_formatter) {
         $this->customer_repository = $customer_repository;
+        $this->swap_formatter      = $swap_formatter;
     }
 
 
@@ -116,9 +118,13 @@ class CustomerEmailHandler {
             'robohashUrl'     => $bot->getRobohashURL(),
             'botUrl'          => $bot_url,
             'botLink'         => $bot_link,
+
+            // 'swapFormatter'   => $this->swap_formatter,
+            // 'swapObject'      => $swap,
         ];
         return $email_vars;
-        
+     
+
     }
 
 }

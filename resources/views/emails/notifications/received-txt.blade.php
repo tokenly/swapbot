@@ -14,6 +14,6 @@ You’ll receive a third and final email once your tokens are ready and waiting 
 
 No need to refresh your wallet.  We’ll email you once we see they’ve safely arrived and are ready for you to use.
 
-That’s it!  If you have any questions or comments email the team@tokenly.co
+That’s it!  If you have any questions or comments email the team@tokenly.com.
 
 @stop
