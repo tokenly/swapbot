@@ -37,6 +37,14 @@ do ()->
             swapConfigIsChosen = !!this.state.userChoices.swapConfig?
 
             return <div>
+                        {
+                            if bot.state != 'active'
+                                <div className="warning">
+                                    <img src="/images/misc/stop.png" alt="STOP" />
+                                    <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
+                                </div>
+                        }
+
                         <table className="fieldset">
                             <tr>
                                 <td>

@@ -736,7 +736,12 @@
         defaultValue = this.state.userChoices.outAmount;
         outAsset = this.state.userChoices.outAsset;
         swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
-        return React.createElement("div", null, React.createElement("table", {
+        return React.createElement("div", null, (bot.state !== 'active' ? React.createElement("div", {
+          "className": "warning"
+        }, React.createElement("img", {
+          "src": "/images/misc/stop.png",
+          "alt": "STOP"
+        }), React.createElement("p", null, "This bot is currently inactive and needs attention by its operator. ", React.createElement("br", null), " Swaps by this bot may be delayed or refunded until this is corrected.")) : void 0), React.createElement("table", {
           "className": "fieldset"
         }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
           "htmlFor": "token-available"
@@ -1078,7 +1083,7 @@
         }, React.createElement("div", {
           "id": "swap-step-2",
           "className": "content"
-        }, React.createElement("h2", null, "Place your Order"), React.createElement("div", {
+        }, React.createElement("h2", null, "Place Your Order"), React.createElement("div", {
           "className": "segment-control"
         }, React.createElement("div", {
           "className": "line"

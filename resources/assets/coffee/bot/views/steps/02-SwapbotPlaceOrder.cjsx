@@ -134,7 +134,7 @@ do ()->
 
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-2" className="content">
-                    <h2>Place your Order</h2>
+                    <h2>Place Your Order</h2>
                     <div className="segment-control">
                         <div className="line"></div>
                         <br />

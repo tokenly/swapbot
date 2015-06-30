@@ -355,6 +355,16 @@ a {
   width: 90px;
   padding: 5px;
 }
+.swapbot-container .warning,
+#swapbot-container .warning {
+  color: #e74c3c;
+  font-weight: 800;
+  margin-bottom: 36px;
+}
+.swapbot-container .warning img,
+#swapbot-container .warning img {
+  width: 120px;
+}
 .swapbot-container .content,
 #swapbot-container .content {
   text-align: center;
