@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
+use Swapbot\Models\Formatting\SwapFormatter;
+use Swapbot\Models\Swap;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class BotEventOutputTransformer {
@@ -14,21 +16,24 @@ class BotEventOutputTransformer {
 
     /**
      */
-    public function __construct()
-    {
+    public function __construct(SwapFormatter $swap_formatter) {
+        $this->swap_formatter = $swap_formatter;
     }
 
 
     public function buildMessage(BotEvent $event) {
         $event_details = $event['event'];
-        return $this->buildMessageFromEventDetails($event_details, $event);
+        return $this->buildMessageFromEventDetails($event_details, $event->swap);
     }
 
-    public function buildMessageFromEventDetails($event_details) {
+    public function buildMessageFromEventDetails($event_details, Swap $swap=null) {
         if (is_string($event_details)) { $event_details = json_decode($event_details, true); }
 
+        if ($swap !== null) { $event_details['swap'] = $swap; }
+        $event_details['swapFormatter'] = $this->swap_formatter;
+
         $name = (isset($event_details['name']) ? $event_details['name'] : 'undefined');
-        Log::debug('$event_details='.json_encode($event_details, 192));
+        // Log::debug('$event_details='.json_encode($event_details, 192));
 
         $message_template = $this->getEventTemplate($name);
         if (!$message_template) {

@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Swap;
+use Tokenly\QuotebotClient\Client;
 
 class SwapFormatter {
 
-    public function __construct() {
+    public function __construct(Client $quotebot_client) {
+        $this->quotebot_client = $quotebot_client;
     }
 
     public function buildSwapDescription(SwapConfig $swap) {
@@ -94,6 +96,16 @@ class SwapFormatter {
     public function formatAddressHref($address) {
         if (!strlen($address)) { return '#unknown'; }
         return 'https://counterpartychain.io/address/'.$address;
+    }
+
+    public function fiatSuffix(SwapConfig $swap_config, $in_qty, $asset) {
+        if (!$swap_config) { return ''; }
+        if ($swap_config['strategy'] == 'fiat') {
+            $quote_entry = $this->quotebot_client->getQuote('bitcoinAverage', ['USD', 'BTC']);
+            $quantity = $in_qty * $quote_entry['last'];
+            return '($'.money_format('%i', $quantity).')';
+        }
+        return '';
     }
 
 }

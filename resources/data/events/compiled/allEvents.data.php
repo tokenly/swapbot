@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-06-26 12:55:32
+// compiled on 2015-07-01 14:02:54
 
 return array (
   'swap.new' => 
@@ -38,7 +38,7 @@ return array (
     'name' => 'swap.transaction.update',
     'label' => 'Swap Transaction',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -53,7 +53,7 @@ return array (
     'name' => 'swap.confirming',
     'label' => 'Confirming Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -68,7 +68,7 @@ return array (
     'name' => 'swap.confirmed',
     'label' => 'Confirmed Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',

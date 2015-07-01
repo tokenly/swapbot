@@ -52,6 +52,9 @@ do ()->
             inAmount = this.getInAmount()
             isChooseable = this.isChooseable()
             errorMsg = this.getErrorMessage()
+            fiatSuffix = <span className="fiatSuffix">
+                    { swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
+                </span>
 
             <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
                 <a className="choose-swap" onClick={this.chooseSwap} href="#next-step">
@@ -61,7 +64,7 @@ do ()->
                         </div>
                     }
                     <div className="item-header">
-                        To purchase {swapbot.formatters.formatCurrency(this.props.outAmount)} {swapConfig.out}, send {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}
+                        To purchase {swapbot.formatters.formatCurrency(this.props.outAmount)} {swapConfig.out}, send {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}{fiatSuffix}
                     </div>
                     <p>
                         { 

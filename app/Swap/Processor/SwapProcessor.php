@@ -88,6 +88,7 @@ class SwapProcessor {
 
     public function processSwap(Swap $swap) {
         try {
+            Log::debug("Begin process swap {$swap['id']}");
             $swap_process = null;
 
             // start by checking the status of the bot
@@ -178,6 +179,7 @@ class SwapProcessor {
         $this->handleUpdateSwapState($swap_process);
 
         // processed this swap
+        Log::debug("End process swap {$swap['id']}");
         return $swap;
     }
 

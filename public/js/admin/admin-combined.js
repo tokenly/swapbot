@@ -2928,6 +2928,15 @@
       }
       return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
+    exports.formatFiatCurrency = function(value, currencyPrefix) {
+      if (currencyPrefix == null) {
+        currencyPrefix = '$';
+      }
+      if ((value == null) || isNaN(value)) {
+        return '';
+      }
+      return ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + window.numeral(value).format('0,0.00');
+    };
     return exports;
   })();
 
@@ -3001,6 +3010,24 @@
     };
     exports.closePusherChanel = function(client) {
       client.disconnect();
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
+  swapbot.quoteUtils = (function() {
+    var exports;
+    exports = {};
+    exports.fiatQuoteSuffix = function(swapConfig, amount, asset) {
+      var fiatAmount;
+      if (swapConfig.strategy !== 'fiat') {
+        return '';
+      }
+      fiatAmount = QuotebotStore.getCurrentPrice() * amount;
+      return ' (' + swapbot.formatters.formatFiatCurrency(fiatAmount) + ')';
     };
     return exports;
   })();

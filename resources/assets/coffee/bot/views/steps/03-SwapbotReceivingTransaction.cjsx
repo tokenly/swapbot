@@ -120,6 +120,11 @@ do ()->
             swapConfig = this.state.userChoices.swapConfig
             return null if not swapConfig
 
+            fiatSuffix = <span className="fiatSuffix">
+                    { swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
+                </span>
+            # console.log "fiatSuffix=",fiatSuffix
+
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-2" className="content">
                     <h2>Receiving transaction</h2>
@@ -135,7 +140,7 @@ do ()->
                     <PlaceOrderInput bot={bot} />
 
                     <div className="sendInstructions">
-                        To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to {bot.address}
+                        To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
                         <ReactZeroClipboard 
                             text={bot.address}
                             onAfterCopy={this.onAfterCopy}
@@ -170,7 +175,7 @@ do ()->
                                     <ul id="transaction-wait-list" className="wide-list">
                                         <li>
                                             <div className="status-icon icon-pending"></div>
-                                            Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}</strong> to be sent to {bot.address}
+                                            Waiting for <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to be sent to {bot.address}
                                             {
                                                 # if numberOfIgnoredSwaps is 0 and there are pending transactions, show an I Paid link
                                                 if this.state.userChoices.numberOfIgnoredSwaps == 0 and this.state.userChoices.numberOfValidSwaps > 0

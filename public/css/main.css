@@ -770,6 +770,11 @@ ul.swaps-list li p {
 #swapbot-container div#GoBackLink {
   margin-top: 8px;
 }
+#swapbot-container .fiatSuffix {
+  color: #202020;
+  font-weight: 500;
+  font-size: 90%;
+}
 .content .x-button {
   float: right;
   margin-right: 52px;

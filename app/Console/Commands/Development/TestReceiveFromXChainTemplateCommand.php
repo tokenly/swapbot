@@ -82,7 +82,6 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         if (!$bot) { throw new Exception("Unable to find bot", 1); }
 
         $notification = $this->resolveNotification($bot);
-        $this->comment("Sending mock xChain notification to bot {$bot['name']}");
 
         // mock xchain client so we don't try to make real calls
         $mock_builder = app('Tokenly\XChainClient\Mock\MockBuilder');
@@ -112,21 +111,25 @@ class TestReceiveFromXChainTemplateCommand extends Command {
 
         $notification_id = $this->input->getOption('notification-id');
         if (!$notification_id) { $notification_id = '11111111-1111-1111-1111-'.sprintf('%06x',rand(1,16777215)).sprintf('%06x',rand(1,16777215)); }
-        echo "\$notification_id: ".json_encode($notification_id, 192)."\n";
+        // echo "\$notification_id: ".json_encode($notification_id, 192)."\n";
 
         $txid = $this->input->getOption('txid');
         if (strlen($txid) < 51) { $txid = 'deadbeef00000000000000000000000000000000000000000000000000'.sprintf('%06x',$txid); }
 
+        $sender = $this->input->getOption('sender');
+        if (strlen($sender) < 30) { $sender = '1SENDER000000000000000000000'.sprintf('%06x',$sender); }
+
         $vars = [
             'asset'          => $this->input->getOption('asset'),
             'quantity'       => $this->input->getOption('quantity'),
-            'sender'         => $this->input->getOption('sender'),
+            'sender'         => $sender,
             'confirmations'  => $this->input->getOption('confirmations'),
             'txid'           => $txid,
             'notificationId' => $notification_id,
             'timestamp'      => time(),
             'bot'            => $bot,
         ];
+        $this->comment("Sending notification of {$vars['quantity']} {$vars['asset']} from $sender to bot {$bot['name']}");
         $rendered_view = view('transactions.template.'.$template_name, $vars)->render();
         $resolved_notification = json_decode($rendered_view, true);
         return $resolved_notification;

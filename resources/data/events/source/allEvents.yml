@@ -22,7 +22,7 @@ events:
     name: swap.transaction.update
     label: Swap Transaction
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -30,7 +30,7 @@ events:
     name: swap.confirming
     label: Confirming Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -38,7 +38,7 @@ events:
     name: swap.confirmed
     label: Confirmed Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
