@@ -154,13 +154,27 @@ swapbot.swapUtils = do ()->
     # exports
 
 
-    exports.exchangeDescriptionForGroup = (swapConfigGroup)->
+    # returns [firstSwapDescription, otherSwapDescriptions]
+    exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
         descs = []
-        for swapConfig in swapConfigGroup
+        otherTokenTypes = []
+        for swapConfig, index in swapConfigGroup
             descs.push(buildDesc[swapConfig.strategy](swapConfig))
+            if index >= 1
+                otherTokenTypes.push(swapConfig.in)
         if descs.length > 1
-            descs[descs.length-1] = ' or '+descs[descs.length-1]
-        return descs.join(', ')
+            otherCount = descs.length - 1
+            # return [descs[0], "#{otherCount} other token#{if otherCount == 1 then '' else 's'} are also accepted"]
+            if otherTokenTypes.length > 1
+                otherTokenTypes[otherTokenTypes.length-1] = ' and '+otherTokenTypes[otherTokenTypes.length-1]
+            if otherTokenTypes.length > 2
+                tokenDescs = otherTokenTypes.join(', ')
+            else
+                tokenDescs = otherTokenTypes.join(' ')
+
+            return [descs[0], "#{tokenDescs} #{if otherCount == 1 then 'is' else 'are'} also accepted"]
+            # return [descs[0], "#{otherCount} other token#{if otherCount == 1 then '' else 's'} are also accepted"]
+        return [descs[0], null]
         
     
     exports.inAmountFromOutAmount = (inAmount, swapConfig, currentRate)->

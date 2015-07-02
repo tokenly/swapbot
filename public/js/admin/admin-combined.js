@@ -3185,17 +3185,30 @@
       }
       return null;
     };
-    exports.exchangeDescriptionForGroup = function(swapConfigGroup) {
-      var descs, j, len, swapConfig;
+    exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
+      var descs, index, j, len, otherCount, otherTokenTypes, swapConfig, tokenDescs;
       descs = [];
-      for (j = 0, len = swapConfigGroup.length; j < len; j++) {
-        swapConfig = swapConfigGroup[j];
+      otherTokenTypes = [];
+      for (index = j = 0, len = swapConfigGroup.length; j < len; index = ++j) {
+        swapConfig = swapConfigGroup[index];
         descs.push(buildDesc[swapConfig.strategy](swapConfig));
+        if (index >= 1) {
+          otherTokenTypes.push(swapConfig["in"]);
+        }
       }
       if (descs.length > 1) {
-        descs[descs.length - 1] = ' or ' + descs[descs.length - 1];
+        otherCount = descs.length - 1;
+        if (otherTokenTypes.length > 1) {
+          otherTokenTypes[otherTokenTypes.length - 1] = ' and ' + otherTokenTypes[otherTokenTypes.length - 1];
+        }
+        if (otherTokenTypes.length > 2) {
+          tokenDescs = otherTokenTypes.join(', ');
+        } else {
+          tokenDescs = otherTokenTypes.join(' ');
+        }
+        return [descs[0], tokenDescs + " " + (otherCount === 1 ? 'is' : 'are') + " also accepted"];
       }
-      return descs.join(', ');
+      return [descs[0], null];
     };
     exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
       inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);

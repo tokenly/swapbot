@@ -341,17 +341,30 @@
       }
       return null;
     };
-    exports.exchangeDescriptionForGroup = function(swapConfigGroup) {
-      var descs, swapConfig, _i, _len;
+    exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
+      var descs, index, otherCount, otherTokenTypes, swapConfig, tokenDescs, _i, _len;
       descs = [];
-      for (_i = 0, _len = swapConfigGroup.length; _i < _len; _i++) {
-        swapConfig = swapConfigGroup[_i];
+      otherTokenTypes = [];
+      for (index = _i = 0, _len = swapConfigGroup.length; _i < _len; index = ++_i) {
+        swapConfig = swapConfigGroup[index];
         descs.push(buildDesc[swapConfig.strategy](swapConfig));
+        if (index >= 1) {
+          otherTokenTypes.push(swapConfig["in"]);
+        }
       }
       if (descs.length > 1) {
-        descs[descs.length - 1] = ' or ' + descs[descs.length - 1];
+        otherCount = descs.length - 1;
+        if (otherTokenTypes.length > 1) {
+          otherTokenTypes[otherTokenTypes.length - 1] = ' and ' + otherTokenTypes[otherTokenTypes.length - 1];
+        }
+        if (otherTokenTypes.length > 2) {
+          tokenDescs = otherTokenTypes.join(', ');
+        } else {
+          tokenDescs = otherTokenTypes.join(' ');
+        }
+        return [descs[0], "" + tokenDescs + " " + (otherCount === 1 ? 'is' : 'are') + " also accepted"];
       }
-      return descs.join(', ');
+      return [descs[0], null];
     };
     exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
       inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
@@ -969,7 +982,7 @@
         })(this);
       },
       render: function() {
-        var bot, index, outAsset, swapConfigGroup, swapConfigGroups;
+        var bot, firstSwapDescription, index, otherSwapDescriptions, outAsset, swapConfigGroup, swapConfigGroups;
         bot = this.props.bot;
         if (!bot) {
           return null;
@@ -983,17 +996,18 @@
           "className": "description"
         }, this.props.bot.description)), React.createElement("div", {
           "className": "section grid-50"
-        }, React.createElement("h3", null, "Available Swaps"), React.createElement("div", {
+        }, React.createElement("h3", null, "I want"), React.createElement("div", {
           "id": "SwapsListComponent"
         }, (bot.swaps ? React.createElement("ul", {
           "id": "swaps-list",
           "className": "wide-list"
         }, (function() {
-          var _i, _len, _results;
+          var _i, _len, _ref, _results;
           _results = [];
           for (index = _i = 0, _len = swapConfigGroups.length; _i < _len; index = ++_i) {
             swapConfigGroup = swapConfigGroups[index];
             outAsset = swapConfigGroup[0].out;
+            _ref = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup), firstSwapDescription = _ref[0], otherSwapDescriptions = _ref[1];
             _results.push(React.createElement("li", {
               "key": "swapGroup" + index,
               "className": "chooseable swap"
@@ -1004,7 +1018,9 @@
               "className": "item-header"
             }, outAsset, " ", React.createElement("small", null, "(", swapbot.formatters.formatCurrency(bot.balances[outAsset]), " available)")), React.createElement("p", {
               "className": "exchange-description"
-            }, "This bot will send you ", swapbot.swapUtils.exchangeDescriptionForGroup(swapConfigGroup), "."), React.createElement("div", {
+            }, "This bot will send you ", firstSwapDescription, ".", (otherSwapDescriptions != null ? React.createElement("span", {
+              "className": "line-two"
+            }, React.createElement("br", null), otherSwapDescriptions, ".") : void 0)), React.createElement("div", {
               "className": "icon-next"
             })))));
           }
