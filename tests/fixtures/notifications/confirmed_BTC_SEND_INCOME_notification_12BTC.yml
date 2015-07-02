@@ -1,0 +1,14 @@
+# send BTC from the public address notification
+
+txid: 0000000000000000000000000000000000000000000000000sendBTCtx444444
+network: bitcoin
+event: send
+notifiedAddress: botaddress000000000000000000000001
+notifiedAddressId: PUBLIC_SEND_MONITOR_ID_01
+sources: [botaddress000000000000000000000001]
+destinations: [INCOME_FORWARDING_ADDRESS_0000001]
+confirmed: true
+confirmations: 1
+asset: BTC
+quantity: 12
+blockId: 300002

@@ -40,12 +40,13 @@ class ProcessIncomeForwardingForAllBotsHandler {
             $this->bot_repository->executeWithLockedBot($bot, function($bot) {
                 // check balance
                 foreach ($bot['income_rules'] as $income_rule_config) {
-                    if ($bot->getBalance($income_rule_config['asset']) >= $income_rule_config['minThreshold']) {
+                    $bot_balance = $bot->getBalance($income_rule_config['asset']);
+                    if ($bot_balance >= $income_rule_config['minThreshold']) {
                         try {
                             // send the transaction
                             $asset = $income_rule_config['asset'];
                             $destination = $income_rule_config['address'];
-                            $quantity = $income_rule_config['paymentAmount'];
+                            $quantity = $this->buildQuantityToForward($bot_balance, $income_rule_config);
                             $fee = $bot['return_fee'];
 
 
@@ -80,6 +81,19 @@ class ProcessIncomeForwardingForAllBotsHandler {
         }
 
 
+    }
+
+    protected function buildQuantityToForward($bot_balance, $income_rule_config) {
+        // send as much as we can to get below the threshold
+        $threshold = $income_rule_config['minThreshold'];
+        $chunk_size = $income_rule_config['paymentAmount'];
+        $number_of_chunks = ceil(($bot_balance - $threshold) / $chunk_size);
+        $quantity = $number_of_chunks * $chunk_size;
+
+        // never send more than we have, even if it was configured that way
+        if ($quantity > $bot_balance) { $quantity = $bot_balance; }
+
+        return $quantity;
     }
 
 }

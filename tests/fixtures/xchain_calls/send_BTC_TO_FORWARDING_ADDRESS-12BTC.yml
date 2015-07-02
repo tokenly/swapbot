@@ -1,0 +1,8 @@
+method: POST
+path: /sends/PUBLIC_ADDRESS_ID_01
+data:
+    destination: INCOME_FORWARDING_ADDRESS_0000001
+    quantity: 12
+    asset: BTC
+    sweep: false
+    fee: 0.0001
