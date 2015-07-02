@@ -21,17 +21,17 @@ swapbot.swapUtils = do ()->
         formatCurrency = swapbot.formatters.formatCurrency
 
         # This bot will send you 1000 SOUP for every 1 BTC you deposit
-        return "This bot will send you #{formatCurrency(outAmount)} #{swapConfig.out} for every #{formatCurrency(inAmount)} #{swapConfig.in} you deposit."
+        return "#{formatCurrency(outAmount)} #{swapConfig.out} for every #{formatCurrency(inAmount)} #{swapConfig.in} you deposit"
 
     buildDesc.fixed = (swapConfig)->
         formatCurrency = swapbot.formatters.formatCurrency
-        return "This bot will send you #{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in} you deposit."
+        return "#{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in} you deposit"
 
     buildDesc.fiat = (swapConfig)->
         formatCurrency = swapbot.formatters.formatCurrency
         outAmount = 1
         cost = swapConfig.cost
-        return "This bot will send you #{formatCurrency(outAmount)} #{swapConfig.out} for every $#{formatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit."
+        return "#{formatCurrency(outAmount)} #{swapConfig.out} for every $#{formatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit"
 
 
     buildInAmountFromOutAmount = {}
@@ -153,8 +153,15 @@ swapbot.swapUtils = do ()->
     # #############################################
     # exports
 
-    exports.exchangeDescription = (swapConfig)->
-        return buildDesc[swapConfig.strategy](swapConfig)
+
+    exports.exchangeDescriptionForGroup = (swapConfigGroup)->
+        descs = []
+        for swapConfig in swapConfigGroup
+            descs.push(buildDesc[swapConfig.strategy](swapConfig))
+        if descs.length > 1
+            descs[descs.length-1] = ' or '+descs[descs.length-1]
+        return descs.join(', ')
+        
     
     exports.inAmountFromOutAmount = (inAmount, swapConfig, currentRate)->
         inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate)
@@ -174,6 +181,19 @@ swapbot.swapUtils = do ()->
 
         # no error
         return null
+
+    exports.groupSwapConfigs = (allSwapConfigs)->
+        swapConfigGroupsByAssetOut = {}
+        for swapConfig, index in allSwapConfigs
+            if not swapConfigGroupsByAssetOut[swapConfig.out]?
+                swapConfigGroupsByAssetOut[swapConfig.out] = []
+            swapConfigGroupsByAssetOut[swapConfig.out].push(swapConfig)
+        
+        swapConfigGroups = []
+        for k, v of swapConfigGroupsByAssetOut
+            swapConfigGroups.push(v)
+        return swapConfigGroups
+
 
     return exports
 

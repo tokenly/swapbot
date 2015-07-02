@@ -27,6 +27,8 @@ do ()->
                 bot = this.props.bot
                 return null if not bot
 
+                swapConfigGroups = swapbot.swapUtils.groupSwapConfigs(bot.swaps)
+
                 <div id="swap-step-1">
                     <div className="section grid-50">
                         <h3>Description</h3>
@@ -39,12 +41,13 @@ do ()->
                                 if bot.swaps
                                     <ul id="swaps-list" className="wide-list">
                                     {
-                                        for swapConfig, index in bot.swaps
-                                            <li key={"swapConfig#{index}"} className="chooseable swap">
-                                                <a href="#choose-swap" onClick={this.buildChooseOutAsset(swapConfig.out)}>
+                                        for swapConfigGroup, index in swapConfigGroups
+                                            outAsset = swapConfigGroup[0].out
+                                            <li key={"swapGroup#{index}"} className="chooseable swap">
+                                                <a href="#choose-swap" onClick={this.buildChooseOutAsset(outAsset)}>
                                                     <div>
-                                                        <div className="item-header">{ swapConfig.out } <small>({ swapbot.formatters.formatCurrency(bot.balances[swapConfig.out]) } available)</small></div>
-                                                        <p className="exchange-description">{ swapbot.swapUtils.exchangeDescription(swapConfig) }</p>
+                                                        <div className="item-header">{ outAsset } <small>({ swapbot.formatters.formatCurrency(bot.balances[outAsset]) } available)</small></div>
+                                                        <p className="exchange-description">This bot will send you { swapbot.swapUtils.exchangeDescriptionForGroup(swapConfigGroup) }.</p>
                                                         <div className="icon-next"></div>
                                                     </div>
                                                 </a>

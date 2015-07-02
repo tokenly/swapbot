@@ -3048,19 +3048,19 @@
       outAmount = 1 * swapConfig.rate;
       inAmount = 1;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(inAmount)) + " " + swapConfig["in"] + " you deposit.";
+      return (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(inAmount)) + " " + swapConfig["in"] + " you deposit";
     };
     buildDesc.fixed = function(swapConfig) {
       var formatCurrency;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "This bot will send you " + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit.";
+      return (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit";
     };
     buildDesc.fiat = function(swapConfig) {
       var cost, formatCurrency, outAmount;
       formatCurrency = swapbot.formatters.formatCurrency;
       outAmount = 1;
       cost = swapConfig.cost;
-      return "This bot will send you " + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every $" + (formatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit.";
+      return (formatCurrency(outAmount)) + " " + swapConfig.out + " for every $" + (formatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit";
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
@@ -3185,8 +3185,17 @@
       }
       return null;
     };
-    exports.exchangeDescription = function(swapConfig) {
-      return buildDesc[swapConfig.strategy](swapConfig);
+    exports.exchangeDescriptionForGroup = function(swapConfigGroup) {
+      var descs, j, len, swapConfig;
+      descs = [];
+      for (j = 0, len = swapConfigGroup.length; j < len; j++) {
+        swapConfig = swapConfigGroup[j];
+        descs.push(buildDesc[swapConfig.strategy](swapConfig));
+      }
+      if (descs.length > 1) {
+        descs[descs.length - 1] = ' or ' + descs[descs.length - 1];
+      }
+      return descs.join(', ');
     };
     exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
       inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
@@ -3210,6 +3219,23 @@
         return errorMsg;
       }
       return null;
+    };
+    exports.groupSwapConfigs = function(allSwapConfigs) {
+      var index, j, k, len, swapConfig, swapConfigGroups, swapConfigGroupsByAssetOut, v;
+      swapConfigGroupsByAssetOut = {};
+      for (index = j = 0, len = allSwapConfigs.length; j < len; index = ++j) {
+        swapConfig = allSwapConfigs[index];
+        if (swapConfigGroupsByAssetOut[swapConfig.out] == null) {
+          swapConfigGroupsByAssetOut[swapConfig.out] = [];
+        }
+        swapConfigGroupsByAssetOut[swapConfig.out].push(swapConfig);
+      }
+      swapConfigGroups = [];
+      for (k in swapConfigGroupsByAssetOut) {
+        v = swapConfigGroupsByAssetOut[k];
+        swapConfigGroups.push(v);
+      }
+      return swapConfigGroups;
     };
     return exports;
   })();
