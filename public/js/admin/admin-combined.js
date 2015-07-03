@@ -3186,29 +3186,48 @@
       return null;
     };
     exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
-      var descs, index, j, len, otherCount, otherTokenTypes, swapConfig, tokenDescs;
-      descs = [];
-      otherTokenTypes = [];
+      var els, index, j, l, len, len1, mainDesc, otherCount, otherSwapDescriptions, otherTokenEl, otherTokenEls, swapConfig, tokenDescs;
+      mainDesc = '';
+      otherTokenEls = [];
       for (index = j = 0, len = swapConfigGroup.length; j < len; index = ++j) {
         swapConfig = swapConfigGroup[index];
-        descs.push(buildDesc[swapConfig.strategy](swapConfig));
+        if (index === 0) {
+          mainDesc = buildDesc[swapConfig.strategy](swapConfig);
+        }
         if (index >= 1) {
-          otherTokenTypes.push(swapConfig["in"]);
+          otherTokenEls.push(React.createElement('span', {
+            key: 'token' + index,
+            className: 'tokenType'
+          }, swapConfig["in"]));
         }
       }
-      if (descs.length > 1) {
-        otherCount = descs.length - 1;
-        if (otherTokenTypes.length > 1) {
-          otherTokenTypes[otherTokenTypes.length - 1] = ' and ' + otherTokenTypes[otherTokenTypes.length - 1];
-        }
-        if (otherTokenTypes.length > 2) {
-          tokenDescs = otherTokenTypes.join(', ');
-        } else {
-          tokenDescs = otherTokenTypes.join(' ');
-        }
-        return [descs[0], tokenDescs + " " + (otherCount === 1 ? 'is' : 'are') + " also accepted"];
+      if (otherTokenEls.length === 0) {
+        return [mainDesc, otherSwapDescriptions];
       }
-      return [descs[0], null];
+      tokenDescs = [];
+      otherCount = otherTokenEls.length;
+      if (otherCount === 1) {
+        otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' is also accepted']);
+      } else if (otherCount === 2) {
+        otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' and ', otherTokenEls[1], ' are also accepted']);
+      }
+      if (otherCount > 2) {
+        els = [];
+        for (index = l = 0, len1 = otherTokenEls.length; l < len1; index = ++l) {
+          otherTokenEl = otherTokenEls[index];
+          if (index === otherTokenEls.length - 1) {
+            els.push(' and ');
+            els.push(otherTokenEl);
+          } else if (index >= 1) {
+            els.push(', ');
+            els.push(otherTokenEl);
+          } else {
+            els.push(otherTokenEl);
+          }
+        }
+        otherSwapDescriptions = React.createElement('span', null, [els, ' are also accepted']);
+      }
+      return [mainDesc, otherSwapDescriptions];
     };
     exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
       inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);

@@ -342,29 +342,48 @@
       return null;
     };
     exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
-      var descs, index, otherCount, otherTokenTypes, swapConfig, tokenDescs, _i, _len;
-      descs = [];
-      otherTokenTypes = [];
+      var els, index, mainDesc, otherCount, otherSwapDescriptions, otherTokenEl, otherTokenEls, swapConfig, tokenDescs, _i, _j, _len, _len1;
+      mainDesc = '';
+      otherTokenEls = [];
       for (index = _i = 0, _len = swapConfigGroup.length; _i < _len; index = ++_i) {
         swapConfig = swapConfigGroup[index];
-        descs.push(buildDesc[swapConfig.strategy](swapConfig));
+        if (index === 0) {
+          mainDesc = buildDesc[swapConfig.strategy](swapConfig);
+        }
         if (index >= 1) {
-          otherTokenTypes.push(swapConfig["in"]);
+          otherTokenEls.push(React.createElement('span', {
+            key: 'token' + index,
+            className: 'tokenType'
+          }, swapConfig["in"]));
         }
       }
-      if (descs.length > 1) {
-        otherCount = descs.length - 1;
-        if (otherTokenTypes.length > 1) {
-          otherTokenTypes[otherTokenTypes.length - 1] = ' and ' + otherTokenTypes[otherTokenTypes.length - 1];
-        }
-        if (otherTokenTypes.length > 2) {
-          tokenDescs = otherTokenTypes.join(', ');
-        } else {
-          tokenDescs = otherTokenTypes.join(' ');
-        }
-        return [descs[0], "" + tokenDescs + " " + (otherCount === 1 ? 'is' : 'are') + " also accepted"];
+      if (otherTokenEls.length === 0) {
+        return [mainDesc, otherSwapDescriptions];
       }
-      return [descs[0], null];
+      tokenDescs = [];
+      otherCount = otherTokenEls.length;
+      if (otherCount === 1) {
+        otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' is also accepted']);
+      } else if (otherCount === 2) {
+        otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' and ', otherTokenEls[1], ' are also accepted']);
+      }
+      if (otherCount > 2) {
+        els = [];
+        for (index = _j = 0, _len1 = otherTokenEls.length; _j < _len1; index = ++_j) {
+          otherTokenEl = otherTokenEls[index];
+          if (index === otherTokenEls.length - 1) {
+            els.push(' and ');
+            els.push(otherTokenEl);
+          } else if (index >= 1) {
+            els.push(', ');
+            els.push(otherTokenEl);
+          } else {
+            els.push(otherTokenEl);
+          }
+        }
+        otherSwapDescriptions = React.createElement('span', null, [els, ' are also accepted']);
+      }
+      return [mainDesc, otherSwapDescriptions];
     };
     exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
       inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
@@ -2004,6 +2023,55 @@
     }
   };
 
+  SwapMatcher = (function() {
+    var exports, swapIsMatched, swapIsValid;
+    exports = {};
+    swapIsMatched = function(swap, userChoices) {
+      if (!swapIsValid(swap, userChoices)) {
+        return false;
+      }
+      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
+        return true;
+      }
+      if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
+        return true;
+      }
+      return false;
+    };
+    swapIsValid = function(swap, userChoices) {
+      if (swap.isComplete) {
+        return false;
+      }
+      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+        return false;
+      }
+      return true;
+    };
+    exports.buildMatchedSwaps = function(swaps, userChoices) {
+      var matchedSwaps, swap, _i, _len;
+      matchedSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsMatched(swap, userChoices)) {
+          matchedSwaps.push(swap);
+        }
+      }
+      return matchedSwaps;
+    };
+    exports.buildValidSwaps = function(swaps, userChoices) {
+      var swap, validSwaps, _i, _len;
+      validSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsValid(swap, userChoices)) {
+          validSwaps.push(swap);
+        }
+      }
+      return validSwaps;
+    };
+    return exports;
+  })();
+
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
     exports = {};
@@ -2589,55 +2657,6 @@
     };
     exports.removeChangeListener = function(callback) {
       eventEmitter.removeListener('change', callback);
-    };
-    return exports;
-  })();
-
-  SwapMatcher = (function() {
-    var exports, swapIsMatched, swapIsValid;
-    exports = {};
-    swapIsMatched = function(swap, userChoices) {
-      if (!swapIsValid(swap, userChoices)) {
-        return false;
-      }
-      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
-        return true;
-      }
-      if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
-        return true;
-      }
-      return false;
-    };
-    swapIsValid = function(swap, userChoices) {
-      if (swap.isComplete) {
-        return false;
-      }
-      if (userChoices.swapIDsToIgnore[swap.id] != null) {
-        return false;
-      }
-      return true;
-    };
-    exports.buildMatchedSwaps = function(swaps, userChoices) {
-      var matchedSwaps, swap, _i, _len;
-      matchedSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsMatched(swap, userChoices)) {
-          matchedSwaps.push(swap);
-        }
-      }
-      return matchedSwaps;
-    };
-    exports.buildValidSwaps = function(swaps, userChoices) {
-      var swap, validSwaps, _i, _len;
-      validSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsValid(swap, userChoices)) {
-          validSwaps.push(swap);
-        }
-      }
-      return validSwaps;
     };
     return exports;
   })();

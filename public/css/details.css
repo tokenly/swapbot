@@ -566,6 +566,9 @@ a.copied.zeroclipboard-is-hover .copyToClipboard {
 .wide-list .exchange-description {
   padding-right: 48px;
 }
+.exchange-description .tokenType {
+  font-weight: 600;
+}
 #transaction-wait-list div.i-paid-link {
   margin-top: 6px;
 }

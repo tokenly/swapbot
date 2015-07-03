@@ -156,25 +156,41 @@ swapbot.swapUtils = do ()->
 
     # returns [firstSwapDescription, otherSwapDescriptions]
     exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
-        descs = []
-        otherTokenTypes = []
+        mainDesc = ''
+            
+        otherTokenEls = []
         for swapConfig, index in swapConfigGroup
-            descs.push(buildDesc[swapConfig.strategy](swapConfig))
+            if index == 0
+                mainDesc = buildDesc[swapConfig.strategy](swapConfig)
             if index >= 1
-                otherTokenTypes.push(swapConfig.in)
-        if descs.length > 1
-            otherCount = descs.length - 1
-            # return [descs[0], "#{otherCount} other token#{if otherCount == 1 then '' else 's'} are also accepted"]
-            if otherTokenTypes.length > 1
-                otherTokenTypes[otherTokenTypes.length-1] = ' and '+otherTokenTypes[otherTokenTypes.length-1]
-            if otherTokenTypes.length > 2
-                tokenDescs = otherTokenTypes.join(', ')
-            else
-                tokenDescs = otherTokenTypes.join(' ')
+                otherTokenEls.push(React.createElement('span',{key: 'token'+index, className: 'tokenType'}, swapConfig.in))
 
-            return [descs[0], "#{tokenDescs} #{if otherCount == 1 then 'is' else 'are'} also accepted"]
-            # return [descs[0], "#{otherCount} other token#{if otherCount == 1 then '' else 's'} are also accepted"]
-        return [descs[0], null]
+        if otherTokenEls.length == 0
+            return [mainDesc, otherSwapDescriptions]
+
+        tokenDescs = []
+        otherCount = otherTokenEls.length
+        if otherCount == 1
+            otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' is also accepted'])
+        else if otherCount == 2
+            # X and Y
+            otherSwapDescriptions = React.createElement('span', null, [otherTokenEls[0], ' and ', otherTokenEls[1], ' are also accepted'])
+        if otherCount > 2
+            # X, Y and Z
+            els = []
+            for otherTokenEl, index in otherTokenEls
+                if index == otherTokenEls.length - 1
+                    els.push(' and ')
+                    els.push(otherTokenEl)
+                else if index >= 1
+                    els.push(', ')
+                    els.push(otherTokenEl)
+                else 
+                    els.push(otherTokenEl)
+            
+            otherSwapDescriptions = React.createElement('span', null, [els, ' are also accepted'])
+
+        return [mainDesc, otherSwapDescriptions]
         
     
     exports.inAmountFromOutAmount = (inAmount, swapConfig, currentRate)->
