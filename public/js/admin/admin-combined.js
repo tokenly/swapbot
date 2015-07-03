@@ -1997,7 +1997,7 @@
           vm.paymentAddress(botData.paymentAddress);
           vm.paymentPlan(botData.paymentPlan);
           vm.state(botData.state);
-          vm.description(botData.description);
+          vm.description(botData.descriptionHtml);
           vm.hash(botData.hash);
           vm.username(botData.username);
           vm.swaps(buildSwapsPropValue(botData.swaps));
@@ -2112,7 +2112,7 @@
                 }, [
                   sbAdmin.form.mValueDisplay("Bot Description", {
                     id: 'description'
-                  }, vm.description())
+                  }, m.trust(vm.description()))
                 ])
               ]), m("div", {
                 "class": "row"

@@ -32,7 +32,7 @@ do ()->
                 <div id="swap-step-1">
                     <div className="section grid-50">
                         <h3>Description</h3>
-                        <div className="description">{this.props.bot.description}</div>
+                        <div className="description" dangerouslySetInnerHTML={{__html: this.props.bot.descriptionHtml}}></div>
                     </div>
                     <div className="section grid-50">
                         <h3>I want</h3>

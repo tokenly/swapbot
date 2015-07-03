@@ -164,6 +164,7 @@ return [
 		'Tokenly\ConsulHealthDaemon\ServiceProvider\ConsulHealthDaemonServiceProvider',
 		'Tokenly\QuotebotClient\ServiceProvider\QuotebotServiceProvider',
 		'Tokenly\RecordLock\Provider\RecordLockServiceProvider',
+		'GrahamCampbell\Markdown\MarkdownServiceProvider',
 
 	],
 

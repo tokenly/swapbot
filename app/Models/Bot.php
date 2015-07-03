@@ -3,6 +3,7 @@
 namespace Swapbot\Models;
 
 use Exception;
+use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Billing\PaymentPlan\PaymentPlan;
@@ -17,8 +18,8 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
-    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -50,6 +51,13 @@ class Bot extends APIModel {
     public function getUsernameAttribute() {
         // get username
         return $this->user['username'];
+    }
+
+    public function getDescriptionHtmlAttribute() {
+        return Markdown::convertToHtml(strip_tags(
+            $this->attributes['description'],
+            '<hr><hr/><li><li/><ol><ol/><caption><caption/><col><col/><p><p/><colgroup><colgroup/><pre><pre/><dd><dd/><div><div/><dl><dl/><table><table/><td><td/><dt><dt/><tbody><tbody/><tfoot><tfoot/><th><th/><thead><thead/><tr><tr/><ul><ul/><h1><h1/><h2><h2/><h3><h3/><h4><h4/><h5><h5/><h6><h6/>'
+        ));
     }
 
     public function getRobohashURL() {

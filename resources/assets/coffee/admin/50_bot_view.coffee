@@ -266,7 +266,8 @@ do ()->
                     vm.paymentAddress(botData.paymentAddress)
                     vm.paymentPlan(botData.paymentPlan)
                     vm.state(botData.state)
-                    vm.description(botData.description)
+                    # vm.description(botData.description)
+                    vm.description(botData.descriptionHtml)
                     vm.hash(botData.hash)
                     vm.username(botData.username)
                     vm.swaps(buildSwapsPropValue(botData.swaps))
@@ -395,7 +396,7 @@ do ()->
 
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-12"}, [
-                                    sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, vm.description()),
+                                    sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, m.trust(vm.description())),
                                 ]),
                             ]),
 
