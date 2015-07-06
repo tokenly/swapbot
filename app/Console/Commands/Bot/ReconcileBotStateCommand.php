@@ -68,7 +68,7 @@ EOF
             $this->dispatch(new ReconcileBotState($bot));
         } catch (Exception $e) {
             // log any failure
-            EventLog::logError('balanceupdate.failed', $e);
+            EventLog::logError('reconcilebotstate.failed', $e);
             $this->error("Failed: ".$e->getMessage());
         }
 
