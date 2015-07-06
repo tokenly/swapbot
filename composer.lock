@@ -2965,12 +2965,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/hmac-auth.git",
-                "reference": "bd146152a6901acc1eb962f8cd4d3418eb19307f"
+                "reference": "ef68430f146ea081aac403043729f65b929a2acc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/bd146152a6901acc1eb962f8cd4d3418eb19307f",
-                "reference": "bd146152a6901acc1eb962f8cd4d3418eb19307f",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/ef68430f146ea081aac403043729f65b929a2acc",
+                "reference": "ef68430f146ea081aac403043729f65b929a2acc",
                 "shasum": ""
             },
             "require": {
@@ -2999,7 +2999,7 @@
                 }
             ],
             "description": "A library",
-            "time": "2015-07-02 15:35:04"
+            "time": "2015-07-06 14:34:51"
         },
         {
             "name": "tokenly/laravel-api-provider",
