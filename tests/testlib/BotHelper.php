@@ -48,6 +48,10 @@ class BotHelper  {
 
             'status_details'             => null,
 
+            'background_image_id'        => null,
+            'logo_image_id'              => null,
+            'background_overlay'         => 'gradient.png',
+
             'swaps'                      => [
                 [
                     'in'       => 'BTC',
@@ -66,6 +70,7 @@ class BotHelper  {
                     'address'       => '1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B',
                 ],
             ],
+
         ];
     }
 
@@ -156,7 +161,7 @@ class BotHelper  {
         try {
             $uuid = Uuid::uuid4()->toString();
             $attributes['uuid'] = $uuid;
-            $this->dispatch(new CreateBot($attributes));
+            $this->dispatch(new CreateBot($attributes, $user));
 
             // now load the model
             return $this->bot_repository->findByUuid($uuid);

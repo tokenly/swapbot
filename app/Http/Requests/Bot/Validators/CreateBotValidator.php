@@ -15,6 +15,9 @@ class CreateBotValidator extends BotValidator {
         'return_fee'             => 'required|numeric|min:0.00001|max:0.001',
         'payment_plan'           => 'required',
         'confirmations_required' => 'required|integer|min:2|max:6',
+        'background_image_id'    => '',
+        'logo_image_id'          => '',
+        'background_overlay'     => 'in:gradient.png',
     ];
 
 

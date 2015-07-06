@@ -165,6 +165,7 @@ return [
 		'Tokenly\QuotebotClient\ServiceProvider\QuotebotServiceProvider',
 		'Tokenly\RecordLock\Provider\RecordLockServiceProvider',
 		'GrahamCampbell\Markdown\MarkdownServiceProvider',
+		'Codesleeve\LaravelStapler\Providers\L5ServiceProvider',
 
 	],
 

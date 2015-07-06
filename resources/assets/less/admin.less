@@ -154,6 +154,91 @@ textarea.form-control {
     height: 230px;
 }
 
+
+// uploader
+
+.uploader {
+    width: 100%;
+    height: 80px;
+    border: 4px dashed #999;
+    color: #ddd;
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 16px 24px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.uploader.upload-active {
+    background-color: #060;
+    color: white;
+    border-color: #eee;
+}
+
+.uploadingDisplay {
+    width: 100%;
+    height: 80px;
+    background-color: #ddd;
+    color: #eee;
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 16px 24px;
+    text-align: center;
+
+    .error {
+        color: @brand-danger;
+        font-weight: bold;
+        
+    }
+
+    a.clear-error {
+        color: @brand-danger;
+        font-weight: 500;
+        text-decoration: underline;
+    }
+}
+
+
+
+
+.imageDisplay {
+    .remove-link {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        background-color: rgba(255, 255, 255, 0.60);
+        font-size: 1.5rem;
+        padding: 2px 12px 5px;
+
+
+        .glyphicon {
+            top: 6px;
+            font-size: 2.4rem;
+        }
+    }
+}
+
+#BGImage img {
+    max-height: 90px;
+}
+
+#LogoImage img {
+    max-height: 90px;
+}
+
+.imageDisplayEmptyLabel {
+    width: 100%;
+    height: 90px;
+    line-height: 90px;
+    font-size: 4.0rem;
+    background-color: #d2d2d2;
+    color: #ededed;
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 0;
+    text-align: center;
+}
+
 // show
 
 .active {

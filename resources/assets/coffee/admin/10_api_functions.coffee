@@ -5,22 +5,36 @@ sbAdmin.api = do ()->
     # ###################################################
     # Internal Functions
 
+    buildFileHash = (file, callbackFn)->
+        reader = new FileReader()
+        reader.onloadend = ()->
+            binaryFileContents = reader.result
+            fileHash = CryptoJS.SHA256(CryptoJS.enc.Latin1.parse(binaryFileContents)).toString()
+            callbackFn(fileHash)
+            return
+
+        reader.onerror = (evt)->
+            console.error('error reading file')
+            return
+
+        reader.readAsBinaryString(file)
+        return
+
     signRequest = (xhr, xhrOptions)->
-        # console.log "xhr=", xhr
-        # console.log "xhrOptions=", xhrOptions
-        # console.log "xhrOptions.data=", xhrOptions.data
         credentials = sbAdmin.auth.getCredentials()
         return if not credentials.apiToken?.length
 
         nonce = newNonce()
         if xhrOptions.data? and xhrOptions.data != 'null'
-            if typeof xhrOptions.data == 'object'
+            if xhrOptions.data instanceof FormData and xhrOptions.paramsToSign?
+                console.log "xhrOptions.paramsToSign=",xhrOptions.paramsToSign
+                paramsBody = window.JSON.stringify(xhrOptions.paramsToSign)
+            else if typeof xhrOptions.data == 'object'
                 paramsBody = window.JSON.stringify(xhrOptions.data)
             else
                 paramsBody = xhrOptions.data
         else
             paramsBody = '{}'
-        # console.log "paramsBody=#{paramsBody}", paramsBody
 
         url = window.location.protocol + '//' + window.location.host + xhrOptions.url
 
@@ -107,7 +121,39 @@ sbAdmin.api = do ()->
         return api.send('GET', "plans")
 
 
+    api.uploadImage = (files)->
+        deferred = m.deferred()
+
+        formData = new FormData
+        rawFormData = []
+        if files.length > 1
+            console.error('only 1 image may be uploaded')
+            return
+
+        additionalOpts = {
+            serialize: (value) ->
+                value
+        }
+
+        formData.append 'image', files[0]
+        buildFileHash files[0], (fileHash)->
+            formData.append 'filehash', fileHash
+            additionalOpts.paramsToSign = {filehash: fileHash}
+            return api.send('POST', "images", formData, additionalOpts).then(
+                (apiResponse)-> 
+                    deferred.resolve(apiResponse)
+                    return
+                , (errorResponse)-> 
+                    deferred.reject(errorResponse)
+                    return
+            )
+
+            return
+
+        return deferred.promise
+
     api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
+
         path = '/api/v1/'+apiPathSuffix
 
         # console.log "FAKE request"
@@ -129,5 +175,7 @@ sbAdmin.api = do ()->
         opts[k] = v for k, v of additionalOpts
 
         return m.request(opts)
+
+
 
     return api

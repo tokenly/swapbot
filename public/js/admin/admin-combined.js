@@ -6,8 +6,22 @@
   };
 
   sbAdmin.api = (function() {
-    var api, newNonce, signRequest, signURLParameters;
+    var api, buildFileHash, newNonce, signRequest, signURLParameters;
     api = {};
+    buildFileHash = function(file, callbackFn) {
+      var reader;
+      reader = new FileReader();
+      reader.onloadend = function() {
+        var binaryFileContents, fileHash;
+        binaryFileContents = reader.result;
+        fileHash = CryptoJS.SHA256(CryptoJS.enc.Latin1.parse(binaryFileContents)).toString();
+        callbackFn(fileHash);
+      };
+      reader.onerror = function(evt) {
+        console.error('error reading file');
+      };
+      reader.readAsBinaryString(file);
+    };
     signRequest = function(xhr, xhrOptions) {
       var credentials, nonce, paramsBody, ref, signature, url;
       credentials = sbAdmin.auth.getCredentials();
@@ -16,7 +30,10 @@
       }
       nonce = newNonce();
       if ((xhrOptions.data != null) && xhrOptions.data !== 'null') {
-        if (typeof xhrOptions.data === 'object') {
+        if (xhrOptions.data instanceof FormData && (xhrOptions.paramsToSign != null)) {
+          console.log("xhrOptions.paramsToSign=", xhrOptions.paramsToSign);
+          paramsBody = window.JSON.stringify(xhrOptions.paramsToSign);
+        } else if (typeof xhrOptions.data === 'object') {
           paramsBody = window.JSON.stringify(xhrOptions.data);
         } else {
           paramsBody = xhrOptions.data;
@@ -98,6 +115,34 @@
     api.getAllPlansData = function() {
       return api.send('GET', "plans");
     };
+    api.uploadImage = function(files) {
+      var additionalOpts, deferred, formData, rawFormData;
+      deferred = m.deferred();
+      formData = new FormData;
+      rawFormData = [];
+      if (files.length > 1) {
+        console.error('only 1 image may be uploaded');
+        return;
+      }
+      additionalOpts = {
+        serialize: function(value) {
+          return value;
+        }
+      };
+      formData.append('image', files[0]);
+      buildFileHash(files[0], function(fileHash) {
+        formData.append('filehash', fileHash);
+        additionalOpts.paramsToSign = {
+          filehash: fileHash
+        };
+        return api.send('POST', "images", formData, additionalOpts).then(function(apiResponse) {
+          deferred.resolve(apiResponse);
+        }, function(errorResponse) {
+          deferred.reject(errorResponse);
+        });
+      });
+      return deferred.promise;
+    };
     api.send = function(method, apiPathSuffix, params, additionalOpts) {
       var k, opts, path, v;
       if (params == null) {
@@ -168,6 +213,33 @@
     return auth;
   })();
 
+  sbAdmin.botutils = (function() {
+    var botutils;
+    botutils = {};
+    botutils.overlayOpts = function() {
+      var opts;
+      opts = [];
+      opts = [
+        {
+          k: '- No Overlay -',
+          v: ''
+        }, {
+          k: 'Swapbot Blue',
+          v: 'gradient.png'
+        }
+      ];
+      return opts;
+    };
+    botutils.overlayDesc = function(value) {
+      switch (value) {
+        case 'gradient.png':
+          return 'Swapbot Blue';
+      }
+      return 'No Overlay';
+    };
+    return botutils;
+  })();
+
   sbAdmin.currencyutils = (function() {
     var SATOSHI, currencyutils;
     currencyutils = {};
@@ -185,6 +257,188 @@
       return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
     };
     return currencyutils;
+  })();
+
+  sbAdmin.fileHelper = (function() {
+    var dragdrop, fileHelper;
+    fileHelper = {};
+    fileHelper.mImageDisplay = function(label, attributes, imageDetailsProp, imageStyle) {
+      var existingImageDetails, imageDisplayOrNone;
+      existingImageDetails = imageDetailsProp();
+      if ((existingImageDetails != null) && (existingImageDetails[imageStyle + 'Url'] != null)) {
+        imageDisplayOrNone = m('div.imageDisplay', attributes, [
+          m('img', {
+            src: existingImageDetails[imageStyle + 'Url']
+          })
+        ]);
+      } else {
+        imageDisplayOrNone = m('div.imageDisplayEmpty', attributes, [
+          m('div', {
+            "class": 'imageDisplayEmptyLabel'
+          }, ['No Image'])
+        ]);
+      }
+      return m("div", {
+        "class": "form-group"
+      }, [
+        m("label", {
+          "for": attributes.id,
+          "class": 'control-label'
+        }, label), imageDisplayOrNone
+      ]);
+    };
+    dragdrop = function(element, options) {
+      var activate, deactivate, update;
+      options = options || {};
+      activate = function(e) {
+        e.preventDefault();
+        element.className = 'uploader upload-active';
+      };
+      deactivate = function() {
+        return element.className = 'uploader';
+      };
+      update = function(e) {
+        e.preventDefault();
+        if (typeof options.onchange === 'function') {
+          options.onchange((e.dataTransfer || e.target).files);
+        }
+      };
+      element.addEventListener('dragover', activate);
+      element.addEventListener('dragleave', deactivate);
+      element.addEventListener('dragend', deactivate);
+      element.addEventListener('drop', deactivate);
+      element.addEventListener('drop', update);
+      window.addEventListener('blur', deactivate);
+    };
+    fileHelper.mImageUploadAndDisplay = function(label, attributes, imageIdProp, imageDetailsProp, imageStyle) {
+      var existingImageDetails, fileUploadDomEl, fileUploadEl, imageDisplayOrUpload, onChange, onFileChange, removeImgFn, tryAgainFn;
+      onChange = function(files) {
+        console.log("onChange!  files=", files);
+        imageDetailsProp({
+          'uploading': true
+        });
+        sbAdmin.api.uploadImage(files).then(function(apiResponse) {
+          console.log("apiResponse=", apiResponse);
+          imageIdProp(apiResponse.id);
+          return imageDetailsProp(apiResponse.imageDetails);
+        }, function(apiError) {
+          console.log("error: ", apiError);
+          imageDetailsProp({
+            'error': "Unable to upload this file. Please check the filesize."
+          });
+        });
+        m.redraw(true);
+      };
+      attributes.config = function(element, isInitialized) {
+        if (!isInitialized) {
+          dragdrop(element, {
+            onchange: onChange
+          });
+        }
+      };
+      fileUploadDomEl = null;
+      attributes.onclick = function(e) {
+        console.log("click! fileUploadDomEl=", fileUploadDomEl);
+        if (fileUploadDomEl != null) {
+          e.stopPropagation();
+          fileUploadDomEl.click();
+        }
+      };
+      onFileChange = function(e) {
+        var files;
+        console.log("onFileChange fileUploadDomEl=", fileUploadDomEl);
+        if (fileUploadDomEl != null) {
+          files = fileUploadDomEl.files;
+          console.log("files=", files);
+          onChange(files);
+          e.stopPropagation();
+        }
+      };
+      removeImgFn = function(e) {
+        imageIdProp(null);
+        imageDetailsProp(null);
+        e.preventDefault();
+      };
+      tryAgainFn = function(e) {
+        imageIdProp(null);
+        imageDetailsProp(null);
+        e.preventDefault();
+        e.stopPropagation();
+      };
+      fileUploadEl = m('input', {
+        type: 'file',
+        onchange: onFileChange,
+        style: {
+          display: 'none'
+        },
+        config: function(domEl, isInitialized) {
+          fileUploadDomEl = domEl;
+        }
+      });
+      existingImageDetails = imageDetailsProp();
+      if ((existingImageDetails != null) && (existingImageDetails[imageStyle + 'Url'] != null)) {
+        imageDisplayOrUpload = m('div.imageDisplay', attributes, [
+          m('img', {
+            src: existingImageDetails[imageStyle + 'Url']
+          }), m("a", {
+            "class": "remove-link",
+            href: '#remove',
+            onclick: removeImgFn
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-remove-circle",
+              title: "Remove Image"
+            }, ''), " Remove Image"
+          ])
+        ]);
+      } else if ((existingImageDetails != null) && (existingImageDetails['uploading'] != null)) {
+        imageDisplayOrUpload = m('div.uploadingDisplay', attributes, [
+          m('span', {
+            "class": 'fileUploadingLabel'
+          }, ['Uploading Image'])
+        ]);
+      } else if ((existingImageDetails != null) && (existingImageDetails['error'] != null)) {
+        imageDisplayOrUpload = m('div.uploadingDisplay', attributes, [
+          m('span', {
+            "class": 'error'
+          }, existingImageDetails['error']), m('br'), m("a", {
+            "class": "clear-error",
+            href: '#try-again',
+            onclick: tryAgainFn
+          }, ['Try Again'])
+        ]);
+      } else {
+        imageDisplayOrUpload = m('div.uploader', attributes, [
+          m('span', {
+            "class": 'fileUploadLabel'
+          }, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)']), fileUploadEl
+        ]);
+      }
+      return m("div", {
+        "class": "form-group"
+      }, [
+        m("label", {
+          "for": attributes.id,
+          "class": 'control-label'
+        }, label), imageDisplayOrUpload
+      ]);
+    };
+    fileHelper.submit = function(apiCallFn, apiCallArgs, errorsProp, fileHelperStatusProp) {
+      if (fileHelperStatusProp() === 'submitting') {
+        return;
+      }
+      errorsProp([]);
+      fileHelperStatusProp('submitting');
+      return apiCallFn.apply(null, apiCallArgs).then(function(apiResponse) {
+        fileHelperStatusProp('submitted');
+        return apiResponse;
+      }, function(error) {
+        fileHelperStatusProp('active');
+        errorsProp(error.errors);
+        return m.deferred().reject(error).promise;
+      });
+    };
+    return fileHelper;
   })();
 
   sbAdmin.formGroup = (function() {
@@ -1329,10 +1583,16 @@
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
+        vm.backgroundOverlay = m.prop('gradient.png');
+        vm.backgroundImageDetails = m.prop('');
+        vm.backgroundImageId = m.prop('');
+        vm.logoImageDetails = m.prop('');
+        vm.logoImageId = m.prop('');
         id = m.route.param('id');
         vm.isNew = id === 'new';
         if (!vm.isNew) {
           sbAdmin.api.getBot(id).then(function(botData) {
+            var ref, ref1;
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
@@ -1343,6 +1603,11 @@
             vm.confirmationsRequired(botData.confirmationsRequired || "2");
             vm.incomeRulesGroup.unserialize(botData.incomeRules);
             vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
+            vm.backgroundOverlay(botData.backgroundOverlay);
+            vm.backgroundImageDetails(botData.backgroundImageDetails);
+            vm.backgroundImageId((ref = botData.backgroundImageDetails) != null ? ref.id : void 0);
+            vm.logoImageDetails(botData.logoImageDetails);
+            vm.logoImageId((ref1 = botData.logoImageDetails) != null ? ref1.id : void 0);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -1378,7 +1643,10 @@
             returnFee: vm.returnFee() + "",
             incomeRules: vm.incomeRulesGroup.serialize(),
             blacklistAddresses: vm.blacklistAddressesGroup.serialize(),
-            confirmationsRequired: vm.confirmationsRequired() + ""
+            confirmationsRequired: vm.confirmationsRequired() + "",
+            backgroundImageId: vm.backgroundImageId() || '',
+            backgroundOverlay: vm.backgroundOverlay(),
+            logoImageId: vm.logoImageId() || ''
           };
           if (vm.resourceId().length > 0) {
             apiCall = sbAdmin.api.updateBot;
@@ -1443,7 +1711,35 @@
                 id: 'description',
                 'placeholder': "Bot Description",
                 required: true
-              }, vm.description), m("hr"), m("h4", "Settings"), m("div", {
+              }, vm.description), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-8"
+                }, [
+                  sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Background Image", {
+                    id: 'BGImage'
+                  }, vm.backgroundImageId, vm.backgroundImageDetails, 'medium')
+                ]), m("div", {
+                  "class": "col-md-4"
+                }, [
+                  sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Logo Image", {
+                    id: 'LogoImage'
+                  }, vm.logoImageId, vm.logoImageDetails, 'thumb')
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-8"
+                }, [
+                  sbAdmin.form.mFormField("Background Overlay", {
+                    id: "background_overlay",
+                    type: 'select',
+                    options: sbAdmin.botutils.overlayOpts()
+                  }, vm.backgroundOverlay)
+                ])
+              ]), m("hr"), m("h4", "Settings"), m("div", {
                 "class": "spacer1"
               }), m("div", {
                 "class": "row"
@@ -1989,6 +2285,9 @@
         vm.paymentBalances = m.prop('');
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
+        vm.backgroundImageDetails = m.prop('');
+        vm.logoImageDetails = m.prop('');
+        vm.backgroundOverlay = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           vm.resourceId(botData.id);
@@ -2006,6 +2305,9 @@
           vm.returnFee(botData.returnFee);
           vm.incomeRulesGroup.unserialize(botData.incomeRules);
           vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
+          vm.backgroundImageDetails(botData.backgroundImageDetails);
+          vm.logoImageDetails(botData.logoImageDetails);
+          vm.backgroundOverlay(botData.backgroundOverlay);
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
@@ -2113,6 +2415,32 @@
                   sbAdmin.form.mValueDisplay("Bot Description", {
                     id: 'description'
                   }, m.trust(vm.description()))
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-7"
+                }, [
+                  sbAdmin.fileHelper.mImageDisplay("Custom Background Image", {
+                    id: 'BGImage'
+                  }, vm.backgroundImageDetails, 'medium')
+                ]), m("div", {
+                  "class": "col-md-5"
+                }, [
+                  sbAdmin.fileHelper.mImageDisplay("Custom Logo Image", {
+                    id: 'LogoImage'
+                  }, vm.logoImageDetails, 'thumb')
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-7"
+                }, [
+                  sbAdmin.form.mValueDisplay("Background Overlay", {
+                    id: 'BackgroundOverlay'
+                  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlay()))
                 ])
               ]), m("div", {
                 "class": "row"

@@ -13,8 +13,16 @@
         <div class="content-width">
         </div>
     </div>
-    <div id="top-background">
-        <div></div>
+    <?php
+        $bg_image = ($bot['backgroundImageDetails'] AND isset($bot['backgroundImageDetails']['originalUrl'])) ? $bot['backgroundImageDetails']['originalUrl'] : '';
+        $has_bg_image = !!strlen($bg_image); 
+        $bg_overlay_image = ($bot['background_overlay'] AND isset($bot['background_overlay'])) ? $bot['background_overlay'] : '';
+        if (!$has_bg_image) { $bg_overlay_image = 'gradient.png'; }
+        $has_bg_overlay = !!strlen($bg_overlay_image); 
+    ?>
+    <!-- {{ $bg_overlay_image }} -->
+    <div id="top-background" style="{{ $has_bg_image ? 'background-image: url('.$bg_image.');' : '' }}">
+        <div style="background-image: {{ $has_bg_overlay ? 'url(/images/background/'.$bg_overlay_image.')' : 'none' }};"></div>
     </div>
     <div id="container" class="content-width">
         <!-- HEAD SECTION -->
@@ -45,6 +53,12 @@
                 </div>
                 <div class="clearfix"></div>
             </div>
+            <?php $logo_image = ($bot['logoImageDetails'] AND isset($bot['logoImageDetails']['thumbUrl'])) ? $bot['logoImageDetails']['thumbUrl'] : ''; $has_logo_image = !!strlen($logo_image); ?>
+            @if ($has_logo_image)
+            <div id="details-logo">
+                <span><img src="{{ $logo_image }}" class="center"></span>
+            </div>
+            @endif
         </div>
         <!-- CONTENT SECTION -->
         <div id="content" class="grid-container">

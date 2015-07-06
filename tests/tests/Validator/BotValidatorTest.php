@@ -198,7 +198,7 @@ class BotValidatorTest extends TestCase {
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
 
-        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
     }
 
     public function testBotBlankIncomeRulesValidation() {
@@ -259,7 +259,7 @@ class BotValidatorTest extends TestCase {
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
 
-        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
     }
 
 
@@ -323,7 +323,7 @@ class BotValidatorTest extends TestCase {
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\UpdateBotValidator');
 
-        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator);
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
     }
 
     ////////////////////////////////////////////////////////////////////////

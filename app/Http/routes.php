@@ -31,6 +31,14 @@ $router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap'
 $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptionController@unsubscribe');
 
 
+
+// $router->get('/uploadtest', 'UploadTestController@index');
+// $router->post('/uploadtest', 'UploadTestController@post');
+// $router->get('/uploadshow', 'UploadTestController@show');
+// $router->get('/uploaddelete/{id}', 'UploadTestController@delete');
+
+
+
 ////////////////////////////////////////////////////////////////////////
 // Public API
 
@@ -84,6 +92,11 @@ $router->resource('api/v1/settings', 'API\Settings\SettingsController', ['except
 $router->get('api/v1/payments/{botuuid}/all', 'API\Payments\PaymentsController@index');
 $router->get('api/v1/payments/{botuuid}/balances', 'API\Payments\PaymentsController@balances');
 
+// Image API
+$router->post('api/v1/images', 'API\Image\ImageController@store');
+$router->put('api/v1/images', 'API\Image\ImageController@store');
+$router->get('api/v1/images', 'API\Image\ImageController@show');
+
 
 // webhook notifications
-Route::post('/_xchain_client_receive', 'WebhookController@receive');
+$router->post('/_xchain_client_receive', 'WebhookController@receive');

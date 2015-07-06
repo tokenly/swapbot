@@ -11,13 +11,18 @@ class ValidatorHelper  {
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
-    public function runTests($test_specs, $validator) {
+    public function runTests($test_specs, $validator, $extra_validator_args=null) {
         // run all tests
         foreach($test_specs as $test_spec_offset => $test_spec) {
             $was_valid = null;
             $errors_string = null;
             try {
-                $validator->validate($test_spec['vars']);
+
+                // call $validator->validate($test_spec['vars'], ...)
+                $args = [$test_spec['vars']];
+                if ($extra_validator_args) { $args = array_merge($args, $extra_validator_args); }
+                call_user_func_array([$validator, 'validate'], $args);
+
                 $was_valid = true;
                 $errors_string = false;
             } catch (ValidationException $e) {

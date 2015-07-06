@@ -22,7 +22,9 @@
 		"tokenly/consul-health-daemon": "dev-master",
 		"tokenly/quotebot-client": "dev-master",
 		"tokenly/laravel-record-lock": "dev-master",
-		"graham-campbell/markdown": "~3.2"
+		"graham-campbell/markdown": "~3.2",
+		"codesleeve/laravel-stapler": "dev-master",
+		"aws/aws-sdk-php": "^2.0.0"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",

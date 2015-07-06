@@ -23,8 +23,20 @@ class UserHelper
         return $user;
     }
 
-    public function newSampleUser($override_vars=[]) {
-        return $this->user_repository->create(array_merge($this->sampleVars(), $override_vars));
+    public function newRandomUser($override_vars=[]) {
+        return $this->newSampleUser($override_vars=[], true);
+    }
+
+    public function newSampleUser($override_vars=[], $randomize=false) {
+        $create_vars = array_merge($this->sampleVars(), $override_vars);
+
+        if ($randomize) {
+            $create_vars['email'] = $this->randomEmail();
+            $create_vars['username'] = $this->usernameFromEmail($create_vars['email']);
+            $create_vars['apitoken'] = $this->testingTokenFromEmail($create_vars['email']);
+        }
+
+        return $this->user_repository->create($create_vars);
     }
 
     public function sampleVars($override_vars=[]) {

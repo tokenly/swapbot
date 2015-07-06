@@ -189,6 +189,11 @@ do ()->
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
 
+            vm.backgroundOverlay      = m.prop('gradient.png')
+            vm.backgroundImageDetails = m.prop('')
+            vm.backgroundImageId      = m.prop('')
+            vm.logoImageDetails       = m.prop('')
+            vm.logoImageId            = m.prop('')
             # if there is an id, then load it from the api
             id = m.route.param('id')
             vm.isNew = (id == 'new')
@@ -208,6 +213,13 @@ do ()->
 
                         vm.incomeRulesGroup.unserialize(botData.incomeRules)
                         vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
+
+                        vm.backgroundOverlay(botData.backgroundOverlay)
+                        vm.backgroundImageDetails(botData.backgroundImageDetails)
+                        vm.backgroundImageId(botData.backgroundImageDetails?.id)
+
+                        vm.logoImageDetails(botData.logoImageDetails)
+                        vm.logoImageId(botData.logoImageDetails?.id)
 
                         return
                     , (errorResponse)->
@@ -241,6 +253,7 @@ do ()->
                     vm.swaps(newSwaps)
                     return
 
+            
 
             vm.save = (e)->
                 e.preventDefault()
@@ -255,6 +268,9 @@ do ()->
                     incomeRules: vm.incomeRulesGroup.serialize()
                     blacklistAddresses: vm.blacklistAddressesGroup.serialize()
                     confirmationsRequired: vm.confirmationsRequired() + ""
+                    backgroundImageId: vm.backgroundImageId() or ''
+                    backgroundOverlay: vm.backgroundOverlay()
+                    logoImageId: vm.logoImageId() or ''
                 }
 
                 if vm.resourceId().length > 0
@@ -314,6 +330,20 @@ do ()->
                         sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, }, vm.name),
                         sbAdmin.form.mFormField("Bot Description", {type: 'textarea', id: 'description', 'placeholder': "Bot Description", required: true, }, vm.description),
 
+                        m("div", { class: "row"}, [
+                            m("div", {class: "col-md-8"}, [
+                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Background Image", {id: 'BGImage'}, vm.backgroundImageId, vm.backgroundImageDetails, 'medium'),
+                            ]),
+                            m("div", {class: "col-md-4"}, [
+                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Logo Image", {id: 'LogoImage'}, vm.logoImageId, vm.logoImageDetails, 'thumb'),
+                            ]),
+                        ]),
+
+                        m("div", { class: "row"}, [
+                            m("div", {class: "col-md-8"}, [
+                                sbAdmin.form.mFormField("Background Overlay", {id: "background_overlay", type: 'select', options: sbAdmin.botutils.overlayOpts()}, vm.backgroundOverlay)
+                            ]),
+                        ]),
 
                         m("hr"),
 

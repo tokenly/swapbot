@@ -49,6 +49,7 @@ class BotController extends APIController {
     public function store(Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
         $attributes = $request->all();
+        $user = $auth->getUser();
 
         // create a UUID
         $uuid = Uuid::uuid4()->toString();
@@ -60,7 +61,7 @@ class BotController extends APIController {
         // issue a create bot command
         try {
             // create a bot
-            $this->dispatch(new CreateBot($attributes));
+            $this->dispatch(new CreateBot($attributes, $user));
 
             // activate the bot
             $bot = $repository->findByUuid($uuid);
@@ -111,14 +112,15 @@ class BotController extends APIController {
      */
     public function update($id, Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
-        $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
+        $user = $auth->getUser();
+        $resource = $api_helper->requireResourceOwnedByUser($id, $user, $repository);
 
         // get the update attributes
         $attributes = $request->all();
 
         // issue an update bot command
         try {
-            $this->dispatch(new UpdateBot($resource, $attributes));
+            $this->dispatch(new UpdateBot($resource, $attributes, $user));
         } catch (ValidationException $e) {
             // handle validation errors
             throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));

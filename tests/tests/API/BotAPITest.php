@@ -23,7 +23,7 @@ class BotAPITest extends TestCase {
         $tester->testIndex();
         
         // test create
-        $bot_helper = $this->app->make('BotHelper');
+        $bot_helper = app('BotHelper');
         $tester->testCreate($bot_helper->sampleBotVarsForAPI());
 
         // test show
@@ -41,10 +41,10 @@ class BotAPITest extends TestCase {
 
     public function testBotBelongsToUser() {
         // create a sample bot with the standard user
-        $new_bot = $this->app->make('BotHelper')->newSampleBot();
+        $new_bot = app('BotHelper')->newSampleBot();
 
         // now create a separate user
-        $another_user = $this->app->make('UserHelper')->getSampleUser('user2@tokenly.co');
+        $another_user = app('UserHelper')->getSampleUser('user2@tokenly.co');
 
         // now call the show method as the other user
         $tester = $this->setupAPITester();
@@ -68,13 +68,65 @@ class BotAPITest extends TestCase {
         PHPUnit::assertEquals('TOKENLY', $actual_response['monthly001']['monthlyRates']['tokenly']['asset']);
     }
 
+    public function testBotImageAPI() {
+        $mock = app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
+
+        $tester = $this->setupAPITester();
+
+        $image_helper = app('ImageHelper');
+        $image_helper->bindMockImageRepository();
+        $image = $image_helper->newSampleImage(app('UserHelper')->getSampleUser());
+
+        $bot_helper = app('BotHelper');
+        $bot_vars = $bot_helper->sampleBotVarsForAPI();
+        $bot_vars['backgroundImageId'] = $image['uuid'];
+
+        $actual_response = $tester->callAPIAndValidateResponse('POST', '/api/v1/bots', $bot_vars);
+
+        PHPUnit::assertEquals($image['uuid'], $actual_response['backgroundImageDetails']['id']);
+        PHPUnit::assertEquals('foo.jpg', $actual_response['backgroundImageDetails']['originalFilename']);
+    }
+
+    public function testBotUpdateImageAPI() {
+        $mock = app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
+
+        $tester = $this->setupAPITester();
+        $image_helper = app('ImageHelper');
+        $image_helper->bindMockImageRepository();
+        $bot_helper = app('BotHelper');
+
+
+        $image = $image_helper->newSampleImage(app('UserHelper')->getSampleUser());
+
+        // add a bot and associate the image
+        $bot_vars = $bot_helper->sampleBotVarsForAPI();
+        $bot_vars['backgroundImageId'] = $image['uuid'];
+        $actual_response = $tester->callAPIAndValidateResponse('POST', '/api/v1/bots', $bot_vars);
+        $bot_uuid = $actual_response['id'];
+
+
+        // now a bot and associate the image
+        $image_2 = $image_helper->newSampleImage(app('UserHelper')->getSampleUser());
+        $bot_update_vars = ['backgroundImageId' => $image_2['uuid']];
+        $tester->callAPIAndValidateResponse('PUT', '/api/v1/bots/'.$bot_uuid, $bot_update_vars, 204);
+
+        // reload the bot
+        $bot_repository = app('Swapbot\Repositories\BotRepository');
+        $reloaded_bot = $bot_repository->findByUuid($bot_uuid);
+        PHPUnit::assertEquals($image_2['id'], $reloaded_bot['background_image_id']);
+
+        // there should only be one image left in the repository
+        $all_images = iterator_to_array(app('Swapbot\Repositories\Mock\MockImageRepository')->findAll());
+        PHPUnit::assertCount(1, $all_images);
+    }
+
     public function setupAPITester() {
-        $bot_helper = $this->app->make('BotHelper');
-        $tester = $this->app->make('APITestHelper');
+        $bot_helper = app('BotHelper');
+        $tester = app('APITestHelper');
         $tester
             ->setURLBase('/api/v1/bots')
-            ->useUserHelper($this->app->make('UserHelper'))
-            ->useRepository($this->app->make('Swapbot\Repositories\BotRepository'))
+            ->useUserHelper(app('UserHelper'))
+            ->useRepository(app('Swapbot\Repositories\BotRepository'))
             ->createModelWith(function($user) use ($bot_helper) {
                 return $bot_helper->newSampleBot($user);
             });

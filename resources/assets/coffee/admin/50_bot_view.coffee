@@ -253,6 +253,10 @@ do ()->
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
 
+            vm.backgroundImageDetails = m.prop('')
+            vm.logoImageDetails       = m.prop('')
+            vm.backgroundOverlay      = m.prop('')
+
             # if there is an id, then load it from the api
             id = m.route.param('id')
             # load the bot info from the api
@@ -277,6 +281,10 @@ do ()->
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
+
+                    vm.backgroundImageDetails(botData.backgroundImageDetails)
+                    vm.logoImageDetails(botData.logoImageDetails)
+                    vm.backgroundOverlay(botData.backgroundOverlay)
 
                     return
                 , (errorResponse)->
@@ -399,6 +407,24 @@ do ()->
                                     sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, m.trust(vm.description())),
                                 ]),
                             ]),
+
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-7"}, [
+                                    sbAdmin.fileHelper.mImageDisplay("Custom Background Image", {id: 'BGImage'}, vm.backgroundImageDetails, 'medium'),
+                                ]),
+                                m("div", {class: "col-md-5"}, [
+                                    sbAdmin.fileHelper.mImageDisplay("Custom Logo Image", {id: 'LogoImage'}, vm.logoImageDetails, 'thumb'),
+                                ]),
+                            ]),
+
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-7"}, [
+                                    
+                                    sbAdmin.form.mValueDisplay("Background Overlay", {id: 'BackgroundOverlay',  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlay())),
+                                ]),
+                            ]),
+
+
 
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-12"}, [

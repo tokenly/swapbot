@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "mithril": "0.1.29",
+    "mithril": "~0.2.0",
     "cryptojslib": "3.1.2",
     "moment": "~2.10.2",
     "accounting.js": "https://github.com/openexchangerates/accounting.js.git#9b73d760f20fb5bd87a570f7b7ecf9af9cf5b76c",

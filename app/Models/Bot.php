@@ -12,20 +12,24 @@ use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStatusDetails;
 use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
+use Swapbot\Models\Image;
+use Swapbot\Repositories\ImageRepository;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
-    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay', 'logo_image_details', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
 
     protected $dates = ['balances_updated_at'];
 
-    protected $state_machine        = null;
-    protected $payment_plan_details = null;
-    protected $payment_plan_object  = null;
+    protected $state_machine           = null;
+    protected $payment_plan_details    = null;
+    protected $payment_plan_object     = null;
+    protected $background_image_object = null;
+    protected $logo_image_object       = null;
 
     public function setSwapsAttribute($swaps) { $this->attributes['swaps'] = json_encode($this->serializeSwaps($swaps)); }
     public function getSwapsAttribute() { return $this->unSerializeSwaps(json_decode($this->attributes['swaps'], true)); }
@@ -99,6 +103,57 @@ class Bot extends APIModel {
 
     public function user() {
         return $this->belongsTo('Swapbot\Models\User');
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Images
+
+    public function getBackgroundImage() {
+        if (!isset($this->background_image_object)) {
+            $this->background_image_object = false;
+
+            $image_id = $this['background_image_id'];
+            if ($image_id) {
+                $this->background_image_object = app('Swapbot\Repositories\ImageRepository')->findById($image_id);
+            }
+        }
+
+        return $this->background_image_object;
+    }
+
+    public function getBackgroundImageDetailsAttribute() {
+        $image = $this->getBackgroundImage();
+        if ($image) {
+            return $image->getImageDetailsAttribute();
+        }
+
+        // none
+        return [];
+    }
+
+
+    public function getLogoImage() {
+        if (!isset($this->logo_image_object)) {
+            $this->logo_image_object = false;
+
+            $image_id = $this['logo_image_id'];
+            if ($image_id) {
+                $this->logo_image_object = app('Swapbot\Repositories\ImageRepository')->findById($image_id);
+            }
+        }
+
+        return $this->logo_image_object;
+    }
+
+    public function getLogoImageDetailsAttribute() {
+        $image = $this->getLogoImage();
+        if ($image) {
+            return $image->getImageDetailsAttribute();
+        }
+
+        // none
+        return [];
     }
 
 

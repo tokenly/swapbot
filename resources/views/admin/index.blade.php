@@ -31,6 +31,7 @@
 
     <!-- deps -->
     <script src="/bower_components/cryptojslib/rollups/sha1.js"></script>
+    <script src="/bower_components/cryptojslib/rollups/sha256.js"></script>
     <script src="/bower_components/cryptojslib/rollups/hmac-sha256.js"></script>
     <script src="/bower_components/cryptojslib/components/enc-base64-min.js"></script>
     <script src="/bower_components/moment/min/moment.min.js"></script>

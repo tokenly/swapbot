@@ -5,11 +5,15 @@ namespace Swapbot\Http\Requests\Bot\Transformers;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\SwapConfig;
+use Swapbot\Repositories\ImageRepository;
 
 class BotTransformer {
 
+    public function __construct(ImageRepository $image_repository) {
+        $this->image_repository = $image_repository;
+    }
+
     public function santizeAttributes($attributes, $rules) {
-        // Log::debug('$attributes'.json_encode($attributes, 192));
 
         $out = [];
         foreach (array_keys($rules) as $field_name) {
@@ -37,6 +41,15 @@ class BotTransformer {
         // santize incomeRules
         if (isset($attributes['incomeRules'])) {
             $out['income_rules'] = $this->sanitizeIncomeRules($attributes['incomeRules']);
+        }
+
+        // lookup background image id
+        if (isset($attributes['backgroundImageId'])) {
+            $out['background_image_id'] = $this->sanitizeImageID($attributes['backgroundImageId']);
+        }
+        // lookup logo image id
+        if (isset($attributes['logoImageId'])) {
+            $out['logo_image_id'] = $this->sanitizeImageID($attributes['logoImageId']);
         }
 
         return $out;
@@ -101,6 +114,26 @@ class BotTransformer {
         $config = IncomeRuleConfig::createFromSerialized($income_rule);
         if ($config->isEmpty()) { return null; }
         return $config;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Image ID
+
+    protected function sanitizeImageID($image_uuid) {
+        Log::debug("sanitizeImageID \$image_uuid=$image_uuid");
+        if (strlen($image_uuid)) {
+            $image = $this->image_repository->findByUuid($image_uuid);
+            // Log::debug("sanitizeImageID findByUuid \$image=".json_encode($image, 192));
+            if ($image) {
+                return $image['id'];
+            }
+
+            // return the uuid which will fail validation
+            return $image_uuid;
+        }
+
+        return null;
     }
 
 

@@ -35,7 +35,19 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase {
 
     public function teardownDb()
     {
-        $this->app['Illuminate\Contracts\Console\Kernel']->call('migrate:reset');
+        // $this->app['Illuminate\Contracts\Console\Kernel']->call('migrate:reset');
+
+        \Swapbot\Models\Bot::truncate();
+        \Swapbot\Models\BotEvent::truncate();
+        \Swapbot\Models\BotLeaseEntry::truncate();
+        \Swapbot\Models\BotLedgerEntry::truncate();
+        \Swapbot\Models\Customer::truncate();
+        \Swapbot\Models\Image::truncate();
+        \Swapbot\Models\NotificationReceipt::truncate();
+        \Swapbot\Models\Setting::truncate();
+        \Swapbot\Models\Swap::truncate();
+        \Swapbot\Models\Transaction::truncate();
+        \Swapbot\Models\User::truncate();
     }
 
 }

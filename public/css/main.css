@@ -638,7 +638,8 @@ body {
   margin-bottom: 90px;
   margin-left: 60px;
 }
-#details #details-avatar {
+#details #details-avatar,
+#details #details-logo {
   width: 110px;
   height: 110px;
   margin: 70px;
@@ -649,11 +650,16 @@ body {
   border: 2px solid black;
   background: #fefefe;
 }
-#details #details-avatar img {
+#details #details-avatar img,
+#details #details-logo img {
   width: 90%;
   height: 90%;
   margin-left: 5%;
   margin-top: 5%;
+}
+#details #details-logo {
+  float: right;
+  border-radius: 0;
 }
 #content {
   background-color: #fefefe;
@@ -909,7 +915,8 @@ button {
     margin: 40px;
     margin-bottom: 54px;
   }
-  #details #details-avatar {
+  #details #details-avatar,
+  #details #details-logo {
     width: 110px;
     height: 110px;
     margin: 40px;
@@ -943,7 +950,8 @@ button {
     margin: 26px;
     margin-bottom: 48px;
   }
-  #details #details-avatar {
+  #details #details-avatar,
+  #details #details-logo {
     display: none;
   }
   #content {
