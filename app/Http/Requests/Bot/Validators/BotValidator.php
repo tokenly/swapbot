@@ -7,6 +7,9 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Factory;
 use LinusU\Bitcoin\AddressValidator;
+use Sabberworm\CSS\Parser as CSSParser;
+use Sabberworm\CSS\Settings as CSSSettings;
+use Sabberworm\CSS\Value\Color as CSSColor;
 use Swapbot\Models\User;
 use Swapbot\Repositories\ImageRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
@@ -53,6 +56,8 @@ class BotValidator {
             // validate images
             $this->validateImageID('background', $user, isset($posted_data['background_image_id']) ? $posted_data['background_image_id'] : null, $validator);
             $this->validateImageID('logo', $user, isset($posted_data['logo_image_id']) ? $posted_data['logo_image_id'] : null, $validator);
+            // validate overlay gradient settings
+            $this->validateOverlaySettings(isset($posted_data['background_overlay_settings']) ? $posted_data['background_overlay_settings'] : null, $validator);
         });
         return $validator;
     }
@@ -185,7 +190,54 @@ class BotValidator {
         }
     }
 
+    protected function validateOverlaySettings($overlay_settings, $validator) {
+        if (isset($overlay_settings['start']) OR isset($overlay_settings['start'])) {
+            $this->validateGradients([
+                'start' => isset($overlay_settings['start']) ? $overlay_settings['start'] : null,
+                'end'   => isset($overlay_settings['end'])   ? $overlay_settings['end']   : null,
+            ], $validator);
+        }
+        return;
+    }
 
+    protected function validateGradients($settings, $validator) {
+        $any_errors_found = false;
+
+        $css = '';
+        foreach($settings as $name => $gradient) {
+            if (!strlen($gradient)) {
+                $validator->errors()->add('gradient_'.$name, "This gradient was empty.");
+                $any_errors_found = true;
+                continue;
+            }
+
+            $sanitized = filter_var($gradient, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH); // rgba(0,0,0,0.15)
+            $sanitized = preg_replace('![^a-z0-9,.()#]!', '', $sanitized);
+            if ($sanitized !== $gradient) {
+                $validator->errors()->add('gradient_'.$name, "This gradient definition contained illegal characters.");
+                $any_errors_found = true;
+                continue;
+            }
+
+            $css .= '.'.$name.' { color: '.$gradient.'; } ';
+        }
+        if ($any_errors_found) { return; }
+
+        $css_parser = new CSSParser($css, CSSSettings::create()->beStrict());
+        $parsed_css = $css_parser->parse();
+        foreach ($parsed_css->getAllRuleSets() as $rule_set) {
+            $rules = $rule_set->getRulesAssoc();
+            $color_rule_value = $rules['color']->getValue();
+
+            if (!($color_rule_value instanceof CSSColor)) {
+                // this is not a valid color
+                $validator->errors()->add('gradient_'.$name, "This gradient definition was not a valid color.");
+                $any_errors_found = true;
+                continue;
+            }
+        }
+
+    }
     
 
     protected function initValidatorRules() {

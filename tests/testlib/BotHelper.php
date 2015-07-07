@@ -23,36 +23,36 @@ class BotHelper  {
 
     public function sampleBotVars() {
         return [
-            'name'                       => 'Sample Bot One',
-            'description'                => 'The bot description goes here.',
-            'active'                     => false,
-            'hash'                       => '',
-            'address'                    => null,
-            'public_address_id'          => null,
-            'public_receive_monitor_id'  => null,
-            'public_send_monitor_id'     => null,
+            'name'                        => 'Sample Bot One',
+            'description'                 => 'The bot description goes here.',
+            'active'                      => false,
+            'hash'                        => '',
+            'address'                     => null,
+            'public_address_id'           => null,
+            'public_receive_monitor_id'   => null,
+            'public_send_monitor_id'      => null,
 
-            'payment_plan'               => 'monthly001',
-            'payment_address'            => null,
-            'payment_address_id'         => null,
-            'payment_receive_monitor_id' => null,
-            'payment_send_monitor_id'    => null,
+            'payment_plan'                => 'monthly001',
+            'payment_address'             => null,
+            'payment_address_id'          => null,
+            'payment_receive_monitor_id'  => null,
+            'payment_send_monitor_id'     => null,
 
-            'balances'                   => null,
+            'balances'                    => null,
 
-            'balances_updated_at'        => null,
-            'blacklist_addresses'        => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
-            'return_fee'                 => 0.0001,
-            'confirmations_required'     => 2,
-            'state'                      => BotState::BRAND_NEW,
+            'balances_updated_at'         => null,
+            'blacklist_addresses'         => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
+            'return_fee'                  => 0.0001,
+            'confirmations_required'      => 2,
+            'state'                       => BotState::BRAND_NEW,
 
-            'status_details'             => null,
+            'status_details'              => null,
 
-            'background_image_id'        => null,
-            'logo_image_id'              => null,
-            'background_overlay'         => 'gradient.png',
+            'background_image_id'         => null,
+            'logo_image_id'               => null,
+            'background_overlay_settings' => '',
 
-            'swaps'                      => [
+            'swaps'                       => [
                 [
                     'in'       => 'BTC',
                     'out'      => 'LTBCOIN',
@@ -62,7 +62,7 @@ class BotHelper  {
                 ],
             ],
 
-            'income_rules'               => [
+            'income_rules'                => [
                 [
                     'asset'         => 'BTC',
                     'minThreshold'  => 10.0,

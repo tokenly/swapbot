@@ -189,7 +189,7 @@ do ()->
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
 
-            vm.backgroundOverlay      = m.prop('gradient.png')
+            vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()))
             vm.backgroundImageDetails = m.prop('')
             vm.backgroundImageId      = m.prop('')
             vm.logoImageDetails       = m.prop('')
@@ -214,7 +214,7 @@ do ()->
                         vm.incomeRulesGroup.unserialize(botData.incomeRules)
                         vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
 
-                        vm.backgroundOverlay(botData.backgroundOverlay)
+                        vm.backgroundOverlaySettings(if botData.backgroundOverlaySettings?.start then window.JSON.stringify(botData.backgroundOverlaySettings) else '')
                         vm.backgroundImageDetails(botData.backgroundImageDetails)
                         vm.backgroundImageId(botData.backgroundImageDetails?.id)
 
@@ -269,7 +269,7 @@ do ()->
                     blacklistAddresses: vm.blacklistAddressesGroup.serialize()
                     confirmationsRequired: vm.confirmationsRequired() + ""
                     backgroundImageId: vm.backgroundImageId() or ''
-                    backgroundOverlay: vm.backgroundOverlay()
+                    backgroundOverlaySettings: if vm.backgroundOverlaySettings() then window.JSON.parse(vm.backgroundOverlaySettings()) else ''
                     logoImageId: vm.logoImageId() or ''
                 }
 
@@ -341,7 +341,7 @@ do ()->
 
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-8"}, [
-                                sbAdmin.form.mFormField("Background Overlay", {id: "background_overlay", type: 'select', options: sbAdmin.botutils.overlayOpts()}, vm.backgroundOverlay)
+                                sbAdmin.form.mFormField("Background Overlay", {id: "background_overlay", type: 'select', options: sbAdmin.botutils.overlayOpts()}, vm.backgroundOverlaySettings)
                             ]),
                         ]),
 

@@ -214,26 +214,63 @@
   })();
 
   sbAdmin.botutils = (function() {
-    var botutils;
+    var botutils, settings;
     botutils = {};
+    settings = [
+      {
+        k: 'Swapbot Blue',
+        v: {
+          start: 'rgba(0,29,62,0.95)',
+          end: 'rgba(8,85,135,0.95)'
+        }
+      }, {
+        k: 'Swapbot Green',
+        v: {
+          start: 'rgba(32,142,78,0.95)',
+          end: 'rgba(46,204,113,0.95)'
+        }
+      }, {
+        k: 'Swapbot Yellow',
+        v: {
+          start: 'rgba(170,138,10,0.95)',
+          end: 'rgba(241,196,15,0.95)'
+        }
+      }, {
+        k: 'Swapbot Red',
+        v: {
+          start: 'rgba(191,39,24,0.95)',
+          end: 'rgba(231,76,6,0.95)'
+        }
+      }
+    ];
+    botutils.defaultOverlay = function() {
+      return settings[0].v;
+    };
     botutils.overlayOpts = function() {
-      var opts;
+      var j, len, opts, setting;
       opts = [];
       opts = [
         {
           k: '- No Overlay -',
           v: ''
-        }, {
-          k: 'Swapbot Blue',
-          v: 'gradient.png'
         }
       ];
+      for (j = 0, len = settings.length; j < len; j++) {
+        setting = settings[j];
+        opts.push({
+          k: setting.k,
+          v: window.JSON.stringify(setting.v)
+        });
+      }
       return opts;
     };
     botutils.overlayDesc = function(value) {
-      switch (value) {
-        case 'gradient.png':
-          return 'Swapbot Blue';
+      var j, len, setting;
+      for (j = 0, len = settings.length; j < len; j++) {
+        setting = settings[j];
+        if (setting.v.start === (value != null ? value.start : void 0) && setting.v.end === (value != null ? value.end : void 0)) {
+          return setting.k;
+        }
       }
       return 'No Overlay';
     };
@@ -1583,7 +1620,7 @@
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
-        vm.backgroundOverlay = m.prop('gradient.png');
+        vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()));
         vm.backgroundImageDetails = m.prop('');
         vm.backgroundImageId = m.prop('');
         vm.logoImageDetails = m.prop('');
@@ -1592,7 +1629,7 @@
         vm.isNew = id === 'new';
         if (!vm.isNew) {
           sbAdmin.api.getBot(id).then(function(botData) {
-            var ref, ref1;
+            var ref, ref1, ref2;
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
@@ -1603,11 +1640,11 @@
             vm.confirmationsRequired(botData.confirmationsRequired || "2");
             vm.incomeRulesGroup.unserialize(botData.incomeRules);
             vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
-            vm.backgroundOverlay(botData.backgroundOverlay);
+            vm.backgroundOverlaySettings(((ref = botData.backgroundOverlaySettings) != null ? ref.start : void 0) ? window.JSON.stringify(botData.backgroundOverlaySettings) : '');
             vm.backgroundImageDetails(botData.backgroundImageDetails);
-            vm.backgroundImageId((ref = botData.backgroundImageDetails) != null ? ref.id : void 0);
+            vm.backgroundImageId((ref1 = botData.backgroundImageDetails) != null ? ref1.id : void 0);
             vm.logoImageDetails(botData.logoImageDetails);
-            vm.logoImageId((ref1 = botData.logoImageDetails) != null ? ref1.id : void 0);
+            vm.logoImageId((ref2 = botData.logoImageDetails) != null ? ref2.id : void 0);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -1645,7 +1682,7 @@
             blacklistAddresses: vm.blacklistAddressesGroup.serialize(),
             confirmationsRequired: vm.confirmationsRequired() + "",
             backgroundImageId: vm.backgroundImageId() || '',
-            backgroundOverlay: vm.backgroundOverlay(),
+            backgroundOverlaySettings: vm.backgroundOverlaySettings() ? window.JSON.parse(vm.backgroundOverlaySettings()) : '',
             logoImageId: vm.logoImageId() || ''
           };
           if (vm.resourceId().length > 0) {
@@ -1737,7 +1774,7 @@
                     id: "background_overlay",
                     type: 'select',
                     options: sbAdmin.botutils.overlayOpts()
-                  }, vm.backgroundOverlay)
+                  }, vm.backgroundOverlaySettings)
                 ])
               ]), m("hr"), m("h4", "Settings"), m("div", {
                 "class": "spacer1"
@@ -2287,7 +2324,7 @@
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
         vm.backgroundImageDetails = m.prop('');
         vm.logoImageDetails = m.prop('');
-        vm.backgroundOverlay = m.prop('');
+        vm.backgroundOverlaySettings = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           vm.resourceId(botData.id);
@@ -2307,7 +2344,7 @@
           vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
           vm.backgroundImageDetails(botData.backgroundImageDetails);
           vm.logoImageDetails(botData.logoImageDetails);
-          vm.backgroundOverlay(botData.backgroundOverlay);
+          vm.backgroundOverlaySettings(botData.backgroundOverlaySettings);
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
@@ -2440,7 +2477,7 @@
                 }, [
                   sbAdmin.form.mValueDisplay("Background Overlay", {
                     id: 'BackgroundOverlay'
-                  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlay()))
+                  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlaySettings()))
                 ])
               ]), m("div", {
                 "class": "row"

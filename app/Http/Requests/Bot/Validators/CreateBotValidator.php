@@ -8,16 +8,16 @@ use Swapbot\Http\Requests\Bot\Validators\BotValidator;
 class CreateBotValidator extends BotValidator {
 
     protected $rules = [
-        'uuid'                   => '',
-        'name'                   => 'required',
-        'description'            => 'required',
-        'user_id'                => 'numeric',
-        'return_fee'             => 'required|numeric|min:0.00001|max:0.001',
-        'payment_plan'           => 'required',
-        'confirmations_required' => 'required|integer|min:2|max:6',
-        'background_image_id'    => '',
-        'logo_image_id'          => '',
-        'background_overlay'     => 'in:gradient.png',
+        'uuid'                        => '',
+        'name'                        => 'required',
+        'description'                 => 'required',
+        'user_id'                     => 'numeric',
+        'return_fee'                  => 'required|numeric|min:0.00001|max:0.001',
+        'payment_plan'                => 'required',
+        'confirmations_required'      => 'required|integer|min:2|max:6',
+        'background_image_id'         => '',
+        'logo_image_id'               => '',
+        'background_overlay_settings' => '',
     ];
 
 

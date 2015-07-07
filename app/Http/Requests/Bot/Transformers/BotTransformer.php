@@ -52,6 +52,11 @@ class BotTransformer {
             $out['logo_image_id'] = $this->sanitizeImageID($attributes['logoImageId']);
         }
 
+        // sanitize background_overlay_settings
+        if (isset($attributes['backgroundOverlaySettings'])) {
+            $out['background_overlay_settings'] = $this->sanitizeOverlaySettings($attributes['backgroundOverlaySettings']);
+        }
+
         return $out;
     }
 
@@ -134,6 +139,17 @@ class BotTransformer {
         }
 
         return null;
+    }
+
+    protected function sanitizeOverlaySettings($background_overlay_settings) {
+        $out = [];
+
+        if (isset($background_overlay_settings['start']) AND isset($background_overlay_settings['end'])) {
+            $out['start'] = $background_overlay_settings['start'];
+            $out['end'] = $background_overlay_settings['end'];
+        }
+
+        return $out;
     }
 
 

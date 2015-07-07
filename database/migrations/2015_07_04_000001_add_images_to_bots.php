@@ -15,7 +15,7 @@ class AddImagesToBots extends Migration
         Schema::table('bots', function (Blueprint $table) {
             $table->integer('background_image_id')->unsigned()->nullable();
             $table->integer('logo_image_id')->unsigned()->nullable();
-            $table->text('background_overlay')->default('gradient.png');
+            $table->text('background_overlay_settings')->nullable();
         });
     }
 
@@ -27,7 +27,7 @@ class AddImagesToBots extends Migration
     public function down()
     {
         Schema::table('bots', function (Blueprint $table) {
-            $table->dropColumn('background_overlay');
+            $table->dropColumn('background_overlay_settings');
             $table->dropColumn('background_image_id');
             $table->dropColumn('logo_image_id');
         });

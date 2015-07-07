@@ -255,7 +255,7 @@ do ()->
 
             vm.backgroundImageDetails = m.prop('')
             vm.logoImageDetails       = m.prop('')
-            vm.backgroundOverlay      = m.prop('')
+            vm.backgroundOverlaySettings = m.prop('')
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -284,7 +284,7 @@ do ()->
 
                     vm.backgroundImageDetails(botData.backgroundImageDetails)
                     vm.logoImageDetails(botData.logoImageDetails)
-                    vm.backgroundOverlay(botData.backgroundOverlay)
+                    vm.backgroundOverlaySettings(botData.backgroundOverlaySettings)
 
                     return
                 , (errorResponse)->
@@ -420,7 +420,7 @@ do ()->
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-7"}, [
                                     
-                                    sbAdmin.form.mValueDisplay("Background Overlay", {id: 'BackgroundOverlay',  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlay())),
+                                    sbAdmin.form.mValueDisplay("Background Overlay", {id: 'BackgroundOverlay',  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlaySettings())),
                                 ]),
                             ]),
 

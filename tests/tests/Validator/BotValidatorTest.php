@@ -115,6 +115,30 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['min' => '',]]]),
                 'error' => 'Please specify a valid minimum value for swap #1',
             ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => 'rgba(0,0,0,1)', 'end' => 'rgba(0,0,0,2)']]),
+                'error' => null,
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => '#f00', 'end' => '#0f0']]),
+                'error' => null,
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => '%bad%', 'end' => 'rgba(0,0,0,2)']]),
+                'error' => 'This gradient definition contained illegal characters.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => 'bold', 'end' => 'rgba(0,0,0,2)']]),
+                'error' => 'This gradient definition was not a valid color.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => 'bold', 'end' => 'none']]),
+                'error' => 'This gradient definition was not a valid color.',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => 'bold', 'end' => '']]),
+                'error' => 'This gradient was empty.',
+            ],
         ];
 
         // fixed

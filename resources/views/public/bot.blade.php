@@ -16,13 +16,11 @@
     <?php
         $bg_image = ($bot['backgroundImageDetails'] AND isset($bot['backgroundImageDetails']['originalUrl'])) ? $bot['backgroundImageDetails']['originalUrl'] : '';
         $has_bg_image = !!strlen($bg_image); 
-        $bg_overlay_image = ($bot['background_overlay'] AND isset($bot['background_overlay'])) ? $bot['background_overlay'] : '';
-        if (!$has_bg_image) { $bg_overlay_image = 'gradient.png'; }
-        $has_bg_overlay = !!strlen($bg_overlay_image); 
+        $bg_overlay_settings = ($bot['background_overlay_settings'] AND isset($bot['background_overlay_settings'])) ? $bot['background_overlay_settings'] : '';
+        $has_bg_overlay_settings = !!($bg_overlay_settings); 
     ?>
-    <!-- {{ $bg_overlay_image }} -->
     <div id="top-background" style="{{ $has_bg_image ? 'background-image: url('.$bg_image.');' : '' }}">
-        <div style="background-image: {{ $has_bg_overlay ? 'url(/images/background/'.$bg_overlay_image.')' : 'none' }};"></div>
+        <div style="background: {{ $has_bg_overlay_settings ? 'linear-gradient(90deg, '.$bg_overlay_settings['start'].', '.$bg_overlay_settings['end'].')' : 'none' }};"></div>
     </div>
     <div id="container" class="content-width">
         <!-- HEAD SECTION -->
