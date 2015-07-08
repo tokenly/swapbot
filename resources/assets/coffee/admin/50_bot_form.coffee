@@ -332,10 +332,10 @@ do ()->
 
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-8"}, [
-                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Background Image", {id: 'BGImage'}, vm.backgroundImageId, vm.backgroundImageDetails, 'medium'),
+                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Background Image", {id: 'BGImage', sizeDesc: '1440 x 720 Image Recommended'}, vm.backgroundImageId, vm.backgroundImageDetails, 'medium'),
                             ]),
                             m("div", {class: "col-md-4"}, [
-                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Logo Image", {id: 'LogoImage'}, vm.logoImageId, vm.logoImageDetails, 'thumb'),
+                                sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Logo Image", {id: 'LogoImage', sizeDesc: '100 x 100 Image Recommended'}, vm.logoImageId, vm.logoImageDetails, 'thumb'),
                             ]),
                         ]),
 

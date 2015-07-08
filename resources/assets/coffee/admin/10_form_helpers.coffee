@@ -44,16 +44,22 @@ sbAdmin.form = do ()->
                 inputEl = m("textarea", inputProps)
             when 'select'
                 delete inputProps.type
-                options = inputProps.options or {'': '- None -'}
-                inputEl = m("select", inputProps, options.map((opt)->
-                    return m("option", {value: opt.v, label: opt.k}, opt.k)
-                ))
+                options = inputProps.options or [{k:'- None -', v: ''}]
+                inputEl = m("select", inputProps, buildOpts(options))
             else
                 inputEl = m("input", inputProps)
 
 
         return inputEl;
 
+    buildOpts = (opts)->
+        return opts.map (opt)->
+            if opt.isGroup?
+                return m("optgroup", {label: opt.label}, buildOpts(opt.opts))
+            val = opt.v
+            if val? and typeof val == 'object'
+                val = window.JSON.stringify(opt.v)
+            return m("option", {value: val, label: opt.k}, opt.k)
 
     form.mSubmitBtn = (label)->
         return m("button", {type: 'submit', class: 'btn btn-primary'}, label)

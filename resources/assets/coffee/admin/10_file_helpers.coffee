@@ -79,6 +79,11 @@ sbAdmin.fileHelper = do ()->
                 fileUploadDomEl.click()
             return
 
+        sizeDesc = null
+        if attributes.sizeDesc
+            sizeDesc = attributes.sizeDesc
+            delete attributes.sizeDesc
+
         onFileChange = (e)->
             console.log "onFileChange fileUploadDomEl=",fileUploadDomEl
             if fileUploadDomEl?
@@ -135,7 +140,7 @@ sbAdmin.fileHelper = do ()->
         else
             # upload a new image
             imageDisplayOrUpload = m('div.uploader', attributes, [
-                m('span', {class: 'fileUploadLabel'}, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)']),
+                m('span', {class: 'fileUploadLabel'}, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)', if sizeDesc then [m('br'), sizeDesc]]),
                 fileUploadEl,
             ])
 

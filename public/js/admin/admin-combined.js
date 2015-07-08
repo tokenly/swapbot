@@ -214,33 +214,105 @@
   })();
 
   sbAdmin.botutils = (function() {
-    var botutils, settings;
+    var botutils, findSetting, settings;
     botutils = {};
     settings = [
       {
-        k: 'Swapbot Blue',
-        v: {
-          start: 'rgba(0,29,62,0.95)',
-          end: 'rgba(8,85,135,0.95)'
-        }
+        isGroup: true,
+        label: 'Swapbot Blue',
+        opts: [
+          {
+            k: 'Blue (Light Tint)',
+            v: {
+              start: 'rgba(0,29,62,0.30)',
+              end: 'rgba(8,85,135,0.30)'
+            }
+          }, {
+            k: 'Blue (Medium Tint)',
+            v: {
+              start: 'rgba(0,29,62,0.60)',
+              end: 'rgba(8,85,135,0.60)'
+            }
+          }, {
+            k: 'Blue (Heavy Tint)',
+            v: {
+              start: 'rgba(0,29,62,0.90)',
+              end: 'rgba(8,85,135,0.90)'
+            }
+          }
+        ]
       }, {
-        k: 'Swapbot Green',
-        v: {
-          start: 'rgba(32,142,78,0.95)',
-          end: 'rgba(46,204,113,0.95)'
-        }
+        isGroup: true,
+        label: 'Swapbot Green',
+        opts: [
+          {
+            k: 'Green (Light Tint)',
+            v: {
+              start: 'rgba(32,142,78,0.30)',
+              end: 'rgba(46,204,113,0.30)'
+            }
+          }, {
+            k: 'Green (Medium Tint)',
+            v: {
+              start: 'rgba(32,142,78,0.60)',
+              end: 'rgba(46,204,113,0.60)'
+            }
+          }, {
+            k: 'Green (Heavy Tint)',
+            v: {
+              start: 'rgba(32,142,78,0.90)',
+              end: 'rgba(46,204,113,0.90)'
+            }
+          }
+        ]
       }, {
-        k: 'Swapbot Yellow',
-        v: {
-          start: 'rgba(170,138,10,0.95)',
-          end: 'rgba(241,196,15,0.95)'
-        }
+        isGroup: true,
+        label: 'Swapbot Yellow',
+        opts: [
+          {
+            k: 'Yellow (Light Tint)',
+            v: {
+              start: 'rgba(170,138,10,0.30)',
+              end: 'rgba(241,196,15,0.30)'
+            }
+          }, {
+            k: 'Yellow (Medium Tint)',
+            v: {
+              start: 'rgba(170,138,10,0.60)',
+              end: 'rgba(241,196,15,0.60)'
+            }
+          }, {
+            k: 'Yellow (Heavy Tint)',
+            v: {
+              start: 'rgba(170,138,10,0.90)',
+              end: 'rgba(241,196,15,0.90)'
+            }
+          }
+        ]
       }, {
-        k: 'Swapbot Red',
-        v: {
-          start: 'rgba(191,39,24,0.95)',
-          end: 'rgba(231,76,6,0.95)'
-        }
+        isGroup: true,
+        label: 'Swapbot Red',
+        opts: [
+          {
+            k: 'Red (Light Tint)',
+            v: {
+              start: 'rgba(191,39,24,0.30)',
+              end: 'rgba(231,76,6,0.30)'
+            }
+          }, {
+            k: 'Red (Medium Tint)',
+            v: {
+              start: 'rgba(191,39,24,0.60)',
+              end: 'rgba(231,76,6,0.60)'
+            }
+          }, {
+            k: 'Red (Heavy Tint)',
+            v: {
+              start: 'rgba(191,39,24,0.90)',
+              end: 'rgba(231,76,6,0.90)'
+            }
+          }
+        ]
       }
     ];
     botutils.defaultOverlay = function() {
@@ -257,22 +329,36 @@
       ];
       for (j = 0, len = settings.length; j < len; j++) {
         setting = settings[j];
-        opts.push({
-          k: setting.k,
-          v: window.JSON.stringify(setting.v)
-        });
+        opts.push(setting);
       }
       return opts;
     };
     botutils.overlayDesc = function(value) {
-      var j, len, setting;
+      var desc;
+      console.log("overlayDesc value=", value);
+      desc = findSetting(value, settings);
+      if (desc) {
+        return desc;
+      }
+      return 'No Overlay';
+    };
+    findSetting = function(value, settings) {
+      var j, len, res, setting;
       for (j = 0, len = settings.length; j < len; j++) {
         setting = settings[j];
+        if (setting.isGroup != null) {
+          res = findSetting(value, setting.opts);
+          if (res) {
+            return res;
+          }
+          continue;
+        }
+        console.log("setting.v.start=", setting.v.start);
         if (setting.v.start === (value != null ? value.start : void 0) && setting.v.end === (value != null ? value.end : void 0)) {
           return setting.k;
         }
       }
-      return 'No Overlay';
+      return null;
     };
     return botutils;
   })();
@@ -348,7 +434,7 @@
       window.addEventListener('blur', deactivate);
     };
     fileHelper.mImageUploadAndDisplay = function(label, attributes, imageIdProp, imageDetailsProp, imageStyle) {
-      var existingImageDetails, fileUploadDomEl, fileUploadEl, imageDisplayOrUpload, onChange, onFileChange, removeImgFn, tryAgainFn;
+      var existingImageDetails, fileUploadDomEl, fileUploadEl, imageDisplayOrUpload, onChange, onFileChange, removeImgFn, sizeDesc, tryAgainFn;
       onChange = function(files) {
         console.log("onChange!  files=", files);
         imageDetailsProp({
@@ -381,6 +467,11 @@
           fileUploadDomEl.click();
         }
       };
+      sizeDesc = null;
+      if (attributes.sizeDesc) {
+        sizeDesc = attributes.sizeDesc;
+        delete attributes.sizeDesc;
+      }
       onFileChange = function(e) {
         var files;
         console.log("onFileChange fileUploadDomEl=", fileUploadDomEl);
@@ -448,7 +539,7 @@
         imageDisplayOrUpload = m('div.uploader', attributes, [
           m('span', {
             "class": 'fileUploadLabel'
-          }, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)']), fileUploadEl
+          }, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)', sizeDesc ? [m('br'), sizeDesc] : void 0]), fileUploadEl
         ]);
       }
       return m("div", {
@@ -715,7 +806,7 @@
   })();
 
   sbAdmin.form = (function() {
-    var form;
+    var buildOpts, form;
     form = {};
     form.mValueDisplay = function(label, attributes, value) {
       var id, inputEl, inputProps;
@@ -772,20 +863,36 @@
           break;
         case 'select':
           delete inputProps.type;
-          options = inputProps.options || {
-            '': '- None -'
-          };
-          inputEl = m("select", inputProps, options.map(function(opt) {
-            return m("option", {
-              value: opt.v,
-              label: opt.k
-            }, opt.k);
-          }));
+          options = inputProps.options || [
+            {
+              k: '- None -',
+              v: ''
+            }
+          ];
+          inputEl = m("select", inputProps, buildOpts(options));
           break;
         default:
           inputEl = m("input", inputProps);
       }
       return inputEl;
+    };
+    buildOpts = function(opts) {
+      return opts.map(function(opt) {
+        var val;
+        if (opt.isGroup != null) {
+          return m("optgroup", {
+            label: opt.label
+          }, buildOpts(opt.opts));
+        }
+        val = opt.v;
+        if ((val != null) && typeof val === 'object') {
+          val = window.JSON.stringify(opt.v);
+        }
+        return m("option", {
+          value: val,
+          label: opt.k
+        }, opt.k);
+      });
     };
     form.mSubmitBtn = function(label) {
       return m("button", {
@@ -1755,13 +1862,15 @@
                   "class": "col-md-8"
                 }, [
                   sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Background Image", {
-                    id: 'BGImage'
+                    id: 'BGImage',
+                    sizeDesc: '1440 x 720 Image Recommended'
                   }, vm.backgroundImageId, vm.backgroundImageDetails, 'medium')
                 ]), m("div", {
                   "class": "col-md-4"
                 }, [
                   sbAdmin.fileHelper.mImageUploadAndDisplay("Custom Logo Image", {
-                    id: 'LogoImage'
+                    id: 'LogoImage',
+                    sizeDesc: '100 x 100 Image Recommended'
                   }, vm.logoImageId, vm.logoImageDetails, 'thumb')
                 ])
               ]), m("div", {
