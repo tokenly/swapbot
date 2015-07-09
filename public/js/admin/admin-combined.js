@@ -1534,7 +1534,7 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-12 col-lg-10"
+            "class": "col-md-12"
           }, [
             m("table", {
               "class": "striped-table bot-table " + (vm.botsRefreshing() ? 'refreshing' : '')
@@ -1698,7 +1698,7 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-12 col-lg-10"
+            "class": "col-md-12"
           }, [
             m("table", {
               "class": "striped-table swap-table " + (vm.swapsRefreshing() ? 'refreshing' : '')

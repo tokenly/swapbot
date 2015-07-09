@@ -62,7 +62,7 @@ do ()->
             m("p", {class: ""}, ["Here is a list of all Swapbots.",]),
 
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-12 col-lg-10"}, [
+                m("div", {class: "col-md-12"}, [
                     m("table", {class: "striped-table bot-table #{if vm.botsRefreshing() then 'refreshing' else ''}"}, [
                         m('thead', {}, [
                             m('tr', {}, [
