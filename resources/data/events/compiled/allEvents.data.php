@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-07-09 13:26:14
+// compiled on 2015-07-09 18:32:27
 
 return array (
   'swap.new' => 
@@ -362,6 +362,20 @@ return array (
     'label' => 'Move Fuel Transaction Created',
     'level' => 'DEBUG',
     'msg' => 'Moving initial swapbot fuel.  Sent <?php echo e($outQty); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
+    'msgVars' => 
+    array (
+      0 => 'outQty',
+      1 => 'outAsset',
+      2 => 'destination',
+      3 => 'txid',
+    ),
+  ),
+  'payment.forwarded' => 
+  array (
+    'name' => 'payment.forwarded',
+    'label' => 'Payment Forwarded',
+    'level' => 'INFO',
+    'msg' => 'Forwarded a payment of <?php echo e($outQty); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
     'msgVars' => 
     array (
       0 => 'outQty',

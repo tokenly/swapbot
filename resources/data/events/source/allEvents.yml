@@ -210,6 +210,12 @@ events:
     level: DEBUG
     msg: Moving initial swapbot fuel.  Sent {{$outQty}} {{$outAsset}} to {{$destination}} with transaction ID {{$txid}}
     msgVars: [outQty, outAsset, destination, txid]
+  -
+    name: payment.forwarded
+    label: Payment Forwarded
+    level: INFO
+    msg: Forwarded a payment of {{$outQty}} {{$outAsset}} to {{$destination}} with transaction ID {{$txid}}
+    msgVars: [outQty, outAsset, destination, txid]
 
 
 

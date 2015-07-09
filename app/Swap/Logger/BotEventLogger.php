@@ -241,6 +241,16 @@ class BotEventLogger {
 
     }
 
+    public function logPaymentForwarded(Bot $bot, $quantity, $asset, $destination, $fee, $tx_id) {
+        return $this->logStandardBotEvent('payment.forwarded', $bot, [
+            'destination' => $destination,
+            'outQty'      => $quantity,
+            'outAsset'    => $asset,
+            'fee'         => $fee,
+            'txid'        => $tx_id,
+        ]);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////
     // swap
