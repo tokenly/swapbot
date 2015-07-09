@@ -61,6 +61,7 @@ class ForwardPaymentCommand extends Command {
 
         return [
             ['dry-run' , 'd', InputOption::VALUE_NONE, 'Dry Run'],
+            ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
         ];
     }
 
