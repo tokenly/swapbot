@@ -3,18 +3,20 @@
 namespace Swapbot\Commands;
 
 use Swapbot\Commands\Command;
-use Swapbot\Models\Bot;
+use Swapbot\Models\Swap;
 
-class ProcessIncomeForwardingForAllBots extends Command {
+class ProcessPendingSwap extends Command
+{
 
+    var $swap;
 
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Swap $swap)
     {
+        $this->swap = $swap;
     }
-
 }

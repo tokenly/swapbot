@@ -1,4 +1,6 @@
-<?php namespace Swapbot\Commands;
+<?php
+
+namespace Swapbot\Commands;
 
 use Swapbot\Commands\Command;
 

@@ -31,12 +31,6 @@ class ProcessPendingSwapsHandler {
      */
     public function handle(ProcessPendingSwaps $command)
     {
-        // $all_swaps = $this->swap_repository->findAll();
-        // $debug_swaps_text = '';
-        // foreach($all_swaps as $all_swap) {
-        //     $debug_swaps_text .= "Swap {$all_swap['id']}: {$all_swap['name']} - state: {$all_swap['state']}\n";
-        // }
-
         $swaps = $this->swap_repository->findByStates(SwapState::allPendingStates());
         
         foreach($swaps as $swap) {
