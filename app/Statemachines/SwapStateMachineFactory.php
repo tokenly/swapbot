@@ -17,6 +17,7 @@ use Swapbot\Statemachines\SwapCommand\SwapConfirmed;
 use Swapbot\Statemachines\SwapCommand\SwapConfirming;
 use Swapbot\Statemachines\SwapCommand\SwapErrored;
 use Swapbot\Statemachines\SwapCommand\SwapRefund;
+use Swapbot\Statemachines\SwapCommand\SwapReset;
 use Swapbot\Statemachines\SwapCommand\SwapRetry;
 use Swapbot\Statemachines\SwapCommand\SwapSent;
 
@@ -95,6 +96,13 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::REFUNDED => SwapState::COMPLETE with SwapStateEvent::SWAP_COMPLETED via Command
         $this->addTransitionToStates($states, SwapState::REFUNDED, SwapState::COMPLETE, SwapStateEvent::SWAP_COMPLETED, new SwapCompleted());
+
+
+        // SwapState::REFUNDED => SwapState::READY with SwapStateEvent::SWAP_RESET via SwapReset
+        $this->addTransitionToStates($states, SwapState::REFUNDED, SwapState::READY, SwapStateEvent::SWAP_RESET, new SwapReset());
+
+        // SwapState::SENT => SwapState::READY with SwapStateEvent::SWAP_RESET via SwapReset
+        $this->addTransitionToStates($states, SwapState::SENT, SwapState::READY, SwapStateEvent::SWAP_RESET, new SwapReset());
 
 
         return $states;

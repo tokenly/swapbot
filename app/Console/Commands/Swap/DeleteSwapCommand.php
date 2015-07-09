@@ -1,6 +1,6 @@
 <?php
 
-namespace Swapbot\Console\Commands\Bot;
+namespace Swapbot\Console\Commands\Swap;
 
 use Exception;
 use Illuminate\Console\Command;
@@ -26,7 +26,7 @@ class DeleteSwapCommand extends Command {
      *
      * @var string
      */
-    protected $description = 'Lists all swaps for a bot';
+    protected $description = 'Deletes a swap completely';
 
 
     /**

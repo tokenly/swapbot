@@ -10,9 +10,9 @@ use Swapbot\Statemachines\SwapCommand\SwapCommand;
 
 
 /*
-* SwapRetry command
+* SwapReset command
 */
-class SwapRetry extends SwapCommand {
+class SwapReset extends SwapCommand {
 
     /**
      */
@@ -28,7 +28,7 @@ class SwapRetry extends SwapCommand {
      */
     public function __toString()
     {
-        return 'Swap Retry';
+        return 'Swap Reset';
     }
 
 

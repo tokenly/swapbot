@@ -134,6 +134,46 @@ class SwapStateTest extends TestCase {
         $this->checkState($swap, SwapState::COMPLETE);
 
 
+        ////////////////////////////////////////////////////////////////////////
+        // REFUNDED -> READY (reset)
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to refunded
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_REFUND);
+        $this->checkState($swap, SwapState::REFUNDED);
+
+        // transition back to READY
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_RESET);
+        $this->checkState($swap, SwapState::READY);
+
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // SENT -> READY (reset)
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to sent (directly from ready)
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_SENT);
+        $this->checkState($swap, SwapState::SENT);
+
+        // transition back to READY
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_RESET);
+        $this->checkState($swap, SwapState::READY);
+
 
 
     }
