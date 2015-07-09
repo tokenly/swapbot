@@ -20,7 +20,7 @@ class ForwardPayment extends Command
      *
      * @return void
      */
-    public function __construct(Bot $bot, $destination, $quantity, $asset, $request_id=null)
+    public function __construct(Bot $bot, $quantity, $asset, $destination, $request_id=null)
     {
         if (!AddressValidator::isValid($destination)) { throw new Exception("Destination $destination is not a valid bitcoin address", 1); }
 

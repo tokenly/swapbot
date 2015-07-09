@@ -28,7 +28,7 @@ class ForwardPaymentHandlerTest extends TestCase {
         $repo->addCredit($bot, 20, 'BTC', $this->sampleEvent($bot));
 
         // forward payment
-        $this->dispatch(new ForwardPayment($bot, '1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD', 19, 'BTC'));
+        $this->dispatch(new ForwardPayment($bot, 19, 'BTC', '1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD'));
 
         // check ledger entries
         $loaded_models = array_values(iterator_to_array($repo->findByBot($bot)));
