@@ -1710,7 +1710,7 @@
       } else {
         tableRows = m("tr", {}, [
           m('td', {
-            colspan: 7,
+            colspan: 8,
             "class": "not-found"
           }, 'No Swaps Found')
         ]);

@@ -102,7 +102,7 @@ do ()->
                 ])
             )
         else
-            tableRows = m("tr", {}, [m('td', {colspan: 7, class: "not-found"}, 'No Swaps Found')])
+            tableRows = m("tr", {}, [m('td', {colspan: 8, class: "not-found"}, 'No Swaps Found')])
 
         mEl = m("div", [
             m("h2", "All Swaps"),
