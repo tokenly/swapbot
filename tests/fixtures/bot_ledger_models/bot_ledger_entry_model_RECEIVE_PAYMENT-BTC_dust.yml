@@ -1,0 +1,5 @@
+# receive a payment of 0.00001 BTC dust
+is_credit: true
+amount: 1000
+asset: BTC
+

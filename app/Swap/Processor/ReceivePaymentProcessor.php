@@ -14,6 +14,7 @@ use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
+use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class ReceivePaymentProcessor {
@@ -123,8 +124,15 @@ class ReceivePaymentProcessor {
         $amount = $tx_process['xchain_notification']['quantity'];
         $asset = $tx_process['xchain_notification']['asset'];
         $bot_event = $this->swap_event_logger->logConfirmedPaymentTx($tx_process['bot'], $tx_process['xchain_notification']);
+
         $is_credit = true;
-        $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $asset, $is_credit, $bot_event));
+        $btc_dust_size = null;
+        if ($asset != 'BTC') {
+            // also credit bitcoin dust if this was a counterparty asset
+            $btc_dust_size = $tx_process['xchain_notification']['counterpartyTx']['dustSize'];
+        }
+        $this->dispatch(new UpdateBotPaymentAccount($tx_process['bot'], $amount, $asset, $is_credit, $bot_event, $btc_dust_size));
+
 
         $tx_process['should_update_transaction'] = true;
     }

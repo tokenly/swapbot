@@ -46,8 +46,10 @@ expectedBotEvents:
 
 
 expectedBotLedgerEntries:
-  - ### Credit - receive BTC payment 
+  - ### Credit - receive LTBCOIN payment 
     meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT-LTBCOIN.yml }
+  - ### Credit - receive BTC payment dust
+    meta: { baseFilename: bot_ledger_entry_model_RECEIVE_PAYMENT-BTC_dust.yml }
   - ### Debit - Paid 1 months
     meta: { baseFilename: bot_ledger_entry_model_1_MONTH_SWAPBOT_RENTAL_LTBCOIN_DEBIT.yml }
   - ### Credit - 1 SWAPBOTMONTH

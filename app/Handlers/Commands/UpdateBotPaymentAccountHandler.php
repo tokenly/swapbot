@@ -39,6 +39,11 @@ class UpdateBotPaymentAccountHandler {
         if ($command->is_credit) {
             $this->bot_ledger_entry_repository->addCredit($command->bot, $command->amount, $command->asset, $command->bot_event);
 
+            // also credit BTC dust
+            if ($command->btc_dust !== null) {
+                $this->bot_ledger_entry_repository->addCredit($command->bot, $command->btc_dust, 'BTC', $command->bot_event);
+            }
+
             // purchase SWAPBOTMONTH credits
             $this->purchaseSwapbotCredits($command->bot);
         } else {
