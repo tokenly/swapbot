@@ -224,12 +224,13 @@ do ()->
 
         vm.init = ()->
             # view status
+            vm.pusherClients = []
+            vm.showDebug = false
+
             vm.errorMessages = m.prop([])
             vm.formStatus = m.prop('active')
             vm.resourceId = m.prop('new')
-            vm.pusherClient = m.prop(null)
             vm.botEvents = m.prop([])
-            vm.showDebug = false
             vm.allPlansData = m.prop(null)
 
             # fields
@@ -312,10 +313,9 @@ do ()->
             # and get the bot balance
             updateBotAccountBalance(id)
 
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_#{id}", handleBotEventMessage))
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_#{id}", handleBotBalancesMessage))
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
-            # console.log "vm.pusherClient=",vm.pusherClient()
+            vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_#{id}", handleBotEventMessage))
+            vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_#{id}", handleBotBalancesMessage))
+            vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
 
             # refresh balances are not needed
             # # and send a balance refresh on each reload
@@ -336,8 +336,9 @@ do ()->
 
         # bind unload event
         this.onunload = (e)->
-            # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
-            sbAdmin.pusherutils.closePusherChanel(vm.pusherClient())
+            for pusherClient in vm.pusherClients
+                sbAdmin.pusherutils.closePusherChanel(pusherClient)
+            
             return
 
         vm.init()

@@ -68,7 +68,6 @@ sbAdmin.form = do ()->
 
 
     form.mAlerts = (errorsProp)->
-        # console.log "errorsProp()=", errorsProp()
         return null if errorsProp().length == 0
         return m("div", {class: "alert alert-danger", role: "alert", }, [
             m("strong", "An error occurred."),

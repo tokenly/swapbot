@@ -6,7 +6,10 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
+use Swapbot\Events\BotEventCreated;
 use Swapbot\Events\BotstreamEventCreated;
+use Swapbot\Events\SwapEventCreated;
+use Swapbot\Events\SwapstreamEventCreated;
 use Swapbot\Models\BotEvent;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,7 +24,7 @@ class TestPushBotEventCommand extends Command {
      *
      * @var string
      */
-    protected $name = 'swapbot:push-bot-event';
+    protected $name = 'swapbotdev:push-bot-event';
 
     /**
      * The console command description.
@@ -32,20 +35,30 @@ class TestPushBotEventCommand extends Command {
 
 
     /**
-     * {@inheritdoc}
+     * Get the console command arguments.
+     *
+     * @return array
      */
-    protected function configure()
+    protected function getArguments()
     {
-        parent::configure();
-
-        $this
-            ->addArgument('bot-id', InputArgument::REQUIRED, 'Bot ID')
-            ->addArgument('event', InputArgument::REQUIRED, 'Event JSON')
-            ->setHelp(<<<EOF
-Sends a test event
-EOF
-        );
+        return [
+            ['bot-id', InputArgument::REQUIRED, 'Bot ID'],
+            ['event', InputArgument::REQUIRED, 'Event JSON'],
+        ];
     }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return [
+            ['swap-id', 's', InputOption::VALUE_OPTIONAL, 'Swap ID'],
+        ];
+    }
+
 
     /**
      * Execute the console command.
@@ -60,7 +73,7 @@ EOF
         $event_arg = $this->input->getArgument('event');
         if (strstr($event_arg, '{')) {
             // interpret as raw JSON
-            $event = json_decode($event_arg);
+            $event = json_decode($event_arg, true);
         } else {
             // assume file
             if (file_exists($event_arg)) {
@@ -74,6 +87,7 @@ EOF
         if (!$event) {
             throw new Exception("Unable to decode event", 1);
         }
+        if (!isset($event['level'])) { $event['level'] = 200; }
 
         $bot_repository = $this->laravel->make('Swapbot\Repositories\BotRepository');
         $bot = $bot_repository->findByUuid($bot_id);
@@ -82,8 +96,26 @@ EOF
             throw new Exception("Unable to find bot", 1);
         }
 
-        $this->info("Sending Botstreamevent for bot ".$bot['name']." ({$bot['uuid']})");
-        Event::fire(new BotstreamEventCreated($bot, $event));
+        $swap_id = $this->input->getOption('swap-id');
+        $swap = null;
+        if ($swap_id) {
+            $swap_repository = app('Swapbot\Repositories\SwapRepository');
+            $swap = $swap_repository->findByUuid($swap_id);
+            if (!$swap) { $swap = $swap_repository->findByID($swap_id); }
+            if (!$swap) { throw new Exception("Unable to find swap", 1); }
+
+            // swapstream event
+            $this->info("Sending Swapstreamevent for swap {$swap['uuid']} in bot ".$bot['name']." ({$bot['uuid']})");
+            $event['swapUuid'] = $swap['uuid'];
+            Event::fire(new SwapEventCreated($swap, $bot, $event));
+    } else {
+            // botstream event
+            $this->info("Sending Botstreamevent for bot ".$bot['name']." ({$bot['uuid']})");
+            Event::fire(new BotstreamEventCreated($bot, $event));
+            // Event::fire(new BotEventCreated($bot, $event));
+        }
+
+
         $this->info("done");
     }
 

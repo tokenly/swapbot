@@ -18,5 +18,6 @@ m.route(
         "/admin/edit/setting/:id"  : sbAdmin.ctrl.settingsForm,
         "/admin/allbots"           : sbAdmin.ctrl.allbots,
         "/admin/allswaps"          : sbAdmin.ctrl.allswaps,
+        "/admin/swapevents/:id"    : sbAdmin.ctrl.swapEvents,
     }
 )

@@ -78,6 +78,15 @@
       }
       return api.send('GET', "botevents/" + id, null, additionalOpts);
     };
+    api.getSwapEvents = function(id, additionalOpts) {
+      if (additionalOpts == null) {
+        additionalOpts = {};
+      }
+      return api.send('GET', "swapevents/" + id, null, additionalOpts);
+    };
+    api.getSwap = function(id) {
+      return api.send('GET', "swaps/" + id);
+    };
     api.refreshBalances = function(id) {
       return api.send('POST', "balancerefresh/" + id, null, {
         background: true
@@ -169,6 +178,30 @@
         url: path,
         data: params,
         config: signRequest
+      };
+      opts.extract = function(xhr, xhrOptions) {
+        var code, e, errMsg, json, newError;
+        try {
+          json = window.JSON.parse(xhr.responseText);
+          code = "" + xhr.status;
+          if (code.substr(0, 1) !== '2') {
+            if (((json != null ? json.errors : void 0) != null) && json.errors.length > 0) {
+              newError = new Error();
+              newError.errors = json.errors;
+              throw newError;
+            }
+            throw new Error('invalid response code: ' + code);
+          }
+          return xhr.responseText;
+        } catch (_error) {
+          e = _error;
+          console.error("e=", e);
+          code = xhr.status;
+          errMsg = "Received an invalid response from server (" + code + ")";
+          newError = new Error();
+          newError.errors = [errMsg];
+          throw newError;
+        }
       };
       for (k in additionalOpts) {
         v = additionalOpts[k];
@@ -1661,6 +1694,12 @@
                 "class": ""
               }, 'Details')
             ]), m("td", {}, [
+              m("a[href='/admin/swapevents/" + swap.id + "']", {
+                target: "_blank",
+                "class": "",
+                config: m.route
+              }, "Events")
+            ]), m("td", {}, [
               m("a[href='" + botAaddress + "']", {
                 target: "_blank",
                 "class": ""
@@ -1702,7 +1741,7 @@
           }, [
             m("table", {
               "class": "striped-table swap-table " + (vm.swapsRefreshing() ? 'refreshing' : '')
-            }, [m('thead', {}, [m('tr', {}, [m('th', {}, 'In'), m('th', {}, 'Out'), m('th', {}, 'State'), m('th', {}, 'Updated'), m('th', {}, 'Details'), m('th', {}, 'Bot'), m('th', {}, 'Owner')])]), m('tbody', {}, tableRows)])
+            }, [m('thead', {}, [m('tr', {}, [m('th', {}, 'In'), m('th', {}, 'Out'), m('th', {}, 'State'), m('th', {}, 'Updated'), m('th', {}, 'Details'), m('th', {}, 'Events'), m('th', {}, 'Bot'), m('th', {}, 'Owner')])]), m('tbody', {}, tableRows)])
           ])
         ]), m("div", {
           "class": "spacer1"
@@ -2703,12 +2742,12 @@
       };
       vm.init = function() {
         var id;
+        vm.pusherClients = [];
+        vm.showDebug = false;
         vm.errorMessages = m.prop([]);
         vm.formStatus = m.prop('active');
         vm.resourceId = m.prop('new');
-        vm.pusherClient = m.prop(null);
         vm.botEvents = m.prop([]);
-        vm.showDebug = false;
         vm.allPlansData = m.prop(null);
         vm.name = m.prop('');
         vm.description = m.prop('');
@@ -2762,16 +2801,21 @@
           vm.errorMessages(errorResponse.errors);
         });
         updateBotAccountBalance(id);
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_" + id, handleBotBalancesMessage));
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
+        vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_" + id, handleBotBalancesMessage));
+        vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
       };
       return vm;
     })();
     sbAdmin.ctrl.botView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        sbAdmin.pusherutils.closePusherChanel(vm.pusherClient());
+        var j, len, pusherClient, ref;
+        ref = vm.pusherClients;
+        for (j = 0, len = ref.length; j < len; j++) {
+          pusherClient = ref[j];
+          sbAdmin.pusherutils.closePusherChanel(pusherClient);
+        }
       };
       vm.init();
     };
@@ -3379,6 +3423,189 @@
   })();
 
   (function() {
+    var appendBotEventMessage, buildMLevel, handleBotEventMessage, vm;
+    sbAdmin.ctrl.swapEvents = {};
+    buildMLevel = function(levelNumber) {
+      switch (levelNumber) {
+        case 100:
+          return m('span', {
+            "class": "label label-default debug"
+          }, "Debug");
+        case 200:
+          return m('span', {
+            "class": "label label-info info"
+          }, "Info");
+        case 250:
+          return m('span', {
+            "class": "label label-primary primary"
+          }, "Notice");
+        case 300:
+          return m('span', {
+            "class": "label label-warning warning"
+          }, "Warning");
+        case 400:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Error");
+        case 500:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Critical");
+        case 550:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Alert");
+        case 600:
+          return m('span', {
+            "class": "label label-danger danger"
+          }, "Emergency");
+      }
+      return m('span', {
+        "class": "label label-danger danger"
+      }, "Code " + levelNumber);
+    };
+    handleBotEventMessage = function(data) {
+      console.log("handleBotEventMessage data=", data);
+      if (appendBotEventMessage(data)) {
+        m.redraw(true);
+      }
+    };
+    appendBotEventMessage = function(data) {
+      var anyAppended, ref;
+      anyAppended = false;
+      if ((data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) || (data != null ? data.message : void 0)) {
+        if (data.swapUuid === vm.swapId) {
+          console.log("matched");
+          vm.swapEvents().unshift(data);
+          anyAppended = true;
+        }
+      }
+      return anyAppended;
+    };
+    vm = sbAdmin.ctrl.swapEvents.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        vm.showDebug = false;
+        vm.pusherClients = [];
+        vm.errorMessages = m.prop([]);
+        vm.user = m.prop(sbAdmin.auth.getUser());
+        vm.swapId = m.route.param('id');
+        vm.swap = m.prop(null);
+        vm.swapEvents = m.prop([]);
+        sbAdmin.api.getSwap(vm.swapId).then(function(swapData) {
+          var bot_id, swap;
+          swap = swapData;
+          vm.swap(swap);
+          bot_id = swap.botUuid;
+          sbAdmin.api.getBotEvents(bot_id).then(function(apiResponse) {
+            var data, j, len;
+            for (j = 0, len = apiResponse.length; j < len; j++) {
+              data = apiResponse[j];
+              appendBotEventMessage(data);
+            }
+          }, function(errorResponse) {
+            vm.errorMessages(errorResponse.errors);
+          });
+          vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + bot_id, handleBotEventMessage));
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+      };
+      vm.toggleDebugView = function(e) {
+        e.preventDefault();
+        vm.showDebug = !vm.showDebug;
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.swapEvents.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      this.onunload = function(e) {
+        var j, len, pusherClient, ref, results;
+        ref = vm.pusherClients;
+        results = [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          pusherClient = ref[j];
+          results.push(sbAdmin.pusherutils.closePusherChanel(pusherClient));
+        }
+        return results;
+      };
+      vm.init();
+    };
+    return sbAdmin.ctrl.swapEvents.view = function() {
+      var botAaddress, mEl, swap;
+      swap = vm.swap();
+      if (!swap) {
+        mEl = m("div", [m("h2", "Swap not found"), sbAdmin.form.mAlerts(vm.errorMessages)]);
+      } else {
+        botAaddress = swapbot.addressUtils.publicBotAddress(swap.botUsername, swap.botUuid, window.location);
+        mEl = m("div", [
+          m("h4", "Swap Events for swap " + swap.id), m("p", {}, [
+            "This swap belongs to the bot ", m("a[href='" + botAaddress + "']", {
+              target: "_blank",
+              "class": ""
+            }, swap.botName)
+          ]), m("div", {
+            "class": "spacer1"
+          }), sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+            "class": "bot-events"
+          }, [
+            m("div", {
+              "class": "pulse-spinner pull-right"
+            }, [
+              m("div", {
+                "class": "rect1"
+              }), m("div", {
+                "class": "rect2"
+              }), m("div", {
+                "class": "rect3"
+              }), m("div", {
+                "class": "rect4"
+              }), m("div", {
+                "class": "rect5"
+              })
+            ]), m("h3", "Events"), vm.swapEvents().length === 0 ? m("div", {
+              "class": "no-events"
+            }, "No Events Yet") : null, m("ul", {
+              "class": "list-unstyled striped-list bot-list event-list"
+            }, [
+              vm.swapEvents().map(function(botEventObj) {
+                var dateObj, ref;
+                if (!vm.showDebug && botEventObj.level <= 100) {
+                  return;
+                }
+                dateObj = window.moment(botEventObj.createdAt);
+                return m("li", {
+                  "class": "bot-list-entry event"
+                }, [
+                  m("div", {
+                    "class": "labelWrapper"
+                  }, buildMLevel(botEventObj.level)), m("span", {
+                    "class": "date",
+                    title: dateObj.format('MMMM Do YYYY, h:mm:ss a')
+                  }, dateObj.format('MMM D h:mm a')), m("span", {
+                    "class": "msg"
+                  }, botEventObj.message || ((ref = botEventObj.event) != null ? ref.msg : void 0))
+                ]);
+              })
+            ]), m("div", {
+              "class": "pull-right"
+            }, [
+              m("a[href='#show-debug']", {
+                onclick: vm.toggleDebugView,
+                "class": "btn " + (vm.showDebug ? 'btn-warning' : 'btn-default') + " btn-xs",
+                style: {
+                  "margin-right": "16px"
+                }
+              }, [vm.showDebug ? "Hide Debug" : "Show Debug"])
+            ])
+          ])
+        ]);
+      }
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
     var formatPrivileges, vm;
     sbAdmin.ctrl.userForm = {};
     formatPrivileges = function(privileges) {
@@ -3625,7 +3852,8 @@
     "/admin/settings": sbAdmin.ctrl.settingsView,
     "/admin/edit/setting/:id": sbAdmin.ctrl.settingsForm,
     "/admin/allbots": sbAdmin.ctrl.allbots,
-    "/admin/allswaps": sbAdmin.ctrl.allswaps
+    "/admin/allswaps": sbAdmin.ctrl.allswaps,
+    "/admin/swapevents/:id": sbAdmin.ctrl.swapEvents
   });
 
   if (swapbot == null) {

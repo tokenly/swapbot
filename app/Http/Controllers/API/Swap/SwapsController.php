@@ -37,5 +37,26 @@ class SwapsController extends APIController {
         return $api_helper->transformResourcesForOutput($resources, 'with_bot');
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @param  Guard               $auth
+     * @param  BotRepository       $repository
+     * @param  APIControllerHelper $api_helper
+     * @return Response
+     */
+    public function show($swapuuid, Guard $auth, SwapRepository $repository, APIControllerHelper $api_helper)
+    {
+        if ($auth->getUser()->hasPermission('viewSwaps')) {
+            $resource = $api_helper->requireResource($swapuuid, $repository);
+
+        } else {
+            $resource = $api_helper->requireResourceOwnedByUser($swapuuid, $auth->getUser(), $repository);
+            
+        }
+        return $api_helper->transformResourceForOutput($resource, 'with_bot');
+    }
+
 
 }

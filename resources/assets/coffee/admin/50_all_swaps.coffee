@@ -91,6 +91,10 @@ do ()->
                         m("a[href='/public/#{swap.botUsername}/swap/#{swap.id}']", {target: "_blank", class: "",}, 'Details'),
                     ]),
                     m("td", {}, [
+                        m("a[href='/admin/swapevents/#{swap.id}']", {target: "_blank", class: "", config: m.route}, "Events"),
+
+                    ]),
+                    m("td", {}, [
                         m("a[href='#{botAaddress}']", {target: "_blank", class: "",}, swap.botName),
                     ]),
                     m("td", {}, swap.botUsername),
@@ -120,6 +124,7 @@ do ()->
                                 m('th', {}, 'State'),
                                 m('th', {}, 'Updated'),
                                 m('th', {}, 'Details'),
+                                m('th', {}, 'Events'),
                                 m('th', {}, 'Bot'),
                                 m('th', {}, 'Owner'),
                             ]),

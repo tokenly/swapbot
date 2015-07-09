@@ -45,6 +45,19 @@ class Swap extends APIModel {
         return $this->belongsTo('Swapbot\Models\Bot');
     }
 
+    public function getBotUuidAttribute() {
+        if (array_key_exists('bot_uuid', $this->attributes)) { return $this->attributes['bot_uuid']; }
+        return $this->bot['uuid'];
+    }
+    public function getBotNameAttribute() {
+        if (array_key_exists('bot_name', $this->attributes)) { return $this->attributes['bot_name']; }
+        return $this->bot['name'];
+    }
+    public function getBotUsernameAttribute() {
+        if (array_key_exists('bot_username', $this->attributes)) { return $this->attributes['bot_username']; }
+        return $this->bot['username'];
+    }
+
 
     public function getSwapConfig() {
         return SwapConfig::createFromSerialized($this['definition']);

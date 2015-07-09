@@ -12,7 +12,6 @@ class SwapAPITest extends TestCase {
     {
         // setup the API tester
         $tester = $this->setupAPITester();
-        // $user = $tester->getUser();
 
         // test public
         $bot_helper = $this->app->make('BotHelper');
@@ -23,6 +22,22 @@ class SwapAPITest extends TestCase {
         $tester->testPublicIndex('/api/v1/public/swaps/', $bot['uuid']);
     }
 
+    public function testGetSwapAPI() {
+        $tester = $this->setupAPITester();
+
+        $user_1 = app('UserHelper')->newRandomUser();
+        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+        $new_swap_1 = app('SwapHelper')->newSampleSwap($bot_1);
+
+        // test get swap as admin
+        $admin_user = app('UserHelper')->newRandomUser(['privileges' => ['viewSwaps' => true]]);
+        $tester->be($admin_user);
+        $loaded_swap = $tester->callAPIAndValidateResponse('GET', '/api/v1/swaps/'.$new_swap_1['uuid']);
+        PHPUnit::assertNotEmpty($loaded_swap);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swap['id']);
+        PHPUnit::assertEquals($bot_1['uuid'], $loaded_swap['botUuid']);
+
+    }
 
     public function testGetAllSwaps() {
         $tester = $this->setupAPITester();
@@ -97,7 +112,7 @@ class SwapAPITest extends TestCase {
 
         $tester = $this->app->make('APITestHelper');
         $tester
-            ->setURLBase('/api/v1/bots')
+            ->setURLBase('/api/v1/swaps')
             ->useUserHelper($this->app->make('UserHelper'))
             ->useRepository($this->app->make('Swapbot\Repositories\SwapRepository'))
             ->createModelWith(function($user) use ($bot_helper, $swap_helper) {

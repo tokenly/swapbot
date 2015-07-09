@@ -83,6 +83,12 @@ sbAdmin.api = do ()->
     api.getBotEvents = (id, additionalOpts={})->
         return api.send('GET', "botevents/#{id}", null, additionalOpts)
 
+    api.getSwapEvents = (id, additionalOpts={})->
+        return api.send('GET', "swapevents/#{id}", null, additionalOpts)
+
+    api.getSwap = (id)->
+        return api.send('GET', "swaps/#{id}")
+
 
     api.refreshBalances = (id)->
         # always does this in the background
@@ -185,6 +191,32 @@ sbAdmin.api = do ()->
             config: signRequest,
             # background: true,
         }
+
+        opts.extract = (xhr, xhrOptions)->
+            try
+                # make sure the json is valid
+                json = window.JSON.parse(xhr.responseText)
+
+                # check code
+                code = ""+xhr.status
+                if code.substr(0, 1) != '2'
+                    if json?.errors? and json.errors.length > 0
+                        newError = new Error()
+                        newError.errors = json.errors
+                        throw newError
+                    throw new Error('invalid response code: '+code)
+
+                # all is good
+                return xhr.responseText
+
+            catch e
+                console.error "e=",e
+                code = xhr.status
+                errMsg = "Received an invalid response from server (#{code})"
+                newError = new Error()
+                newError.errors = [errMsg]
+                throw newError
+
 
         # merge additionalOpts
         opts[k] = v for k, v of additionalOpts
