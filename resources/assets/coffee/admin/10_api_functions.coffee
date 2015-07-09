@@ -27,16 +27,21 @@ sbAdmin.api = do ()->
         nonce = newNonce()
         if xhrOptions.data? and xhrOptions.data != 'null'
             if xhrOptions.data instanceof FormData and xhrOptions.paramsToSign?
-                console.log "xhrOptions.paramsToSign=",xhrOptions.paramsToSign
+                # console.log "xhrOptions.paramsToSign=",xhrOptions.paramsToSign
                 paramsBody = window.JSON.stringify(xhrOptions.paramsToSign)
             else if typeof xhrOptions.data == 'object'
                 paramsBody = window.JSON.stringify(xhrOptions.data)
+                # console.log "paramsBody=",paramsBody
             else
                 paramsBody = xhrOptions.data
         else
             paramsBody = '{}'
 
-        url = window.location.protocol + '//' + window.location.host + xhrOptions.url
+        
+        # strip off any query
+        parser = document.createElement('a')
+        parser.href = window.location.protocol + '//' + window.location.host + xhrOptions.url
+        url = parser.protocol + '//' + parser.host + parser.pathname
 
         signature = signURLParameters(xhrOptions.method, url, paramsBody, nonce, credentials)
 
@@ -151,6 +156,16 @@ sbAdmin.api = do ()->
             return
 
         return deferred.promise
+
+    api.getBotsForAllUsers = ()->
+        return api.send('GET', 'bots', {allusers: ''})
+
+    api.getSwapsForAllUsers = (filters=null)->
+        return api.send('GET', 'swaps', filters)
+
+
+
+    # ############################################################
 
     api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
 

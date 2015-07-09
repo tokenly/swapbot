@@ -49,7 +49,7 @@ class SettingAPITest extends TestCase {
             'email'      => $email,
             'apitoken'   => $api_token,
             'user_id'    => null,
-            'privileges' => ['createUser' => true, 'manageSettings' => true, ],
+            'privileges' => ['createUser' => true, 'manageSettings' => true, 'manageBots' => true, ],
         ]);
 
 

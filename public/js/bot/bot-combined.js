@@ -11,9 +11,6 @@
     exports.publicBotAddress = function(username, botId, location) {
       return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
-    };
     return exports;
   })();
 

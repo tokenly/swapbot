@@ -120,6 +120,30 @@ class BotAPITest extends TestCase {
         PHPUnit::assertCount(1, $all_images);
     }
 
+    public function testGetAllBots() {
+        $tester = $this->setupAPITester();
+
+        // create a sample bot with the standard user
+        $new_bot_1 = app('BotHelper')->newSampleBot();
+        $new_bot_2 = app('BotHelper')->newSampleBot();
+
+        // now create a separate user
+        $another_user = app('UserHelper')->newRandomUser(['privileges' => ['viewBots' => true]]);
+        $new_bot_3 = app('BotHelper')->newSampleBot($another_user);
+
+        // first user is unauthorized
+        $loaded_bots = $tester->callAPIAndValidateResponse('GET', '/api/v1/bots', ['allusers' => null], 403);
+
+        // now call the method as the other user
+        $tester = $this->setupAPITester();
+        $tester->be($another_user);
+        $loaded_bots = $tester->callAPIAndValidateResponse('GET', '/api/v1/bots', ['allusers' => null]);
+
+        PHPUnit::assertCount(3, $loaded_bots);
+        PHPUnit::assertEquals($new_bot_1['uuid'], $loaded_bots[0]['id']);
+    }
+
+
     public function setupAPITester() {
         $bot_helper = app('BotHelper');
         $tester = app('APITestHelper');

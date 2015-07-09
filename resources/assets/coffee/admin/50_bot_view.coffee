@@ -132,9 +132,6 @@ do ()->
     botPublicAddress = (vm)->
         return swapbot.addressUtils.publicBotAddress(vm.username(), vm.resourceId(), window.location)
 
-    poupupBotAddress = (vm)->
-        return swapbot.addressUtils.poupupBotAddress(vm.username(), vm.resourceId(), window.location)
-
     # ################################################
 
 

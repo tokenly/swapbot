@@ -24,7 +24,7 @@ class UserHelper
     }
 
     public function newRandomUser($override_vars=[]) {
-        return $this->newSampleUser($override_vars=[], true);
+        return $this->newSampleUser($override_vars, true);
     }
 
     public function newSampleUser($override_vars=[], $randomize=false) {

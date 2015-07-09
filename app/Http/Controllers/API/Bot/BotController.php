@@ -29,11 +29,19 @@ class BotController extends APIController {
      * @param  APIControllerHelper $api_helper
      * @return Response
      */
-    public function index(Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
+    public function index(Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
-        // all bots for this user
-        $resources = $repository->findByUser($auth->getUser());
-        // Log::debug('$resources='.json_encode(iterator_to_array($resources), 192));
+        $params = $request->all();
+        if ($params AND array_key_exists('allusers', $params)) {
+            // all users
+            $api_helper->requirePermission($auth->getUser(), 'viewBots', 'view all bots');
+
+            $resources = $repository->findAll($auth->getUser());
+        } else {
+            // all bots for this user
+            $resources = $repository->findByUser($auth->getUser());
+        }
+
 
         // format for API
         return $api_helper->transformResourcesForOutput($resources);

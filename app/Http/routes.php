@@ -97,6 +97,9 @@ $router->post('api/v1/images', 'API\Image\ImageController@store');
 $router->put('api/v1/images', 'API\Image\ImageController@store');
 $router->get('api/v1/images', 'API\Image\ImageController@show');
 
+// Swaps API (admin)
+$router->resource('api/v1/swaps', 'API\Swap\SwapsController@index');
+
 
 // webhook notifications
 $router->post('/_xchain_client_receive', 'WebhookController@receive');

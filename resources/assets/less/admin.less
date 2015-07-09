@@ -291,6 +291,58 @@ li.botlink {
 
 
 
+// admin bot list
+// 
+
+table.bot-table, table.swap-table {
+    width: 100%;
+}
+
+table.striped-table {
+    tr {
+        border-bottom: 1px dotted #e0e0e0;
+
+        th {
+            color: #f9f9f9;
+            // background: linear-gradient(180deg, #333, #222);
+            background: #555;
+            line-height: 3rem;
+        }
+    }
+
+    tr:last-child {
+        border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f6f6f6;
+    }
+
+    th, td {
+        padding: 2px 12px;
+    }
+}
+
+table.refreshing td {
+    opacity: 0.2;
+}
+
+
+div.filter-select {
+    padding: 4px 12px;
+    margin-top: -12px;
+}
+
+td.not-found {
+    text-align: center;
+    color: #c0c0c0;
+    background-color: #e4e4e4;
+    font-weight: bold;
+    font-size: 1.8rem;
+    line-height: 4.2rem;
+}
+
+
 // footer
 footer {
     margin-top: 24px;

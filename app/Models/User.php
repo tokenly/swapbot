@@ -7,9 +7,10 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Swapbot\Models\Base\APIModel;
+use Tokenly\LaravelApiProvider\Contracts\APIPermissionedUserContract;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 
-class User extends APIModel implements AuthenticatableContract, CanResetPasswordContract, APIUserContract {
+class User extends APIModel implements AuthenticatableContract, CanResetPasswordContract, APIUserContract, APIPermissionedUserContract {
 
     protected $api_attributes = ['id', 'name', 'username', 'email', 'apitoken', 'apisecretkey', 'privileges',];
 

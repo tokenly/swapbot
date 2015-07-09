@@ -39,6 +39,29 @@ sbAdmin.nav = do ()->
             ])
         return null
 
+    buildAdminPanelNavLink = (user)->
+        els = []
+        if user.privileges?.viewBots
+            els.push(m("li", { class: ""}, [
+                m("a[href='/admin/allbots']", {class: "", config: m.route}, "Show All Bots"),
+            ]))
+            
+        if user.privileges?.viewBots
+            els.push(m("li", { class: ""}, [
+                m("a[href='/admin/allswaps']", {class: "", config: m.route}, "Show All Swaps"),
+            ]))
+
+        if els.length > 1
+            return m("li", { class: "dropdown"}, [
+                m("a[href=#]", {class: "dropdown-toggle", "data-toggle": "dropdown", "role": "button", "aria-expanded": "false",}, [
+                    'Admin Controls',
+                    m("span", {class: "caret"})
+                ]),
+                m("ul", { class: "dropdown-menu", role: "menu"}, els),
+            ]);
+
+        return els
+
     # clone an object
     nav.buildNav = ()->
         user = sbAdmin.auth.getUser()
@@ -58,6 +81,7 @@ sbAdmin.nav = do ()->
                     ]),
                     buildUsersNavLink(user),
                     buildSettingsNavLink(user),
+                    buildAdminPanelNavLink(user),
                 ]),
                 buildRightNav(user),
             ]),

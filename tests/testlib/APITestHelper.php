@@ -269,7 +269,7 @@ class APITestHelper  {
         return $this->user_helper->getSampleUser();
     }
 
-    public function callAPIAndValidateResponse($method, $url, $parameters, $expected_response_code=200) {
+    public function callAPIAndValidateResponse($method, $url, $parameters=[], $expected_response_code=200) {
         $response = $this->callAPIWithAuthentication($method, $url, $parameters);
         PHPUnit::assertEquals($expected_response_code, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()."\n\nfor {$method} {$url}".(($actual_response_from_api = json_decode($response->getContent(), true)) ? json_encode($actual_response_from_api, 192) : null));
         $actual_response_from_api = json_decode($response->getContent(), true);

@@ -24,6 +24,73 @@ class SwapAPITest extends TestCase {
     }
 
 
+    public function testGetAllSwaps() {
+        $tester = $this->setupAPITester();
+
+        $user_1 = app('UserHelper')->newRandomUser();
+        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+
+        $user_2 = app('UserHelper')->newRandomUser();
+        $bot_2 = app('BotHelper')->newSampleBot($user_2);
+
+        $admin_user = app('UserHelper')->newRandomUser(['privileges' => ['viewSwaps' => true]]);
+
+        // create a sample bot with the standard user
+        $new_swap_1 = app('SwapHelper')->newSampleSwap($bot_1);
+        $new_swap_2 = app('SwapHelper')->newSampleSwap($bot_1);
+        $new_swap_3 = app('SwapHelper')->newSampleSwap($bot_2);
+
+        // first user is unauthorized
+        $loaded_bots = $tester->callAPIAndValidateResponse('GET', '/api/v1/swaps', [], 403);
+
+        // now call the method as the other user
+        $tester = $this->setupAPITester();
+        $tester->be($admin_user);
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/swaps');
+
+        PHPUnit::assertCount(3, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swaps[0]['id']);
+        PHPUnit::assertEquals($bot_1['uuid'], $loaded_swaps[0]['botUuid']);
+        PHPUnit::assertEquals($bot_1['name'], $loaded_swaps[0]['botName']);
+    }
+
+    public function testGetSwapsWithFilters() {
+        $user_1 = app('UserHelper')->newRandomUser();
+        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+
+        $user_2 = app('UserHelper')->newRandomUser();
+        $bot_2 = app('BotHelper')->newSampleBot($user_2);
+
+        $admin_user = app('UserHelper')->newRandomUser(['privileges' => ['viewSwaps' => true]]);
+
+        // create a sample bot with the standard user
+        $new_swap_1 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'brandnew']);
+        $new_swap_2 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'complete']);
+        $new_swap_3 = app('SwapHelper')->newSampleSwap($bot_2, null, ['state' => 'complete']);
+        $new_swap_4 = app('SwapHelper')->newSampleSwap($bot_2, null, ['state' => 'error']);
+
+        // now call the method as the other user
+        $tester = $this->setupAPITester();
+        $tester->be($admin_user);
+
+        // brand new
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/swaps', ['state' => 'brandnew']);
+        PHPUnit::assertCount(1, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swaps[0]['id']);
+
+        // complete
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/swaps', ['state' => 'complete']);
+        PHPUnit::assertCount(2, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_2['uuid'], $loaded_swaps[0]['id']);
+        PHPUnit::assertEquals($new_swap_3['uuid'], $loaded_swaps[1]['id']);
+
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    
+    
+
     public function setupAPITester() {
         $bot_helper = $this->app->make('BotHelper');
         $swap_helper = $this->app->make('SwapHelper');

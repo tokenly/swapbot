@@ -21,17 +21,18 @@ sbAdmin.form = do ()->
             inputEl,
         ])
 
-    form.mInputEl = (attributes, prop)->
+    form.mInputEl = (attributes, prop=null)->
         inputProps = sbAdmin.utils.clone(attributes)
         name = inputProps.name or inputProps.id
 
-        if attributes.onchange?
-            inputProps.onchange = (e)->
-                (attributes.onchange)(e)
-                return (m.withAttr("value", prop))(e)
-        else
-            inputProps.onchange = m.withAttr("value", prop)
-        inputProps.value = prop()
+        if prop?
+            if attributes.onchange?
+                inputProps.onchange = (e)->
+                    (attributes.onchange)(e)
+                    return (m.withAttr("value", prop))(e)
+            else
+                inputProps.onchange = m.withAttr("value", prop)
+            inputProps.value = prop()
         
         # defaults
         inputProps.class = 'form-control' if not inputProps.class?

@@ -23,7 +23,7 @@
       reader.readAsBinaryString(file);
     };
     signRequest = function(xhr, xhrOptions) {
-      var credentials, nonce, paramsBody, ref, signature, url;
+      var credentials, nonce, paramsBody, parser, ref, signature, url;
       credentials = sbAdmin.auth.getCredentials();
       if (!((ref = credentials.apiToken) != null ? ref.length : void 0)) {
         return;
@@ -31,7 +31,6 @@
       nonce = newNonce();
       if ((xhrOptions.data != null) && xhrOptions.data !== 'null') {
         if (xhrOptions.data instanceof FormData && (xhrOptions.paramsToSign != null)) {
-          console.log("xhrOptions.paramsToSign=", xhrOptions.paramsToSign);
           paramsBody = window.JSON.stringify(xhrOptions.paramsToSign);
         } else if (typeof xhrOptions.data === 'object') {
           paramsBody = window.JSON.stringify(xhrOptions.data);
@@ -41,7 +40,9 @@
       } else {
         paramsBody = '{}';
       }
-      url = window.location.protocol + '//' + window.location.host + xhrOptions.url;
+      parser = document.createElement('a');
+      parser.href = window.location.protocol + '//' + window.location.host + xhrOptions.url;
+      url = parser.protocol + '//' + parser.host + parser.pathname;
       signature = signURLParameters(xhrOptions.method, url, paramsBody, nonce, credentials);
       xhr.setRequestHeader('X-Tokenly-Auth-Nonce', nonce);
       xhr.setRequestHeader('X-Tokenly-Auth-Api-Token', credentials.apiToken);
@@ -142,6 +143,17 @@
         });
       });
       return deferred.promise;
+    };
+    api.getBotsForAllUsers = function() {
+      return api.send('GET', 'bots', {
+        allusers: ''
+      });
+    };
+    api.getSwapsForAllUsers = function(filters) {
+      if (filters == null) {
+        filters = null;
+      }
+      return api.send('GET', 'swaps', filters);
     };
     api.send = function(method, apiPathSuffix, params, additionalOpts) {
       var k, opts, path, v;
@@ -838,17 +850,22 @@
     };
     form.mInputEl = function(attributes, prop) {
       var inputEl, inputProps, name, options;
+      if (prop == null) {
+        prop = null;
+      }
       inputProps = sbAdmin.utils.clone(attributes);
       name = inputProps.name || inputProps.id;
-      if (attributes.onchange != null) {
-        inputProps.onchange = function(e) {
-          attributes.onchange(e);
-          return (m.withAttr("value", prop))(e);
-        };
-      } else {
-        inputProps.onchange = m.withAttr("value", prop);
+      if (prop != null) {
+        if (attributes.onchange != null) {
+          inputProps.onchange = function(e) {
+            attributes.onchange(e);
+            return (m.withAttr("value", prop))(e);
+          };
+        } else {
+          inputProps.onchange = m.withAttr("value", prop);
+        }
+        inputProps.value = prop();
       }
-      inputProps.value = prop();
       if (inputProps["class"] == null) {
         inputProps["class"] = 'form-control';
       }
@@ -960,7 +977,7 @@
   })();
 
   sbAdmin.nav = (function() {
-    var buildRightNav, buildSettingsNavLink, buildUsersNavLink, nav;
+    var buildAdminPanelNavLink, buildRightNav, buildSettingsNavLink, buildUsersNavLink, nav;
     nav = {};
     buildRightNav = function(user) {
       var username;
@@ -1039,6 +1056,50 @@
       }
       return null;
     };
+    buildAdminPanelNavLink = function(user) {
+      var els, ref, ref1;
+      els = [];
+      if ((ref = user.privileges) != null ? ref.viewBots : void 0) {
+        els.push(m("li", {
+          "class": ""
+        }, [
+          m("a[href='/admin/allbots']", {
+            "class": "",
+            config: m.route
+          }, "Show All Bots")
+        ]));
+      }
+      if ((ref1 = user.privileges) != null ? ref1.viewBots : void 0) {
+        els.push(m("li", {
+          "class": ""
+        }, [
+          m("a[href='/admin/allswaps']", {
+            "class": "",
+            config: m.route
+          }, "Show All Swaps")
+        ]));
+      }
+      if (els.length > 1) {
+        return m("li", {
+          "class": "dropdown"
+        }, [
+          m("a[href=#]", {
+            "class": "dropdown-toggle",
+            "data-toggle": "dropdown",
+            "role": "button",
+            "aria-expanded": "false"
+          }, [
+            'Admin Controls', m("span", {
+              "class": "caret"
+            })
+          ]), m("ul", {
+            "class": "dropdown-menu",
+            role: "menu"
+          }, els)
+        ]);
+      }
+      return els;
+    };
     nav.buildNav = function() {
       var user;
       user = sbAdmin.auth.getUser();
@@ -1072,7 +1133,7 @@
                 "class": "",
                 config: m.route
               }, "New Bot")
-            ]), buildUsersNavLink(user), buildSettingsNavLink(user)
+            ]), buildUsersNavLink(user), buildSettingsNavLink(user), buildAdminPanelNavLink(user)
           ]), buildRightNav(user)
         ])
       ]);
@@ -1414,6 +1475,242 @@
   })();
 
   window.utils = sbAdmin.utils;
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.allbots = {};
+    vm = sbAdmin.ctrl.allbots.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        vm.user = m.prop(sbAdmin.auth.getUser());
+        vm.bots = m.prop([]);
+        vm.botsRefreshing = m.prop('true');
+        vm.refreshBots();
+      };
+      vm.refreshBotsFn = function(e) {
+        e.preventDefault();
+        vm.refreshBots();
+      };
+      vm.refreshBots = function() {
+        vm.botsRefreshing('true');
+        m.redraw(true);
+        sbAdmin.api.getBotsForAllUsers().then(function(botsList) {
+          vm.bots(botsList);
+          vm.botsRefreshing(false);
+        });
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.allbots.controller = function() {
+      var removeImgFn;
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+      return;
+      return removeImgFn = function(e) {
+        imageIdProp(null);
+        imageDetailsProp(null);
+        e.preventDefault();
+      };
+    };
+    return sbAdmin.ctrl.allbots.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("h2", "All Swapbots"), m("div", {
+          "class": "spacer1"
+        }), m("p", {
+          "class": "pull-right"
+        }, [
+          m("a[href='#refresh']", {
+            onclick: vm.refreshBotsFn
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-refresh",
+              title: "Refresh"
+            }, ''), ' Refresh'
+          ])
+        ]), m("p", {
+          "class": ""
+        }, ["Here is a list of all Swapbots."]), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12 col-lg-10"
+          }, [
+            m("table", {
+              "class": "striped-table bot-table " + (vm.botsRefreshing() ? 'refreshing' : '')
+            }, [
+              m('thead', {}, [m('tr', {}, [m('th', {}, 'Bot Name'), m('th', {}, 'State'), m('th', {}, 'Owner')])]), vm.bots().map(function(bot) {
+                var address;
+                address = swapbot.addressUtils.publicBotAddress(bot.username, bot.id, window.location);
+                return m("tr", {}, [
+                  m("td", {}, [
+                    bot.hash.length ? m("a[href='" + address + "']", {
+                      target: "_blank"
+                    }, [
+                      m("img", {
+                        "class": 'tinyRoboHead',
+                        src: "http://robohash.org/" + bot.hash + ".png?set=set3"
+                      })
+                    ]) : m('div', {
+                      "class": 'emptyRoboHead'
+                    }, ''), m("a[href='" + address + "']", {
+                      target: "_blank",
+                      "class": ""
+                    }, "" + bot.name)
+                  ]), m("td", {}, bot.state), m("td", {}, bot.username)
+                ]);
+              })
+            ])
+          ])
+        ]), m("div", {
+          "class": "spacer1"
+        })
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.allswaps = {};
+    vm = sbAdmin.ctrl.allswaps.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        vm.user = m.prop(sbAdmin.auth.getUser());
+        vm.swaps = m.prop([]);
+        vm.swapsRefreshing = m.prop('true');
+        vm.swapFilterState = m.prop('confirming');
+        vm.refreshSwaps();
+      };
+      vm.refreshSwapsFn = function(e) {
+        e.preventDefault();
+        vm.refreshSwaps();
+      };
+      vm.refreshSwaps = function() {
+        var filters;
+        vm.swapsRefreshing('true');
+        m.redraw(true);
+        filters = {};
+        if (vm.swapFilterState().length) {
+          filters.state = vm.swapFilterState();
+        }
+        filters.sort = 'updatedAt';
+        sbAdmin.api.getSwapsForAllUsers(filters).then(function(swapslist) {
+          vm.swaps(swapslist);
+          vm.swapsRefreshing(false);
+        });
+      };
+      vm.changeFilterFn = function(e) {
+        e.preventDefault();
+        return setTimeout(function() {
+          vm.refreshSwaps();
+        }, 1);
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.allswaps.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.allswaps.view = function() {
+      var filterOptions, filterSelectEl, mEl, tableRows;
+      filterOptions = [
+        {
+          k: 'All Swaps',
+          v: ''
+        }, {
+          k: 'Brand New',
+          v: 'brandnew'
+        }, {
+          k: 'Out of Stock',
+          v: 'outofstock'
+        }, {
+          k: 'Ready',
+          v: 'ready'
+        }, {
+          k: 'Confirming',
+          v: 'confirming'
+        }, {
+          k: 'Sent',
+          v: 'sent'
+        }, {
+          k: 'Refunded',
+          v: 'refunded'
+        }, {
+          k: 'Complete',
+          v: 'complete'
+        }, {
+          k: 'Error',
+          v: 'error'
+        }
+      ];
+      filterSelectEl = sbAdmin.form.mInputEl({
+        type: "select",
+        options: filterOptions,
+        id: "filter",
+        onchange: vm.changeFilterFn
+      }, vm.swapFilterState);
+      if (vm.swaps().length) {
+        tableRows = vm.swaps().map(function(swap) {
+          var botAaddress;
+          botAaddress = swapbot.addressUtils.publicBotAddress(swap.botUsername, swap.botUuid, window.location);
+          return m("tr", {}, [
+            m("td", {}, swap.receipt.quantityIn + " " + swap.receipt.assetIn), m("td", {}, swap.receipt.quantityOut + " " + swap.receipt.assetOut), m("td", {}, swap.state), m("td", {}, window.moment(swap.updatedAt).format('MMM D h:mm a')), m("td", {}, [
+              m("a[href='/public/" + swap.botUsername + "/swap/" + swap.id + "']", {
+                target: "_blank",
+                "class": ""
+              }, 'Details')
+            ]), m("td", {}, [
+              m("a[href='" + botAaddress + "']", {
+                target: "_blank",
+                "class": ""
+              }, swap.botName)
+            ]), m("td", {}, swap.botUsername)
+          ]);
+        });
+      } else {
+        tableRows = m("tr", {}, [
+          m('td', {
+            colspan: 7,
+            "class": "not-found"
+          }, 'No Swaps Found')
+        ]);
+      }
+      mEl = m("div", [
+        m("h2", "All Swaps"), m("div", {
+          "class": "spacer1"
+        }), m("p", {
+          "class": "pull-right"
+        }, [
+          m("a[href='#refresh']", {
+            onclick: vm.refreshSwapsFn
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-refresh",
+              title: "Refresh"
+            }, ''), ' Refresh'
+          ])
+        ]), m("div", {
+          "class": "pull-right filter-select"
+        }, [filterSelectEl]), m("p", {
+          "class": ""
+        }, ["Here is a list of all Swaps."]), m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12 col-lg-10"
+          }, [
+            m("table", {
+              "class": "striped-table swap-table " + (vm.swapsRefreshing() ? 'refreshing' : '')
+            }, [m('thead', {}, [m('tr', {}, [m('th', {}, 'In'), m('th', {}, 'Out'), m('th', {}, 'State'), m('th', {}, 'Updated'), m('th', {}, 'Details'), m('th', {}, 'Bot'), m('th', {}, 'Owner')])]), m('tbody', {}, tableRows)])
+          ])
+        ]), m("div", {
+          "class": "spacer1"
+        })
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
+  })();
 
   (function() {
     var buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildOnSwaptypeChange, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, vm;
@@ -2115,7 +2412,7 @@
   })();
 
   (function() {
-    var botPublicAddress, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, poupupBotAddress, serializeSwaps, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
+    var botPublicAddress, buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildMLevel, curryHandleAccountUpdatesMessage, handleBotBalancesMessage, handleBotEventMessage, serializeSwaps, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, updateBotAccountBalance, vm;
     sbAdmin.ctrl.botView = {};
     swapGroupRenderers = {};
     sharedSwapTypeFormField = function(number, swap) {
@@ -2298,9 +2595,6 @@
     };
     botPublicAddress = function(vm) {
       return swapbot.addressUtils.publicBotAddress(vm.username(), vm.resourceId(), window.location);
-    };
-    poupupBotAddress = function(vm) {
-      return swapbot.addressUtils.poupupBotAddress(vm.username(), vm.resourceId(), window.location);
     };
     handleBotEventMessage = function(data) {
       var ref;
@@ -3314,9 +3608,6 @@
     exports.publicBotAddress = function(username, botId, location) {
       return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
-    exports.poupupBotAddress = function(username, botId, location) {
-      return exports.publicBotAddress(username, botId, location) + "/popup";
-    };
     return exports;
   })();
 
@@ -3332,7 +3623,9 @@
     "/admin/users": sbAdmin.ctrl.usersView,
     "/admin/edit/user/:id": sbAdmin.ctrl.userForm,
     "/admin/settings": sbAdmin.ctrl.settingsView,
-    "/admin/edit/setting/:id": sbAdmin.ctrl.settingsForm
+    "/admin/edit/setting/:id": sbAdmin.ctrl.settingsForm,
+    "/admin/allbots": sbAdmin.ctrl.allbots,
+    "/admin/allswaps": sbAdmin.ctrl.allswaps
   });
 
   if (swapbot == null) {
