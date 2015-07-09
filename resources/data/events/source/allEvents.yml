@@ -102,6 +102,26 @@ events:
     swapEventStream: true
 
 
+  # ### Income
+
+  -
+    name: income.forwarded
+    label: Income Forwarded
+    level: INFO
+    msg: Sent an income forwarding payment of {{ $quantityOut }} {{ $assetOut }} to {{ $destination }} with transaction ID {{ $txid }}.
+    msgVars: [quantityOut,assetOut,destination,txid]
+    botEventStream: true
+
+  -
+    name: income.forwardSent
+    label: Income Forwarding Sent
+    level: DEBUG
+    msg: Income of {{ $quantityOut }} {{ $assetOut }} was forwarded to {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msgVars: [quantityOut,assetOut,destination,confirmations]
+    botEventStream: true
+
+
+
   # ### Bot Events ##########################################
   -
     name: tx.previous

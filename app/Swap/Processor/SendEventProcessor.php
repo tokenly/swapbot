@@ -7,7 +7,6 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
@@ -91,9 +90,6 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
-            // // process fuel send
-            // $this->processFuelSend($tx_process);
-
             // process income forwarding send
             $this->processIncomingForwardingSend($tx_process);
 
@@ -104,11 +100,6 @@ class SendEventProcessor {
             $this->updateTransaction($tx_process);
         });
 
-
-        // bot balance update must be done outside of the transaction
-        // if ($should_update_bot_balance) {
-        //     $this->updateBotBalance($bot);
-        // }
 
         return $bot;
     }
@@ -122,55 +113,37 @@ class SendEventProcessor {
         if ($transaction_model['processed']) {
             $xchain_notification = $tx_process['xchain_notification'];
             $bot = $tx_process['bot'];
-            $swap = $tx_process['swap'];
-
-            // $this->bot_event_logger->logPreviousSendTx($bot, $xchain_notification);
 
             $tx_process['tx_is_handled'] = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
 
-            $receipt_update_vars = ['confirmationsOut' => $tx_process['xchain_notification']['confirmations'],];
-            $tx_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+            if ($this->isIncomeForwardingTransaction($tx_process)) {
+                // log the confirmed income forward
+                $this->bot_event_logger->logIncomeForwardingTxSent($bot, $xchain_notification);
 
-            $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars);
+            } else {
+                // log a swap send confirmation
+                $swap = $tx_process['swap'];
+                $receipt_update_vars = ['confirmationsOut' => $tx_process['xchain_notification']['confirmations'],];
+                $tx_process['swap_update_vars']['receipt'] = $receipt_update_vars;
+                $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars);
+
+            }
+
+
         }
     }
 
-
-    // protected function processFuelSend($tx_process) {
-    //     if ($tx_process['tx_is_handled']) { return; }
-
-    //     // see if this is a BTC send from the payment address
-    //     //   to the public address
-    //     $bot                 = $tx_process['bot'];
-    //     $xchain_notification = $tx_process['xchain_notification'];
-
-    //     if (
-    //         $xchain_notification['asset'] == 'BTC'
-    //         AND in_array($bot['payment_address'], $xchain_notification['sources'])
-    //         AND in_array($bot['address'], $xchain_notification['destinations'])
-    //     ) {
-    //         $this->bot_event_logger->logFuelTXSent($bot, $xchain_notification);
-    //         $tx_process['tx_is_handled'] = true;
-
-    //         if ($tx_process['is_confirmed']) {
-    //             $tx_process['transaction_update_vars']['processed'] = true;
-    //         }
-    //     }
-    // }
 
     protected function processIncomingForwardingSend($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
         // see if this is a send from the public address
         //   to the forwarding address
-        $bot                 = $tx_process['bot'];
-        $xchain_notification = $tx_process['xchain_notification'];
+        if ($this->isIncomeForwardingTransaction($tx_process)) {
+            $bot                 = $tx_process['bot'];
+            $xchain_notification = $tx_process['xchain_notification'];
 
-        if (
-            in_array($bot['address'], $xchain_notification['sources'])
-            AND in_array($xchain_notification['destinations'][0], $bot->getAllIncomeForwardingAddresses())
-        ) {
             $this->bot_event_logger->logIncomeForwardingTxSent($bot, $xchain_notification);
             $tx_process['tx_is_handled'] = true;
 
@@ -261,17 +234,21 @@ class SendEventProcessor {
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
-    // Balance
+    // Income Forwarding
     
-    // protected function updateBotBalance($bot) {
-    //     try {
-    //         $this->dispatch(new UpdateBotBalances($bot));
-    //     } catch (Exception $e) {
-    //         // log any failure
-    //         EventLog::logError('balanceupdate.failed', $e);
-    //         $this->bot_event_logger->logBalanceUpdateFailed($bot, $e);
-    //     }
-    // }
+    protected function isIncomeForwardingTransaction($tx_process) {
+        $bot                 = $tx_process['bot'];
+        $xchain_notification = $tx_process['xchain_notification'];
+
+        if (
+            in_array($bot['address'], $xchain_notification['sources'])
+            AND in_array($xchain_notification['destinations'][0], $bot->getAllIncomeForwardingAddresses())
+        ) {
+            return true;
+        }
+
+        return false;
+    }
 
 
     ////////////////////////////////////////////////////////////////////////

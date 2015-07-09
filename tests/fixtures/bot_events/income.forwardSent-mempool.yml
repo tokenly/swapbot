@@ -1,6 +1,9 @@
 name: income.forwardSent
-msg: 'Forwarded income of 2 BTC to INCOME_FORWARDING_ADDRESS_0000001 with transaction ID 0000000000000000000000000000000000000000000000000sendBTCtx444444.'
+
 destination: 'INCOME_FORWARDING_ADDRESS_0000001'
-qty: 2
-asset: 'BTC'
+quantityOut: 2
+assetOut: 'BTC'
 confirmations: 0
+
+state: active
+isActive: true

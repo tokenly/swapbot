@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-07-01 14:02:54
+// compiled on 2015-07-09 13:26:14
 
 return array (
   'swap.new' => 
@@ -170,6 +170,36 @@ return array (
       2 => 'destination',
     ),
     'swapEventStream' => true,
+  ),
+  'income.forwarded' => 
+  array (
+    'name' => 'income.forwarded',
+    'label' => 'Income Forwarded',
+    'level' => 'INFO',
+    'msg' => 'Sent an income forwarding payment of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+      3 => 'txid',
+    ),
+    'botEventStream' => true,
+  ),
+  'income.forwardSent' => 
+  array (
+    'name' => 'income.forwardSent',
+    'label' => 'Income Forwarding Sent',
+    'level' => 'DEBUG',
+    'msg' => 'Income of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> was forwarded to <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+      3 => 'confirmations',
+    ),
+    'botEventStream' => true,
   ),
   'tx.previous' => 
   array (

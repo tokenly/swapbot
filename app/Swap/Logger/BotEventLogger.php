@@ -403,15 +403,13 @@ class BotEventLogger {
     // income forwarding
 
     
-    // ($bot, $send_result, $destination, $quantity, $asset)
     public function logIncomeForwardingResult(Bot $bot, $send_result, $destination, $quantity, $asset) {
         // log the send
-        return $this->logLegacyBotEvent($bot, 'income.forwarded', BotEvent::LEVEL_INFO, [
-            'msg'         => "Sent an income forwarding payment of {$quantity} {$asset} to {$destination} with transaction ID {$send_result['txid']}.",
-            'destination' => $destination,
-            'outQty'      => $quantity,
-            'outAsset'    => $asset,
-            'sentTxID'    => $send_result['txid'],
+        return $this->logStandardBotEvent('income.forwarded', $bot, [
+            'quantityOut'   => $quantity,
+            'assetOut'      => $asset,
+            'txid'          => $send_result['txid'],
+            'destination'   => $destination,
         ]);
 
     }
@@ -425,15 +423,15 @@ class BotEventLogger {
         ]);
     }
 
-    public function logIncomeForwardingTxSent($bot, $xchain_notification) {
+    public function logIncomeForwardingTxSent(Bot $bot, $xchain_notification) {
         $quantity    = $xchain_notification['quantity'];
         $asset       = $xchain_notification['asset'];
         $tx_id       = $xchain_notification['txid'];
         $destination = $xchain_notification['destinations'][0];
-        return $this->logLegacyBotEvent($bot, 'income.forwardSent', BotEvent::LEVEL_INFO, [
-            'msg'           => "Forwarded income of {$quantity} {$asset} to {$destination} with transaction ID {$tx_id}.",
-            'qty'           => $quantity,
-            'asset'         => $asset,
+
+        return $this->logStandardBotEvent('income.forwardSent', $bot, [
+            'quantityOut'   => $quantity,
+            'assetOut'      => $asset,
             'txid'          => $tx_id,
             'destination'   => $destination,
             'confirmations' => $xchain_notification['confirmations'],

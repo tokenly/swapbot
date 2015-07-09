@@ -20,6 +20,11 @@ xchainNotifications:
   - # send income to the forwarding address (confirmed)
     meta: { baseFilename: confirmed_BTC_SEND_INCOME_notification_01.yml }
 
+  - # send income to the forwarding address (2 confirmations)
+    meta: { baseFilename: confirmed_BTC_SEND_INCOME_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
+
 
 
 
@@ -56,6 +61,10 @@ expectedBotEvents:
 
   - #### income forward sent (confirmed)
     meta: { baseFilename: income.forwardSent-confirmed.yml }
+
+  - #### income forward sent (confirmed 2)
+    meta: { baseFilename: income.forwardSent-confirmed.yml }
+    confirmations: 2
 
 expectedBotModels:
   - 
