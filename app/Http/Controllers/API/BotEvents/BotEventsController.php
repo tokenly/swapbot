@@ -23,8 +23,16 @@ class BotEventsController extends APIController {
     {
         $user = $auth->getUser();
 
-        // get the bot
-        $bot = $api_helper->requireResourceOwnedByUser($botuuid, $user, $bot_repository);
+        if ($auth->getUser()->hasPermission('viewBots')) {
+            // get the bot no matter who owns it
+            $bot = $api_helper->requireResource($botuuid, $bot_repository);
+
+        } else {
+            // get the bot
+            $bot = $api_helper->requireResourceOwnedByUser($botuuid, $user, $bot_repository);
+            
+        }
+
 
         // get all events fot this bot
         $resources = $bot_event_repository->findByBotId($bot['id']);
