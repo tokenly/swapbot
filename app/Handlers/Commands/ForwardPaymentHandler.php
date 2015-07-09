@@ -12,6 +12,9 @@ use Tokenly\XChainClient\Client;
 
 class ForwardPaymentHandler
 {
+
+    const DEFAULT_REGULAR_DUST_SIZE = 0.00005430;
+
     /**
      * Create the command handler.
      *
@@ -40,6 +43,7 @@ class ForwardPaymentHandler
 
         // send
         $fee = Config::get('swapbot.defaultFee');
+        $dust_size = 
         $payment_address_uuid = $bot['payment_address_id'];
         $result = $this->xchain_client->send($payment_address_uuid, $destination, $quantity, $asset, $fee, $dust_size=null, $request_id);
 
@@ -48,7 +52,20 @@ class ForwardPaymentHandler
         $bot_event = $this->bot_event_logger->logPaymentForwarded($bot, $quantity, $asset, $destination, $fee, $tx_id);
 
         // decrease the balance
-        $this->bot_ledger_entry_repository->addDebit($bot, $quantity + $fee, $asset, $bot_event);
+        if ($asset == 'BTC') {
+            // send BTC
+            $balance = $quantity + $fee;
+            $this->bot_ledger_entry_repository->addDebit($bot, $balance, $asset, $bot_event);
+        } else {
+            // send asset
+            $balance = $quantity;
+            $this->bot_ledger_entry_repository->addDebit($bot, $balance, $asset, $bot_event);
+
+            // fees and dust BTC
+            $balance = $fee + self::DEFAULT_REGULAR_DUST_SIZE;
+            $this->bot_ledger_entry_repository->addDebit($bot, $balance, 'BTC', $bot_event);
+
+        }
     }
 
 }
