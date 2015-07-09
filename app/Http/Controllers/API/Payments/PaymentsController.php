@@ -27,7 +27,7 @@ class PaymentsController extends APIController {
         $user = $auth->getUser();
 
         // get the bot
-        $bot = $api_helper->requireResourceOwnedByUser($botuuid, $user, $bot_repository);
+        $bot = $api_helper->requireResourceOwnedByUserOrWithPermssion($botuuid, $user, $bot_repository, 'viewBots');
 
         // get all payments for this bot
         // $resources = $bot_ledger_entry_repository->findByBot($bot);
@@ -62,7 +62,7 @@ class PaymentsController extends APIController {
         $user = $auth->getUser();
 
         // get the bot
-        $bot = $api_helper->requireResourceOwnedByUser($botuuid, $user, $bot_repository);
+        $bot = $api_helper->requireResourceOwnedByUserOrWithPermssion($botuuid, $user, $bot_repository, 'viewBots');
 
         // get all payment balances for this bot
         $balances = $bot_ledger_entry_repository->sumCreditsAndDebitsByAsset($bot);

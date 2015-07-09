@@ -104,7 +104,7 @@ class BotController extends APIController {
      */
     public function show($id, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
-        $resource = $api_helper->requireResourceOwnedByUser($id, $auth->getUser(), $repository);
+        $resource = $api_helper->requireResourceOwnedByUserOrWithPermssion($id, $auth->getUser(), $repository, 'viewBots');
         return $api_helper->transformResourceForOutput($resource);
     }
 

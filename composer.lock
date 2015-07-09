@@ -3010,7 +3010,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/ef68430f146ea081aac403043729f65b929a2acc",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/199e5cf7e408020fae6e426215a9c5071f7ce27f",
                 "reference": "ef68430f146ea081aac403043729f65b929a2acc",
                 "shasum": ""
             },
@@ -3048,12 +3048,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "740a7a97dfaaf5bab4fe9002d0f2bfbaeda0bfea"
+                "reference": "bdc2d8b7f76dd3baf1da95fe02e83af7ec15205b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/740a7a97dfaaf5bab4fe9002d0f2bfbaeda0bfea",
-                "reference": "740a7a97dfaaf5bab4fe9002d0f2bfbaeda0bfea",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/bdc2d8b7f76dd3baf1da95fe02e83af7ec15205b",
+                "reference": "bdc2d8b7f76dd3baf1da95fe02e83af7ec15205b",
                 "shasum": ""
             },
             "require": {
@@ -3084,7 +3084,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-07-09 01:18:50"
+            "time": "2015-07-09 21:25:46"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",

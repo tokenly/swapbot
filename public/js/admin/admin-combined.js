@@ -1572,7 +1572,7 @@
             m("table", {
               "class": "striped-table bot-table " + (vm.botsRefreshing() ? 'refreshing' : '')
             }, [
-              m('thead', {}, [m('tr', {}, [m('th', {}, 'Bot Name'), m('th', {}, 'State'), m('th', {}, 'Owner')])]), vm.bots().map(function(bot) {
+              m('thead', {}, [m('tr', {}, [m('th', {}, 'Bot Name'), m('th', {}, 'Admin Link'), m('th', {}, 'State'), m('th', {}, 'Owner')])]), vm.bots().map(function(bot) {
                 var address;
                 address = swapbot.addressUtils.publicBotAddress(bot.username, bot.id, window.location);
                 return m("tr", {}, [
@@ -1590,6 +1590,11 @@
                       target: "_blank",
                       "class": ""
                     }, "" + bot.name)
+                  ]), m("td", {}, [
+                    m("a[href='/admin/view/bot/" + bot.id + "']", {
+                      "class": "",
+                      config: m.route
+                    }, "Admin")
                   ]), m("td", {}, bot.state), m("td", {}, bot.username)
                 ]);
               })
