@@ -182,7 +182,9 @@
       opts.extract = function(xhr, xhrOptions) {
         var code, e, errMsg, json, newError;
         try {
-          json = window.JSON.parse(xhr.responseText);
+          if (xhr.responseText.length) {
+            json = window.JSON.parse(xhr.responseText);
+          }
           code = "" + xhr.status;
           if (code.substr(0, 1) !== '2') {
             if (((json != null ? json.errors : void 0) != null) && json.errors.length > 0) {
@@ -192,7 +194,10 @@
             }
             throw new Error('invalid response code: ' + code);
           }
-          return xhr.responseText;
+          if (xhr.responseText.length) {
+            return xhr.responseText;
+          }
+          return '""';
         } catch (_error) {
           e = _error;
           console.error("e=", e);

@@ -195,7 +195,8 @@ sbAdmin.api = do ()->
         opts.extract = (xhr, xhrOptions)->
             try
                 # make sure the json is valid
-                json = window.JSON.parse(xhr.responseText)
+                if xhr.responseText.length
+                    json = window.JSON.parse(xhr.responseText)
 
                 # check code
                 code = ""+xhr.status
@@ -207,7 +208,10 @@ sbAdmin.api = do ()->
                     throw new Error('invalid response code: '+code)
 
                 # all is good
-                return xhr.responseText
+                if xhr.responseText.length
+                    return xhr.responseText
+
+                return '""'
 
             catch e
                 console.error "e=",e
