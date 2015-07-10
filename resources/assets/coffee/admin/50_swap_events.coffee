@@ -23,12 +23,14 @@ do ()->
             m.redraw(true)
         return
 
-    appendBotEventMessage = (data)->
+    appendBotEventMessage = (data, reverse=true)->
         anyAppended = false
         if data?.event?.msg or data?.message
             if data.swapUuid == vm.swapId
-                console.log "matched"
-                vm.swapEvents().unshift(data)
+                if reverse
+                    vm.swapEvents().unshift(data)
+                else
+                    vm.swapEvents().push(data)
                 anyAppended = true
         return anyAppended
 
@@ -60,7 +62,7 @@ do ()->
                     sbAdmin.api.getBotEvents(bot_id).then(
                         (apiResponse)->
                             for data in apiResponse
-                                appendBotEventMessage(data)
+                                appendBotEventMessage(data, false)
                             return
                         , (errorResponse)->
                             vm.errorMessages(errorResponse.errors)

@@ -3480,13 +3480,19 @@
         m.redraw(true);
       }
     };
-    appendBotEventMessage = function(data) {
+    appendBotEventMessage = function(data, reverse) {
       var anyAppended, ref;
+      if (reverse == null) {
+        reverse = true;
+      }
       anyAppended = false;
       if ((data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) || (data != null ? data.message : void 0)) {
         if (data.swapUuid === vm.swapId) {
-          console.log("matched");
-          vm.swapEvents().unshift(data);
+          if (reverse) {
+            vm.swapEvents().unshift(data);
+          } else {
+            vm.swapEvents().push(data);
+          }
           anyAppended = true;
         }
       }
@@ -3511,7 +3517,7 @@
             var data, j, len;
             for (j = 0, len = apiResponse.length; j < len; j++) {
               data = apiResponse[j];
-              appendBotEventMessage(data);
+              appendBotEventMessage(data, false);
             }
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
