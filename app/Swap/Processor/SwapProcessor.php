@@ -488,12 +488,18 @@ class SwapProcessor {
 
         } else {
             // Counterparty asset refund
-            $input_dust_size_sat = $xchain_notification['counterpartyTx']['dustSizeSat'];
-            $fee_sat = floor($input_dust_size_sat * 0.2);
-            $dust_size_sat = $input_dust_size_sat - $fee_sat;
 
-            $fee = CurrencyUtil::satoshisToValue($fee_sat);
-            $dust_size = CurrencyUtil::satoshisToValue($dust_size_sat);
+            // // calculate a minimum fee
+            // $input_dust_size_sat = $xchain_notification['counterpartyTx']['dustSizeSat'];
+            // $fee_sat = floor($input_dust_size_sat * 0.2);
+            // $dust_size_sat = $input_dust_size_sat - $fee_sat;
+            // $fee = CurrencyUtil::satoshisToValue($fee_sat);
+            // $dust_size = CurrencyUtil::satoshisToValue($dust_size_sat);
+
+            // refunds must use minimum fees to be relayed by the network
+            $fee = $bot['return_fee'];
+            $dust_size = self::DEFAULT_REGULAR_DUST_SIZE;
+
             $out_asset = $xchain_notification['asset'];
             $out_quantity = $xchain_notification['quantity'];
         }
