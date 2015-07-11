@@ -61,7 +61,7 @@
         <div class="row">
             <div class="content">
                 <div class="title">Swapbot</div>
-                <div class="quote">Where are your token exchange dreams come true</div>
+                <div class="quote">By <a href="http://tokenly.com">Tokenly</a></div>
             </div>
         </div>
 
