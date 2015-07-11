@@ -1,6 +1,9 @@
 # When swap in is less than the minimum
 #   the return transaction does not pay more dust than it received
 
+#### TEMPORARILY DISABLED ####
+# See https://github.com/tokenly/swapbot/issues/147
+#### TEMPORARILY DISABLED ####
 
 ############################
 # setup bots and payment
@@ -28,9 +31,9 @@ xchainNotifications:
 expectedXChainCalls:
   - 
     meta: { baseFilename: send_LTBCOIN-refund.yml }
-    data:
-      fee: 0.000001
-      dust_size: 0.000004
+    # data:
+    #   fee: 0.000001
+    #   dust_size: 0.000004
 expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new.yml }

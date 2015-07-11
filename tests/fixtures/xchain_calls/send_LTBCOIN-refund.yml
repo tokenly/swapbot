@@ -5,5 +5,7 @@ data:
     quantity: 500
     asset: LTBCOIN
     sweep: false
-    fee: 0.000002
-    dust_size: 0.000008
+    # fee: 0.000002
+    fee: 0.0001
+    # dust_size: 0.000008
+    dust_size: 0.0000543
