@@ -204,6 +204,7 @@ sbAdmin.api = do ()->
                     if json?.errors? and json.errors.length > 0
                         newError = new Error()
                         newError.errors = json.errors
+                        newError.message = json.message
                         throw newError
                     throw new Error('invalid response code: '+code)
 
@@ -214,6 +215,10 @@ sbAdmin.api = do ()->
                 return '""'
 
             catch e
+                # pass through an error with the errors property already set
+                if e.errors?
+                    throw e
+
                 console.error "e=",e
                 code = xhr.status
                 errMsg = "Received an invalid response from server (#{code})"

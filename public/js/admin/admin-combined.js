@@ -190,6 +190,7 @@
             if (((json != null ? json.errors : void 0) != null) && json.errors.length > 0) {
               newError = new Error();
               newError.errors = json.errors;
+              newError.message = json.message;
               throw newError;
             }
             throw new Error('invalid response code: ' + code);
@@ -200,6 +201,9 @@
           return '""';
         } catch (_error) {
           e = _error;
+          if (e.errors != null) {
+            throw e;
+          }
           console.error("e=", e);
           code = xhr.status;
           errMsg = "Received an invalid response from server (" + code + ")";
