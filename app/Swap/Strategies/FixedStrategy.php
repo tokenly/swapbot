@@ -19,7 +19,7 @@ class FixedStrategy implements Strategy {
     }
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $quantity_out = floor($quantity_in / $swap_config['in_qty']) * $swap_config['out_qty'];
+        $quantity_out = floor(bcdiv($quantity_in, $swap_config['in_qty'])) * $swap_config['out_qty'];
 
         return [
             'quantityIn'  => $quantity_in,
