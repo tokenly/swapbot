@@ -148,7 +148,6 @@ do ()->
                         and we&rsquo;ll let you know when your {swapbot.formatters.formatCurrency(outAmount)} {outAsset} has been delivered.
                     </div>
 
-
                     <div className="segment-control">
                         <div className="line"></div>
                         <br/>
@@ -174,9 +173,11 @@ do ()->
                             <div>No transaction found</div>
                     }
 
-
-
                     <p className="description">This bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+
+                    <div id="GoBackLink">
+                        <NeedHelpLink botName={bot.name} />
+                    </div>
                 </div>
             </div>
 

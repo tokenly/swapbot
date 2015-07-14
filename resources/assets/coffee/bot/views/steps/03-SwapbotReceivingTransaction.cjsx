@@ -158,6 +158,8 @@ do ()->
 
                     <div id="GoBackLink">
                         <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
+                        &nbsp;
+                        <NeedHelpLink botName={bot.name} />
                     </div>
 
                     

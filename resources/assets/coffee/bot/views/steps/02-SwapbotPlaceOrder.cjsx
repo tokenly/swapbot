@@ -151,6 +151,8 @@ do ()->
 
                     <div id="GoBackLink">
                         <a id="go-back" onClick={UserInputActions.goBackOnClick} href="#go-back" className="shadow-link">Go Back</a>
+
+                        <NeedHelpLink botName={bot.name} />
                     </div>
                     
                     { if this.state.userChoices.outAmount? and this.state.userChoices.outAmount > 0
