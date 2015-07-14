@@ -228,6 +228,11 @@ class ReceiveEventProcessor {
         // never process a transaction coming from the payment address
         $blacklist_addresses[] = $tx_process['bot']['payment_address'];
 
+        // never process a transaction coming from any income forwarding addresses
+        foreach ($tx_process['bot']['income_rules'] as $income_rule_config) {
+            $blacklist_addresses[] = $income_rule_config['address'];
+        }
+
         if (in_array($tx_process['xchain_notification']['sources'][0], $blacklist_addresses)) {
             // blacklisted
             $this->bot_event_logger->logSendFromBlacklistedAddress($tx_process['bot'], $tx_process['xchain_notification'], $tx_process['is_confirmed']);
