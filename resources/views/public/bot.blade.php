@@ -110,6 +110,8 @@
 </script>
 
 
+{{-- pockets data holders --}}
+<div data-pockets-url class="pockets-url" style="display: none;"></div><div data-pockets-image class="pockets-image" style="display: none;"></div>
 
 </body>
 

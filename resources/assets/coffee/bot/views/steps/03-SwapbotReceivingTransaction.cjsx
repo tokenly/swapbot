@@ -125,6 +125,8 @@ do ()->
                 </span>
             # console.log "fiatSuffix=",fiatSuffix
 
+
+
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-2" className="content">
                     <h2>Receiving transaction</h2>
@@ -141,6 +143,10 @@ do ()->
 
                     <div className="sendInstructions">
                         To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
+
+                        { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAsset) }
+
+
                         <ReactZeroClipboard 
                             text={bot.address}
                             onAfterCopy={this.onAfterCopy}
