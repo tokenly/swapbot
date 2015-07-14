@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Bot\DeleteBotCommand',
 		'Swapbot\Console\Commands\Bot\ListBotSwapsCommand',
 		'Swapbot\Console\Commands\Bot\ForwardPaymentCommand',
+		'Swapbot\Console\Commands\Bot\ProcessIncomeForwardingForAllBotsCommand',
 
 		'Swapbot\Console\Commands\Swap\DeleteSwapCommand',
 		'Swapbot\Console\Commands\Swap\ResetSwapCommand',
