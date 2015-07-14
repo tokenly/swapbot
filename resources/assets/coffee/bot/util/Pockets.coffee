@@ -4,11 +4,13 @@ Pockets = do ()->
     pocketsUrl = null
     pocketsImage = null
 
-    exports.buildPaymentButton = (address, label, acceptedTokens='btc')->
+    exports.buildPaymentButton = (address, label, amount=null, acceptedTokens='btc')->
         return null if not pocketsUrl
 
         encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape)
         urlAttributes = "?address="+address+"&label="+encodedLabel+"&tokens="+acceptedTokens;
+        if amount?
+            urlAttributes += '&amount='+swapbot.formatters.formatCurrency(amount)
         return React.createElement('a', {href: pocketsUrl+urlAttributes, target: '_blank', className: 'pocketsLink', title: "Pay Using Tokenly Pockets"}, [
             React.createElement('img', {src: pocketsImage, height: '24px', 'width': '24px'}),
         ])

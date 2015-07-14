@@ -144,7 +144,7 @@ do ()->
                     <div className="sendInstructions">
                         To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
 
-                        { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAsset) }
+                        { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
 
 
                         <ReactZeroClipboard 
