@@ -37,6 +37,8 @@ class PublicBotController extends Controller {
             'pusherUrl'         => $pusher_url,
             'quotebotPusherUrl' => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
             'env'               => app()->environment(),
+
+            'analyticsId'       => env('GOOGLE_ANALYTICS_ID'),
         ]);
     }
 
