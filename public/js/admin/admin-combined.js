@@ -3959,6 +3959,12 @@
       }
       return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
+    exports.formatCurrencyAsNumber = function(value) {
+      if ((value == null) || isNaN(value)) {
+        return '0';
+      }
+      return window.numeral(value).format('0.[00000000]');
+    };
     exports.formatFiatCurrency = function(value, currencyPrefix) {
       if (currencyPrefix == null) {
         currencyPrefix = '$';

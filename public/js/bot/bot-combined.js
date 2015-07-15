@@ -97,6 +97,12 @@
       }
       return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
+    exports.formatCurrencyAsNumber = function(value) {
+      if ((value == null) || isNaN(value)) {
+        return '0';
+      }
+      return window.numeral(value).format('0.[00000000]');
+    };
     exports.formatFiatCurrency = function(value, currencyPrefix) {
       if (currencyPrefix == null) {
         currencyPrefix = '$';
@@ -797,6 +803,239 @@
         }, "Load more swaps..."))));
       }
     });
+  })();
+
+  NeedHelpLink = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {
+        userChoices: UserChoiceStore.getUserChoices()
+      };
+    };
+    return NeedHelpLink = React.createClass({
+      displayName: 'NeedHelpLink',
+      getInitialState: function() {
+        return {};
+      },
+      render: function() {
+        var subject;
+        subject = "Swapbot Help";
+        if (this.props.botName != null) {
+          subject = "Help with " + this.props.botName;
+        }
+        return React.createElement("span", null, React.createElement("a", {
+          "href": "mailto:" + (encodeURIComponent('Tokenly Team <team@tokenly.co>')) + "?subject=" + (encodeURIComponent(subject)),
+          "className": "shadow-link helpLink",
+          "target": "_blank"
+        }, "Need Help?"));
+      }
+    });
+  })();
+
+  PlaceOrderInput = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {
+        userChoices: UserChoiceStore.getUserChoices()
+      };
+    };
+    return PlaceOrderInput = React.createClass({
+      displayName: 'PlaceOrderInput',
+      getInitialState: function() {
+        return $.extend({}, getViewState());
+      },
+      updateAmount: function(e) {
+        var outAmount;
+        outAmount = parseFloat($(e.target).val());
+        if (outAmount < 0 || isNaN(outAmount)) {
+          outAmount = 0;
+        }
+        UserInputActions.updateOutAmount(outAmount);
+      },
+      checkEnter: function(e) {
+        if (e.keyCode === 13) {
+          if (this.props.onOrderInput != null) {
+            this.props.onOrderInput();
+          }
+        }
+      },
+      render: function() {
+        var bot, defaultValue, isChooseable, outAmount, outAsset, swapConfigIsChosen;
+        bot = this.props.bot;
+        defaultValue = this.state.userChoices.outAmount;
+        outAsset = this.state.userChoices.outAsset;
+        swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
+        outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset]);
+        isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset]);
+        return React.createElement("div", null, (bot.state !== 'active' ? React.createElement("div", {
+          "className": "warning"
+        }, React.createElement("img", {
+          "src": "/images/misc/stop.png",
+          "alt": "STOP"
+        }), React.createElement("p", null, "This bot is currently inactive and needs attention by its operator. ", React.createElement("br", null), " Swaps by this bot may be delayed or refunded until this is corrected.")) : !isChooseable ? React.createElement("div", {
+          "className": "warning"
+        }, React.createElement("img", {
+          "src": "/images/misc/stop.png",
+          "alt": "STOP"
+        }), React.createElement("p", null, "This bot is currently empty of ", outAsset, ". ", React.createElement("br", null), " Swaps by this bot may be delayed or refunded until this is corrected.")) : void 0), React.createElement("table", {
+          "className": "fieldset"
+        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-available"
+        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
+          "id": "token-available"
+        }, swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset]), " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
+          "htmlFor": "token-amount"
+        }, "I would like to purchase: ")), React.createElement("td", null, (swapConfigIsChosen ? React.createElement("div", {
+          "className": "chosenInputAmount"
+        }, swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset) : React.createElement("div", null, React.createElement("input", {
+          "onChange": this.updateAmount,
+          "onKeyUp": this.checkEnter,
+          "type": "text",
+          "id": "token-amount",
+          "placeholder": '0',
+          "defaultValue": defaultValue
+        }), "\u00a0", outAsset))))));
+      }
+    });
+  })();
+
+  ReactZeroClipboard = void 0;
+
+  (function() {
+    var addZeroListener, client, eventHandlers, handleZeroClipLoad, propToEvent, readyEventHasHappened, result, waitingForScriptToLoad;
+    client = void 0;
+    waitingForScriptToLoad = [];
+    eventHandlers = {
+      copy: [],
+      afterCopy: [],
+      error: [],
+      ready: []
+    };
+    propToEvent = {
+      onCopy: 'copy',
+      onAfterCopy: 'afterCopy',
+      onError: 'error',
+      onReady: 'ready'
+    };
+    readyEventHasHappened = false;
+    handleZeroClipLoad = function(error) {
+      var ZeroClipboard, eventName, handleEvent;
+      ZeroClipboard = window.ZeroClipboard;
+      delete window.ZeroClipboard;
+      client = new ZeroClipboard;
+      handleEvent = function(eventName) {
+        client.on(eventName, function(event) {
+          var activeElement;
+          if (eventName === 'ready') {
+            eventHandlers['ready'].forEach(function(xs) {
+              xs[1](event);
+            });
+            readyEventHasHappened = true;
+            return;
+          }
+          activeElement = ZeroClipboard.activeElement();
+          eventHandlers[eventName].some(function(xs) {
+            var callback, element;
+            element = xs[0];
+            callback = xs[1];
+            if (element === activeElement) {
+              callback(event);
+              return true;
+            }
+          });
+        });
+      };
+      for (eventName in eventHandlers) {
+        handleEvent(eventName);
+      }
+      waitingForScriptToLoad.forEach(function(callback) {
+        callback();
+      });
+    };
+    result = function(fnOrValue) {
+      if (typeof fnOrValue === 'function') {
+        return fnOrValue();
+      } else {
+        return fnOrValue;
+      }
+    };
+    handleZeroClipLoad(null);
+    ReactZeroClipboard = React.createClass({
+      ready: function(cb) {
+        if (client) {
+          setTimeout(cb.bind(this), 1);
+        } else {
+          waitingForScriptToLoad.push(cb.bind(this));
+        }
+      },
+      componentWillMount: function() {
+        if (readyEventHasHappened && this.props.onReady) {
+          this.props.onReady();
+        }
+      },
+      componentDidMount: function() {
+        this.eventRemovers = [];
+        this.ready(function() {
+          var remover;
+          var el, eventName, prop, remover;
+          if (!this.isMounted()) {
+            return;
+          }
+          el = React.findDOMNode(this);
+          client.clip(el);
+          for (prop in this.props) {
+            eventName = propToEvent[prop];
+            if (eventName && typeof this.props[prop] === 'function') {
+              remover = addZeroListener(eventName, el, this.props[prop]);
+              this.eventRemovers.push(remover);
+            }
+          }
+          remover = addZeroListener('copy', el, this.handleCopy);
+          this.eventRemovers.push(remover);
+        });
+      },
+      componentWillUnmount: function() {
+        if (client) {
+          client.unclip(this.getDOMNode());
+        }
+        this.eventRemovers.forEach(function(fn) {
+          fn();
+        });
+      },
+      handleCopy: function() {
+        var html, p, richText, text;
+        p = this.props;
+        text = result(p.getText || p.text);
+        html = result(p.getHtml || p.html);
+        richText = result(p.getRichText || p.richText);
+        client.clearData();
+        richText !== null && client.setRichText(richText);
+        html !== null && client.setHtml(html);
+        text !== null && client.setText(text);
+      },
+      render: function() {
+        return React.Children.only(this.props.children);
+      }
+    });
+    addZeroListener = function(event, el, fn) {
+      eventHandlers[event].push([el, fn]);
+      return function() {
+        var handlers, i;
+        handlers = eventHandlers[event];
+        i = 0;
+        while (i < handlers.length) {
+          if (handlers[i][0] === el) {
+            handlers.splice(i, 1);
+            return;
+          }
+          i++;
+        }
+      };
+    };
   })();
 
   SwapbotChoose = null;
@@ -1529,239 +1768,6 @@
     });
   })();
 
-  NeedHelpLink = null;
-
-  (function() {
-    var getViewState;
-    getViewState = function() {
-      return {
-        userChoices: UserChoiceStore.getUserChoices()
-      };
-    };
-    return NeedHelpLink = React.createClass({
-      displayName: 'NeedHelpLink',
-      getInitialState: function() {
-        return {};
-      },
-      render: function() {
-        var subject;
-        subject = "Swapbot Help";
-        if (this.props.botName != null) {
-          subject = "Help with " + this.props.botName;
-        }
-        return React.createElement("span", null, React.createElement("a", {
-          "href": "mailto:" + (encodeURIComponent('Tokenly Team <team@tokenly.co>')) + "?subject=" + (encodeURIComponent(subject)),
-          "className": "shadow-link helpLink",
-          "target": "_blank"
-        }, "Need Help?"));
-      }
-    });
-  })();
-
-  PlaceOrderInput = null;
-
-  (function() {
-    var getViewState;
-    getViewState = function() {
-      return {
-        userChoices: UserChoiceStore.getUserChoices()
-      };
-    };
-    return PlaceOrderInput = React.createClass({
-      displayName: 'PlaceOrderInput',
-      getInitialState: function() {
-        return $.extend({}, getViewState());
-      },
-      updateAmount: function(e) {
-        var outAmount;
-        outAmount = parseFloat($(e.target).val());
-        if (outAmount < 0 || isNaN(outAmount)) {
-          outAmount = 0;
-        }
-        UserInputActions.updateOutAmount(outAmount);
-      },
-      checkEnter: function(e) {
-        if (e.keyCode === 13) {
-          if (this.props.onOrderInput != null) {
-            this.props.onOrderInput();
-          }
-        }
-      },
-      render: function() {
-        var bot, defaultValue, isChooseable, outAmount, outAsset, swapConfigIsChosen;
-        bot = this.props.bot;
-        defaultValue = this.state.userChoices.outAmount;
-        outAsset = this.state.userChoices.outAsset;
-        swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
-        outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset]);
-        isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset]);
-        return React.createElement("div", null, (bot.state !== 'active' ? React.createElement("div", {
-          "className": "warning"
-        }, React.createElement("img", {
-          "src": "/images/misc/stop.png",
-          "alt": "STOP"
-        }), React.createElement("p", null, "This bot is currently inactive and needs attention by its operator. ", React.createElement("br", null), " Swaps by this bot may be delayed or refunded until this is corrected.")) : !isChooseable ? React.createElement("div", {
-          "className": "warning"
-        }, React.createElement("img", {
-          "src": "/images/misc/stop.png",
-          "alt": "STOP"
-        }), React.createElement("p", null, "This bot is currently empty of ", outAsset, ". ", React.createElement("br", null), " Swaps by this bot may be delayed or refunded until this is corrected.")) : void 0), React.createElement("table", {
-          "className": "fieldset"
-        }, React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-available"
-        }, outAsset, " available for purchase: ")), React.createElement("td", null, React.createElement("span", {
-          "id": "token-available"
-        }, swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset]), " ", outAsset))), React.createElement("tr", null, React.createElement("td", null, React.createElement("label", {
-          "htmlFor": "token-amount"
-        }, "I would like to purchase: ")), React.createElement("td", null, (swapConfigIsChosen ? React.createElement("div", {
-          "className": "chosenInputAmount"
-        }, swapbot.formatters.formatCurrency(defaultValue), "\u00a0", outAsset) : React.createElement("div", null, React.createElement("input", {
-          "onChange": this.updateAmount,
-          "onKeyUp": this.checkEnter,
-          "type": "text",
-          "id": "token-amount",
-          "placeholder": '0',
-          "defaultValue": defaultValue
-        }), "\u00a0", outAsset))))));
-      }
-    });
-  })();
-
-  ReactZeroClipboard = void 0;
-
-  (function() {
-    var addZeroListener, client, eventHandlers, handleZeroClipLoad, propToEvent, readyEventHasHappened, result, waitingForScriptToLoad;
-    client = void 0;
-    waitingForScriptToLoad = [];
-    eventHandlers = {
-      copy: [],
-      afterCopy: [],
-      error: [],
-      ready: []
-    };
-    propToEvent = {
-      onCopy: 'copy',
-      onAfterCopy: 'afterCopy',
-      onError: 'error',
-      onReady: 'ready'
-    };
-    readyEventHasHappened = false;
-    handleZeroClipLoad = function(error) {
-      var ZeroClipboard, eventName, handleEvent;
-      ZeroClipboard = window.ZeroClipboard;
-      delete window.ZeroClipboard;
-      client = new ZeroClipboard;
-      handleEvent = function(eventName) {
-        client.on(eventName, function(event) {
-          var activeElement;
-          if (eventName === 'ready') {
-            eventHandlers['ready'].forEach(function(xs) {
-              xs[1](event);
-            });
-            readyEventHasHappened = true;
-            return;
-          }
-          activeElement = ZeroClipboard.activeElement();
-          eventHandlers[eventName].some(function(xs) {
-            var callback, element;
-            element = xs[0];
-            callback = xs[1];
-            if (element === activeElement) {
-              callback(event);
-              return true;
-            }
-          });
-        });
-      };
-      for (eventName in eventHandlers) {
-        handleEvent(eventName);
-      }
-      waitingForScriptToLoad.forEach(function(callback) {
-        callback();
-      });
-    };
-    result = function(fnOrValue) {
-      if (typeof fnOrValue === 'function') {
-        return fnOrValue();
-      } else {
-        return fnOrValue;
-      }
-    };
-    handleZeroClipLoad(null);
-    ReactZeroClipboard = React.createClass({
-      ready: function(cb) {
-        if (client) {
-          setTimeout(cb.bind(this), 1);
-        } else {
-          waitingForScriptToLoad.push(cb.bind(this));
-        }
-      },
-      componentWillMount: function() {
-        if (readyEventHasHappened && this.props.onReady) {
-          this.props.onReady();
-        }
-      },
-      componentDidMount: function() {
-        this.eventRemovers = [];
-        this.ready(function() {
-          var remover;
-          var el, eventName, prop, remover;
-          if (!this.isMounted()) {
-            return;
-          }
-          el = React.findDOMNode(this);
-          client.clip(el);
-          for (prop in this.props) {
-            eventName = propToEvent[prop];
-            if (eventName && typeof this.props[prop] === 'function') {
-              remover = addZeroListener(eventName, el, this.props[prop]);
-              this.eventRemovers.push(remover);
-            }
-          }
-          remover = addZeroListener('copy', el, this.handleCopy);
-          this.eventRemovers.push(remover);
-        });
-      },
-      componentWillUnmount: function() {
-        if (client) {
-          client.unclip(this.getDOMNode());
-        }
-        this.eventRemovers.forEach(function(fn) {
-          fn();
-        });
-      },
-      handleCopy: function() {
-        var html, p, richText, text;
-        p = this.props;
-        text = result(p.getText || p.text);
-        html = result(p.getHtml || p.html);
-        richText = result(p.getRichText || p.richText);
-        client.clearData();
-        richText !== null && client.setRichText(richText);
-        html !== null && client.setHtml(html);
-        text !== null && client.setText(text);
-      },
-      render: function() {
-        return React.Children.only(this.props.children);
-      }
-    });
-    addZeroListener = function(event, el, fn) {
-      eventHandlers[event].push([el, fn]);
-      return function() {
-        var handlers, i;
-        handlers = eventHandlers[event];
-        i = 0;
-        while (i < handlers.length) {
-          if (handlers[i][0] === el) {
-            handlers.splice(i, 1);
-            return;
-          }
-          i++;
-        }
-      };
-    };
-  })();
-
   window.BotApp = {
     init: function(bot, quotebotCredentials, pusherURL) {
       SwapsStore.init();
@@ -2017,6 +2023,104 @@
     exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -2656,104 +2760,6 @@
     return exports;
   })();
 
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
-
   Pockets = (function() {
     var exports, pocketsImage, pocketsUrl;
     exports = {};
@@ -2773,7 +2779,7 @@
       encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape);
       urlAttributes = "?address=" + address + "&label=" + encodedLabel + "&tokens=" + acceptedTokens;
       if (amount != null) {
-        urlAttributes += '&amount=' + swapbot.formatters.formatCurrency(amount);
+        urlAttributes += '&amount=' + swapbot.formatters.formatCurrencyAsNumber(amount);
       }
       return React.createElement('a', {
         href: pocketsUrl + urlAttributes,
