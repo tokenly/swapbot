@@ -55,9 +55,10 @@ do ()->
                                 {
                                     for swapConfigGroup, index in swapConfigGroups
                                         outAsset = swapConfigGroup[0].out
-                                        outAmount = swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])
-                                        isChooseable = outAmount > 0
+                                        outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
+                                        isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
                                         [firstSwapDescription, otherSwapDescriptions] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup)
+
                                         <li key={"swapGroup#{index}"} className={"chooseable swap"+(" unchooseable" if not isChooseable) }>
                                             <a href="#choose-swap" onClick={this.buildChooseOutAsset(outAsset, isChooseable)}>
                                                 <div>

@@ -3912,7 +3912,7 @@
   }
 
   swapbot.formatters = (function() {
-    var exports;
+    var exports, isZero;
     exports = {};
     exports.formatConfirmations = function(confirmations) {
       if (confirmations == null) {
@@ -3934,11 +3934,21 @@
       SATOSHI = swapbot.swapUtils.SATOSHI;
       return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
     };
-    exports.formatCurrencyWithZero = function(value, currencyPostfix) {
+    isZero = function(value) {
+      if ((value == null) || value.length === 0) {
+        return true;
+      }
+      return false;
+    };
+    exports.isZero = isZero;
+    exports.isNotZero = function(value) {
+      return !isZero(value);
+    };
+    exports.formatCurrencyWithForcedZero = function(value, currencyPostfix) {
       if (currencyPostfix == null) {
         currencyPostfix = '';
       }
-      return exports.formatCurrency(((value == null) || value.length === 0 ? 0 : value), currencyPostfix);
+      return exports.formatCurrency((isZero(value) ? 0 : value), currencyPostfix);
     };
     exports.formatCurrency = function(value, currencyPostfix) {
       if (currencyPostfix == null) {

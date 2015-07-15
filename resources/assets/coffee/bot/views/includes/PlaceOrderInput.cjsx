@@ -36,8 +36,8 @@ do ()->
             outAsset = this.state.userChoices.outAsset
             swapConfigIsChosen = !!this.state.userChoices.swapConfig?
 
-            outAmount = swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])
-            isChooseable = outAmount > 0
+            outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
+            isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
 
             return <div>
                         {
@@ -59,7 +59,7 @@ do ()->
                                 <td>
                                     <label htmlFor="token-available">{outAsset} available for purchase: </label>
                                 </td>
-                                <td><span id="token-available">{swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])} {outAsset}</span></td>
+                                <td><span id="token-available">{swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])} {outAsset}</span></td>
                             </tr>
                             <tr>
                                 <td>
