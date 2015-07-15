@@ -5,6 +5,7 @@ window.BotApp =
         BotstreamStore.init()
         QuotebotStore.init()
         UserChoiceStore.init()
+        UserInterfaceStateStore.init()
 
         # subscribe to the swaps event stream
         BotAPIActionCreator.subscribeToBotstream(bot.id)

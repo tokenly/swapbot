@@ -20,6 +20,8 @@ BotConstants = do ()->
 
     exports.BOT_ADD_NEW_QUOTE                = 'BOT_ADD_NEW_QUOTE';
 
+    exports.UI_BEGIN_SWAPS                   = 'UI_BEGIN_SWAPS';
+
 
     # #############################################
     return exports
