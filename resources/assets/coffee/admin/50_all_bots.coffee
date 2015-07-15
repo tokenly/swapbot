@@ -76,7 +76,7 @@ do ()->
                             address = swapbot.addressUtils.publicBotAddress(bot.username, bot.id, window.location)
                             return m("tr", {}, [
                                 m("td", {}, [
-                                    if bot.hash.length then m("a[href='#{address}']", {target: "_blank"}, [m("img", {class: 'tinyRoboHead', src: "http://robohash.org/#{bot.hash}.png?set=set3"})]) else m('div', {class: 'emptyRoboHead'}, ''),
+                                    if bot.hash.length then m("a[href='#{address}']", {target: "_blank"}, [m("img", {class: 'tinyRoboHead', src: "http://robohash.tokenly.com/#{bot.hash}.png?set=set3"})]) else m('div', {class: 'emptyRoboHead'}, ''),
                                     m("a[href='#{address}']", {target: "_blank", class: "",}, "#{bot.name}"),
                                 ]),
                                 m("td", {}, [

@@ -25,11 +25,12 @@ class PublicSwapController extends Controller {
         list($user, $bot, $swap) = $this->requireUserAndSwap($username, $swapid);
 
         return view('public.swap-details', [
-            'swap'          => $swap,
-            'bot'           => $bot,
-            'swapFormatter' => $swap_formatter,
-            'pusherUrl'     => Config::get('tokenlyPusher.clientUrl'),
-            'env'           => app()->environment(),
+            'swap'           => $swap,
+            'bot'            => $bot,
+            'botRobohashUrl' => $bot->getRobohashURL(),
+            'swapFormatter'  => $swap_formatter,
+            'pusherUrl'      => Config::get('tokenlyPusher.clientUrl'),
+            'env'            => app()->environment(),
         ]);
     }
 

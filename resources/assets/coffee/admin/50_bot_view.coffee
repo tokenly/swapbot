@@ -357,7 +357,7 @@ do ()->
                         m("h2", "SwapBot #{vm.name()}"),
                     ]),
                     m("div", {class: "col-md-2 text-right"}, [
-                        if vm.hash().length then m("img", {class: 'mediumRoboHead', src: "http://robohash.org/#{vm.hash()}.png?set=set3"}) else null,
+                        if vm.hash().length then m("img", {class: 'mediumRoboHead', src: "http://robohash.tokenly.com/#{vm.hash()}.png?set=set3"}) else null,
                     ]),
                 ]),
 

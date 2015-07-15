@@ -17,7 +17,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     <div class="swapbot-container">
         <div class="header">
             <div class="avatar">
-                <a href="{{ $bot->getPublicBotURL() }}" title="Return to the bot home page"><img src="http://robohash.org/{{ $bot['hash'] }}.png?set=set3"></a>
+                <a href="{{ $bot->getPublicBotURL() }}" title="Return to the bot home page"><img src="{{ $botRobohashUrl }}"></a>
             </div>
             <div class="status-dot bckg-{{ $swapFormatter->swapStateDotColor($swap) }}"></div>
             <h1><a href="{{ $bot->getPublicBotURL() }}" target="_blank">{{ $bot['name'] }}</a></h1>

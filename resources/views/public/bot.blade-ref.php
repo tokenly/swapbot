@@ -20,8 +20,8 @@
         <!-- HEAD SECTION -->
         <div id="details">
             <div id="details-avatar">
-                @if ($bot['hash'])
-                <img src="http://robohash.org/{{ $bot['hash'] }}.png?set=set3" class="center">
+                @if ($botRobohashUrl)
+                <img src="{{ $botRobohashUrl }}" class="center">
                 @else
                 <span data-no-image></span>
                 @endif

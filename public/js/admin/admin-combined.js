@@ -1591,7 +1591,7 @@
                     }, [
                       m("img", {
                         "class": 'tinyRoboHead',
-                        src: "http://robohash.org/" + bot.hash + ".png?set=set3"
+                        src: "http://robohash.tokenly.com/" + bot.hash + ".png?set=set3"
                       })
                     ]) : m('div', {
                       "class": 'emptyRoboHead'
@@ -2185,7 +2185,7 @@
               }, [
                 vm.hash().length ? m("img", {
                   "class": 'mediumRoboHead',
-                  src: "http://robohash.org/" + (vm.hash()) + ".png?set=set3"
+                  src: "http://robohash.tokenly.com/" + (vm.hash()) + ".png?set=set3"
                 }) : null
               ])
             ]), m("div", {
@@ -2846,7 +2846,7 @@
           }, [
             vm.hash().length ? m("img", {
               "class": 'mediumRoboHead',
-              src: "http://robohash.org/" + (vm.hash()) + ".png?set=set3"
+              src: "http://robohash.tokenly.com/" + (vm.hash()) + ".png?set=set3"
             }) : null
           ])
         ]), m("div", {
@@ -3114,7 +3114,7 @@
                     }, [
                       m("img", {
                         "class": 'tinyRoboHead',
-                        src: "http://robohash.org/" + bot.hash + ".png?set=set3"
+                        src: "http://robohash.tokenly.com/" + bot.hash + ".png?set=set3"
                       })
                     ]) : m('div', {
                       "class": 'emptyRoboHead'
