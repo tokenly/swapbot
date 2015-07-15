@@ -24,6 +24,9 @@ swapbot.formatters = do ()->
         SATOSHI = swapbot.swapUtils.SATOSHI
         return exports.formatCurrency(amount / SATOSHI, currencyPostfix)
 
+    exports.formatCurrencyWithZero = (value, currencyPostfix='') ->
+        return exports.formatCurrency((if not value? or value.length == 0 then 0 else value), currencyPostfix)
+    
     exports.formatCurrency = (value, currencyPostfix='') ->
         if not value? or isNaN(value) then return ''
         return window.numeral(value).format('0,0.[00000000]') + (if currencyPostfix?.length then ' '+currencyPostfix else '')

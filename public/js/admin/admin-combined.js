@@ -3934,6 +3934,12 @@
       SATOSHI = swapbot.swapUtils.SATOSHI;
       return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
     };
+    exports.formatCurrencyWithZero = function(value, currencyPostfix) {
+      if (currencyPostfix == null) {
+        currencyPostfix = '';
+      }
+      return exports.formatCurrency(((value == null) || value.length === 0 ? 0 : value), currencyPostfix);
+    };
     exports.formatCurrency = function(value, currencyPostfix) {
       if (currencyPostfix == null) {
         currencyPostfix = '';

@@ -850,6 +850,13 @@ li.chooseable:hover {
 }
 li.unchooseable {
   opacity: 0.4;
+  cursor: default;
+}
+li.unchooseable a {
+  cursor: default;
+}
+li.unchooseable a .icon-next {
+  cursor: default;
 }
 /* BUTTONS */
 button {
@@ -2422,7 +2429,8 @@ button {
 .loading {
   color: #777;
 }
-.error {
+.error,
+.wide-list .item-header small.error {
   color: #900;
   font-weight: bold;
 }

@@ -36,12 +36,21 @@ do ()->
             outAsset = this.state.userChoices.outAsset
             swapConfigIsChosen = !!this.state.userChoices.swapConfig?
 
+            outAmount = swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])
+            isChooseable = outAmount > 0
+
             return <div>
                         {
                             if bot.state != 'active'
                                 <div className="warning">
                                     <img src="/images/misc/stop.png" alt="STOP" />
                                     <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
+                                </div>
+                            else if not isChooseable
+                            # should not get here
+                                <div className="warning">
+                                    <img src="/images/misc/stop.png" alt="STOP" />
+                                    <p>This bot is currently empty of {outAsset}. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
                                 </div>
                         }
 
@@ -50,7 +59,7 @@ do ()->
                                 <td>
                                     <label htmlFor="token-available">{outAsset} available for purchase: </label>
                                 </td>
-                                <td><span id="token-available">{swapbot.formatters.formatCurrency(bot.balances[outAsset])} {outAsset}</span></td>
+                                <td><span id="token-available">{swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])} {outAsset}</span></td>
                             </tr>
                             <tr>
                                 <td>
@@ -76,20 +85,3 @@ do ()->
                         </table>
                     </div>
 
-
-                    # <table className="fieldset">
-                    #     <tr>
-                    #         <td>
-                    #             <label htmlFor="token-available">{swapConfig.out} available for purchase: </label>
-                    #         </td>
-                    #         <td><span id="token-available">{bot.balances[swapConfig.out]} {swapConfig.out}</span></td>
-                    #     </tr>
-                    #     <tr>
-                    #         <td>
-                    #             <label htmlFor="token-amount">I would like to purchase: </label>
-                    #         </td>
-                    #         <td>
-                    #             <input disabled type="text" id="token-amount" placeholder={'0 '+swapConfig.out} defaultValue={this.state.userChoices.outAmount} />
-                    #         </td>
-                    #     </tr>
-                    # </table>

@@ -16,10 +16,11 @@ do ()->
         componentDidMount: ()->
             return
 
-        buildChooseOutAsset: (outAsset)->
+        buildChooseOutAsset: (outAsset, isChooseable)->
             return (e)=>
                 e.preventDefault()
-                UserInputActions.chooseOutAsset(outAsset)
+                if isChooseable
+                    UserInputActions.chooseOutAsset(outAsset)
                 return
 
 
@@ -43,11 +44,19 @@ do ()->
                                     {
                                         for swapConfigGroup, index in swapConfigGroups
                                             outAsset = swapConfigGroup[0].out
+                                            outAmount = swapbot.formatters.formatCurrencyWithZero(bot.balances[outAsset])
+                                            isChooseable = outAmount > 0
                                             [firstSwapDescription, otherSwapDescriptions] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup)
-                                            <li key={"swapGroup#{index}"} className="chooseable swap">
-                                                <a href="#choose-swap" onClick={this.buildChooseOutAsset(outAsset)}>
+                                            <li key={"swapGroup#{index}"} className={"chooseable swap"+(" unchooseable" if not isChooseable) }>
+                                                <a href="#choose-swap" onClick={this.buildChooseOutAsset(outAsset, isChooseable)}>
                                                     <div>
-                                                        <div className="item-header">{ outAsset } <small>({ swapbot.formatters.formatCurrency(bot.balances[outAsset]) } available)</small></div>
+                                                        <div className="item-header">{ outAsset } 
+                                                            {   if isChooseable
+                                                                    <small> ({ outAmount } available)</small>
+                                                                else
+                                                                    <small className="error"> OUT OF STOCK</small>
+                                                            }
+                                                        </div>
                                                         <p className="exchange-description">
                                                             This bot will send you { firstSwapDescription }.
                                                             { if otherSwapDescriptions?
