@@ -272,9 +272,15 @@ UserChoiceStore = do ()->
     # 
     # #############################################
 
-    routeToStepOrEmitChange = (newStep)->
+    routeToStep = (newStep)->
         if userChoices.step != newStep
             router.setRoute('/'+newStep)
+            return true
+
+        return false
+
+    routeToStepOrEmitChange = (newStep)->
+        if routeToStep(newStep)
             return
 
         emitChange()
@@ -452,6 +458,9 @@ UserChoiceStore = do ()->
 
                     # go back to the wait step if we aren't there
                     routeToStepOrEmitChange('receive')
+
+                when BotConstants.UI_BEGIN_SWAPS
+                    routeToStep('choose')
 
                 # else
                 #     console.log "unknown action: #{action.actionType}"

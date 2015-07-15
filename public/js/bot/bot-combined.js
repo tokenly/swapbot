@@ -2338,7 +2338,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
+    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStep, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
     exports = {};
     exports.MATCH_AUTO = MATCH_AUTO = 'AUTO';
     exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL';
@@ -2558,9 +2558,15 @@
       }
       return false;
     };
-    routeToStepOrEmitChange = function(newStep) {
+    routeToStep = function(newStep) {
       if (userChoices.step !== newStep) {
         router.setRoute('/' + newStep);
+        return true;
+      }
+      return false;
+    };
+    routeToStepOrEmitChange = function(newStep) {
+      if (routeToStep(newStep)) {
         return;
       }
       emitChange();
@@ -2691,6 +2697,9 @@
             clearChosenSwap();
             changeSwapMatchMode(MATCH_SHOW_ALL);
             routeToStepOrEmitChange('receive');
+            break;
+          case BotConstants.UI_BEGIN_SWAPS:
+            routeToStep('choose');
         }
       });
       resetUserChoices();
