@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-07-09 18:32:27
+// compiled on 2015-07-16 02:23:11
 
 return array (
   'swap.new' => 
@@ -38,7 +38,7 @@ return array (
     'name' => 'swap.transaction.update',
     'label' => 'Swap Transaction',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -53,7 +53,7 @@ return array (
     'name' => 'swap.confirming',
     'label' => 'Confirming Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -68,7 +68,7 @@ return array (
     'name' => 'swap.confirmed',
     'label' => 'Confirmed Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -83,12 +83,15 @@ return array (
     'name' => 'swap.sent',
     'label' => 'Swap Sent',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msg' => 'Sent <?php echo e($fmt($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.
+',
     'msgVars' => 
     array (
       0 => 'quantityOut',
       1 => 'assetOut',
       2 => 'destination',
+      3 => 'changeOut',
+      4 => 'changeOutAsset',
     ),
     'swapEventStream' => true,
   ),
@@ -111,7 +114,8 @@ return array (
     'name' => 'send.confirmed',
     'label' => 'Swap Send Confirmed',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.',
+    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.
+',
     'msgVars' => 
     array (
       0 => 'quantityOut',

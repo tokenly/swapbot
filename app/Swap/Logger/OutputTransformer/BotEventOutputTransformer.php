@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Formatting\SwapFormatter;
 use Swapbot\Models\Swap;
+use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class BotEventOutputTransformer {
@@ -49,7 +50,10 @@ class BotEventOutputTransformer {
             if (!isset($event_details[$var_name])) { $event_details[$var_name] = ''; }
         }
 
-        $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $event_details);
+        $blade_vars = $event_details;
+        $blade_vars['fmt'] = function($value) { return CurrencyUtil::valueToFormattedString($value); };
+
+        $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $blade_vars);
         return $resolved_message;
     }
 

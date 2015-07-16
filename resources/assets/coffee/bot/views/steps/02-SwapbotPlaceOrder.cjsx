@@ -52,9 +52,11 @@ do ()->
             inAmount = this.getInAmount()
             isChooseable = this.isChooseable()
             errorMsg = this.getErrorMessage()
-            fiatSuffix = <span className="fiatSuffix">
+            fiatSuffix = 
+                <span className="fiatSuffix">
                     { swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
                 </span>
+            changeMessage = swapbot.swapUtils.buildChangeMessage(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
 
             <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
                 <a className="choose-swap" onClick={this.chooseSwap} href="#next-step">
@@ -69,7 +71,13 @@ do ()->
                     <p>
                         { 
                             if isChooseable
-                                <small>Click the arrow to choose this swap</small>
+                                <small>
+                                    Click the arrow to choose this swap.
+                                    { if changeMessage?.length
+                                        <span className="changeMessage"> {changeMessage}</span>
+                                    }
+                                </small>
+
                             else
                                 <small>Enter an amount above</small>
                         }

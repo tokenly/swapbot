@@ -57,17 +57,26 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     <div class="item-header">Amount</div>
                     <p>
                     @if (($receipt_type == 'refund'))
-                        {{-- expr --}}
-                        Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }} and refunded
-                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
+                        Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
+                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                     @elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-                        {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}
+                        {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                         →
-                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
+                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                     @else
                         <span class="none">none</span>
                     @endif
                 </li>
+
+                @if (isset($receipt['changeOut']) AND $receipt['changeOut'] > 0)
+                <li>
+                    <div class="item-header">Change</div>
+                    <p>
+                        {{ $swapFormatter->formatCurrency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
+                    </p>
+                </li>
+                @endif
+
                 <li>
                     <div class="item-header">Recipient's address</div>
                     <p>

@@ -32,6 +32,7 @@ expectedBotEvents:
     meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
     quantityIn: 0.02
     quantityOut: 0
+    changeOut: 0.02
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap refunding

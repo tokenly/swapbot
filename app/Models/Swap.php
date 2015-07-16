@@ -62,6 +62,9 @@ class Swap extends APIModel {
     public function getSwapConfig() {
         return SwapConfig::createFromSerialized($this['definition']);
     }
+    public function getSwapConfigStrategy() {
+        return $this['definition']['strategy'];
+    }
 
     // pending swaps are those that have not been processed yet
     public function isPending() {

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Swap;
+use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\QuotebotClient\Client;
 
 class SwapFormatter {
@@ -98,14 +99,22 @@ class SwapFormatter {
         return 'https://counterpartychain.io/address/'.$address;
     }
 
-    public function fiatSuffix(SwapConfig $swap_config, $in_qty, $asset) {
-        if (!$swap_config) { return ''; }
-        if ($swap_config['strategy'] == 'fiat') {
-            $quote_entry = $this->quotebot_client->getQuote('bitcoinAverage', ['USD', 'BTC']);
-            $quantity = $in_qty * $quote_entry['last'];
-            return '($'.money_format('%i', $quantity).')';
+    public function fiatSuffix($swap_config_strategy, $in_qty, $asset, $conversion_rate=null) {
+        if ($asset != 'BTC') { return ''; }
+        if ($swap_config_strategy == 'fiat') {
+            if ($conversion_rate === null) {
+                $quote_entry = $this->quotebot_client->getQuote('bitcoinAverage', ['USD', 'BTC']);
+                $conversion_rate = $quote_entry['last'];
+            }
+
+            $quantity = $in_qty * $conversion_rate;
+            return ' ($'.money_format('%i', $quantity).')';
         }
         return '';
+    }
+
+    public function formatCurrency($value, $places=null) {
+        return CurrencyUtil::valueToFormattedString($value, $places);
     }
 
 }

@@ -51,17 +51,20 @@ expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### UNCONFIRMED TRANSACTION
     meta: { baseFilename: swap.transaction.update-BTC_HAMBURGER_unconfirmed.yml }
     quantityIn: 0.035
+    changeOut: 0.01
 
   - #### transaction handled previously (1 confirmation)
     meta: { baseFilename: tx.previous-BTC-1.yml }
   - #### waiting on confirmation
     meta: { baseFilename: swap.confirming-BTC_HAMBURGER.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### CONFIRMING
     meta: { baseFilename: swap.stateChange-confirming.yml }
 
@@ -70,6 +73,7 @@ expectedBotEvents:
   - #### confirming swap
     meta: { baseFilename: swap.confirmed-BTC_HAMBURGER.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -79,6 +83,7 @@ expectedBotEvents:
   - #### swap sent
     meta: { baseFilename: swap.sent-BTC_HAMBURGER-2confirmations.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -86,6 +91,7 @@ expectedBotEvents:
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
     quantityIn: 0.035
+    changeOut: 0.01
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 
@@ -94,6 +100,7 @@ expectedBotEvents:
     confirmations: 2
     confirmationsOut: 2
     quantityIn: 0.035
+    changeOut: 0.01
 
 # check balance
 expectedBotModels:

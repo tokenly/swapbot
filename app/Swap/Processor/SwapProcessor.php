@@ -356,7 +356,8 @@ class SwapProcessor {
 
         $fee = $swap_process['bot']['return_fee'];
 
-        if (isset($swap_process['swap']['receipt']['changeOut']) AND $swap_process['swap']['receipt']['changeOut'] > 0) {
+        $change_out = isset($swap_process['swap']['receipt']['changeOut']) ? $swap_process['swap']['receipt']['changeOut'] : 0;
+        if ($change_out > 0) {
             $dust_size = self::DEFAULT_REGULAR_DUST_SIZE + $swap_process['swap']['receipt']['changeOut'];
         } else {
             $dust_size = null;

@@ -46,7 +46,12 @@ swapbot.formatters = do ()->
 
     exports.formatFiatCurrency = (value, currencyPrefix='$') ->
         if not value? or isNaN(value) then return ''
-        return (if currencyPrefix?.length then currencyPrefix else '')+window.numeral(value).format('0,0.00')
+        formattedCurrencyString = window.numeral(value).format('0,0.00')
+        prefix = ''
+        if formattedCurrencyString == '0.00'
+            prefix = 'less than '
+            formattedCurrencyString = '0.01'
+        return prefix+(if currencyPrefix?.length then currencyPrefix else '')+(formattedCurrencyString)
 
     return exports
 

@@ -5,6 +5,8 @@ assetIn: 'BTC'
 txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
 quantityOut: 1
 assetOut: 'HAMBURGER'
+changeOut: 0
+changeOutAsset: 'BTC'
 confirmations: '0'
 state: 'ready'
 isComplete: false

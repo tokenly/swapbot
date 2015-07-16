@@ -41,6 +41,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\UpgradeBotToMonthlyCommand',
 		'Swapbot\Console\Commands\Development\CreateInitialPoolAddressCommand',
 		'Swapbot\Console\Commands\Development\ProcessPendingSwapCommand',
+		'Swapbot\Console\Commands\Development\TestRenderBotEventCommand',
 
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',

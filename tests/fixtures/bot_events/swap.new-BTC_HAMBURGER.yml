@@ -8,3 +8,6 @@ quantityIn: 0.025
 assetIn: 'BTC'
 quantityOut: 1
 assetOut: 'HAMBURGER'
+
+changeOut: 0
+changeOutAsset: 'BTC'

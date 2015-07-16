@@ -31,6 +31,7 @@ class PublicSwapController extends Controller {
             'swapFormatter'  => $swap_formatter,
             'pusherUrl'      => Config::get('tokenlyPusher.clientUrl'),
             'env'            => app()->environment(),
+            'strategy'       => $swap->getSwapConfigStrategy(),
         ]);
     }
 

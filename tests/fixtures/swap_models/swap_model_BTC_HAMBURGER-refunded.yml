@@ -11,3 +11,4 @@ receipt:
     txidOut: '0000000000000000000000000000001111'
     destination: 'SENDER01'
     confirmationsOut: 0
+    conversionRate: 200

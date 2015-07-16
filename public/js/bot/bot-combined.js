@@ -104,13 +104,20 @@
       return window.numeral(value).format('0.[00000000]');
     };
     exports.formatFiatCurrency = function(value, currencyPrefix) {
+      var formattedCurrencyString, prefix;
       if (currencyPrefix == null) {
         currencyPrefix = '$';
       }
       if ((value == null) || isNaN(value)) {
         return '';
       }
-      return ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + window.numeral(value).format('0,0.00');
+      formattedCurrencyString = window.numeral(value).format('0,0.00');
+      prefix = '';
+      if (formattedCurrencyString === '0.00') {
+        prefix = 'less than ';
+        formattedCurrencyString = '0.01';
+      }
+      return prefix + ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + formattedCurrencyString;
     };
     return exports;
   })();
@@ -212,7 +219,7 @@
   }
 
   swapbot.swapUtils = (function() {
-    var HARD_MINIMUM, SATOSHI, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
+    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
     exports = {};
     exports.SATOSHI = 100000000;
     SATOSHI = exports.SATOSHI;
@@ -255,7 +262,18 @@
       return inAmount;
     };
     buildInAmountFromOutAmount.fiat = function(outAmount, swapConfig, currentRate) {
-      var cost, inAmount, marketBuffer, maxMarketBuffer, maxMarketBufferValue;
+      var buffer, inAmount, _ref;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      if (currentRate === 0) {
+        return 0;
+      }
+      _ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = _ref[0], buffer = _ref[1];
+      return inAmount + buffer;
+    };
+    buildInAmountAndBuffer = function(outAmount, swapConfig, currentRate) {
+      var buffer, cost, inAmount, marketBuffer, maxMarketBuffer, maxMarketBufferValue;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
@@ -273,8 +291,9 @@
           marketBuffer = maxMarketBuffer;
         }
       }
-      inAmount = outAmount * cost / currentRate * (1 + marketBuffer);
-      return inAmount;
+      inAmount = outAmount * cost / currentRate;
+      buffer = inAmount * marketBuffer;
+      return [inAmount, buffer];
     };
     validateOutAmount = {};
     validateOutAmount.shared = function(outAmount, swapConfig) {
@@ -360,6 +379,15 @@
       }
       return null;
     };
+    buildChangeMessage = {};
+    buildChangeMessage.fiat = function(outAmount, swapConfig, currentRate) {
+      var assetIn, buffer, inAmount, _ref;
+      _ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = _ref[0], buffer = _ref[1];
+      if ((buffer != null) && buffer > 0) {
+        assetIn = swapConfig["in"];
+        return "This includes a buffer of " + (swapbot.formatters.formatCurrency(buffer)) + " " + assetIn + " " + (swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)) + ".";
+      }
+    };
     exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
       var els, index, mainDesc, otherCount, otherSwapDescriptions, otherTokenEl, otherTokenEls, swapConfig, tokenDescs, _i, _j, _len, _len1;
       mainDesc = '';
@@ -404,8 +432,9 @@
       }
       return [mainDesc, otherSwapDescriptions];
     };
-    exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
-      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
+    exports.inAmountFromOutAmount = function(outAmount, swapConfig, currentRate) {
+      var inAmount;
+      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate);
       if (inAmount === NaN) {
         inAmount = 0;
       }
@@ -426,6 +455,10 @@
         return errorMsg;
       }
       return null;
+    };
+    exports.buildChangeMessage = function(outAmount, swapConfig, currentRate) {
+      var _name;
+      return typeof buildChangeMessage[_name = swapConfig.strategy] === "function" ? buildChangeMessage[_name](outAmount, swapConfig, currentRate) : void 0;
     };
     exports.groupSwapConfigs = function(allSwapConfigs) {
       var index, k, swapConfig, swapConfigGroups, swapConfigGroupsByAssetOut, v, _i, _len;
@@ -1175,7 +1208,7 @@
         UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentBTCPrice);
       },
       render: function() {
-        var errorMsg, fiatSuffix, inAmount, isChooseable, swapConfig;
+        var changeMessage, errorMsg, fiatSuffix, inAmount, isChooseable, swapConfig;
         swapConfig = this.props.swapConfig;
         inAmount = this.getInAmount();
         isChooseable = this.isChooseable();
@@ -1183,6 +1216,7 @@
         fiatSuffix = React.createElement("span", {
           "className": "fiatSuffix"
         }, swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig["in"]));
+        changeMessage = swapbot.swapUtils.buildChangeMessage(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice);
         return React.createElement("li", {
           "className": 'choose-swap' + (isChooseable ? ' chooseable' : ' unchooseable')
         }, React.createElement("a", {
@@ -1193,7 +1227,9 @@
           "className": "item-content error"
         }, errorMsg) : void 0), React.createElement("div", {
           "className": "item-header"
-        }, "To purchase ", swapbot.formatters.formatCurrency(this.props.outAmount), " ", swapConfig.out, ", send ", swapbot.formatters.formatCurrency(inAmount), " ", swapConfig["in"], fiatSuffix), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap") : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
+        }, "To purchase ", swapbot.formatters.formatCurrency(this.props.outAmount), " ", swapConfig.out, ", send ", swapbot.formatters.formatCurrency(inAmount), " ", swapConfig["in"], fiatSuffix), React.createElement("p", null, (isChooseable ? React.createElement("small", null, "Click the arrow to choose this swap.", ((changeMessage != null ? changeMessage.length : void 0) ? React.createElement("span", {
+          "className": "changeMessage"
+        }, " ", changeMessage) : void 0)) : React.createElement("small", null, "Enter an amount above"))), React.createElement("div", {
           "className": "icon-next"
         }), React.createElement("div", {
           "className": "clearfix"

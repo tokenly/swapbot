@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Cache;
@@ -33,7 +34,7 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder, Repository $cache_store) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -46,7 +47,7 @@ class ScenarioRunner
         $this->bot_lease_entry_repository  = $bot_lease_entry_repository;
         $this->bot_ledger_entry_helper     = $bot_ledger_entry_helper;
         $this->mock_builder                = $mock_builder;
-
+        $this->cache_store                 = $cache_store;
     }
 
     public function init($test_case) {
@@ -90,6 +91,9 @@ class ScenarioRunner
     }
 
     public function runScenario($scenario_data) {
+        // clear the entire cache for consistency
+        $this->cache_store->flush();
+
         // setup mock quotebot (first)
         $this->quotebot_recorder = $this->installMockQuotebot(isset($scenario_data['quotebot']) ? $scenario_data['quotebot'] : null);
 
@@ -1128,7 +1132,16 @@ class ScenarioRunner
             $normalized_expected_quotebot_client_calls[] = $expected_quotebot_client_call;
         }
 
+        // if the number of actual calls is greater, then allow them
         $actual_calls = $this->quotebot_recorder->calls;
+        if (($diff = (count($actual_calls) - count($normalized_expected_quotebot_client_calls))) > 0) {
+            $count_normalized_expected_quotebot_client_calls = count($normalized_expected_quotebot_client_calls);
+            for ($i=0; $i < $diff; $i++) { 
+                $offset = $count_normalized_expected_quotebot_client_calls + $i;
+                $normalized_expected_quotebot_client_calls[$offset] = $actual_calls[$offset];
+            }
+        }
+
         PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls, "QuoteClientCalls mismatch");
     }
 

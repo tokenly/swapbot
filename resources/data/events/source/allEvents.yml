@@ -22,7 +22,7 @@ events:
     name: swap.transaction.update
     label: Swap Transaction
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -30,7 +30,7 @@ events:
     name: swap.confirming
     label: Confirming Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -38,7 +38,7 @@ events:
     name: swap.confirmed
     label: Confirmed Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfig(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -46,8 +46,9 @@ events:
     name: swap.sent
     label: Swap Sent
     level: INFO
-    msg: Sent {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
-    msgVars: [quantityOut,assetOut,destination]
+    msg: |
+        Sent {{ $fmt($quantityOut) }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }}.
+    msgVars: [quantityOut,assetOut,destination,changeOut,changeOutAsset]
     swapEventStream: true
 
   -
@@ -62,7 +63,8 @@ events:
     name: send.confirmed
     label: Swap Send Confirmed
     level: INFO
-    msg: Sent {{ $quantityOut }} {{ $assetOut }} to {{ $destination }} with {{ $confirmationsOut }} {{ str_plural('confirmation', $confirmationsOut) }}.
+    msg: |
+        Sent {{ $quantityOut }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }} with {{ $confirmationsOut }} {{ str_plural('confirmation', $confirmationsOut) }}.
     msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 

@@ -15,7 +15,7 @@ class FiatStrategy implements Strategy {
     }
 
     public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
-        $value_data = $this->buildQuantityOutAndChangeOut($swap_config, $quantity_in);
+        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in);
 
         // if this input would not purchase any outAsset or is below the minimum
         //   then it should be refunded
@@ -27,21 +27,23 @@ class FiatStrategy implements Strategy {
     }
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $value_data = $this->buildQuantityOutAndChangeOut($swap_config, $quantity_in);
+        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in);
         $asset_out = $swap_config['out'];
 
         return [
-            'quantityIn'  => $quantity_in,
-            'assetIn'     => $swap_config['in'],
+            'quantityIn'     => $quantity_in,
+            'assetIn'        => $swap_config['in'],
 
-            'quantityOut' => $value_data['quantityOut'],
-            'assetOut'    => $swap_config['out'],
+            'quantityOut'    => $value_data['quantityOut'],
+            'assetOut'       => $swap_config['out'],
 
-            'changeOut'   => $value_data['changeOut'],
+            'changeOut'      => $value_data['changeOut'],
+
+            'conversionRate' => $value_data['conversionRate'],
         ];
     }
 
-    protected function buildQuantityOutAndChangeOut(SwapConfig $swap_config, $quantity_in) {
+    protected function buildQuantityConversionData(SwapConfig $swap_config, $quantity_in) {
         $cost = $swap_config['cost'];
         $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
         $quantity_out = $quantity_in * $conversion_rate / $cost;
@@ -58,8 +60,9 @@ class FiatStrategy implements Strategy {
         }
 
         return [
-            'quantityOut' => $quantity_out,
-            'changeOut'   => $change_quantity_out,
+            'quantityOut'    => $quantity_out,
+            'changeOut'      => $change_quantity_out,
+            'conversionRate' => $conversion_rate,
         ];
 
     }

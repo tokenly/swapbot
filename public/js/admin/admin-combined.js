@@ -3966,13 +3966,20 @@
       return window.numeral(value).format('0.[00000000]');
     };
     exports.formatFiatCurrency = function(value, currencyPrefix) {
+      var formattedCurrencyString, prefix;
       if (currencyPrefix == null) {
         currencyPrefix = '$';
       }
       if ((value == null) || isNaN(value)) {
         return '';
       }
-      return ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + window.numeral(value).format('0,0.00');
+      formattedCurrencyString = window.numeral(value).format('0,0.00');
+      prefix = '';
+      if (formattedCurrencyString === '0.00') {
+        prefix = 'less than ';
+        formattedCurrencyString = '0.01';
+      }
+      return prefix + ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + formattedCurrencyString;
     };
     return exports;
   })();
@@ -4074,7 +4081,7 @@
   }
 
   swapbot.swapUtils = (function() {
-    var HARD_MINIMUM, SATOSHI, buildDesc, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
+    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
     exports = {};
     exports.SATOSHI = 100000000;
     SATOSHI = exports.SATOSHI;
@@ -4117,7 +4124,18 @@
       return inAmount;
     };
     buildInAmountFromOutAmount.fiat = function(outAmount, swapConfig, currentRate) {
-      var cost, inAmount, marketBuffer, maxMarketBuffer, maxMarketBufferValue;
+      var buffer, inAmount, ref;
+      if ((outAmount == null) || isNaN(outAmount)) {
+        return 0;
+      }
+      if (currentRate === 0) {
+        return 0;
+      }
+      ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = ref[0], buffer = ref[1];
+      return inAmount + buffer;
+    };
+    buildInAmountAndBuffer = function(outAmount, swapConfig, currentRate) {
+      var buffer, cost, inAmount, marketBuffer, maxMarketBuffer, maxMarketBufferValue;
       if ((outAmount == null) || isNaN(outAmount)) {
         return 0;
       }
@@ -4135,8 +4153,9 @@
           marketBuffer = maxMarketBuffer;
         }
       }
-      inAmount = outAmount * cost / currentRate * (1 + marketBuffer);
-      return inAmount;
+      inAmount = outAmount * cost / currentRate;
+      buffer = inAmount * marketBuffer;
+      return [inAmount, buffer];
     };
     validateOutAmount = {};
     validateOutAmount.shared = function(outAmount, swapConfig) {
@@ -4222,6 +4241,15 @@
       }
       return null;
     };
+    buildChangeMessage = {};
+    buildChangeMessage.fiat = function(outAmount, swapConfig, currentRate) {
+      var assetIn, buffer, inAmount, ref;
+      ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = ref[0], buffer = ref[1];
+      if ((buffer != null) && buffer > 0) {
+        assetIn = swapConfig["in"];
+        return "This includes a buffer of " + (swapbot.formatters.formatCurrency(buffer)) + " " + assetIn + " " + (swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)) + ".";
+      }
+    };
     exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
       var els, index, j, l, len, len1, mainDesc, otherCount, otherSwapDescriptions, otherTokenEl, otherTokenEls, swapConfig, tokenDescs;
       mainDesc = '';
@@ -4266,8 +4294,9 @@
       }
       return [mainDesc, otherSwapDescriptions];
     };
-    exports.inAmountFromOutAmount = function(inAmount, swapConfig, currentRate) {
-      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate);
+    exports.inAmountFromOutAmount = function(outAmount, swapConfig, currentRate) {
+      var inAmount;
+      inAmount = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate);
       if (inAmount === NaN) {
         inAmount = 0;
       }
@@ -4288,6 +4317,10 @@
         return errorMsg;
       }
       return null;
+    };
+    exports.buildChangeMessage = function(outAmount, swapConfig, currentRate) {
+      var name1;
+      return typeof buildChangeMessage[name1 = swapConfig.strategy] === "function" ? buildChangeMessage[name1](outAmount, swapConfig, currentRate) : void 0;
     };
     exports.groupSwapConfigs = function(allSwapConfigs) {
       var index, j, k, len, swapConfig, swapConfigGroups, swapConfigGroupsByAssetOut, v;

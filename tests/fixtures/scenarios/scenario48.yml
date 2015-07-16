@@ -31,6 +31,7 @@ expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -40,6 +41,7 @@ expectedBotEvents:
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_HAMBURGER.yml }
     quantityIn: 0.035
+    changeOut: 0.01
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 

@@ -7,12 +7,14 @@
 
 
 @section('main')
+<?php $receipt = $swap['receipt']; $receipt_type = (isset($receipt['type']) ? $receipt['type'] : null); ?>
+<?php $swapFormatter = app('Swapbot\Models\Formatting\SwapFormatter'); ?>
 
 <p>The tokens you recently purchased from {!! $botLink !!} have been delivered.</p>
 
 <p>When you’re ready, log into your wallet to use, send or redeem them as you see fit.</p>
 
-<p>To recap your order, you sent {!! $botLink !!} {{ $inQty }} {{ $inAsset }} and we’ve just sent you {{ $outQty }} {{ $outAsset }}{{ $hasChange ? " along with {$swap['receipt']['changeOut']} {$inAsset} in change" : ''}}.</p>
+<p>To recap your order, you sent {!! $botLink !!} {{ $swapFormatter->formatCurrency($inQty) }} {{ $inAsset }} and we’ve just sent you {{ $swapFormatter->formatCurrency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$swapFormatter->formatCurrency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}}.</p>
 
 
 <p style="height: 12px;">&nbsp;</p>
@@ -20,9 +22,6 @@
 <p style="height: 2px;">&nbsp;</p>
 <h4>Your Swap Receipt</h4>
 <p>&nbsp;</p>
-
-<?php $receipt = $swap['receipt']; $receipt_type = (isset($receipt['type']) ? $receipt['type'] : null); ?>
-<?php $swapFormatter = app('Swapbot\Models\Formatting\SwapFormatter'); ?>
 
 <p><strong>Status</strong></p>
 <p>{{ $swapFormatter->formatState($swap['state']) }}</p>
@@ -36,15 +35,25 @@
 <p><strong>Amount</strong></p>
 <p>
 @if (($receipt_type == 'refund'))
-    {{-- expr --}}
-    Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }} and refunded
-    {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
+
+    Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
+    {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+
 @elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-    {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}
+
+    {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
     →
-    {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}
+    {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+
 @else
     <span class="none">none</span>
+@endif
+
+@if (isset($receipt['changeOut']) AND $receipt['changeOut'] > 0)
+<p><strong>Change</strong></p>
+<p>
+{{ $swapFormatter->formatCurrency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
+</p>
 @endif
 
 <p><strong>Recipient's address</strong></p>

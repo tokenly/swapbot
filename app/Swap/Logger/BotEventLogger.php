@@ -484,19 +484,22 @@ class BotEventLogger {
         $state = ($swap_update_vars !== null AND isset($swap_update_vars['state'])) ? $swap_update_vars['state'] : $swap['state'];
 
         $swap_details_for_log = [
-            'destination'      => isset($receipt['destination'])      ? $receipt['destination']      : null,
+            'destination'      => isset($receipt['destination'])      ? $receipt['destination']       : null,
 
-            'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']       : null,
-            'assetIn'          => isset($receipt['assetIn'])          ? $receipt['assetIn']          : null,
-            'txidIn'           => isset($receipt['txidIn'])           ? $receipt['txidIn']           : null,
-            'confirmations'    => isset($receipt['confirmations'])    ? $receipt['confirmations']    : null,
+            'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']        : null,
+            'assetIn'          => isset($receipt['assetIn'])          ? $receipt['assetIn']           : null,
+            'txidIn'           => isset($receipt['txidIn'])           ? $receipt['txidIn']            : null,
+            'confirmations'    => isset($receipt['confirmations'])    ? $receipt['confirmations']     : null,
 
-            'quantityOut'      => isset($receipt['quantityOut'])      ? $receipt['quantityOut']      : null,
-            'assetOut'         => isset($receipt['assetOut'])         ? $receipt['assetOut']         : null,
-            'txidOut'          => isset($receipt['txidOut'])          ? $receipt['txidOut']          : null,
-            'confirmationsOut' => isset($receipt['confirmationsOut']) ? $receipt['confirmationsOut'] : null,
+            'quantityOut'      => isset($receipt['quantityOut'])      ? $receipt['quantityOut']       : null,
+            'assetOut'         => isset($receipt['assetOut'])         ? $receipt['assetOut']          : null,
+            'txidOut'          => isset($receipt['txidOut'])          ? $receipt['txidOut']           : null,
+            'confirmationsOut' => isset($receipt['confirmationsOut']) ? $receipt['confirmationsOut']  : null,
 
-            'completedAt'      => isset($receipt['completedAt'])      ? $receipt['completedAt']      : null,
+            'changeOut'        => isset($receipt['changeOut'])        ? $receipt['changeOut']         : null,
+            'changeOutAsset'   => isset($receipt['changeOut'])        ? 'BTC'                         : null,
+
+            'completedAt'      => isset($receipt['completedAt'])      ? $receipt['completedAt']       : null,
 
             'state'            => $state,
             'isComplete'       => $swap->isComplete($state),

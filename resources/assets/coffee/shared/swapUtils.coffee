@@ -33,6 +33,7 @@ swapbot.swapUtils = do ()->
         cost = swapConfig.cost
         return "#{formatCurrency(outAmount)} #{swapConfig.out} for every $#{formatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit"
 
+    # #############################################
 
     buildInAmountFromOutAmount = {}
     buildInAmountFromOutAmount.rate = (outAmount, swapConfig)->
@@ -61,6 +62,17 @@ swapbot.swapUtils = do ()->
         if currentRate == 0
             return 0
 
+        [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
+        return inAmount + buffer
+
+
+    buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
+        if not outAmount? or isNaN(outAmount)
+            return 0
+
+        if currentRate == 0
+            return 0
+
         cost = swapConfig.cost
 
         if swapConfig.divisible
@@ -72,14 +84,15 @@ swapbot.swapUtils = do ()->
             maxMarketBufferValue = cost * 0.40
             maxMarketBuffer = maxMarketBufferValue / outAmount
             if marketBuffer > maxMarketBuffer
-                # console.log "maxMarketBuffer adjusted downwards from #{marketBuffer} to #{maxMarketBuffer}"
                 marketBuffer = maxMarketBuffer
 
-        inAmount = outAmount * cost / currentRate * (1 + marketBuffer)
+        inAmount = outAmount * cost / currentRate
+        buffer = inAmount * marketBuffer
 
-        # console.log "currentRate=#{currentRate}.  inAmount=#{inAmount}"
-        return inAmount
+        return [inAmount, buffer]
 
+
+    # #############################################
 
     validateOutAmount = {}
     validateOutAmount.shared = (outAmount, swapConfig)->
@@ -113,6 +126,8 @@ swapbot.swapUtils = do ()->
             return "To use this swap, you must purchase at least #{formatCurrency(swapConfig.min_out)} #{swapConfig.out}."
 
         return null
+
+    # #############################################
 
     validateInAmount = {}
     validateInAmount.shared = (inAmount, swapConfig)->
@@ -149,6 +164,17 @@ swapbot.swapUtils = do ()->
         if errorMsg? then return errorMsg
         return null
 
+
+    # #############################################
+
+    buildChangeMessage = {}
+    buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
+        [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
+        if buffer? and buffer > 0
+            assetIn = swapConfig.in
+            return "This includes a buffer of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)}."
+
+        return
 
     # #############################################
     # exports
@@ -193,8 +219,8 @@ swapbot.swapUtils = do ()->
         return [mainDesc, otherSwapDescriptions]
         
     
-    exports.inAmountFromOutAmount = (inAmount, swapConfig, currentRate)->
-        inAmount = buildInAmountFromOutAmount[swapConfig.strategy](inAmount, swapConfig, currentRate)
+    exports.inAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
+        inAmount = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
         inAmount = 0 if inAmount == NaN
         return inAmount
 
@@ -211,6 +237,9 @@ swapbot.swapUtils = do ()->
 
         # no error
         return null
+
+    exports.buildChangeMessage = (outAmount, swapConfig, currentRate)->
+        return buildChangeMessage[swapConfig.strategy]?(outAmount, swapConfig, currentRate)
 
     exports.groupSwapConfigs = (allSwapConfigs)->
         swapConfigGroupsByAssetOut = {}
