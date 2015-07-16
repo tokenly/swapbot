@@ -1717,7 +1717,10 @@
               m("a[href='" + botAaddress + "']", {
                 target: "_blank",
                 "class": ""
-              }, swap.botName)
+              }, swap.botName), " | ", m("a[href='/admin/view/bot/" + swap.botUuid + "']", {
+                "class": "",
+                config: m.route
+              }, "Admin")
             ]), m("td", {}, swap.botUsername)
           ]);
         });

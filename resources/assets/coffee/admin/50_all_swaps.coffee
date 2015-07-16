@@ -82,6 +82,7 @@ do ()->
             tableRows = vm.swaps().map((swap)->
                 # address = swapbot.addressUtils.publicBotAddress(swap.username, swap.id, window.location)
                 botAaddress = swapbot.addressUtils.publicBotAddress(swap.botUsername, swap.botUuid, window.location)
+
                 return m("tr", {}, [
                     m("td", {}, "#{swap.receipt.quantityIn} #{swap.receipt.assetIn}"),
                     m("td", {}, "#{swap.receipt.quantityOut} #{swap.receipt.assetOut}"),
@@ -96,6 +97,8 @@ do ()->
                     ]),
                     m("td", {}, [
                         m("a[href='#{botAaddress}']", {target: "_blank", class: "",}, swap.botName),
+                        " | ",
+                        m("a[href='/admin/view/bot/#{swap.botUuid}']", {class: "", config: m.route}, "Admin"),
                     ]),
                     m("td", {}, swap.botUsername),
 
