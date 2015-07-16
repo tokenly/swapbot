@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -177,16 +177,25 @@
   swapbot.pusher = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(pusherURL, channelName, callbackFn) {
-      var client;
-      if (callbackFn == null) {
-        callbackFn = channelName;
-        channelName = pusherURL;
+    exports.subscribeToPusherChanel = function(channelName, dataCallbackFn, onSubscribedFn, pusherURL) {
+      var client, subscription;
+      if (onSubscribedFn == null) {
+        onSubscribedFn = null;
+      }
+      if (pusherURL == null) {
+        pusherURL = null;
+      }
+      if (pusherURL == null) {
         pusherURL = window.PUSHER_URL;
       }
       client = new window.Faye.Client("" + pusherURL + "/public");
-      client.subscribe("/" + channelName, function(data) {
-        callbackFn(data);
+      subscription = client.subscribe("/" + channelName, function(data) {
+        dataCallbackFn(data);
+      });
+      subscription.then(function() {
+        if (onSubscribedFn != null) {
+          onSubscribedFn();
+        }
       });
       return client;
     };
@@ -681,7 +690,8 @@
     var getViewState;
     getViewState = function() {
       return {
-        swaps: SwapsStore.getSwaps()
+        swaps: SwapsStore.getSwaps(),
+        swapsUI: UserInterfaceStateStore.getSwapsUIState()
       };
     };
     RecentOrActiveSwapComponent = React.createClass({
@@ -748,92 +758,98 @@
       },
       componentDidMount: function() {
         SwapsStore.addChangeListener(this._onChange);
+        UserInterfaceStateStore.addChangeListener(this._onChange);
       },
       componentWillUnmount: function() {
         SwapsStore.removeChangeListener(this._onChange);
+        UserInterfaceStateStore.removeChangeListener(this._onChange);
       },
-      activeSwaps: function() {
-        var activeSwaps, swap, _i, _len, _ref;
-        activeSwaps = [];
-        _ref = this.state.swaps;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          swap = _ref[_i];
-          if (!swap.isComplete) {
-            activeSwaps.push(swap);
-          }
+      buildRecentAndActiveSwapComponents: function(limit) {
+        var activeSwaps, index, recentSwaps, swap, _i, _len, _ref;
+        if (limit == null) {
+          limit = 999;
         }
-        return activeSwaps;
-      },
-      recentSwaps: function() {
-        var recentSwaps, swap, _i, _len, _ref;
+        activeSwaps = [];
         recentSwaps = [];
         _ref = this.state.swaps;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          swap = _ref[_i];
+        for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+          swap = _ref[index];
           if (swap.isComplete) {
-            recentSwaps.push(swap);
+            recentSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
+              "key": swap.id,
+              "bot": this.props.bot,
+              "swap": swap
+            }));
+          } else {
+            activeSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
+              "key": swap.id,
+              "bot": this.props.bot,
+              "swap": swap
+            }));
+          }
+          if (index >= limit - 1) {
+            break;
           }
         }
-        return recentSwaps;
+        return [activeSwaps, recentSwaps];
+      },
+      updateMaxSwapsToShow: function(e) {
+        e.preventDefault();
+        UserInterfaceActions.updateMaxSwapsToShow();
       },
       render: function() {
-        var anyActiveSwaps, anyRecentSwaps, swap;
+        var activeSwaps, activeSwapsSection, loadMoreButton, recentSwaps, recentSwapsSection, swapsUI, _ref;
         if (!this.state.swaps) {
           return React.createElement("div", null, "No swaps");
         }
-        anyActiveSwaps = false;
-        anyRecentSwaps = false;
-        return React.createElement("div", null, React.createElement("div", {
+        swapsUI = this.state.swapsUI;
+        _ref = this.buildRecentAndActiveSwapComponents(swapsUI.maxSwapsToShow), activeSwaps = _ref[0], recentSwaps = _ref[1];
+        activeSwapsSection = React.createElement("div", {
           "id": "active-swaps",
           "className": "section grid-100"
         }, React.createElement("h3", null, "Active Swaps"), React.createElement("ul", {
           "className": "swap-list"
-        }, (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.activeSwaps();
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            swap = _ref[_i];
-            anyActiveSwaps = true;
-            _results.push(React.createElement(RecentOrActiveSwapComponent, {
-              "key": swap.id,
-              "bot": this.props.bot,
-              "swap": swap
-            }));
-          }
-          return _results;
-        }).call(this)), (!anyActiveSwaps ? React.createElement("div", {
+        }, activeSwaps), (!activeSwaps.length ? React.createElement("div", {
           "className": "description"
-        }, "No Active Swaps") : void 0)), React.createElement("div", {
+        }, "No Active Swaps") : void 0));
+        if (activeSwaps.length >= swapsUI.maxSwapsToShow) {
+          recentSwapsSection = null;
+        } else {
+          recentSwapsSection = React.createElement("div", {
+            "id": "recent-swaps",
+            "className": "section grid-100"
+          }, React.createElement("h3", null, "Recent Swaps"), React.createElement("ul", {
+            "className": "swap-list"
+          }, recentSwaps), (!recentSwaps.length ? React.createElement("div", {
+            "className": "description"
+          }, "No Recent Swaps") : void 0));
+        }
+        if (swapsUI.loading) {
+          loadMoreButton = React.createElement("div", {
+            "style": {
+              textAlign: 'center'
+            }
+          }, React.createElement("button", {
+            "disabled": "disabled",
+            "className": "button-load-more"
+          }, "Loading..."));
+        } else {
+          if (swapsUI.maxSwapsToShow > swapsUI.numberOfSwapsLoaded) {
+            loadMoreButton = null;
+          } else {
+            loadMoreButton = React.createElement("div", {
+              "style": {
+                textAlign: 'center'
+              }
+            }, React.createElement("button", {
+              "onClick": this.updateMaxSwapsToShow,
+              "className": "button-load-more"
+            }, "Load more swaps"));
+          }
+        }
+        return React.createElement("div", null, activeSwapsSection, React.createElement("div", {
           "className": "clearfix"
-        }), React.createElement("div", {
-          "id": "recent-swaps",
-          "className": "section grid-100"
-        }, React.createElement("h3", null, "Recent Swaps"), React.createElement("ul", {
-          "className": "swap-list"
-        }, (function() {
-          var _i, _len, _ref, _results;
-          _ref = this.recentSwaps();
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            swap = _ref[_i];
-            anyRecentSwaps = true;
-            _results.push(React.createElement(RecentOrActiveSwapComponent, {
-              "key": swap.id,
-              "bot": this.props.bot,
-              "swap": swap
-            }));
-          }
-          return _results;
-        }).call(this)), (!anyRecentSwaps ? React.createElement("div", {
-          "className": "description"
-        }, "No Recent Swaps") : void 0), React.createElement("div", {
-          "style": {
-            textAlign: 'center'
-          }
-        }, React.createElement("button", {
-          "className": "button-load-more"
-        }, "Load more swaps..."))));
+        }), recentSwapsSection, loadMoreButton);
       }
     });
   })();
@@ -1812,7 +1828,7 @@
       UserChoiceStore.init();
       UserInterfaceStateStore.init();
       BotAPIActionCreator.subscribeToBotstream(bot.id);
-      SwapAPIActionCreator.subscribeToSwapstream(bot.id);
+      SwapAPIActionCreator.init(bot.id);
       QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL);
       React.render(React.createElement(BotCopyableAddress, {
         "bot": bot
@@ -1837,17 +1853,18 @@
       BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
     };
     exports.subscribeToBotstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, function(botstreamEvent) {
-        return handleBotstreamEvents([botstreamEvent]);
-      });
-      $.get("/api/v1/public/boteventstream/" + botId, (function(_this) {
-        return function(botstreamEvents) {
-          botstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
-          handleBotstreamEvents(botstreamEvents);
-        };
-      })(this));
+      var onBotstreamEvent, onSubscribedToBotstream;
+      onSubscribedToBotstream = function() {
+        $.get("/api/v1/public/boteventstream/" + botId + "?sort=serial desc&limit=1", (function(_this) {
+          return function(botstreamEvents) {
+            handleBotstreamEvents(botstreamEvents);
+          };
+        })(this));
+      };
+      onBotstreamEvent = function(botstreamEvent) {
+        handleBotstreamEvents([botstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, onBotstreamEvent, onSubscribedToBotstream);
     };
     return exports;
   })();
@@ -1871,37 +1888,66 @@
           }
         };
       })(this));
-      subscriberId = swapbot.pusher.subscribeToPusherChanel(pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
         QuotebotEventActions.addNewQuote(quote);
-      });
+      }, null, pusherURL);
     };
     return exports;
   })();
 
   SwapAPIActionCreator = (function() {
-    var exports, handleSwapstreamEvents, subscriberId;
+    var exports, handleSwapstreamEvents, loadSwapsFromAPI, loadSwapstreamEventsFromAPI, loading, onUIChange, subscribeToSwapstream, subscriberId;
     exports = {};
     subscriberId = null;
+    loading = false;
     handleSwapstreamEvents = function(swapstreamEvents) {
       SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
     };
-    exports.loadSwapsFromAPI = function(botId) {
+    loadSwapsFromAPI = function(botId) {
       $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
         SwapstreamEventActions.addNewSwaps(swapsData);
       });
     };
-    exports.subscribeToSwapstream = function(botId) {
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, function(swapstreamEvent) {
-        handleSwapstreamEvents([swapstreamEvent]);
-      });
-      $.get("/api/v1/public/swapevents/" + botId, (function(_this) {
+    loadSwapstreamEventsFromAPI = function(botId, limit) {
+      loading = true;
+      setTimeout(function() {
+        UserInterfaceActions.beginLoadingMoreSwaps();
+      }, 1);
+      $.get("/api/v1/public/swapevents/" + botId + "?latestperswap=1&limit=" + limit + "&sort=serial desc", (function(_this) {
         return function(swapstreamEvents) {
-          swapstreamEvents.sort(function(a, b) {
-            return a.serial - b.serial;
-          });
+          var newMaxSwapsRequestedFromServer;
           handleSwapstreamEvents(swapstreamEvents);
+          newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit);
+          UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer);
+          UserInterfaceActions.endLoadingMoreSwaps();
+          loading = false;
         };
       })(this));
+    };
+    subscribeToSwapstream = function(botId) {
+      var onSubscribedToSwapstream, onSwapstreamEvent;
+      onSubscribedToSwapstream = function() {
+        loadSwapstreamEventsFromAPI(botId, Settings.SWAPS_TO_SHOW);
+      };
+      onSwapstreamEvent = function(swapstreamEvent) {
+        handleSwapstreamEvents([swapstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, onSwapstreamEvent, onSubscribedToSwapstream);
+    };
+    onUIChange = function(botId) {
+      var maxSwapsToShow;
+      maxSwapsToShow = UserInterfaceStateStore.getSwapsUIState().maxSwapsToShow;
+      if (maxSwapsToShow > UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer) {
+        if (!loading) {
+          loadSwapstreamEventsFromAPI(botId, maxSwapsToShow);
+        }
+      }
+    };
+    exports.init = function(botId) {
+      subscribeToSwapstream(botId);
+      UserInterfaceStateStore.addChangeListener(function() {
+        onUIChange(botId);
+      });
     };
     return exports;
   })();
@@ -2035,6 +2081,27 @@
         actionType: BotConstants.UI_BEGIN_SWAPS
       });
     };
+    exports.updateMaxSwapsToShow = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
+      });
+    };
+    exports.beginLoadingMoreSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_BEGIN
+      });
+    };
+    exports.endLoadingMoreSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END
+      });
+    };
+    exports.updateMaxSwapsRequestedFromServer = function(maxSwapsRequestedFromServer) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END,
+        maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
+      });
+    };
     return exports;
   })();
 
@@ -2057,6 +2124,18 @@
     exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
     exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
     exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
     return exports;
   })();
 
@@ -2165,14 +2244,20 @@
     allMyBotstreamEvents = [];
     eventEmitter = null;
     handleBotstreamEvents = function(eventWrappers) {
-      var anyChanged, event, eventId, eventWrapper, _i, _len;
+      var anyChanged, event, eventId, eventWrapper, existingEvent, newBotEvent, _i, _len;
       anyChanged = false;
       for (_i = 0, _len = eventWrappers.length; _i < _len; _i++) {
         eventWrapper = eventWrappers[_i];
         eventId = eventWrapper.id;
         event = eventWrapper.event;
         if (allMyBotstreamEventsById[eventId] != null) {
-          allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
+          existingEvent = allMyBotstreamEventsById[eventId];
+          if (eventWrapper.serial > existingEvent.serial) {
+            allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
+          } else {
+            newBotEvent = buildEventFromStreamstreamEventWrapper(eventWrapper);
+            allMyBotstreamEventsById[eventId] = $.extend({}, newBotEvent, allMyBotstreamEventsById[eventId]);
+          }
         } else {
           allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper);
         }
@@ -2292,15 +2377,21 @@
       emitChange();
     };
     handleSwapstreamEvents = function(eventWrappers) {
-      var anyChanged, event, eventWrapper, newSwap, swapId, _i, _len;
+      var anyChanged, event, eventWrapper, existingSwap, newSwap, swapId, _i, _len;
       anyChanged = false;
       for (_i = 0, _len = eventWrappers.length; _i < _len; _i++) {
         eventWrapper = eventWrappers[_i];
         swapId = eventWrapper.swapUuid;
         event = eventWrapper.event;
         if (allMySwapsById[swapId] != null) {
-          newSwap = buildSwapFromSwapEvent(eventWrapper);
-          $.extend(allMySwapsById[swapId], newSwap);
+          existingSwap = allMySwapsById[swapId];
+          if (eventWrapper.serial > existingSwap.serial) {
+            newSwap = buildSwapFromSwapEvent(eventWrapper);
+            $.extend(allMySwapsById[swapId], newSwap);
+          } else {
+            newSwap = buildSwapFromSwapEvent(eventWrapper);
+            allMySwapsById[swapId] = $.extend({}, newSwap, allMySwapsById[swapId]);
+          }
         } else {
           allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper);
         }
@@ -2357,6 +2448,9 @@
     };
     exports.getSwaps = function() {
       return allMySwaps;
+    };
+    exports.numberOfSwapsLoaded = function() {
+      return allMySwaps.length;
     };
     exports.getSwapById = function(swapId) {
       if (allMySwapsById[swapId] == null) {
@@ -2757,10 +2851,16 @@
   })();
 
   UserInterfaceStateStore = (function() {
-    var beginSwaps, emitChange, eventEmitter, exports, uiState;
+    var beginSwaps, emitChange, eventEmitter, exports, swapsLoadingBegin, swapsLoadingEnd, swapsStoreChanged, uiState, updateMaxSwapsRequested, updateMaxSwapsToShow;
     exports = {};
     uiState = {
-      animatingSwapButtons: [false, false, false, false, false, false]
+      animatingSwapButtons: [false, false, false, false, false, false],
+      swaps: {
+        maxSwapsToShow: Settings.SWAPS_TO_SHOW,
+        maxSwapsRequestedFromServer: 0,
+        numberOfSwapsLoaded: 0,
+        loading: false
+      }
     };
     eventEmitter = null;
     emitChange = function() {
@@ -2784,14 +2884,51 @@
         _fn(i);
       }
     };
+    updateMaxSwapsToShow = function() {
+      uiState.swaps.maxSwapsToShow += Settings.MORE_SWAPS_TO_SHOW;
+      emitChange();
+    };
+    swapsLoadingBegin = function() {
+      uiState.swaps.loading = true;
+      emitChange();
+    };
+    swapsLoadingEnd = function() {
+      uiState.swaps.loading = false;
+      emitChange();
+    };
+    updateMaxSwapsRequested = function(maxSwapsRequestedFromServer) {
+      uiState.swaps.maxSwapsRequestedFromServer = maxSwapsRequestedFromServer;
+      emitChange();
+    };
+    swapsStoreChanged = function() {
+      var numberOfSwapsLoaded;
+      numberOfSwapsLoaded = SwapsStore.numberOfSwapsLoaded();
+      if (numberOfSwapsLoaded !== uiState.swaps.numberOfSwapsLoaded) {
+        uiState.swaps.numberOfSwapsLoaded = numberOfSwapsLoaded;
+        emitChange();
+      }
+    };
     exports.init = function() {
       eventEmitter = new window.EventEmitter();
       Dispatcher.register(function(action) {
         switch (action.actionType) {
           case BotConstants.UI_BEGIN_SWAPS:
             beginSwaps();
+            break;
+          case BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW:
+            updateMaxSwapsToShow();
+            break;
+          case BotConstants.UI_UPDATE_MAX_SWAPS_REQUESTED:
+            updateMaxSwapsRequested(action.maxSwapsRequestedFromServer);
+            break;
+          case BotConstants.UI_SWAPS_LOADING_BEGIN:
+            swapsLoadingBegin();
+            break;
+          case BotConstants.UI_SWAPS_LOADING_END:
+            swapsLoadingEnd();
         }
       });
+      SwapsStore.addChangeListener(swapsStoreChanged);
     };
     exports.addChangeListener = function(callback) {
       eventEmitter.addListener('change', callback);
@@ -2801,6 +2938,9 @@
     };
     exports.getUIState = function() {
       return uiState;
+    };
+    exports.getSwapsUIState = function() {
+      return uiState.swaps;
     };
     return exports;
   })();

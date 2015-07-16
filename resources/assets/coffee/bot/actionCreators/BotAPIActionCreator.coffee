@@ -9,18 +9,18 @@ BotAPIActionCreator = do ()->
         return
 
     exports.subscribeToBotstream = (botId)->
-        subscriberId = swapbot.pusher.subscribeToPusherChanel "swapbot_botstream_#{botId}", (botstreamEvent)->
-            handleBotstreamEvents([botstreamEvent])
-
-        # load all existing botstream events
-        $.get "/api/v1/public/boteventstream/#{botId}", (botstreamEvents)=>
-            # sort by oldest to newest
-            # console.log "botstreamEvents",botstreamEvents
-            botstreamEvents.sort (a,b)->
-                return a.serial - b.serial
-
-            handleBotstreamEvents(botstreamEvents)
+        onSubscribedToBotstream = ()->
+            # load all existing botstream events
+            $.get "/api/v1/public/boteventstream/#{botId}?sort=serial desc&limit=1", (botstreamEvents)=>
+                handleBotstreamEvents(botstreamEvents)
+                return
             return
+
+        onBotstreamEvent = (botstreamEvent)->
+            handleBotstreamEvents([botstreamEvent])
+            return
+
+        subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_#{botId}", onBotstreamEvent, onSubscribedToBotstream)
 
         return
 

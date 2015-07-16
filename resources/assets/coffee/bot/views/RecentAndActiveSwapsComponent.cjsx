@@ -6,6 +6,7 @@ do ()->
     getViewState = ()->
         return {
             swaps: SwapsStore.getSwaps()
+            swapsUI: UserInterfaceStateStore.getSwapsUIState()
         }
 
 
@@ -88,67 +89,96 @@ do ()->
 
         componentDidMount: ()->
             SwapsStore.addChangeListener(this._onChange)
+            UserInterfaceStateStore.addChangeListener(this._onChange)
             return
 
         componentWillUnmount: ()->
             SwapsStore.removeChangeListener(this._onChange)
+            UserInterfaceStateStore.removeChangeListener(this._onChange)
             return
 
-        activeSwaps: ()->
+        buildRecentAndActiveSwapComponents: (limit=999)->
             activeSwaps = []
-            for swap in this.state.swaps
-                if not swap.isComplete
-                    activeSwaps.push(swap)
-            return activeSwaps
-
-        recentSwaps: ()->
             recentSwaps = []
-            for swap in this.state.swaps
-                if swap.isComplete
-                    recentSwaps.push(swap)
-            return recentSwaps
 
-        render: ->
+            for swap, index in this.state.swaps
+                if swap.isComplete
+                    recentSwaps.push(<RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />)
+                else
+                    activeSwaps.push(<RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />)
+            
+                if index >= limit - 1
+                    break
+
+            return [activeSwaps, recentSwaps]
+
+        updateMaxSwapsToShow: (e)->
+            e.preventDefault()
+            UserInterfaceActions.updateMaxSwapsToShow()
+            return
+
+        render: ()->
             if not this.state.swaps
                 return <div>No swaps</div>
-            
-            anyActiveSwaps = false
-            anyRecentSwaps = false
 
-            return <div>
+
+            swapsUI = this.state.swapsUI
+            [activeSwaps, recentSwaps] = this.buildRecentAndActiveSwapComponents(swapsUI.maxSwapsToShow)
+
+
+            # ------ Active Swaps ------ #
+
+            activeSwapsSection = 
                 <div id="active-swaps" className="section grid-100">
                     <h3>Active Swaps</h3>
-                    <ul className="swap-list">
-                        {
-                            for swap in this.activeSwaps()
-                                anyActiveSwaps = true
-                                <RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />
-                        }
-                    </ul>
+                    <ul className="swap-list">{activeSwaps}</ul>
                     {
-                        if not anyActiveSwaps
+                        if not activeSwaps.length
                             <div className="description">No Active Swaps</div>
                     }
                 </div>
-                <div className="clearfix"></div>
-                <div id="recent-swaps" className="section grid-100">
-                    <h3>Recent Swaps</h3>
-                    <ul className="swap-list">
-                        {
-                            for swap in this.recentSwaps()
-                                anyRecentSwaps = true
-                                <RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />
-                        }
-                    </ul>
-                    {
-                        if not anyRecentSwaps
-                            <div className="description">No Recent Swaps</div>
-                    }
 
-                    <div style={textAlign: 'center'}>
-                        <button className="button-load-more">Load more swaps...</button>
+
+            # ------ Recent Swaps ------ #
+
+            if activeSwaps.length >= swapsUI.maxSwapsToShow
+                recentSwapsSection = null
+            else
+                recentSwapsSection =
+                    <div id="recent-swaps" className="section grid-100">
+                        <h3>Recent Swaps</h3>
+                        <ul className="swap-list">{recentSwaps}</ul>
+                        {
+                            if not recentSwaps.length
+                                <div className="description">No Recent Swaps</div>
+                        }
                     </div>
-                </div>
-            </div>
+
+
+            # ------ Load More ------ #
+
+            if swapsUI.loading
+                loadMoreButton = 
+                    <div style={textAlign: 'center'}>
+                        <button disabled="disabled" className="button-load-more">Loading...</button>
+                    </div>
+            else
+                if swapsUI.maxSwapsToShow > swapsUI.numberOfSwapsLoaded
+                    loadMoreButton = null
+                else
+                    loadMoreButton = 
+                        <div style={textAlign: 'center'}>
+                            <button onClick={this.updateMaxSwapsToShow} className="button-load-more">Load more swaps</button>
+                        </div>
+
+
+            # ------ Combined ------ #
+
+            return  <div>
+                        { activeSwapsSection }
+                        <div className="clearfix"></div>
+                        { recentSwapsSection }
+                        { loadMoreButton }
+                    </div>
 
 

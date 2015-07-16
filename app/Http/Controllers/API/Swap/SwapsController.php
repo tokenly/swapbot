@@ -9,6 +9,7 @@ use Swapbot\Http\Controllers\API\Base\APIController;
 use Swapbot\Models\Swap;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
+use Tokenly\LaravelApiProvider\Filter\IndexRequestFilter;
 use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 
 class SwapsController extends APIController {
@@ -23,15 +24,11 @@ class SwapsController extends APIController {
      */
     public function index(Request $request, Guard $auth, SwapRepository $swap_repository, APIControllerHelper $api_helper)
     {
-        $params = $request->all();
-
         // require the viewSwaps permission
         $api_helper->requirePermission($auth->getUser(), 'viewSwaps', 'view all swaps');
 
         // get all swaps fot this bot
-        $out = [];
-
-        $resources = $swap_repository->findAllWithBots($params, isset($params['sort']) ? $params['sort'] : null);
+        $resources = $swap_repository->findAllWithBots($this->buildFilter($request, $swap_repository));
 
         // format for API
         return $api_helper->transformResourcesForOutput($resources, 'with_bot');
@@ -56,6 +53,11 @@ class SwapsController extends APIController {
             
         }
         return $api_helper->transformResourceForOutput($resource, 'with_bot');
+    }
+
+
+    protected function buildFilter(Request $request, SwapRepository $swap_repository) {
+        return IndexRequestFilter::createFromRequest($request, $swap_repository->buildFindAllWithBotsFilterDefinition());
     }
 
 

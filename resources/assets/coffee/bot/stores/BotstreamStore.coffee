@@ -12,8 +12,15 @@ BotstreamStore = do ()->
             event = eventWrapper.event
     
             if allMyBotstreamEventsById[eventId]?
-                # update existing event
-                allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper)
+                # update existing bot event
+                existingEvent = allMyBotstreamEventsById[eventId]
+                if eventWrapper.serial > existingEvent.serial
+                    allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper)
+                else
+                    # merge the existing newer one on top of the just-received old one
+                    #   so the newest event always takes precidence
+                    newBotEvent = buildEventFromStreamstreamEventWrapper(eventWrapper)
+                    allMyBotstreamEventsById[eventId] = $.extend({}, newBotEvent, allMyBotstreamEventsById[eventId])
             else
                 # new event
                 allMyBotstreamEventsById[eventId] = buildEventFromStreamstreamEventWrapper(eventWrapper)

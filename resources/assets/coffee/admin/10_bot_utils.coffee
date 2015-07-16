@@ -40,7 +40,7 @@ sbAdmin.botutils = do ()->
     
 
     botutils.overlayDesc = (value)->
-        console.log "overlayDesc value=",value
+        # console.log "overlayDesc value=",value
         desc = findSetting(value, settings)
         if desc
             return desc
@@ -55,7 +55,6 @@ sbAdmin.botutils = do ()->
                     return res
                 continue
 
-            console.log "setting.v.start=",setting.v.start
             if setting.v.start == value?.start and setting.v.end == value?.end
                 return setting.k
         

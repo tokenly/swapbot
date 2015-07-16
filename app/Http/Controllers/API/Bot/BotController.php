@@ -36,7 +36,7 @@ class BotController extends APIController {
             // all users
             $api_helper->requirePermission($auth->getUser(), 'viewBots', 'view all bots');
 
-            $resources = $repository->findAll($auth->getUser());
+            $resources = $repository->findAll();
         } else {
             // all bots for this user
             $resources = $repository->findByUser($auth->getUser());
@@ -105,7 +105,8 @@ class BotController extends APIController {
     public function show($id, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
         $resource = $api_helper->requireResourceOwnedByUserOrWithPermssion($id, $auth->getUser(), $repository, 'viewBots');
-        return $api_helper->transformResourceForOutput($resource);
+        $output = $api_helper->transformResourceForOutput($resource);
+        return $output;
     }
 
     /**

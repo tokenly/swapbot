@@ -3,6 +3,11 @@ UserInterfaceStateStore = do ()->
 
     uiState = {
         animatingSwapButtons: [false,false,false,false,false,false,]
+        swaps:
+            maxSwapsToShow: Settings.SWAPS_TO_SHOW
+            maxSwapsRequestedFromServer: 0
+            numberOfSwapsLoaded: 0
+            loading: false
     }
     
     eventEmitter = null
@@ -31,6 +36,35 @@ UserInterfaceStateStore = do ()->
                 , (delay + hold + (i * delay))
         return
 
+    updateMaxSwapsToShow = ()->
+        uiState.swaps.maxSwapsToShow += Settings.MORE_SWAPS_TO_SHOW
+        # console.log "uiState.swaps.maxSwapsToShow set to #{uiState.swaps.maxSwapsToShow}"
+        emitChange()
+        return
+
+    swapsLoadingBegin = ()->
+        uiState.swaps.loading = true
+        emitChange()
+        return
+
+    swapsLoadingEnd = ()->
+        uiState.swaps.loading = false
+        emitChange()
+        return
+
+    updateMaxSwapsRequested = (maxSwapsRequestedFromServer)->
+        uiState.swaps.maxSwapsRequestedFromServer = maxSwapsRequestedFromServer
+        emitChange()
+        return
+
+    swapsStoreChanged = ()->
+        numberOfSwapsLoaded = SwapsStore.numberOfSwapsLoaded()
+        if numberOfSwapsLoaded != uiState.swaps.numberOfSwapsLoaded
+            uiState.swaps.numberOfSwapsLoaded = numberOfSwapsLoaded
+            emitChange()
+        return
+
+
     # #############################################
 
     exports.init = ()->
@@ -44,7 +78,22 @@ UserInterfaceStateStore = do ()->
                 when BotConstants.UI_BEGIN_SWAPS
                     beginSwaps()
 
+                when BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
+                    updateMaxSwapsToShow()
+
+                when BotConstants.UI_UPDATE_MAX_SWAPS_REQUESTED
+                    updateMaxSwapsRequested(action.maxSwapsRequestedFromServer)
+
+                when BotConstants.UI_SWAPS_LOADING_BEGIN
+                    swapsLoadingBegin()
+
+                when BotConstants.UI_SWAPS_LOADING_END
+                    swapsLoadingEnd()
+
             return
+
+        SwapsStore.addChangeListener(swapsStoreChanged)
+
         return
 
     exports.addChangeListener = (callback)->
@@ -57,6 +106,9 @@ UserInterfaceStateStore = do ()->
 
     exports.getUIState = ()->
         return uiState
+
+    exports.getSwapsUIState = ()->
+        return uiState.swaps
 
     # #############################################
     return exports

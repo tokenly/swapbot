@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Models\Swap;
+use Swapbot\Swap\Logger\BotEventLogger;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
@@ -17,8 +18,24 @@ class BotEventOutputTransformer {
 
     /**
      */
-    public function __construct(FormattingHelper $formatting_helper) {
+    public function __construct(FormattingHelper $formatting_helper, BotEventLogger $bot_event_logger) {
         $this->formatting_helper = $formatting_helper;
+        $this->bot_event_logger = $bot_event_logger;
+    }
+
+    public function isMissingStandardSwapEventData($bot_event_data) {
+        $event = $bot_event_data['event'];
+        if (!isset($event['quantityIn']) OR !isset($event['txidIn']) OR !isset($event['state'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function addMissingStandardSwapEventData(Swap $swap, $bot_event_data) {
+        $standard_swap_details = $this->bot_event_logger->standardSwapDetails($swap);
+        $bot_event_data['event'] = array_merge($standard_swap_details, $bot_event_data['event']);
+        return $bot_event_data;
     }
 
 

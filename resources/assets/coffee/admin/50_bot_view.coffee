@@ -507,7 +507,13 @@ do ()->
 
                     m("div", {class: "spacer2"}),
 
-                    m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot"),
+                    (
+                        if vm.username() == sbAdmin.auth.getUser().username
+                            m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot")
+                        else
+                            null
+                    ),
+
                     m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
 
                 ]),

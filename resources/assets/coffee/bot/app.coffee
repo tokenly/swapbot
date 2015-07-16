@@ -9,7 +9,7 @@ window.BotApp =
 
         # subscribe to the swaps event stream
         BotAPIActionCreator.subscribeToBotstream(bot.id)
-        SwapAPIActionCreator.subscribeToSwapstream(bot.id)
+        SwapAPIActionCreator.init(bot.id)
 
         QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL)
 

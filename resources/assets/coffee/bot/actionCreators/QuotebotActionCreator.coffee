@@ -13,9 +13,10 @@ QuotebotActionCreator = do ()->
             return
 
         # subscribe to the pusher events
-        subscriberId = swapbot.pusher.subscribeToPusherChanel pusherURL, "quotebot_quote_bitcoinAverage_USD_BTC", (quote)->
+        subscriberId = swapbot.pusher.subscribeToPusherChanel "quotebot_quote_bitcoinAverage_USD_BTC", (quote)->
             QuotebotEventActions.addNewQuote(quote)
             return
+        , null, pusherURL
 
         return
 

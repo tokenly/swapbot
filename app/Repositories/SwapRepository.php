@@ -6,6 +6,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Swap;
+use Tokenly\LaravelApiProvider\Filter\IndexRequestFilter;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use Tokenly\RecordLock\Facade\RecordLock;
 use \Exception;
@@ -58,22 +59,31 @@ class SwapRepository extends APIRepository
         
     }
 
-    public function findAllWithBots($filter_params=null, $order_by_field=null) {
-
+    public function findAllWithBots(IndexRequestFilter $filter=null) {
         $query = DB::table('swaps')
             ->join('bots', 'bots.id', '=', 'swaps.bot_id')
             ->join('users', 'users.id', '=', 'bots.user_id')
             ->select(['swaps.*', 'bots.name AS bot_name', 'bots.uuid AS bot_uuid', 'users.username AS bot_username']);
 
-        $filter_defs = [
-            'state'     => ['field' => 'swaps.state',],
-            'updatedAt' => ['sortField' => 'swaps.updated_at', 'sortDirection' => 'desc'],
-        ];
-        $this->filter($filter_params, $query, $filter_defs);
-        $this->orderBy($order_by_field, $query, $filter_defs);
+        if ($filter !== null) {
+            $filter->filter($query);
+            $filter->limit($query);
+            $filter->sort($query);
+        }
 
         $swap = new Swap();
         return $swap->hydrate($query->get());
+    }
+
+    public function buildFindAllWithBotsFilterDefinition() {
+        return [
+            'fields' => [
+                'state'     => ['field' => 'swaps.state',],
+                'updatedAt' => ['sortField' => 'swaps.updated_at', 'defaultSortDirection' => 'desc'],
+            ],
+            'defaults' => [
+            ],
+        ];
     }
 
 
@@ -109,29 +119,6 @@ class SwapRepository extends APIRepository
         return $update_vars;
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
 
-    protected function filter($filter_params, Builder $query, $filter_definitions) {
-        if ($filter_params !== null) {
-            foreach($filter_params as $param_key => $param_value) {
-                if (isset($filter_definitions[$param_key]) AND isset($filter_definitions[$param_key]['field'])) {
-                    $filter_def = $filter_definitions[$param_key];
-                    $query->where($filter_def['field'], '=', $param_value);
-                }
-            }
-        }
-    }
-
-    protected function orderBy($order_by_field, Builder $query, $filter_definitions) {
-        if ($order_by_field !== null) {
-            if (isset($filter_definitions[$order_by_field]) AND isset($filter_definitions[$order_by_field]['sortField'])) {
-                $filter_def = $filter_definitions[$order_by_field];
-                $direction = $filter_def['sortDirection'];
-                $query->orderBy($filter_def['sortField'], $direction);
-            }
-        }
-    }
-    
 
 }

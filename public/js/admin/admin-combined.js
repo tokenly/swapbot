@@ -78,7 +78,7 @@
       }
       return api.send('GET', "botevents/" + id, null, additionalOpts);
     };
-    api.getSwapEvents = function(id, additionalOpts) {
+    api.getSwapEventStream = function(id, additionalOpts) {
       if (additionalOpts == null) {
         additionalOpts = {};
       }
@@ -389,7 +389,6 @@
     };
     botutils.overlayDesc = function(value) {
       var desc;
-      console.log("overlayDesc value=", value);
       desc = findSetting(value, settings);
       if (desc) {
         return desc;
@@ -407,7 +406,6 @@
           }
           continue;
         }
-        console.log("setting.v.start=", setting.v.start);
         if (setting.v.start === (value != null ? value.start : void 0) && setting.v.end === (value != null ? value.end : void 0)) {
           return setting.k;
         }
@@ -3056,10 +3054,10 @@
             "class": "spacer1"
           }), m("hr"), m("div", {
             "class": "spacer2"
-          }), m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
+          }), (vm.username() === sbAdmin.auth.getUser().username ? m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
             "class": "btn btn-success",
             config: m.route
-          }, "Edit This Bot"), m("a[href='/admin/dashboard']", {
+          }, "Edit This Bot") : null), m("a[href='/admin/dashboard']", {
             "class": "btn btn-default pull-right",
             config: m.route
           }, "Back to Dashboard")
@@ -4042,16 +4040,25 @@
   swapbot.pusher = (function() {
     var exports;
     exports = {};
-    exports.subscribeToPusherChanel = function(pusherURL, channelName, callbackFn) {
-      var client;
-      if (callbackFn == null) {
-        callbackFn = channelName;
-        channelName = pusherURL;
+    exports.subscribeToPusherChanel = function(channelName, dataCallbackFn, onSubscribedFn, pusherURL) {
+      var client, subscription;
+      if (onSubscribedFn == null) {
+        onSubscribedFn = null;
+      }
+      if (pusherURL == null) {
+        pusherURL = null;
+      }
+      if (pusherURL == null) {
         pusherURL = window.PUSHER_URL;
       }
       client = new window.Faye.Client(pusherURL + "/public");
-      client.subscribe("/" + channelName, function(data) {
-        callbackFn(data);
+      subscription = client.subscribe("/" + channelName, function(data) {
+        dataCallbackFn(data);
+      });
+      subscription.then(function() {
+        if (onSubscribedFn != null) {
+          onSubscribedFn();
+        }
       });
       return client;
     };

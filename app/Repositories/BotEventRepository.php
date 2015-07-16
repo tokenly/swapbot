@@ -2,8 +2,11 @@
 
 namespace Swapbot\Repositories;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\User;
+use Tokenly\LaravelApiProvider\Filter\IndexRequestFilter;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use \Exception;
 
@@ -21,18 +24,62 @@ class BotEventRepository extends APIRepository
             ->get();
     }
 
-    public function findSwapsEventStreamByBotId($bot_id) {
-        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
+    public function findLatestSwapStreamEventsByBotId($bot_id, IndexRequestFilter $filter=null) {
+        // get all of the most recent event ids
+        $all_swaps_results = call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
             ->where('swap_stream', true)
-            ->orderBy('serial', 'asc')
+            ->where('swap_id', '>', 0)
+            ->select(DB::raw('MAX(id) AS id'))
+            ->groupBy('swap_id')
             ->get();
+        $allowed_ids = [];
+        foreach($all_swaps_results as $all_swaps_result) {
+            $allowed_ids[] = $all_swaps_result['id'];
+        }
+
+        // only allow the event ids found above
+        $query = call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
+            ->where('swap_stream', true)
+            ->whereIn('id', $allowed_ids);
+
+        if ($filter === null) {
+            $query->orderBy('serial', 'asc');
+        } else {
+            $filter->limit($query);
+            $filter->sort($query);
+        }
+
+        return $query->get();
     }
 
-    public function findBotEventStreamByBotId($bot_id) {
-        return call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
-            ->where('bot_stream', true)
-            ->orderBy('serial', 'asc')
-            ->get();
+    public function findAllSwapStreamEventsByBotId($bot_id, IndexRequestFilter $filter=null) {
+        $query = call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
+            ->where('swap_stream', true);
+
+        if ($filter === null) {
+            $query->orderBy('serial', 'asc');
+        } else {
+            $filter->limit($query);
+            $filter->sort($query);
+        }
+
+        return $query->get();
+    }
+
+
+    public function findBotStreamEventsByBotId($bot_id, IndexRequestFilter $filter=null) {
+        $query = call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
+            ->where('bot_stream', true);
+
+        // limit
+        if ($filter === null) {
+            $query->orderBy('serial', 'asc');
+        } else {
+            $filter->limit($query);
+            $filter->sort($query);
+        }
+
+        return $query->get();
     }
 
 

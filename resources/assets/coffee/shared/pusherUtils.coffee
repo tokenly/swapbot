@@ -5,17 +5,22 @@ swapbot.pusher = do ()->
     exports = {}
 
     # pusherURL is optional
-    exports.subscribeToPusherChanel = (pusherURL, channelName, callbackFn)->
-        if not callbackFn?
-            callbackFn = channelName
-            channelName = pusherURL
+    exports.subscribeToPusherChanel = (channelName, dataCallbackFn, onSubscribedFn=null, pusherURL=null)->
+        if not pusherURL?
             pusherURL = window.PUSHER_URL
 
 
         client = new window.Faye.Client("#{pusherURL}/public")
-        client.subscribe "/#{channelName}", (data)->
-            callbackFn(data)
+        subscription = client.subscribe "/#{channelName}", (data)->
+            dataCallbackFn(data)
             return
+
+        subscription.then ()->
+            if onSubscribedFn?
+                onSubscribedFn()
+            return
+
+
         return client
 
     exports.closePusherChanel = (client)->

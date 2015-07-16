@@ -7,7 +7,7 @@ events:
     level: INFO
     msg: A new swap was created for incoming transaction {{ $txidIn }}.
     msgVars: [txidIn]
-    swapEventStream: false
+    swapEventStream: true
 
   -
     name: swap.stateChange
@@ -220,6 +220,15 @@ events:
     msgVars: [outQty, outAsset, destination, txid]
 
 
+
+# name: The system event id,                                      (swap.stateChange)
+# label: A friendly label for this event type,                    (Swap State Change)
+# level: INFO, DEBUG, WARNING
+# msg: A dynamic message.                                         (Entered state {{ $state }})
+# msgVars: Variables needed to create the message [state]
+# eventVars: A filtered set of data stored in the database        ([state, isComplete, isError])
+# swapEventStream: Whether to be shown in the public swap events  (true or false)
+# botEventStream: Whether to be shown in the public bot events    (true or false)
 
 
 

@@ -22,22 +22,24 @@ SwapsStore = do ()->
     
             if allMySwapsById[swapId]?
                 # update existing swap
-                newSwap = buildSwapFromSwapEvent(eventWrapper)
-                $.extend(allMySwapsById[swapId], newSwap)
+                existingSwap = allMySwapsById[swapId]
+                if eventWrapper.serial > existingSwap.serial
+                    newSwap = buildSwapFromSwapEvent(eventWrapper)
+                    $.extend(allMySwapsById[swapId], newSwap)
+                else
+                    # merge the existing newer one on top of the just-received old one
+                    #   so the newest event always takes precidence
+                    newSwap = buildSwapFromSwapEvent(eventWrapper)
+                    allMySwapsById[swapId] = $.extend({}, newSwap, allMySwapsById[swapId])
             else
                 # new swap
                 allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper)
-
-            # console.log "eventWrapper=",eventWrapper
-            # console.log "allMySwapsById[#{swapId}]=",allMySwapsById[swapId]
 
             anyChanged = true
 
         if anyChanged
             # rebuild allMySwaps
             allMySwaps = rebuildAllMySwaps()
-            # console.log "emitChange"
-
             emitChange()
         
         return
@@ -91,14 +93,15 @@ SwapsStore = do ()->
                 when BotConstants.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS
                     handleSwapstreamEvents(action.swapstreamEvents)
 
-                # else
-                #     console.log "unknown action: #{action.actionType}"
             return
 
         return
 
     exports.getSwaps = ()->
         return allMySwaps
+
+    exports.numberOfSwapsLoaded = ()->
+        return allMySwaps.length
 
     exports.getSwapById = (swapId)->
         return null if not allMySwapsById[swapId]?

@@ -269,14 +269,22 @@ class APITestHelper  {
         return $this->user_helper->getSampleUser();
     }
 
-    public function callAPIAndValidateResponse($method, $url, $parameters=[], $expected_response_code=200) {
-        $response = $this->callAPIWithAuthentication($method, $url, $parameters);
+    public function callAPIAndValidateResponse($method, $url, $parameters=[], $expected_response_code=200, $with_authentication=true) {
+        if ($with_authentication) {
+            $response = $this->callAPIWithAuthentication($method, $url, $parameters);
+        } else {
+            $response = $this->callAPIWithoutAuthentication($method, $url, $parameters);
+        }
         PHPUnit::assertEquals($expected_response_code, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()."\n\nfor {$method} {$url}".(($actual_response_from_api = json_decode($response->getContent(), true)) ? json_encode($actual_response_from_api, 192) : null));
         $actual_response_from_api = json_decode($response->getContent(), true);
         if ($expected_response_code != 204) {
             PHPUnit::assertNotEmpty($actual_response_from_api);
         }
         return $actual_response_from_api;
+    }
+
+    public function callAPIWithoutAuthenticationAndValidateResponse($method, $url, $parameters=[], $expected_response_code=200) {
+        return $this->callAPIAndValidateResponse($method, $url, $parameters, $expected_response_code, false);
     }
 
     ////////////////////////////////////////////////////////////////////////

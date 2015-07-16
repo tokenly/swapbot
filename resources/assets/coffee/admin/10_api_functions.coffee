@@ -83,7 +83,8 @@ sbAdmin.api = do ()->
     api.getBotEvents = (id, additionalOpts={})->
         return api.send('GET', "botevents/#{id}", null, additionalOpts)
 
-    api.getSwapEvents = (id, additionalOpts={})->
+    # 1 event per swap
+    api.getSwapEventStream = (id, additionalOpts={})->
         return api.send('GET', "swapevents/#{id}", null, additionalOpts)
 
     api.getSwap = (id)->
