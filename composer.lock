@@ -2926,12 +2926,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/bitcoin-currency-lib.git",
-                "reference": "cb26b91d9c37ed73a086b7046f45ff596fac42c5"
+                "reference": "e3db1d2af979be4cd5c021a9df4f5f4c60503b8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/bitcoin-currency-lib/zipball/cb26b91d9c37ed73a086b7046f45ff596fac42c5",
-                "reference": "cb26b91d9c37ed73a086b7046f45ff596fac42c5",
+                "url": "https://api.github.com/repos/tokenly/bitcoin-currency-lib/zipball/e3db1d2af979be4cd5c021a9df4f5f4c60503b8e",
+                "reference": "e3db1d2af979be4cd5c021a9df4f5f4c60503b8e",
                 "shasum": ""
             },
             "require": {
@@ -2958,7 +2958,7 @@
                 }
             ],
             "description": "A simple bitcoin currency library",
-            "time": "2014-11-20 14:15:04"
+            "time": "2015-07-16 00:53:49"
         },
         {
             "name": "tokenly/consul-health-daemon",
