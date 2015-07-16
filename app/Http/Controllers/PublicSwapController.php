@@ -4,7 +4,7 @@ use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Config;
 use Swapbot\Http\Controllers\Controller;
-use Swapbot\Models\Formatting\SwapFormatter;
+use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\UserRepository;
 
@@ -20,7 +20,7 @@ class PublicSwapController extends Controller {
      *
      * @return Response
      */
-    public function showSwap($username, $swapid, SwapRepository $swap_repository, SwapFormatter $swap_formatter)
+    public function showSwap($username, $swapid, SwapRepository $swap_repository, FormattingHelper $formatting_helper)
     {
         list($user, $bot, $swap) = $this->requireUserAndSwap($username, $swapid);
 
@@ -28,9 +28,6 @@ class PublicSwapController extends Controller {
             'swap'           => $swap,
             'bot'            => $bot,
             'botRobohashUrl' => $bot->getRobohashURL(),
-            'swapFormatter'  => $swap_formatter,
-            'pusherUrl'      => Config::get('tokenlyPusher.clientUrl'),
-            'env'            => app()->environment(),
             'strategy'       => $swap->getSwapConfigStrategy(),
         ]);
     }

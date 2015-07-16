@@ -2,7 +2,7 @@
 
 @section('main')
 <?php $receipt = $swap['receipt']; $receipt_type = (isset($receipt['type']) ? $receipt['type'] : null); ?>
-<?php $swapFormatter = app('Swapbot\Models\Formatting\SwapFormatter'); ?>
+
 
 Hello Again!
 
@@ -11,36 +11,36 @@ The tokens you recently purchased from {{ $bot['name'] }} have been delivered.
 
 When you’re ready, log into your wallet to use, send or redeem them as you see fit.
 
-To recap your order, you sent {!! $botLink !!} {{ $swapFormatter->formatCurrency($inQty) }} {{ $inAsset }} and we’ve just sent you {{ $swapFormatter->formatCurrency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$swapFormatter->formatCurrency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}}.
+To recap your order, you sent {!! $botLink !!} {{ $currency($inQty) }} {{ $inAsset }} and we’ve just sent you {{ $currency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$currency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}}.
 
 
 
 Your Swap Receipt
 
 Status
-  {{ $swapFormatter->formatState($swap['state']) }}
+  {{ $fmt->formatState($swap['state']) }}
 
 Deposit Recieved
-  {{ $swapFormatter->formatDate($swap['createdAt']) }}
+  {{ $fmt->formatDate($swap['createdAt']) }}
 
 Tokens Delivered
-  {{ $swapFormatter->formatDate($swap['completedAt']) }}
+  {{ $fmt->formatDate($swap['completedAt']) }}
 
 Amount
 @if (($receipt_type == 'refund'))
-  Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
-  {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+  Received {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
+  {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
 @elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-  {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+  {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
   →
-  {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+  {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
 @else
   none
 @endif
 
 @if (isset($receipt['changeOut']) AND $receipt['changeOut'] > 0)
 Change
-  {{ $swapFormatter->formatCurrency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
+  {{ $currency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
 @endif
 
 Recipient's address

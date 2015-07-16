@@ -22,7 +22,7 @@ events:
     name: swap.transaction.update
     label: Swap Transaction
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $currency($quantityIn) }} {{ $assetIn }}{{ $swap ? ' '.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -30,7 +30,7 @@ events:
     name: swap.confirming
     label: Confirming Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $currency($quantityIn) }} {{ $assetIn }}{{ $swap ? ' '.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -38,7 +38,7 @@ events:
     name: swap.confirmed
     label: Confirmed Swap
     level: INFO
-    msg: Received {{ $quantityIn }} {{ $assetIn }}{{ $swap ? ' '.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Received {{ $currency($quantityIn) }} {{ $assetIn }}{{ $swap ? ' '.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityIn,assetIn,destination,confirmations]
     swapEventStream: true
 
@@ -47,7 +47,7 @@ events:
     label: Swap Sent
     level: INFO
     msg: |
-        Sent {{ $fmt($quantityOut) }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }}.
+        Sent {{ $currency($quantityOut) }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }}.
     msgVars: [quantityOut,assetOut,destination,changeOut,changeOutAsset]
     swapEventStream: true
 
@@ -55,7 +55,7 @@ events:
     name: send.unconfirmed
     label: Unconfirmed Swap Send
     level: DEBUG
-    msg: Unconfirmed send of {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msg: Unconfirmed send of {{ $currency($quantityOut) }} {{ $assetOut }} to {{ $destination }}.
     msgVars: [quantityOut,assetOut,destination]
     swapEventStream: true
 
@@ -64,7 +64,7 @@ events:
     label: Swap Send Confirmed
     level: INFO
     msg: |
-        Sent {{ $quantityOut }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }} with {{ $confirmationsOut }} {{ str_plural('confirmation', $confirmationsOut) }}.
+        Sent {{ $currency($quantityOut) }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }} with {{ $confirmationsOut }} {{ str_plural('confirmation', $confirmationsOut) }}.
     msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 
@@ -91,7 +91,7 @@ events:
     name: swap.refunding
     label: Refunding Swap
     level: DEBUG
-    msg: Refunding {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msg: Refunding {{ $currency($quantityOut) }} {{ $assetOut }} to {{ $destination }}.
     msgVars: [quantityOut,assetOut,destination]
     swapEventStream: true
 
@@ -99,7 +99,7 @@ events:
     name: swap.refunded
     label: Swap Refunded
     level: INFO
-    msg: Refunded {{ $quantityOut }} {{ $assetOut }} to {{ $destination }}.
+    msg: Refunded {{ $currency($quantityOut) }} {{ $assetOut }} to {{ $destination }}.
     msgVars: [quantityOut,assetOut,destination]
     swapEventStream: true
 
@@ -110,7 +110,7 @@ events:
     name: income.forwarded
     label: Income Forwarded
     level: INFO
-    msg: Sent an income forwarding payment of {{ $quantityOut }} {{ $assetOut }} to {{ $destination }} with transaction ID {{ $txid }}.
+    msg: Sent an income forwarding payment of {{ $currency($quantityOut) }} {{ $assetOut }} to {{ $destination }} with transaction ID {{ $txid }}.
     msgVars: [quantityOut,assetOut,destination,txid]
     botEventStream: true
 
@@ -118,7 +118,7 @@ events:
     name: income.forwardSent
     label: Income Forwarding Sent
     level: DEBUG
-    msg: Income of {{ $quantityOut }} {{ $assetOut }} was forwarded to {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Income of {{ $currency($quantityOut) }} {{ $assetOut }} was forwarded to {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [quantityOut,assetOut,destination,confirmations]
     botEventStream: true
 
@@ -129,9 +129,9 @@ events:
     name: tx.previous
     label: Previous Transaction
     level: DEBUG
-    msgVars: [txid, confirmations]
     msg: Transaction {{ $txid }} was confirmed with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
-    botEventStream: true
+    msgVars: [txid, confirmations]
+
   -
     name: bot.stateChange
     label: Bot State Change
@@ -146,13 +146,13 @@ events:
     name: payment.unconfirmedMoveFuel
     label: Unconfirmed Swapbot Fuel Received
     level: INFO
-    msg: Unconfirmed swapbot fuel of {{$inQty}} {{$inAsset}} received from {{$source}} with transaction ID {{$txid}}.
+    msg: Unconfirmed swapbot fuel of {{ $currency($inQty) }} {{ $inAsset }} received from {{ $source }} with transaction ID {{ $txid }}.
     msgVars: [inQty,inAsset,source,txid]
   -
     name: payment.moveFuelConfirmed
     label: Swapbot Fuel Received
     level: INFO
-    msg: Swapbot fuel of {{$inQty}} {{$inAsset}} received from {{$source}} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Swapbot fuel of {{ $currency($inQty) }} {{ $inAsset }} received from {{ $source }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [inQty,inAsset,source,txid,confirmations]
 
 
@@ -161,62 +161,62 @@ events:
     name: payment.leaseCreated
     label: Lease Created
     level: INFO
-    msg: Swapbot lease activated from {{$start_date}} until {{$end_date}}.
+    msg: Swapbot lease activated from {{ $start_date }} until {{ $end_date }}.
     msgVars: [start_date, end_date]
   -
     name: payment.monthlyFeePurchased
     label: Monthly Fee Purchased
     level: INFO
-    msg: Purchased {{$months}} {{ str_plural('month', $months) }} of swapbot rental for {{$cost}} {{$asset}}.
+    msg: Purchased {{ $months }} {{ str_plural('month', $months) }} of swapbot rental for {{ $cost }} {{ $asset }}.
     msgVars: [months,cost,asset]
   -
     name: payment.firstMonthlyFeePaid
     label: First Monthly Fee Paid
     level: INFO
-    msg: Paid {{$qty}} {{$asset}} as a monthly fee.
+    msg: Paid {{ $qty }} {{ $asset }} as a monthly fee.
     msgVars: [qty,asset]
   -
     name: payment.monthlyFeePaid
     label: Monthly Fee Paid
     level: INFO
-    msg: Paid {{$qty}} {{$asset}} as a monthly fee.
+    msg: Paid {{ $qty }} {{ $asset }} as a monthly fee.
     msgVars: [qty,asset]
 
   -
     name: payment.unconfirmed
     label: Unconfirmed Payment Received
     level: INFO
-    msg: Received an unconfirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
+    msg: Received an unconfirmed payment of {{ $currency($inQty) }} {{ $inAsset }} from {{ $source }}
     msgVars: [inQty,inAsset,source]
   -
     name: payment.confirmed
     label: Confirmed Payment Received
     level: INFO
-    msg: Received a confirmed payment of {{$inQty}} {{$inAsset}} from {{$source}}
+    msg: Received a confirmed payment of {{ $currency($inQty) }} {{ $inAsset }} from {{ $source }}
     msgVars: [inQty,inAsset,source]
   -
     name: payment.previous
     label: Confirmed Payment Received
     level: DEBUG
-    msg: Payment transaction {{$txid}} was confirmed with {{$confirmations}} {{ str_plural('confirmation', $confirmations) }}.
+    msg: Payment transaction {{ $txid }} was confirmed with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
     msgVars: [txid, confirmations]
   -
     name: payment.unknown
     label: Confirmed Payment Received
     level: WARNING
-    msg: Received a payment of {{$inQty}} {{$inAsset}} from {{$source}} with transaction ID {{$txid}}. This was not a valid payment.
+    msg: Received a payment of {{ $currency($inQty) }} {{ $inAsset }} from {{ $source }} with transaction ID {{ $txid }}. This was not a valid payment.
     msgVars: [inQty,inAsset,source,txid]
   -
     name: payment.moveFuelCreated
     label: Move Fuel Transaction Created
     level: DEBUG
-    msg: Moving initial swapbot fuel.  Sent {{$outQty}} {{$outAsset}} to {{$destination}} with transaction ID {{$txid}}
+    msg: Moving initial swapbot fuel.  Sent {{ $currency($outQty) }} {{ $outAsset }} to {{ $destination }} with transaction ID {{ $txid }}
     msgVars: [outQty, outAsset, destination, txid]
   -
     name: payment.forwarded
     label: Payment Forwarded
     level: INFO
-    msg: Forwarded a payment of {{$outQty}} {{$outAsset}} to {{$destination}} with transaction ID {{$txid}}
+    msg: Forwarded a payment of {{ $currency($outQty) }} {{ $outAsset }} to {{ $destination }} with transaction ID {{ $txid }}
     msgVars: [outQty, outAsset, destination, txid]
 
 

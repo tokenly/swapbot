@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-07-16 02:23:11
+// compiled on 2015-07-16 13:34:34
 
 return array (
   'swap.new' => 
@@ -38,7 +38,7 @@ return array (
     'name' => 'swap.transaction.update',
     'label' => 'Swap Transaction',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($currency($quantityIn)); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -53,7 +53,7 @@ return array (
     'name' => 'swap.confirming',
     'label' => 'Confirming Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($currency($quantityIn)); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -68,7 +68,7 @@ return array (
     'name' => 'swap.confirmed',
     'label' => 'Confirmed Swap',
     'level' => 'INFO',
-    'msg' => 'Received <?php echo e($quantityIn); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$swapFormatter->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Received <?php echo e($currency($quantityIn)); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityIn',
@@ -83,7 +83,7 @@ return array (
     'name' => 'swap.sent',
     'label' => 'Swap Sent',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($fmt($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.
+    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.
 ',
     'msgVars' => 
     array (
@@ -100,7 +100,7 @@ return array (
     'name' => 'send.unconfirmed',
     'label' => 'Unconfirmed Swap Send',
     'level' => 'DEBUG',
-    'msg' => 'Unconfirmed send of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msg' => 'Unconfirmed send of <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -114,7 +114,7 @@ return array (
     'name' => 'send.confirmed',
     'label' => 'Swap Send Confirmed',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$fmt($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.
+    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.
 ',
     'msgVars' => 
     array (
@@ -152,7 +152,7 @@ return array (
     'name' => 'swap.refunding',
     'label' => 'Refunding Swap',
     'level' => 'DEBUG',
-    'msg' => 'Refunding <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msg' => 'Refunding <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -166,7 +166,7 @@ return array (
     'name' => 'swap.refunded',
     'label' => 'Swap Refunded',
     'level' => 'INFO',
-    'msg' => 'Refunded <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
+    'msg' => 'Refunded <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -180,7 +180,7 @@ return array (
     'name' => 'income.forwarded',
     'label' => 'Income Forwarded',
     'level' => 'INFO',
-    'msg' => 'Sent an income forwarding payment of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>.',
+    'msg' => 'Sent an income forwarding payment of <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -195,7 +195,7 @@ return array (
     'name' => 'income.forwardSent',
     'label' => 'Income Forwarding Sent',
     'level' => 'DEBUG',
-    'msg' => 'Income of <?php echo e($quantityOut); ?> <?php echo e($assetOut); ?> was forwarded to <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Income of <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> was forwarded to <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -210,13 +210,12 @@ return array (
     'name' => 'tx.previous',
     'label' => 'Previous Transaction',
     'level' => 'DEBUG',
+    'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'txid',
       1 => 'confirmations',
     ),
-    'msg' => 'Transaction <?php echo e($txid); ?> was confirmed with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
-    'botEventStream' => true,
   ),
   'bot.stateChange' => 
   array (
@@ -235,7 +234,7 @@ return array (
     'name' => 'payment.unconfirmedMoveFuel',
     'label' => 'Unconfirmed Swapbot Fuel Received',
     'level' => 'INFO',
-    'msg' => 'Unconfirmed swapbot fuel of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>.',
+    'msg' => 'Unconfirmed swapbot fuel of <?php echo e($currency($inQty)); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>.',
     'msgVars' => 
     array (
       0 => 'inQty',
@@ -249,7 +248,7 @@ return array (
     'name' => 'payment.moveFuelConfirmed',
     'label' => 'Swapbot Fuel Received',
     'level' => 'INFO',
-    'msg' => 'Swapbot fuel of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msg' => 'Swapbot fuel of <?php echo e($currency($inQty)); ?> <?php echo e($inAsset); ?> received from <?php echo e($source); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
     'msgVars' => 
     array (
       0 => 'inQty',
@@ -313,7 +312,7 @@ return array (
     'name' => 'payment.unconfirmed',
     'label' => 'Unconfirmed Payment Received',
     'level' => 'INFO',
-    'msg' => 'Received an unconfirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
+    'msg' => 'Received an unconfirmed payment of <?php echo e($currency($inQty)); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
     'msgVars' => 
     array (
       0 => 'inQty',
@@ -326,7 +325,7 @@ return array (
     'name' => 'payment.confirmed',
     'label' => 'Confirmed Payment Received',
     'level' => 'INFO',
-    'msg' => 'Received a confirmed payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
+    'msg' => 'Received a confirmed payment of <?php echo e($currency($inQty)); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?>',
     'msgVars' => 
     array (
       0 => 'inQty',
@@ -351,7 +350,7 @@ return array (
     'name' => 'payment.unknown',
     'label' => 'Confirmed Payment Received',
     'level' => 'WARNING',
-    'msg' => 'Received a payment of <?php echo e($inQty); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>. This was not a valid payment.',
+    'msg' => 'Received a payment of <?php echo e($currency($inQty)); ?> <?php echo e($inAsset); ?> from <?php echo e($source); ?> with transaction ID <?php echo e($txid); ?>. This was not a valid payment.',
     'msgVars' => 
     array (
       0 => 'inQty',
@@ -365,7 +364,7 @@ return array (
     'name' => 'payment.moveFuelCreated',
     'label' => 'Move Fuel Transaction Created',
     'level' => 'DEBUG',
-    'msg' => 'Moving initial swapbot fuel.  Sent <?php echo e($outQty); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
+    'msg' => 'Moving initial swapbot fuel.  Sent <?php echo e($currency($outQty)); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
     'msgVars' => 
     array (
       0 => 'outQty',
@@ -379,7 +378,7 @@ return array (
     'name' => 'payment.forwarded',
     'label' => 'Payment Forwarded',
     'level' => 'INFO',
-    'msg' => 'Forwarded a payment of <?php echo e($outQty); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
+    'msg' => 'Forwarded a payment of <?php echo e($currency($outQty)); ?> <?php echo e($outAsset); ?> to <?php echo e($destination); ?> with transaction ID <?php echo e($txid); ?>',
     'msgVars' => 
     array (
       0 => 'outQty',

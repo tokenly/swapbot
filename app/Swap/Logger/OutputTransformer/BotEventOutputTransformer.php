@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
-use Swapbot\Models\Formatting\SwapFormatter;
+use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Models\Swap;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -17,8 +17,8 @@ class BotEventOutputTransformer {
 
     /**
      */
-    public function __construct(SwapFormatter $swap_formatter) {
-        $this->swap_formatter = $swap_formatter;
+    public function __construct(FormattingHelper $formatting_helper) {
+        $this->formatting_helper = $formatting_helper;
     }
 
 
@@ -31,7 +31,6 @@ class BotEventOutputTransformer {
         if (is_string($event_details)) { $event_details = json_decode($event_details, true); }
 
         if ($swap !== null) { $event_details['swap'] = $swap; }
-        $event_details['swapFormatter'] = $this->swap_formatter;
 
         $name = (isset($event_details['name']) ? $event_details['name'] : 'undefined');
         // Log::debug('$event_details='.json_encode($event_details, 192));
@@ -51,7 +50,10 @@ class BotEventOutputTransformer {
         }
 
         $blade_vars = $event_details;
-        $blade_vars['fmt'] = function($value) { return CurrencyUtil::valueToFormattedString($value); };
+
+        // helpers
+        $blade_vars['fmt'] = $this->formatting_helper;
+        $blade_vars['currency'] = function($value, $places=null) { return $this->formatting_helper->formatCurrency($value, $places); };
 
         $resolved_message = $this->resolveBladeSrc($compiled_blade_src, $blade_vars);
         return $resolved_message;

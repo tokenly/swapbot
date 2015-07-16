@@ -10,7 +10,7 @@ class BotEventOutputTransformerServiceProvider extends ServiceProvider {
 
     public function register() {
         $this->app->bind('boteventlogoutput', function($app) {
-            return new BotEventOutputTransformer(app('Swapbot\Models\Formatting\SwapFormatter'));
+            return new BotEventOutputTransformer(app('Swapbot\Models\Formatting\FormattingHelper'));
         });
 
     }

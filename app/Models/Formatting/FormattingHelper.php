@@ -10,7 +10,7 @@ use Swapbot\Models\Swap;
 use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\QuotebotClient\Client;
 
-class SwapFormatter {
+class FormattingHelper {
 
     public function __construct(Client $quotebot_client) {
         $this->quotebot_client = $quotebot_client;

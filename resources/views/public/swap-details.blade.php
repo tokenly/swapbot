@@ -19,50 +19,50 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
             <div class="avatar">
                 <a href="{{ $bot->getPublicBotURL() }}" title="Return to the bot home page"><img src="{{ $botRobohashUrl }}"></a>
             </div>
-            <div class="status-dot bckg-{{ $swapFormatter->swapStateDotColor($swap) }}"></div>
+            <div class="status-dot bckg-{{ $fmt->swapStateDotColor($swap) }}"></div>
             <h1><a href="{{ $bot->getPublicBotURL() }}" target="_blank">{{ $bot['name'] }}</a></h1>
         </div>
         <div class="content">
             <div class="content-header">
-                <div class="status-icon icon-{{ $swapFormatter->buildStateIcon($swap) }}"></div>
+                <div class="status-icon icon-{{ $fmt->buildStateIcon($swap) }}"></div>
                 <div class="message">
                     @if ($swap['state'] == 'complete')
                         @if ($receipt_type == 'swap')
                             {{-- swap --}}
-                            <span><b>Successfully</b> swapped <b>{{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}</b> for <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
+                            <span><b>Successfully</b> swapped <b>{{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}</b> for <b>{{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}</b>.</span>
                         @elseif ($receipt_type == 'refund')
                             {{-- refund --}}
-                            <span>This swap was <b>refunded</b> <b>{{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}</b>.</span>
+                            <span>This swap was <b>refunded</b> <b>{{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}</b>.</span>
                         @else
                         @endif
                     @else
-                        <span>This swap is {{ $swapFormatter->formatState($swap['state']) }}.</span>
+                        <span>This swap is {{ $fmt->formatState($swap['state']) }}.</span>
                     @endif
                 </div>
             </div>
             <ul class="wide-list wide-list-short1">
                 <li>
                     <div class="item-header">Status</div>
-                    <p>{{ $swapFormatter->formatState($swap['state']) }}</p>
+                    <p>{{ $fmt->formatState($swap['state']) }}</p>
                 </li>
                 <li>
                     <div class="item-header">Deposit Recieved</div>
-                    <p>{{ $swapFormatter->formatDate($swap['created_at']) }}</p>
+                    <p>{{ $fmt->formatDate($swap['created_at']) }}</p>
                 </li>
                 <li>
                     <div class="item-header">Tokens Delivered</div>
-                    <p>{{ $swapFormatter->formatDate($swap['completed_at']) }}</p>
+                    <p>{{ $fmt->formatDate($swap['completed_at']) }}</p>
                 </li>
                 <li>
                     <div class="item-header">Amount</div>
                     <p>
                     @if (($receipt_type == 'refund'))
-                        Received {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
-                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+                        Received {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
+                        {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                     @elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-                        {{ $receipt['quantityIn'] }} {{ $receipt['assetIn'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+                        {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                         →
-                        {{ $receipt['quantityOut'] }} {{ $receipt['assetOut'] }}{{ $swapFormatter->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
+                        {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
                     @else
                         <span class="none">none</span>
                     @endif
@@ -72,7 +72,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                 <li>
                     <div class="item-header">Change</div>
                     <p>
-                        {{ $swapFormatter->formatCurrency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
+                        {{ $currency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
                     </p>
                 </li>
                 @endif
@@ -81,7 +81,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     <div class="item-header">Recipient's address</div>
                     <p>
                         @if (isset($receipt['destination']))
-                            <a href="{{ $swapFormatter->formatAddressHref($receipt['destination']) }}" target="_blank">{{ $receipt['destination'] }}</a>
+                            <a href="{{ $fmt->formatAddressHref($receipt['destination']) }}" target="_blank">{{ $receipt['destination'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -90,14 +90,14 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                 <li>
                     <div class="item-header">Swapbot's address</div>
                     <p>
-                        <a href="{{ $swapFormatter->formatAddressHref($bot['address']) }}" target="_blank">{{ $bot['address'] }}</a>
+                        <a href="{{ $fmt->formatAddressHref($bot['address']) }}" target="_blank">{{ $bot['address'] }}</a>
                     </p>
                 </li>
                 <li>
                     <div class="item-header">Incoming TXID</div>
                     <p>
                         @if (isset($receipt['txidIn']))
-                            <a href="{{ $swapFormatter->formatBlockchainHref($receipt['txidIn'], $receipt['assetIn']) }}" target="_blank">{{ $receipt['txidIn'] }}</a>
+                            <a href="{{ $fmt->formatBlockchainHref($receipt['txidIn'], $receipt['assetIn']) }}" target="_blank">{{ $receipt['txidIn'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif
@@ -107,7 +107,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     <div class="item-header">Outgoing TXID</div>
                     <p>
                         @if (isset($receipt['txidOut']))
-                            <a href="{{ $swapFormatter->formatBlockchainHref($receipt['txidOut'], $receipt['assetOut']) }}" target="_blank">{{ $receipt['txidOut'] }}</a>
+                            <a href="{{ $fmt->formatBlockchainHref($receipt['txidOut'], $receipt['assetOut']) }}" target="_blank">{{ $receipt['txidOut'] }}</a>
                         @else
                             <span class="none">none</span>
                         @endif

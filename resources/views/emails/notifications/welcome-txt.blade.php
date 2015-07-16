@@ -3,11 +3,12 @@
 @section('main')
 
 
+
 Thanks for making a purchase with SwapBot!
 
 We can see your payment on the blockchain and will be sending your {{ $outAsset }} shortly (After {{ $bot['confirmationsRequired'] }} confirmations or about {{ $bot['confirmationsRequired'] * 10 }} minutes).
 
-To recap your order, you sent {{ $bot['name'] }} {{ $inQty }} {{ $inAsset }} and will be receiving {{ $outQty }} {{ $outAsset }}{{ $hasChange ? " along with {$swap['receipt']['changeOut']} {$inAsset} in change" : ''}} shortly.
+To recap your order, you sent {{ $bot['name'] }} {{ $currency($inQty) }} {{ $inAsset }} and will be receiving {{ $currency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$currency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}} shortly.
 
 What Happens Next?
 

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 use Swapbot\Commands\UnsubscribeCustomer;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests;
-use Swapbot\Models\Formatting\SwapFormatter;
+use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Repositories\CustomerRepository;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 

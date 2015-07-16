@@ -6,7 +6,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Config;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Http\Requests;
-use Swapbot\Models\Formatting\SwapFormatter;
+use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\UserRepository;
 
@@ -22,24 +22,13 @@ class PublicBotController extends Controller {
      *
      * @return Response
      */
-    public function showBot($username, $botid, BotRepository $bot_repository, SwapFormatter $swap_formatter)
+    public function showBot($username, $botid, BotRepository $bot_repository)
     {
         list($user, $bot) = $this->requireUserAndBot($username, $botid);
 
-        $pusher_url = Config::get('tokenlyPusher.clientUrl');
         return view('public.bot', [
             'bot'               => $bot,
-            'quotebot'          => [
-                'url'      => rtrim(Config::get('quotebot.connection_url'), '/'),
-                'apiToken' => Config::get('quotebot.api_token'),
-            ],
-            'swapFormatter'     => $swap_formatter,
-            'pusherUrl'         => $pusher_url,
-            'quotebotPusherUrl' => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
-            'env'               => app()->environment(),
             'botRobohashUrl'    => $bot->getRobohashURL(),
-
-            'analyticsId'       => env('GOOGLE_ANALYTICS_ID'),
         ]);
     }
 
