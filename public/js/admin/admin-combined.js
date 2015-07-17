@@ -4154,11 +4154,12 @@
       return (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit";
     };
     buildDesc.fiat = function(swapConfig) {
-      var cost, formatCurrency, outAmount;
+      var cost, formatCurrency, formatFiatCurrency, outAmount;
       formatCurrency = swapbot.formatters.formatCurrency;
+      formatFiatCurrency = swapbot.formatters.formatFiatCurrency;
       outAmount = 1;
       cost = swapConfig.cost;
-      return (formatCurrency(outAmount)) + " " + swapConfig.out + " for every $" + (formatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit";
+      return (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatFiatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit";
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
