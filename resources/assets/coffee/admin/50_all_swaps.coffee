@@ -66,7 +66,6 @@ do ()->
                 ])
 
             csvString = sbAdmin.csvutils.dataToCSVString(rows)
-            console.log "csvString=",csvString
             csvHref = sbAdmin.csvutils.CSVDownloadHref(csvString)
 
             linkEl = e.target
