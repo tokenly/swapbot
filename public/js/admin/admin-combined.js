@@ -1683,7 +1683,6 @@
           rows.push(["" + swap.receipt.quantityIn, "" + swap.receipt.assetIn, "" + swap.receipt.quantityOut, "" + swap.receipt.assetOut, swap.state, window.moment(swap.updatedAt).format('YYYY-MM-DD HH:mm:ss Z'), swap.botName, swap.botUsername]);
         }
         csvString = sbAdmin.csvutils.dataToCSVString(rows);
-        console.log("csvString=", csvString);
         csvHref = sbAdmin.csvutils.CSVDownloadHref(csvString);
         linkEl = e.target;
         linkEl.setAttribute('download', 'export.csv');
@@ -3980,7 +3979,7 @@
       return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
     };
     isZero = function(value) {
-      if ((value == null) || value.length === 0) {
+      if ((value == null) || value.length === 0 || value === 0) {
         return true;
       }
       return false;

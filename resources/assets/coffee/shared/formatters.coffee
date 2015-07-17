@@ -25,7 +25,7 @@ swapbot.formatters = do ()->
         return exports.formatCurrency(amount / SATOSHI, currencyPostfix)
 
     isZero = (value)->
-        if not value? or value.length == 0
+        if not value? or value.length == 0 or value == 0
             return true
         return false
 
