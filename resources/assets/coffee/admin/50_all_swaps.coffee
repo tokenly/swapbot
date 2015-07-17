@@ -48,8 +48,33 @@ do ()->
                 return
             , 1
 
+        vm.exportAsCSV = (e)->
+            # e.preventDefault()
 
+            rows = []
+            rows.push(['In Qty', 'In Asset','Out Qty','Out Asset','State','Updated','Bot','Owner',])
+            for swap in vm.swaps()
+                rows.push([
+                    "#{swap.receipt.quantityIn}",
+                    "#{swap.receipt.assetIn}",
+                    "#{swap.receipt.quantityOut}",
+                    "#{swap.receipt.assetOut}",
+                    swap.state,
+                    window.moment(swap.updatedAt).format('YYYY-MM-DD HH:mm:ss Z'),
+                    swap.botName,
+                    swap.botUsername,
+                ])
 
+            csvString = sbAdmin.csvutils.dataToCSVString(rows)
+            console.log "csvString=",csvString
+            csvHref = sbAdmin.csvutils.CSVDownloadHref(csvString)
+
+            linkEl = e.target
+            linkEl.setAttribute('download', 'export.csv')
+            linkEl.setAttribute('href', csvHref)
+            linkEl.setAttribute('target', '_blank')
+
+            return
 
         return vm
 
@@ -138,10 +163,13 @@ do ()->
             ]),
                 
 
-            m("div", {class: "spacer1"}),
+            m("div", {class: "spacer2"}),
 
-            
+            m("a[href='#csvExport']", {class: "btn btn-success", onclick: vm.exportAsCSV }, "Download as CSV"),
+
+            m("div", {class: "spacer1"}),
         ])
+
         return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
 
 

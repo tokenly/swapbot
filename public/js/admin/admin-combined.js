@@ -415,6 +415,28 @@
     return botutils;
   })();
 
+  sbAdmin.csvutils = (function() {
+    var csvutils;
+    csvutils = {};
+    csvutils.dataToCSVString = function(rows) {
+      var csv, j, len, row, rowText;
+      csv = '';
+      for (j = 0, len = rows.length; j < len; j++) {
+        row = rows[j];
+        rowText = '"' + row.map(function(text, i) {
+          console.log("text=", text);
+          return text.replace(/"/g, '""');
+        }).join('","') + '"';
+        csv += rowText + "\n";
+      }
+      return csv;
+    };
+    csvutils.CSVDownloadHref = function(csvString) {
+      return "data:application/csv;charset=utf-8," + encodeURIComponent(csvString);
+    };
+    return csvutils;
+  })();
+
   sbAdmin.currencyutils = (function() {
     var SATOSHI, currencyutils;
     currencyutils = {};
@@ -1651,6 +1673,23 @@
           vm.refreshSwaps();
         }, 1);
       };
+      vm.exportAsCSV = function(e) {
+        var csvHref, csvString, j, len, linkEl, ref, rows, swap;
+        rows = [];
+        rows.push(['In Qty', 'In Asset', 'Out Qty', 'Out Asset', 'State', 'Updated', 'Bot', 'Owner']);
+        ref = vm.swaps();
+        for (j = 0, len = ref.length; j < len; j++) {
+          swap = ref[j];
+          rows.push(["" + swap.receipt.quantityIn, "" + swap.receipt.assetIn, "" + swap.receipt.quantityOut, "" + swap.receipt.assetOut, swap.state, window.moment(swap.updatedAt).format('YYYY-MM-DD HH:mm:ss Z'), swap.botName, swap.botUsername]);
+        }
+        csvString = sbAdmin.csvutils.dataToCSVString(rows);
+        console.log("csvString=", csvString);
+        csvHref = sbAdmin.csvutils.CSVDownloadHref(csvString);
+        linkEl = e.target;
+        linkEl.setAttribute('download', 'export.csv');
+        linkEl.setAttribute('href', csvHref);
+        linkEl.setAttribute('target', '_blank');
+      };
       return vm;
     })();
     sbAdmin.ctrl.allswaps.controller = function() {
@@ -1759,6 +1798,11 @@
             }, [m('thead', {}, [m('tr', {}, [m('th', {}, 'In'), m('th', {}, 'Out'), m('th', {}, 'State'), m('th', {}, 'Updated'), m('th', {}, 'Details'), m('th', {}, 'Events'), m('th', {}, 'Bot'), m('th', {}, 'Owner')])]), m('tbody', {}, tableRows)])
           ])
         ]), m("div", {
+          "class": "spacer2"
+        }), m("a[href='#csvExport']", {
+          "class": "btn btn-success",
+          onclick: vm.exportAsCSV
+        }, "Download as CSV"), m("div", {
           "class": "spacer1"
         })
       ]);
