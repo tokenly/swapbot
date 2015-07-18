@@ -63,7 +63,7 @@ do ()->
                         <div className="item-header" title="{swap.name}">Transaction Received</div>
                         <p className="date">{ this.state.fromNow }</p>
                         <p>{swap.message}</p>
-                        <p>This transaction has <b>{swap.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot)}.</p>
+                        <p>This transaction has <b>{swap.confirmations} out of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot.confirmationsRequired)}.</p>
                     </div>
                     <div className="item-actions">
                         <div className="icon-next"></div>
@@ -198,7 +198,7 @@ do ()->
 
 
 
-                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                    <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>
                 </div>
             </div>
 

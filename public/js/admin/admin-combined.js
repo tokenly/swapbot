@@ -3955,6 +3955,43 @@
     swapbot = {};
   }
 
+  swapbot.eventMessageUtils = (function() {
+    var buildTransactionLinkElement, buildTransactionLinkHref, exports;
+    exports = {};
+    exports.buildTransactionLinkHref = buildTransactionLinkHref = function(txid) {
+      return "https://chain.so/tx/BTC/" + txid;
+    };
+    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents) {
+      if (linkContents == null) {
+        linkContents = null;
+      }
+      if (txid == null) {
+        return null;
+      }
+      if (linkContents == null) {
+        linkContents = txid;
+      }
+      return React.createElement('a', {
+        href: buildTransactionLinkHref(txid),
+        target: '_blank',
+        className: 'externalLink'
+      }, linkContents);
+    };
+    exports.buildSwapStatusMessageElement = function(swap, bot) {
+      switch (swap.state) {
+        case 'sent':
+        case 'refunded':
+          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
+      }
+      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
   swapbot.formatters = (function() {
     var SATOSHI, exports, isZero;
     exports = {};
@@ -3965,11 +4002,11 @@
       }
       return window.numeral(confirmations).format('0');
     };
-    exports.confirmationsProse = function(bot) {
-      return bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    exports.confirmationsProse = function(confirmations) {
+      return (exports.formatConfirmations(confirmations)) + " " + (exports.confirmationsWord(confirmations));
     };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    exports.confirmationsWord = function(confirmations) {
+      return "confirmation" + (confirmations === 1 ? '' : 's');
     };
     exports.satoshisToValue = function(amount, currencyPostfix) {
       if (currencyPostfix == null) {

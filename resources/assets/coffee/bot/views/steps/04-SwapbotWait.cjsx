@@ -60,7 +60,7 @@ do ()->
 
                     <p>
                         {swap.message}<br/>
-                        This transaction has <b>{swapbot.formatters.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot)} in and <b>{swapbot.formatters.formatConfirmations(swap.confirmationsOut)}</b> {swapbot.formatters.confirmationsWord(bot)} out.<br/>
+                        This transaction has <b>{swapbot.formatters.formatConfirmations(swap.confirmations)} of {bot.confirmationsRequired}</b> {swapbot.formatters.confirmationsWord(bot.confirmationsRequired)} in and <b>{swapbot.formatters.formatConfirmations(swap.confirmationsOut)}</b> {swapbot.formatters.confirmationsWord(bot.confirmationsOut)} out.<br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>
 
@@ -173,7 +173,7 @@ do ()->
                             <div>No transaction found</div>
                     }
 
-                    <p className="description">This bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                    <p className="description">This bot will wait for <b>{swapbot.formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>
 
                     <div id="GoBackLink">
                         <NeedHelpLink botName={bot.name} />

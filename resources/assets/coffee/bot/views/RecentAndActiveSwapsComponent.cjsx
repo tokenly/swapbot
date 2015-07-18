@@ -67,7 +67,7 @@ do ()->
                         </span>
                         { if not swap.isComplete
                             <div>
-                                <small>Waiting for {swapbot.formatters.confirmationsProse(bot)} to send {swap.quantityOut} {swap.assetOut}</small>
+                                <small>{swapbot.eventMessageUtils.buildSwapStatusMessageElement(swap, bot)}</small>
                             </div>
                         }
                         </span>

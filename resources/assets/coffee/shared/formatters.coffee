@@ -17,11 +17,11 @@ swapbot.formatters = do ()->
         return 0 if not confirmations?
         return window.numeral(confirmations).format('0')
 
-    exports.confirmationsProse = (bot)->
-        return "#{bot.confirmationsRequired} #{exports.confirmationsWord(bot)}"
+    exports.confirmationsProse = (confirmations)->
+        return "#{exports.formatConfirmations(confirmations)} #{exports.confirmationsWord(confirmations)}"
     
-    exports.confirmationsWord = (bot)->
-        return "confirmation#{if bot.confirmationsRequired == 1 then '' else 's'}"
+    exports.confirmationsWord = (confirmations)->
+        return "confirmation#{if confirmations == 1 then '' else 's'}"
     
     exports.satoshisToValue = (amount, currencyPostfix='BTC') ->
         return exports.formatCurrency(amount / SATOSHI, currencyPostfix)

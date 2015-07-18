@@ -175,7 +175,7 @@ do ()->
                                                 <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
                                 }
                             </ul>
-                            <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot)}</b> and return tokens <b>to the same address</b>.</p>
+                            <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>
                         </div>
                     }
 

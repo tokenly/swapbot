@@ -49,6 +49,43 @@
     swapbot = {};
   }
 
+  swapbot.eventMessageUtils = (function() {
+    var buildTransactionLinkElement, buildTransactionLinkHref, exports;
+    exports = {};
+    exports.buildTransactionLinkHref = buildTransactionLinkHref = function(txid) {
+      return "https://chain.so/tx/BTC/" + txid;
+    };
+    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents) {
+      if (linkContents == null) {
+        linkContents = null;
+      }
+      if (txid == null) {
+        return null;
+      }
+      if (linkContents == null) {
+        linkContents = txid;
+      }
+      return React.createElement('a', {
+        href: buildTransactionLinkHref(txid),
+        target: '_blank',
+        className: 'externalLink'
+      }, linkContents);
+    };
+    exports.buildSwapStatusMessageElement = function(swap, bot) {
+      switch (swap.state) {
+        case 'sent':
+        case 'refunded':
+          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
+      }
+      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+    };
+    return exports;
+  })();
+
+  if (swapbot == null) {
+    swapbot = {};
+  }
+
   swapbot.formatters = (function() {
     var SATOSHI, exports, isZero;
     exports = {};
@@ -59,11 +96,11 @@
       }
       return window.numeral(confirmations).format('0');
     };
-    exports.confirmationsProse = function(bot) {
-      return "" + bot.confirmationsRequired + " " + (exports.confirmationsWord(bot));
+    exports.confirmationsProse = function(confirmations) {
+      return "" + (exports.formatConfirmations(confirmations)) + " " + (exports.confirmationsWord(confirmations));
     };
-    exports.confirmationsWord = function(bot) {
-      return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
+    exports.confirmationsWord = function(confirmations) {
+      return "confirmation" + (confirmations === 1 ? '' : 's');
     };
     exports.satoshisToValue = function(amount, currencyPostfix) {
       if (currencyPostfix == null) {
@@ -756,7 +793,7 @@
           "target": "_blank"
         }, React.createElement("i", {
           "className": "fa fa-arrow-circle-right"
-        })) : void 0)), (!swap.isComplete ? React.createElement("div", null, React.createElement("small", null, "Waiting for ", swapbot.formatters.confirmationsProse(bot), " to send ", swap.quantityOut, " ", swap.assetOut)) : void 0))));
+        })) : void 0)), (!swap.isComplete ? React.createElement("div", null, React.createElement("small", null, swapbot.eventMessageUtils.buildSwapStatusMessageElement(swap, bot))) : void 0))));
       }
     });
     return RecentAndActiveSwapsComponent = React.createClass({
@@ -1367,7 +1404,7 @@
           }
         }).call(this))), React.createElement("p", {
           "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")) : void 0)));
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")) : void 0)));
       }
     });
   })();
@@ -1437,7 +1474,7 @@
           "title": "{swap.name}"
         }, "Transaction Received"), React.createElement("p", {
           "className": "date"
-        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), ".")), React.createElement("div", {
+        }, this.state.fromNow), React.createElement("p", null, swap.message), React.createElement("p", null, "This transaction has ", React.createElement("b", null, swap.confirmations, " out of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot.confirmationsRequired), ".")), React.createElement("div", {
           "className": "item-actions"
         }, React.createElement("div", {
           "className": "icon-next"
@@ -1569,7 +1606,7 @@
           "className": "shadow-link"
         }, "I\u2019ve Paid")) : void 0))))), React.createElement("p", {
           "className": "description"
-        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
+        }, "After receiving one of those token types, this bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " and return tokens ", React.createElement("b", null, "to the same address"), ".")));
       }
     });
   })();
@@ -1620,7 +1657,7 @@
         swap = userChoices.swap;
         bot = this.props.bot;
         emailValue = userChoices.email.value;
-        return React.createElement("div", null, React.createElement("p", null, swap.message, React.createElement("br", null), "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot), " out.", React.createElement("br", null), React.createElement("a", {
+        return React.createElement("div", null, React.createElement("p", null, swap.message, React.createElement("br", null), "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot.confirmationsRequired), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot.confirmationsOut), " out.", React.createElement("br", null), React.createElement("a", {
           "id": "not-my-transaction",
           "onClick": this.notMyTransactionClicked,
           "href": "#",
@@ -1704,7 +1741,7 @@
           "userChoices": this.state.userChoices
         }) : React.createElement("div", null, "No transaction found")), React.createElement("p", {
           "className": "description"
-        }, "This bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot)), " and return tokens ", React.createElement("b", null, "to the same address"), "."), React.createElement("div", {
+        }, "This bot will wait for ", React.createElement("b", null, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " and return tokens ", React.createElement("b", null, "to the same address"), "."), React.createElement("div", {
           "id": "GoBackLink"
         }, React.createElement(NeedHelpLink, {
           "botName": bot.name
@@ -1863,150 +1900,6 @@
     }
   };
 
-  BotAPIActionCreator = (function() {
-    var exports, handleBotstreamEvents, subscriberId;
-    exports = {};
-    subscriberId = null;
-    handleBotstreamEvents = function(botstreamEvents) {
-      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
-    };
-    exports.subscribeToBotstream = function(botId) {
-      var onBotstreamEvent, onSubscribedToBotstream;
-      onSubscribedToBotstream = function() {
-        $.get("/api/v1/public/boteventstream/" + botId + "?sort=serial desc&limit=1", (function(_this) {
-          return function(botstreamEvents) {
-            handleBotstreamEvents(botstreamEvents);
-          };
-        })(this));
-      };
-      onBotstreamEvent = function(botstreamEvent) {
-        handleBotstreamEvents([botstreamEvent]);
-      };
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, onBotstreamEvent, onSubscribedToBotstream);
-    };
-    return exports;
-  })();
-
-  QuotebotActionCreator = (function() {
-    var exports, subscriberId;
-    exports = {};
-    subscriberId = null;
-    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
-      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
-        return function(quotesJSON) {
-          var quote, _i, _len, _ref;
-          if (quotesJSON.quotes != null) {
-            _ref = quotesJSON.quotes;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              quote = _ref[_i];
-              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
-                QuotebotEventActions.addNewQuote(quote);
-              }
-            }
-          }
-        };
-      })(this));
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
-        QuotebotEventActions.addNewQuote(quote);
-      }, null, pusherURL);
-    };
-    return exports;
-  })();
-
-  SwapAPIActionCreator = (function() {
-    var exports, handleSwapstreamEvents, loadSwapsFromAPI, loadSwapstreamEventsFromAPI, loading, onUIChange, subscribeToSwapstream, subscriberId;
-    exports = {};
-    subscriberId = null;
-    loading = false;
-    handleSwapstreamEvents = function(swapstreamEvents) {
-      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
-    };
-    loadSwapsFromAPI = function(botId) {
-      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
-        SwapstreamEventActions.addNewSwaps(swapsData);
-      });
-    };
-    loadSwapstreamEventsFromAPI = function(botId, limit) {
-      loading = true;
-      setTimeout(function() {
-        UserInterfaceActions.beginLoadingMoreSwaps();
-      }, 1);
-      $.get("/api/v1/public/swapevents/" + botId + "?latestperswap=1&limit=" + limit + "&sort=serial desc", (function(_this) {
-        return function(swapstreamEvents) {
-          var newMaxSwapsRequestedFromServer;
-          handleSwapstreamEvents(swapstreamEvents);
-          newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit);
-          UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer);
-          UserInterfaceActions.endLoadingMoreSwaps();
-          loading = false;
-        };
-      })(this));
-    };
-    subscribeToSwapstream = function(botId) {
-      var onSubscribedToSwapstream, onSwapstreamEvent;
-      onSubscribedToSwapstream = function() {
-        loadSwapstreamEventsFromAPI(botId, Settings.SWAPS_TO_SHOW);
-      };
-      onSwapstreamEvent = function(swapstreamEvent) {
-        handleSwapstreamEvents([swapstreamEvent]);
-      };
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, onSwapstreamEvent, onSubscribedToSwapstream);
-    };
-    onUIChange = function(botId) {
-      var maxSwapsToShow;
-      maxSwapsToShow = UserInterfaceStateStore.getSwapsUIState().maxSwapsToShow;
-      if (maxSwapsToShow > UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer) {
-        if (!loading) {
-          loadSwapstreamEventsFromAPI(botId, maxSwapsToShow);
-        }
-      }
-    };
-    exports.init = function(botId) {
-      subscribeToSwapstream(botId);
-      UserInterfaceStateStore.addChangeListener(function() {
-        onUIChange(botId);
-      });
-    };
-    return exports;
-  })();
-
-  UIActionListeners = (function($) {
-    var bindScrollTo, exports;
-    exports = {};
-    bindScrollTo = function(button, target, animationTime) {
-      if (animationTime == null) {
-        animationTime = 750;
-      }
-      $(button).on('click', function(e) {
-        return $('html, body').animate({
-          scrollTop: $(target).offset().top
-        }, animationTime);
-      });
-    };
-    exports.init = function() {
-      bindScrollTo('#active-swaps-button', '#active-swaps');
-      bindScrollTo('#recent-swaps-button', '#recent-swaps');
-      $('#heart-button').on('click', function() {
-        $('i.fa', this).removeClass('fa-heart-o').addClass('fa-heart').css({
-          transform: 'scale(1.6)'
-        });
-        setTimeout((function(_this) {
-          return function() {
-            var iconEl;
-            iconEl = $('i.fa', _this);
-            iconEl.css({
-              transform: 'scale(1)'
-            });
-            return setTimeout(function() {
-              return iconEl.removeClass('fa-heart').addClass('fa-heart-o');
-            }, 200);
-          };
-        })(this), 200);
-      });
-    };
-    return exports;
-  })(jQuery);
-
   BotstreamEventActions = (function() {
     var exports;
     exports = {};
@@ -2160,6 +2053,150 @@
     return exports;
   })();
 
+  BotAPIActionCreator = (function() {
+    var exports, handleBotstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleBotstreamEvents = function(botstreamEvents) {
+      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    };
+    exports.subscribeToBotstream = function(botId) {
+      var onBotstreamEvent, onSubscribedToBotstream;
+      onSubscribedToBotstream = function() {
+        $.get("/api/v1/public/boteventstream/" + botId + "?sort=serial desc&limit=1", (function(_this) {
+          return function(botstreamEvents) {
+            handleBotstreamEvents(botstreamEvents);
+          };
+        })(this));
+      };
+      onBotstreamEvent = function(botstreamEvent) {
+        handleBotstreamEvents([botstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, onBotstreamEvent, onSubscribedToBotstream);
+    };
+    return exports;
+  })();
+
+  QuotebotActionCreator = (function() {
+    var exports, subscriberId;
+    exports = {};
+    subscriberId = null;
+    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
+      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
+        return function(quotesJSON) {
+          var quote, _i, _len, _ref;
+          if (quotesJSON.quotes != null) {
+            _ref = quotesJSON.quotes;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              quote = _ref[_i];
+              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
+                QuotebotEventActions.addNewQuote(quote);
+              }
+            }
+          }
+        };
+      })(this));
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
+        QuotebotEventActions.addNewQuote(quote);
+      }, null, pusherURL);
+    };
+    return exports;
+  })();
+
+  SwapAPIActionCreator = (function() {
+    var exports, handleSwapstreamEvents, loadSwapsFromAPI, loadSwapstreamEventsFromAPI, loading, onUIChange, subscribeToSwapstream, subscriberId;
+    exports = {};
+    subscriberId = null;
+    loading = false;
+    handleSwapstreamEvents = function(swapstreamEvents) {
+      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
+    };
+    loadSwapsFromAPI = function(botId) {
+      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
+        SwapstreamEventActions.addNewSwaps(swapsData);
+      });
+    };
+    loadSwapstreamEventsFromAPI = function(botId, limit) {
+      loading = true;
+      setTimeout(function() {
+        UserInterfaceActions.beginLoadingMoreSwaps();
+      }, 1);
+      $.get("/api/v1/public/swapevents/" + botId + "?latestperswap=1&limit=" + limit + "&sort=serial desc", (function(_this) {
+        return function(swapstreamEvents) {
+          var newMaxSwapsRequestedFromServer;
+          handleSwapstreamEvents(swapstreamEvents);
+          newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit);
+          UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer);
+          UserInterfaceActions.endLoadingMoreSwaps();
+          loading = false;
+        };
+      })(this));
+    };
+    subscribeToSwapstream = function(botId) {
+      var onSubscribedToSwapstream, onSwapstreamEvent;
+      onSubscribedToSwapstream = function() {
+        loadSwapstreamEventsFromAPI(botId, Settings.SWAPS_TO_SHOW);
+      };
+      onSwapstreamEvent = function(swapstreamEvent) {
+        handleSwapstreamEvents([swapstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, onSwapstreamEvent, onSubscribedToSwapstream);
+    };
+    onUIChange = function(botId) {
+      var maxSwapsToShow;
+      maxSwapsToShow = UserInterfaceStateStore.getSwapsUIState().maxSwapsToShow;
+      if (maxSwapsToShow > UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer) {
+        if (!loading) {
+          loadSwapstreamEventsFromAPI(botId, maxSwapsToShow);
+        }
+      }
+    };
+    exports.init = function(botId) {
+      subscribeToSwapstream(botId);
+      UserInterfaceStateStore.addChangeListener(function() {
+        onUIChange(botId);
+      });
+    };
+    return exports;
+  })();
+
+  UIActionListeners = (function($) {
+    var bindScrollTo, exports;
+    exports = {};
+    bindScrollTo = function(button, target, animationTime) {
+      if (animationTime == null) {
+        animationTime = 750;
+      }
+      $(button).on('click', function(e) {
+        return $('html, body').animate({
+          scrollTop: $(target).offset().top
+        }, animationTime);
+      });
+    };
+    exports.init = function() {
+      bindScrollTo('#active-swaps-button', '#active-swaps');
+      bindScrollTo('#recent-swaps-button', '#recent-swaps');
+      $('#heart-button').on('click', function() {
+        $('i.fa', this).removeClass('fa-heart-o').addClass('fa-heart').css({
+          transform: 'scale(1.6)'
+        });
+        setTimeout((function(_this) {
+          return function() {
+            var iconEl;
+            iconEl = $('i.fa', _this);
+            iconEl.css({
+              transform: 'scale(1)'
+            });
+            return setTimeout(function() {
+              return iconEl.removeClass('fa-heart').addClass('fa-heart-o');
+            }, 200);
+          };
+        })(this), 200);
+      });
+    };
+    return exports;
+  })(jQuery);
+
   BotConstants = (function() {
     var exports;
     exports = {};
@@ -2193,104 +2230,6 @@
     exports.MORE_SWAPS_TO_SHOW = 10;
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -2999,6 +2938,104 @@
     };
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   Pockets = (function() {
     var exports, pocketsImage, pocketsUrl;
