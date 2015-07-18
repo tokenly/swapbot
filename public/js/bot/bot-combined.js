@@ -8,6 +8,11 @@
   swapbot.addressUtils = (function() {
     var exports;
     exports = {};
+    exports.publicBotHrefFromBot = function(bot) {
+      var location;
+      location = window.location;
+      return "" + location.protocol + "//" + location.host + "/public/" + bot.username + "/" + bot.id;
+    };
     exports.publicBotAddress = function(username, botId, location) {
       return "" + location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
@@ -78,6 +83,9 @@
           return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
       }
       return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+    };
+    exports.fullSwapSummary = function(swap, bot) {
+      return React.createElement('span', {}, ["You deposited " + (swapbot.formatters.formatCurrency(swap.quantityIn)) + " " + swap.assetIn + " and we delivered " + (swapbot.formatters.formatCurrency(swap.quantityOut)) + " " + swap.assetOut + " to " + swap.destination + "."]);
     };
     return exports;
   })();
@@ -1800,12 +1808,14 @@
         }, React.createElement("div", {
           "id": "swap-step-4",
           "className": "content"
-        }, React.createElement("h2", null, "Successfully finished"), React.createElement("a", {
+        }, React.createElement("h2", null, "Success!"), React.createElement("a", {
           "href": "#close",
           "onClick": this.closeClicked,
           "className": "x-button",
           "id": "swap-step-4-close"
-        }), React.createElement("div", {
+        }), React.createElement("h3", {
+          "className": "subtitle"
+        }, "Swap Completed"), React.createElement("div", {
           "className": "segment-control"
         }, React.createElement("div", {
           "className": "line"
@@ -1819,7 +1829,9 @@
           "className": "dot selected"
         })), React.createElement("div", {
           "className": "icon-success center"
-        }), React.createElement("p", null, swap.message, React.createElement("br", null), React.createElement("a", {
+        }), React.createElement("p", null, "Thank you for swapping with ", React.createElement("a", {
+          "href": swapbot.addressUtils.publicBotHrefFromBot(bot)
+        }, bot.name), "!"), React.createElement("p", null, swapbot.eventMessageUtils.fullSwapSummary(swap, bot), React.createElement("br", null), React.createElement("a", {
           "id": "not-my-transaction",
           "onClick": this.notMyTransactionClicked,
           "href": "#",
@@ -1899,6 +1911,150 @@
       }), document.getElementById('SwapPurchaseStepsComponent'));
     }
   };
+
+  BotAPIActionCreator = (function() {
+    var exports, handleBotstreamEvents, subscriberId;
+    exports = {};
+    subscriberId = null;
+    handleBotstreamEvents = function(botstreamEvents) {
+      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
+    };
+    exports.subscribeToBotstream = function(botId) {
+      var onBotstreamEvent, onSubscribedToBotstream;
+      onSubscribedToBotstream = function() {
+        $.get("/api/v1/public/boteventstream/" + botId + "?sort=serial desc&limit=1", (function(_this) {
+          return function(botstreamEvents) {
+            handleBotstreamEvents(botstreamEvents);
+          };
+        })(this));
+      };
+      onBotstreamEvent = function(botstreamEvent) {
+        handleBotstreamEvents([botstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, onBotstreamEvent, onSubscribedToBotstream);
+    };
+    return exports;
+  })();
+
+  QuotebotActionCreator = (function() {
+    var exports, subscriberId;
+    exports = {};
+    subscriberId = null;
+    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
+      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
+        return function(quotesJSON) {
+          var quote, _i, _len, _ref;
+          if (quotesJSON.quotes != null) {
+            _ref = quotesJSON.quotes;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              quote = _ref[_i];
+              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
+                QuotebotEventActions.addNewQuote(quote);
+              }
+            }
+          }
+        };
+      })(this));
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
+        QuotebotEventActions.addNewQuote(quote);
+      }, null, pusherURL);
+    };
+    return exports;
+  })();
+
+  SwapAPIActionCreator = (function() {
+    var exports, handleSwapstreamEvents, loadSwapsFromAPI, loadSwapstreamEventsFromAPI, loading, onUIChange, subscribeToSwapstream, subscriberId;
+    exports = {};
+    subscriberId = null;
+    loading = false;
+    handleSwapstreamEvents = function(swapstreamEvents) {
+      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
+    };
+    loadSwapsFromAPI = function(botId) {
+      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
+        SwapstreamEventActions.addNewSwaps(swapsData);
+      });
+    };
+    loadSwapstreamEventsFromAPI = function(botId, limit) {
+      loading = true;
+      setTimeout(function() {
+        UserInterfaceActions.beginLoadingMoreSwaps();
+      }, 1);
+      $.get("/api/v1/public/swapevents/" + botId + "?latestperswap=1&limit=" + limit + "&sort=serial desc", (function(_this) {
+        return function(swapstreamEvents) {
+          var newMaxSwapsRequestedFromServer;
+          handleSwapstreamEvents(swapstreamEvents);
+          newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit);
+          UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer);
+          UserInterfaceActions.endLoadingMoreSwaps();
+          loading = false;
+        };
+      })(this));
+    };
+    subscribeToSwapstream = function(botId) {
+      var onSubscribedToSwapstream, onSwapstreamEvent;
+      onSubscribedToSwapstream = function() {
+        loadSwapstreamEventsFromAPI(botId, Settings.SWAPS_TO_SHOW);
+      };
+      onSwapstreamEvent = function(swapstreamEvent) {
+        handleSwapstreamEvents([swapstreamEvent]);
+      };
+      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, onSwapstreamEvent, onSubscribedToSwapstream);
+    };
+    onUIChange = function(botId) {
+      var maxSwapsToShow;
+      maxSwapsToShow = UserInterfaceStateStore.getSwapsUIState().maxSwapsToShow;
+      if (maxSwapsToShow > UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer) {
+        if (!loading) {
+          loadSwapstreamEventsFromAPI(botId, maxSwapsToShow);
+        }
+      }
+    };
+    exports.init = function(botId) {
+      subscribeToSwapstream(botId);
+      UserInterfaceStateStore.addChangeListener(function() {
+        onUIChange(botId);
+      });
+    };
+    return exports;
+  })();
+
+  UIActionListeners = (function($) {
+    var bindScrollTo, exports;
+    exports = {};
+    bindScrollTo = function(button, target, animationTime) {
+      if (animationTime == null) {
+        animationTime = 750;
+      }
+      $(button).on('click', function(e) {
+        return $('html, body').animate({
+          scrollTop: $(target).offset().top
+        }, animationTime);
+      });
+    };
+    exports.init = function() {
+      bindScrollTo('#active-swaps-button', '#active-swaps');
+      bindScrollTo('#recent-swaps-button', '#recent-swaps');
+      $('#heart-button').on('click', function() {
+        $('i.fa', this).removeClass('fa-heart-o').addClass('fa-heart').css({
+          transform: 'scale(1.6)'
+        });
+        setTimeout((function(_this) {
+          return function() {
+            var iconEl;
+            iconEl = $('i.fa', _this);
+            iconEl.css({
+              transform: 'scale(1)'
+            });
+            return setTimeout(function() {
+              return iconEl.removeClass('fa-heart').addClass('fa-heart-o');
+            }, 200);
+          };
+        })(this), 200);
+      });
+    };
+    return exports;
+  })(jQuery);
 
   BotstreamEventActions = (function() {
     var exports;
@@ -2052,150 +2208,6 @@
     };
     return exports;
   })();
-
-  BotAPIActionCreator = (function() {
-    var exports, handleBotstreamEvents, subscriberId;
-    exports = {};
-    subscriberId = null;
-    handleBotstreamEvents = function(botstreamEvents) {
-      BotstreamEventActions.handleBotstreamEvents(botstreamEvents);
-    };
-    exports.subscribeToBotstream = function(botId) {
-      var onBotstreamEvent, onSubscribedToBotstream;
-      onSubscribedToBotstream = function() {
-        $.get("/api/v1/public/boteventstream/" + botId + "?sort=serial desc&limit=1", (function(_this) {
-          return function(botstreamEvents) {
-            handleBotstreamEvents(botstreamEvents);
-          };
-        })(this));
-      };
-      onBotstreamEvent = function(botstreamEvent) {
-        handleBotstreamEvents([botstreamEvent]);
-      };
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_botstream_" + botId, onBotstreamEvent, onSubscribedToBotstream);
-    };
-    return exports;
-  })();
-
-  QuotebotActionCreator = (function() {
-    var exports, subscriberId;
-    exports = {};
-    subscriberId = null;
-    exports.subscribeToQuotebot = function(quotebotURL, apiToken, pusherURL) {
-      $.get("" + quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken, (function(_this) {
-        return function(quotesJSON) {
-          var quote, _i, _len, _ref;
-          if (quotesJSON.quotes != null) {
-            _ref = quotesJSON.quotes;
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              quote = _ref[_i];
-              if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
-                QuotebotEventActions.addNewQuote(quote);
-              }
-            }
-          }
-        };
-      })(this));
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", function(quote) {
-        QuotebotEventActions.addNewQuote(quote);
-      }, null, pusherURL);
-    };
-    return exports;
-  })();
-
-  SwapAPIActionCreator = (function() {
-    var exports, handleSwapstreamEvents, loadSwapsFromAPI, loadSwapstreamEventsFromAPI, loading, onUIChange, subscribeToSwapstream, subscriberId;
-    exports = {};
-    subscriberId = null;
-    loading = false;
-    handleSwapstreamEvents = function(swapstreamEvents) {
-      SwapstreamEventActions.handleSwapstreamEvents(swapstreamEvents);
-    };
-    loadSwapsFromAPI = function(botId) {
-      $.get("/api/v1/public/swaps/" + botId, function(swapsData) {
-        SwapstreamEventActions.addNewSwaps(swapsData);
-      });
-    };
-    loadSwapstreamEventsFromAPI = function(botId, limit) {
-      loading = true;
-      setTimeout(function() {
-        UserInterfaceActions.beginLoadingMoreSwaps();
-      }, 1);
-      $.get("/api/v1/public/swapevents/" + botId + "?latestperswap=1&limit=" + limit + "&sort=serial desc", (function(_this) {
-        return function(swapstreamEvents) {
-          var newMaxSwapsRequestedFromServer;
-          handleSwapstreamEvents(swapstreamEvents);
-          newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit);
-          UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer);
-          UserInterfaceActions.endLoadingMoreSwaps();
-          loading = false;
-        };
-      })(this));
-    };
-    subscribeToSwapstream = function(botId) {
-      var onSubscribedToSwapstream, onSwapstreamEvent;
-      onSubscribedToSwapstream = function() {
-        loadSwapstreamEventsFromAPI(botId, Settings.SWAPS_TO_SHOW);
-      };
-      onSwapstreamEvent = function(swapstreamEvent) {
-        handleSwapstreamEvents([swapstreamEvent]);
-      };
-      subscriberId = swapbot.pusher.subscribeToPusherChanel("swapbot_swapstream_" + botId, onSwapstreamEvent, onSubscribedToSwapstream);
-    };
-    onUIChange = function(botId) {
-      var maxSwapsToShow;
-      maxSwapsToShow = UserInterfaceStateStore.getSwapsUIState().maxSwapsToShow;
-      if (maxSwapsToShow > UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer) {
-        if (!loading) {
-          loadSwapstreamEventsFromAPI(botId, maxSwapsToShow);
-        }
-      }
-    };
-    exports.init = function(botId) {
-      subscribeToSwapstream(botId);
-      UserInterfaceStateStore.addChangeListener(function() {
-        onUIChange(botId);
-      });
-    };
-    return exports;
-  })();
-
-  UIActionListeners = (function($) {
-    var bindScrollTo, exports;
-    exports = {};
-    bindScrollTo = function(button, target, animationTime) {
-      if (animationTime == null) {
-        animationTime = 750;
-      }
-      $(button).on('click', function(e) {
-        return $('html, body').animate({
-          scrollTop: $(target).offset().top
-        }, animationTime);
-      });
-    };
-    exports.init = function() {
-      bindScrollTo('#active-swaps-button', '#active-swaps');
-      bindScrollTo('#recent-swaps-button', '#recent-swaps');
-      $('#heart-button').on('click', function() {
-        $('i.fa', this).removeClass('fa-heart-o').addClass('fa-heart').css({
-          transform: 'scale(1.6)'
-        });
-        setTimeout((function(_this) {
-          return function() {
-            var iconEl;
-            iconEl = $('i.fa', _this);
-            iconEl.css({
-              transform: 'scale(1)'
-            });
-            return setTimeout(function() {
-              return iconEl.removeClass('fa-heart').addClass('fa-heart-o');
-            }, 200);
-          };
-        })(this), 200);
-      });
-    };
-    return exports;
-  })(jQuery);
 
   BotConstants = (function() {
     var exports;
@@ -3107,7 +3119,7 @@
       if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
         return true;
       }
-      if (swap.assetIn = userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
+      if (swap.assetIn === userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
         return true;
       }
       return false;

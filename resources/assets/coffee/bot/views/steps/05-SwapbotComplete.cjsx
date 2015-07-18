@@ -59,8 +59,9 @@ do ()->
 
             return <div id="swapbot-container" className="section grid-100">
                 <div id="swap-step-4" className="content">
-                    <h2>Successfully finished</h2>
+                    <h2>Success!</h2>
                     <a href="#close" onClick={this.closeClicked} className="x-button" id="swap-step-4-close"></a>
+                    <h3 className="subtitle">Swap Completed</h3>
                     <div className="segment-control">
                         <div className="line"></div>
                         <br />
@@ -70,8 +71,9 @@ do ()->
                         <div className="dot selected"></div>
                     </div>
                     <div className="icon-success center"></div>
+                    <p>Thank you for swapping with <a href={swapbot.addressUtils.publicBotHrefFromBot(bot)}>{bot.name}</a>!</p>
                     <p>
-                        {swap.message}
+                        {swapbot.eventMessageUtils.fullSwapSummary(swap, bot)}
                         <br/>
                         <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                     </p>

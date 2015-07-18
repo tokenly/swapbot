@@ -34,5 +34,10 @@ swapbot.eventMessageUtils = do ()->
             " to send #{swap.quantityOut} #{swap.assetOut}."
         ]);
 
+    exports.fullSwapSummary = (swap, bot)->
+        return React.createElement('span', {}, [
+            "You deposited #{swapbot.formatters.formatCurrency(swap.quantityIn)} #{swap.assetIn} and we delivered #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut} to #{swap.destination}.",
+        ])
+
     return exports
 

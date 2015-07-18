@@ -3896,6 +3896,11 @@
   swapbot.addressUtils = (function() {
     var exports;
     exports = {};
+    exports.publicBotHrefFromBot = function(bot) {
+      var location;
+      location = window.location;
+      return location.protocol + "//" + location.host + "/public/" + bot.username + "/" + bot.id;
+    };
     exports.publicBotAddress = function(username, botId, location) {
       return location.protocol + "//" + location.host + "/public/" + username + "/" + botId;
     };
@@ -3984,6 +3989,9 @@
           return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
       }
       return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+    };
+    exports.fullSwapSummary = function(swap, bot) {
+      return React.createElement('span', {}, ["You deposited " + (swapbot.formatters.formatCurrency(swap.quantityIn)) + " " + swap.assetIn + " and we delivered " + (swapbot.formatters.formatCurrency(swap.quantityOut)) + " " + swap.assetOut + " to " + swap.destination + "."]);
     };
     return exports;
   })();

@@ -11,7 +11,7 @@ SwapMatcher = do ()->
         if userChoices.swapMatchMode == UserChoiceStore.MATCH_SHOW_ALL
             return true
 
-        if swap.assetIn = userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)
+        if swap.assetIn == userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)
             return true
 
         return false
