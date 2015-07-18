@@ -22,6 +22,10 @@ do ()->
             UserInterfaceStateStore.addChangeListener(this._onChange)
             return
 
+        componentWillUnmount: ()->
+            UserInterfaceStateStore.removeChangeListener(this._onChange)
+            return
+
         _onChange: ()->
             this.setState(getViewState())
             return
