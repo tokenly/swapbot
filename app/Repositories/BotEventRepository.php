@@ -24,11 +24,14 @@ class BotEventRepository extends APIRepository
             ->get();
     }
 
-    public function findLatestSwapStreamEventsByBotId($bot_id, IndexRequestFilter $filter=null) {
+    public function findLatestSwapStreamEventsByBotId($bot_id, IndexRequestFilter $filter=null, $min_level=null) {
+        if ($min_level === null) { $min_level = BotEvent::LEVEL_INFO; }
+
         // get all of the most recent event ids
         $all_swaps_results = call_user_func([$this->model_type, 'where'], 'bot_id', $bot_id)
             ->where('swap_stream', true)
             ->where('swap_id', '>', 0)
+            ->where('level', '>=', $min_level)
             ->select(DB::raw('MAX(id) AS id'))
             ->groupBy('swap_id')
             ->get();
