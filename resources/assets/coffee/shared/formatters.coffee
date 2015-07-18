@@ -4,6 +4,9 @@ swapbot = {} if not swapbot?
 swapbot.formatters = do ()->
     exports = {}
 
+
+    SATOSHI = 100000000
+
     # #############################################
     # local
 
@@ -21,7 +24,6 @@ swapbot.formatters = do ()->
         return "confirmation#{if bot.confirmationsRequired == 1 then '' else 's'}"
     
     exports.satoshisToValue = (amount, currencyPostfix='BTC') ->
-        SATOSHI = swapbot.swapUtils.SATOSHI
         return exports.formatCurrency(amount / SATOSHI, currencyPostfix)
 
     isZero = (value)->
@@ -38,7 +40,17 @@ swapbot.formatters = do ()->
     
     exports.formatCurrency = (value, currencyPostfix='') ->
         if not value? or isNaN(value) then return ''
-        return window.numeral(value).format('0,0.[00000000]') + (if currencyPostfix?.length then ' '+currencyPostfix else '')
+
+        decimalText = window.numeral(value).format('0,0.[00000000]')
+
+        if value > 0 and value < 0.0001
+            # 40 satoshis (0.00000040) BTC
+            satoshisPrefix = window.numeral(value * SATOSHI).format('0')+' satoshis'
+            valueText = "#{satoshisPrefix} (#{decimalText})"
+        else
+            valueText = decimalText
+
+        return valueText + (if currencyPostfix?.length then ' '+currencyPostfix else '')
 
     exports.formatCurrencyAsNumber = (value) ->
         if not value? or isNaN(value) then return '0'

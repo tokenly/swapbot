@@ -113,7 +113,15 @@ class FormattingHelper {
         return '';
     }
 
+    // 123 satoshis (0.00000123)
     public function formatCurrency($value, $places=null) {
+        if (($places === null OR $places == 8) AND $value < 0.0001) {
+            $text = 
+                CurrencyUtil::valueToSatoshis($value).' satoshis'.
+                ' ('.CurrencyUtil::valueToFormattedString($value, $places).')';
+            return $text;
+        }
+
         return CurrencyUtil::valueToFormattedString($value, $places);
     }
 

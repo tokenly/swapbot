@@ -3956,8 +3956,9 @@
   }
 
   swapbot.formatters = (function() {
-    var exports, isZero;
+    var SATOSHI, exports, isZero;
     exports = {};
+    SATOSHI = 100000000;
     exports.formatConfirmations = function(confirmations) {
       if (confirmations == null) {
         return 0;
@@ -3971,11 +3972,9 @@
       return "confirmation" + (bot.confirmationsRequired === 1 ? '' : 's');
     };
     exports.satoshisToValue = function(amount, currencyPostfix) {
-      var SATOSHI;
       if (currencyPostfix == null) {
         currencyPostfix = 'BTC';
       }
-      SATOSHI = swapbot.swapUtils.SATOSHI;
       return exports.formatCurrency(amount / SATOSHI, currencyPostfix);
     };
     isZero = function(value) {
@@ -3995,13 +3994,21 @@
       return exports.formatCurrency((isZero(value) ? 0 : value), currencyPostfix);
     };
     exports.formatCurrency = function(value, currencyPostfix) {
+      var decimalText, satoshisPrefix, valueText;
       if (currencyPostfix == null) {
         currencyPostfix = '';
       }
       if ((value == null) || isNaN(value)) {
         return '';
       }
-      return window.numeral(value).format('0,0.[00000000]') + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
+      decimalText = window.numeral(value).format('0,0.[00000000]');
+      if (value > 0 && value < 0.0001) {
+        satoshisPrefix = window.numeral(value * SATOSHI).format('0') + ' satoshis';
+        valueText = satoshisPrefix + " (" + decimalText + ")";
+      } else {
+        valueText = decimalText;
+      }
+      return valueText + ((currencyPostfix != null ? currencyPostfix.length : void 0) ? ' ' + currencyPostfix : '');
     };
     exports.formatCurrencyAsNumber = function(value) {
       if ((value == null) || isNaN(value)) {
