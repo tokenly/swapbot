@@ -6,6 +6,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link href="/css/main.css" rel="stylesheet">
+    <link rel="icon" href="{{ $bot->getRobohashURL() }}">
 </head>
 
 <body>
