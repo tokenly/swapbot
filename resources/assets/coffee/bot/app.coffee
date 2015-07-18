@@ -13,6 +13,9 @@ window.BotApp =
 
         QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL)
 
+        # bind misc UI events
+        UIActionListeners.init()
+
         # render the components
 
         # Bot copyable address

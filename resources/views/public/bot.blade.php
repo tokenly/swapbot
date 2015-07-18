@@ -9,10 +9,12 @@
 </head>
 
 <body>
+    {{-- 
     <div id="navigation-bar">
         <div class="content-width">
         </div>
     </div>
+     --}}
     <?php
         $bg_image = ($bot['backgroundImageDetails'] AND isset($bot['backgroundImageDetails']['originalUrl'])) ? $bot['backgroundImageDetails']['originalUrl'] : '';
         $has_bg_image = !!strlen($bg_image); 
@@ -63,7 +65,7 @@
             <!-- ACTION BUTTONS BAR -->
             <div id="main-buttons-bar">
                 <button id="begin-swap-button" class="btn-action bckg-green" onclick="UserInterfaceActions.beginSwaps();">BEGIN SWAP</button>
-                <button id="heart-button" class="btn-action bckg-red btn-stick-left float-right"><i class="fa fa-heart-o"></i></button>
+                <button id="heart-button" class="btn-action bckg-red btn-stick-left float-right"><i class="fa fa-heart-o generic-transition"></i></button>
                 <button id="recent-swaps-button" class="btn-action bckg-yellow btn-stick-right btn-stick-left float-right">RECENT SWAPS</button>
                 <button id="active-swaps-button" class="btn-action bckg-blue btn-stick-right float-right">ACTIVE SWAPS</button>
             </div>

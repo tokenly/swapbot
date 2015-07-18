@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UIActionListeners, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -1847,6 +1847,7 @@
       BotAPIActionCreator.subscribeToBotstream(bot.id);
       SwapAPIActionCreator.init(bot.id);
       QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL);
+      UIActionListeners.init();
       React.render(React.createElement(BotCopyableAddress, {
         "bot": bot
       }), document.getElementById('BotCopyableAddress'));
@@ -1968,6 +1969,43 @@
     };
     return exports;
   })();
+
+  UIActionListeners = (function($) {
+    var bindScrollTo, exports;
+    exports = {};
+    bindScrollTo = function(button, target, animationTime) {
+      if (animationTime == null) {
+        animationTime = 750;
+      }
+      $(button).on('click', function(e) {
+        return $('html, body').animate({
+          scrollTop: $(target).offset().top
+        }, animationTime);
+      });
+    };
+    exports.init = function() {
+      bindScrollTo('#active-swaps-button', '#active-swaps');
+      bindScrollTo('#recent-swaps-button', '#recent-swaps');
+      $('#heart-button').on('click', function() {
+        $('i.fa', this).removeClass('fa-heart-o').addClass('fa-heart').css({
+          transform: 'scale(1.6)'
+        });
+        setTimeout((function(_this) {
+          return function() {
+            var iconEl;
+            iconEl = $('i.fa', _this);
+            iconEl.css({
+              transform: 'scale(1)'
+            });
+            return setTimeout(function() {
+              return iconEl.removeClass('fa-heart').addClass('fa-heart-o');
+            }, 200);
+          };
+        })(this), 200);
+      });
+    };
+    return exports;
+  })(jQuery);
 
   BotstreamEventActions = (function() {
     var exports;
