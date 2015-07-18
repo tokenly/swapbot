@@ -306,26 +306,29 @@
       return [inAmount, buffer];
     };
     validateOutAmount = {};
-    validateOutAmount.shared = function(outAmount, swapConfig) {
+    validateOutAmount.shared = function(outAmount, swapConfig, botBalance) {
       if (("" + outAmount).length === 0) {
         return null;
       }
       if (isNaN(outAmount)) {
         return 'The amount to purchase does not look like a number.';
       }
+      if ((botBalance == null) || outAmount > botBalance) {
+        return "There is not enough " + swapConfig.out + " available to make this purchase.";
+      }
       return null;
     };
-    validateOutAmount.rate = function(outAmount, swapConfig) {
+    validateOutAmount.rate = function(outAmount, swapConfig, botBalance) {
       var errorMsg;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
       return null;
     };
-    validateOutAmount.fixed = function(outAmount, swapConfig) {
+    validateOutAmount.fixed = function(outAmount, swapConfig, botBalance) {
       var errorMsg, formatCurrency, ratio;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -336,9 +339,9 @@
       }
       return null;
     };
-    validateOutAmount.fiat = function(outAmount, swapConfig) {
+    validateOutAmount.fiat = function(outAmount, swapConfig, botBalance) {
       var errorMsg, formatCurrency;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -450,9 +453,9 @@
       }
       return inAmount;
     };
-    exports.validateOutAmount = function(outAmount, swapConfig) {
+    exports.validateOutAmount = function(outAmount, swapConfig, botBalance) {
       var errorMsg;
-      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -1200,14 +1203,17 @@
         if (this.getErrorMessage() != null) {
           return false;
         }
-        if (this.getInAmount() > 0) {
-          return true;
+        if (this.getInAmount() <= 0) {
+          return false;
         }
-        return false;
+        if (this.props.outAmount > this.props.bot.balances[this.props.swapConfig.out]) {
+          return false;
+        }
+        return true;
       },
       getErrorMessage: function() {
         var errors;
-        errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig);
+        errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out]);
         if (errors != null) {
           return errors;
         }
@@ -2106,6 +2112,40 @@
     return exports;
   })();
 
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
+    return exports;
+  })();
+
   Dispatcher = (function() {
     var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
     exports = {};
@@ -2203,40 +2243,6 @@
       throw error;
     }
   };
-
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
-    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
-    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
-    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
-    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
-    return exports;
-  })();
-
-  Settings = (function() {
-    var exports;
-    exports = {};
-    exports.SWAPS_TO_SHOW = 10;
-    exports.MORE_SWAPS_TO_SHOW = 10;
-    return exports;
-  })();
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;

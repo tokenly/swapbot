@@ -96,19 +96,23 @@ swapbot.swapUtils = do ()->
     # #############################################
 
     validateOutAmount = {}
-    validateOutAmount.shared = (outAmount, swapConfig)->
+    validateOutAmount.shared = (outAmount, swapConfig, botBalance)->
         if (""+outAmount).length == 0 then return null
         if isNaN(outAmount)
             return 'The amount to purchase does not look like a number.'
+
+        if not botBalance? or outAmount > botBalance
+            return "There is not enough #{swapConfig.out} available to make this purchase."
+
         return null
 
-    validateOutAmount.rate = (outAmount, swapConfig)->
-        errorMsg = validateOutAmount.shared(outAmount, swapConfig) 
+    validateOutAmount.rate = (outAmount, swapConfig, botBalance)->
+        errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance) 
         if errorMsg? then return errorMsg
         return null
 
-    validateOutAmount.fixed = (outAmount, swapConfig)->
-        errorMsg = validateOutAmount.shared(outAmount, swapConfig) 
+    validateOutAmount.fixed = (outAmount, swapConfig, botBalance)->
+        errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance) 
         if errorMsg? then return errorMsg
 
         ratio = outAmount / swapConfig.out_qty
@@ -118,8 +122,8 @@ swapbot.swapUtils = do ()->
 
         return null
 
-    validateOutAmount.fiat = (outAmount, swapConfig)->
-        errorMsg = validateOutAmount.shared(outAmount, swapConfig) 
+    validateOutAmount.fiat = (outAmount, swapConfig, botBalance)->
+        errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance) 
         if errorMsg? then return errorMsg
 
         if swapConfig.min_out? and outAmount > 0 and outAmount < swapConfig.min_out
@@ -225,8 +229,8 @@ swapbot.swapUtils = do ()->
         inAmount = 0 if inAmount == NaN
         return inAmount
 
-    exports.validateOutAmount = (outAmount, swapConfig)->
-        errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig)
+    exports.validateOutAmount = (outAmount, swapConfig, botBalance)->
+        errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig, botBalance)
         if errorMsg? then return errorMsg
 
         # no error

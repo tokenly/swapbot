@@ -4212,26 +4212,29 @@
       return [inAmount, buffer];
     };
     validateOutAmount = {};
-    validateOutAmount.shared = function(outAmount, swapConfig) {
+    validateOutAmount.shared = function(outAmount, swapConfig, botBalance) {
       if (("" + outAmount).length === 0) {
         return null;
       }
       if (isNaN(outAmount)) {
         return 'The amount to purchase does not look like a number.';
       }
+      if ((botBalance == null) || outAmount > botBalance) {
+        return "There is not enough " + swapConfig.out + " available to make this purchase.";
+      }
       return null;
     };
-    validateOutAmount.rate = function(outAmount, swapConfig) {
+    validateOutAmount.rate = function(outAmount, swapConfig, botBalance) {
       var errorMsg;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
       return null;
     };
-    validateOutAmount.fixed = function(outAmount, swapConfig) {
+    validateOutAmount.fixed = function(outAmount, swapConfig, botBalance) {
       var errorMsg, formatCurrency, ratio;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -4242,9 +4245,9 @@
       }
       return null;
     };
-    validateOutAmount.fiat = function(outAmount, swapConfig) {
+    validateOutAmount.fiat = function(outAmount, swapConfig, botBalance) {
       var errorMsg, formatCurrency;
-      errorMsg = validateOutAmount.shared(outAmount, swapConfig);
+      errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }
@@ -4356,9 +4359,9 @@
       }
       return inAmount;
     };
-    exports.validateOutAmount = function(outAmount, swapConfig) {
+    exports.validateOutAmount = function(outAmount, swapConfig, botBalance) {
       var errorMsg;
-      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig);
+      errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig, botBalance);
       if (errorMsg != null) {
         return errorMsg;
       }

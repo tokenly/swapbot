@@ -23,13 +23,16 @@ do ()->
             if this.getErrorMessage()?
                 return false
 
-            if this.getInAmount() > 0
-                return true
+            if this.getInAmount() <= 0
+                return false
 
-            return false
+            if this.props.outAmount > this.props.bot.balances[this.props.swapConfig.out]
+                return false
+
+            return true
 
         getErrorMessage: ()->
-            errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig)
+            errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out])
             return errors if errors?
 
             errors = swapbot.swapUtils.validateInAmount(this.getInAmount(), this.props.swapConfig)
