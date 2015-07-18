@@ -341,6 +341,14 @@ class SwapProcessor {
 
         // do we need to refund
         $is_refunding = $swap_process['swap_config']->getStrategy()->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+
+        // check forced refund
+        $forced_refund = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['forcedRefund']) AND $swap_process['swap']['receipt']['forcedRefund']);
+        if (!$is_refunding AND $forced_refund) {
+            $is_refunding = true;
+            EventLog::log('Forced refund triggered', ['botName' => $swap_process['bot']['name'], 'swapId' => $swap_process['swap']['id']]);
+        }
+
         if ($is_refunding) {
             // refund
             $this->doRefund($swap_process);
