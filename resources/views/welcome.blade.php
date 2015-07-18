@@ -28,10 +28,6 @@
         margin-top: 4rem;
     }
     .info-content a {
-        text-decoration: none;
-        border-bottom: 1px dotted #B0BEC5;
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
     }
     .footer-content {
         margin-top: 12rem;
@@ -54,6 +50,12 @@
     .quote {
         font-size: 24px;
     }
+
+    a {
+        color: #B0BEC5;
+        text-decoration: none;
+        border-bottom: 1px dotted #B0BEC5;
+    }
     </style>
 </head>
 <body>
@@ -66,8 +68,20 @@
         </div>
 
         <div class="row">
+            <div class="content info-content">
+                <p>Check out the <a href="https://letstalkbitcoin.com/services">services directory at LetsTalkBitcoin.com</a> for a list of active swapbots.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="content info-content">
+                <p>To create your own Swapbot, apply <a href="http://tokenly.com/swap">here</a>.</p>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="content info-content footer-content">
-                <a href="/admin">Swapbot Administration</a>
+                <p>Swapbot owners may log into the <a href="/admin">Swapbot Administration</a>.</p>
             </div>
         </div>
     </div>
