@@ -788,6 +788,7 @@
           icon = 'confirmed';
         }
         return React.createElement("li", {
+          "key": "roa-" + swap.id,
           "className": icon
         }, React.createElement("div", {
           "className": "status-icon icon-" + icon
@@ -832,13 +833,13 @@
           swap = _ref[index];
           if (swap.isComplete) {
             recentSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
-              "key": swap.id,
+              "key": "ra-" + swap.id,
               "bot": this.props.bot,
               "swap": swap
             }));
           } else {
             activeSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
-              "key": swap.id,
+              "key": "ra-" + swap.id,
               "bot": this.props.bot,
               "swap": swap
             }));
@@ -1646,6 +1647,9 @@
         e.preventDefault();
         UserInputActions.updateEmailValue(e.target.value);
       },
+      updateEmailLevel: function(e) {
+        UserInputActions.updateEmailLevel(e.target.checked ? 30 : 0);
+      },
       submitEmailFn: function(e) {
         var email;
         e.preventDefault();
@@ -1660,11 +1664,12 @@
         UserInputActions.clearSwap();
       },
       render: function() {
-        var bot, emailValue, swap, userChoices;
+        var bot, emailLevelIsChecked, emailValue, swap, userChoices;
         userChoices = this.props.userChoices;
         swap = userChoices.swap;
         bot = this.props.bot;
         emailValue = userChoices.email.value;
+        emailLevelIsChecked = userChoices.email.level > 0 ? true : false;
         return React.createElement("div", null, React.createElement("p", null, swap.message, React.createElement("br", null), "This transaction has ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmations), " of ", bot.confirmationsRequired), " ", swapbot.formatters.confirmationsWord(bot.confirmationsRequired), " in and ", React.createElement("b", null, swapbot.formatters.formatConfirmations(swap.confirmationsOut)), " ", swapbot.formatters.confirmationsWord(bot.confirmationsOut), " out.", React.createElement("br", null), React.createElement("a", {
           "id": "not-my-transaction",
           "onClick": this.notMyTransactionClicked,
@@ -1675,6 +1680,7 @@
         }, userChoices.email.emailErrorMsg, "  Please try again.") : null), (userChoices.email.submittedEmail ? React.createElement("div", null, React.createElement("p", null, React.createElement("strong", null, "Email Address Received"), React.createElement("br", null), "Thanks for using Swapbot, you\u2019ll quickly receive the first of three updates designed to keep you informed of your order."), React.createElement("p", null, "We hope you enjoy the rest of your day.  Any comments or questions can be directed to ", React.createElement("a", {
           "href": "mailto:team@tokenly.com"
         }, "team@tokenly.com"), "."), React.createElement("p", null, "\u00a0")) : React.createElement("div", null, React.createElement("p", null, "Don\u2019t want to wait here?", React.createElement("br", null), "We can notify you when the transaction is done!"), React.createElement("form", {
+          "id": "SubmitEmailForm",
           "action": "#submit-email",
           "onSubmit": this.submitEmailFn,
           "style": (userChoices.email.submittingEmail ? {
@@ -1682,7 +1688,9 @@
           } : null)
         }, React.createElement("table", {
           "className": "fieldset fieldset-other"
-        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, React.createElement("input", {
+        }, React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", {
+          "id": "EmailInputColumn"
+        }, React.createElement("input", {
           "disabled": (userChoices.email.submittingEmail ? true : false),
           "required": true,
           "type": "email",
@@ -1690,7 +1698,18 @@
           "id": "other-address",
           "placeholder": "example@example.com",
           "value": emailValue
-        })), React.createElement("td", null, React.createElement("div", {
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "email-level"
+        }, React.createElement("input", {
+          "disabled": (userChoices.email.submittingEmail ? true : false),
+          "onChange": this.updateEmailLevel,
+          "type": "checkbox",
+          "id": "EmailLevel",
+          "name": "email_level",
+          "checked": emailLevelIsChecked
+        }), " ", React.createElement("label", {
+          "htmlFor": "EmailLevel"
+        }, "Only email me when my order has been delivered"))), React.createElement("td", null, React.createElement("div", {
           "id": "icon-other-next",
           "className": "icon-next",
           "onClick": this.submitEmailFn
@@ -2142,6 +2161,12 @@
         email: email
       });
     };
+    exports.updateEmailLevel = function(level) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE,
+        level: level
+      });
+    };
     exports.submitEmail = function() {
       Dispatcher.dispatch({
         actionType: BotConstants.BOT_USER_SUBMIT_EMAIL
@@ -2222,6 +2247,7 @@
     exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
     exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
     exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
     exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
     exports.BOT_GO_BACK = 'BOT_GO_BACK';
     exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
@@ -2242,6 +2268,104 @@
     exports.MORE_SWAPS_TO_SHOW = 10;
     return exports;
   })();
+
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
 
   BotstreamStore = (function() {
     var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
@@ -2474,7 +2598,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStep, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
+    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStep, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailLevel, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
     exports = {};
     exports.MATCH_AUTO = MATCH_AUTO = 'AUTO';
     exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL';
@@ -2494,6 +2618,7 @@
       numberOfValidSwaps: 0,
       email: {
         value: '',
+        level: 0,
         submitting: false,
         submitted: false,
         errorMsg: null
@@ -2520,6 +2645,7 @@
     resetEmailChoices = function() {
       userChoices.email = {
         value: '',
+        level: 0,
         submitting: false,
         submitted: false,
         errorMsg: null
@@ -2585,6 +2711,13 @@
         emitChange();
       }
     };
+    updateEmailLevel = function(level) {
+      if (level !== userChoices.email.level) {
+        userChoices.email.level = level;
+        console.log("userChoices.email.level=", userChoices.email.level);
+        emitChange();
+      }
+    };
     submitEmail = function() {
       var data;
       if (userChoices.email.submittingEmail) {
@@ -2594,6 +2727,7 @@
       userChoices.email.emailErrorMsg = null;
       data = {
         email: userChoices.email.value,
+        level: userChoices.email.level,
         swapId: userChoices.swap.id
       };
       $.ajax({
@@ -2818,6 +2952,9 @@
           case BotConstants.BOT_UPDATE_EMAIL_VALUE:
             updateEmailValue(action.email);
             break;
+          case BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE:
+            updateEmailLevel(action.level);
+            break;
           case BotConstants.BOT_USER_SUBMIT_EMAIL:
             submitEmail();
             break;
@@ -2950,104 +3087,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   Pockets = (function() {
     var exports, pocketsImage, pocketsUrl;

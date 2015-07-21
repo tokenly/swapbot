@@ -34,6 +34,10 @@ do ()->
             UserInputActions.updateEmailValue(e.target.value)
             return
 
+        updateEmailLevel: (e)->
+            UserInputActions.updateEmailLevel(if e.target.checked then 30 else 0)
+            return
+
         submitEmailFn: (e)->
             e.preventDefault()
 
@@ -53,8 +57,7 @@ do ()->
             swap = userChoices.swap
             bot = this.props.bot
             emailValue = userChoices.email.value
-
-            # Received <b>{swap.quantityIn} {swap.assetIn}</b> from {swap.destination}.
+            emailLevelIsChecked = if userChoices.email.level > 0 then true else false
 
             return <div>
 
@@ -86,12 +89,16 @@ do ()->
                                 Don’t want to wait here?
                                 <br/>We can notify you when the transaction is done!
                             </p>
-                            <form action="#submit-email" onSubmit={this.submitEmailFn} style={if userChoices.email.submittingEmail then {opacity: 0.2} else null}>
+                            <form id="SubmitEmailForm" action="#submit-email" onSubmit={this.submitEmailFn} style={if userChoices.email.submittingEmail then {opacity: 0.2} else null}>
                                 <table className="fieldset fieldset-other">
                                     <tbody>
                                         <tr>
-                                            <td>
+                                            <td id="EmailInputColumn">
                                                 <input disabled={if userChoices.email.submittingEmail then true else false} required type="email" onChange={this.updateEmailValue} id="other-address" placeholder="example@example.com" value={emailValue} />
+                                                <br />
+                                                <div className="email-level">
+                                                    <input disabled={if userChoices.email.submittingEmail then true else false} onChange={this.updateEmailLevel} type="checkbox" id="EmailLevel" name="email_level" checked={emailLevelIsChecked} /> <label htmlFor="EmailLevel">Only email me when my order has been delivered</label>
+                                                </div>
                                             </td>
                                             <td>
                                                 <div id="icon-other-next" className="icon-next" onClick={this.submitEmailFn}></div>

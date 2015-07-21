@@ -11,6 +11,7 @@ class CreateCustomerValidator extends CustomerValidator {
         'uuid'    => '',
         'swap_id' => 'required|integer',
         'email'   => 'required|email',
+        'level'   => 'integer',
     ];
 
 

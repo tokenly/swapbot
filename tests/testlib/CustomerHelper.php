@@ -13,7 +13,8 @@ class CustomerHelper  {
     public function sampleCustomerVars() {
         return [
             'email'  => 'customer@tokenly.co',
-            'active' => 1
+            'active' => 1,
+            'level'  => 0,
         ];
     }
 

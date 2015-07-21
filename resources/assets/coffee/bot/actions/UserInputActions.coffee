@@ -52,6 +52,13 @@ UserInputActions = do ()->
         })
         return
 
+    exports.updateEmailLevel = (level)->
+        Dispatcher.dispatch({
+            actionType: BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE
+            level: level
+        })
+        return
+
     exports.submitEmail = ()->
         Dispatcher.dispatch({
             actionType: BotConstants.BOT_USER_SUBMIT_EMAIL

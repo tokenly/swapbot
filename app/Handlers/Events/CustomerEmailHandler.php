@@ -31,6 +31,9 @@ class CustomerEmailHandler {
         $customer = $event->customer;
         $swap     = $event->swap;
 
+        // filter by event level
+        if ($customer['level'] > Customer::NOTIFICATION_LEVEL_ALL) { return; }
+
         // build variables
         $email_vars = $this->buildEmailVariables($swap, $customer);
 
@@ -49,6 +52,10 @@ class CustomerEmailHandler {
         foreach($customers as $customer) {
             if (!$customer->isActive()) { continue; }
 
+            // filter by event level
+            if ($customer['level'] > Customer::NOTIFICATION_LEVEL_RECEIVED) { return; }
+
+
             // build variables
             $email_vars = $this->buildEmailVariables($swap, $customer);
 
@@ -66,6 +73,9 @@ class CustomerEmailHandler {
         $customers = $this->customer_repository->findBySwap($swap);
         foreach($customers as $customer) {
             if (!$customer->isActive()) { continue; }
+
+            // filter by event level
+            if ($customer['level'] > Customer::NOTIFICATION_LEVEL_FINAL_ONLY) { return; }
 
             // build variables
             $email_vars = $this->buildEmailVariables($swap, $customer);

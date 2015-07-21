@@ -21,6 +21,7 @@ UserChoiceStore = do ()->
 
         email:
             value     : ''
+            level     : 0
             submitting: false
             submitted : false
             errorMsg  : null
@@ -52,6 +53,7 @@ UserChoiceStore = do ()->
     resetEmailChoices = ()->
         userChoices.email = {
             value     : ''
+            level     : 0
             submitting: false
             submitted : false
             errorMsg  : null
@@ -148,13 +150,20 @@ UserChoiceStore = do ()->
             emitChange()
         return
 
+    updateEmailLevel = (level)->
+        if level != userChoices.email.level
+            userChoices.email.level = level
+            console.log "userChoices.email.level=",userChoices.email.level
+            emitChange()
+        return
+
     submitEmail = ()->
         return if userChoices.email.submittingEmail
 
         userChoices.email.submittingEmail = true
         userChoices.email.emailErrorMsg = null
 
-        data = {email: userChoices.email.value, swapId: userChoices.swap.id}
+        data = {email: userChoices.email.value, level: userChoices.email.level, swapId: userChoices.swap.id}
         $.ajax({
             type: "POST",
             url: '/api/v1/public/customers',
@@ -433,6 +442,9 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_UPDATE_EMAIL_VALUE
                     updateEmailValue(action.email)
+
+                when BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE
+                    updateEmailLevel(action.level)
 
                 when BotConstants.BOT_USER_SUBMIT_EMAIL
                     submitEmail()

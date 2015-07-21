@@ -48,7 +48,7 @@ do ()->
             if swap.isError then icon = 'failed'
             else if swap.isComplete then icon = 'confirmed'
 
-            return <li className={icon}>
+            return <li key={"roa-"+swap.id} className={icon}>
                     <div className={"status-icon icon-#{icon}"}></div>
                     <div className="status-content">
                         <span>
@@ -103,9 +103,9 @@ do ()->
 
             for swap, index in this.state.swaps
                 if swap.isComplete
-                    recentSwaps.push(<RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />)
+                    recentSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.props.bot} swap={swap} />)
                 else
-                    activeSwaps.push(<RecentOrActiveSwapComponent key={swap.id} bot={this.props.bot} swap={swap} />)
+                    activeSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.props.bot} swap={swap} />)
             
                 if index >= limit - 1
                     break

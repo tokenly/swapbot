@@ -12,6 +12,7 @@ BotConstants = do ()->
     exports.BOT_USER_RESET_SWAP              = 'BOT_USER_RESET_SWAP'
     exports.BOT_USER_CHOOSE_OUT_AMOUNT       = 'BOT_USER_CHOOSE_OUT_AMOUNT'
     exports.BOT_UPDATE_EMAIL_VALUE           = 'BOT_UPDATE_EMAIL_VALUE'
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE     = 'BOT_UPDATE_EMAIL_LEVEL_VALUE'
     exports.BOT_USER_SUBMIT_EMAIL            = 'BOT_USER_SUBMIT_EMAIL'
 
     exports.BOT_GO_BACK                      = 'BOT_GO_BACK'

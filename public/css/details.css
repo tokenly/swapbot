@@ -414,6 +414,10 @@ a {
   padding: 6px;
   font-size: 13px;
 }
+.swapbot-container .content .fieldset input[type=checkbox],
+#swapbot-container .content .fieldset input[type=checkbox] {
+  width: auto;
+}
 .swapbot-container .content .fieldset-other,
 #swapbot-container .content .fieldset-other {
   width: 0%;
@@ -428,6 +432,29 @@ a {
 #swapbot-container .content .fieldset-other .icon-next:hover {
   background-color: #18e36e;
   cursor: pointer;
+}
+.swapbot-container .content #EmailInputColumn,
+#swapbot-container .content #EmailInputColumn {
+  text-align: left;
+}
+.swapbot-container .content #EmailInputColumn #other-address,
+#swapbot-container .content #EmailInputColumn #other-address {
+  width: 284px;
+}
+.swapbot-container .content .email-level,
+#swapbot-container .content .email-level {
+  margin-top: 5px;
+}
+.swapbot-container .content .email-level label,
+#swapbot-container .content .email-level label {
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.swapbot-container .content .email-level input,
+#swapbot-container .content .email-level input {
+  font-size: 0.65rem;
+  position: relative;
+  top: 3px;
 }
 .swapbot-container .content .wide-list,
 #swapbot-container .content .wide-list {

@@ -1,0 +1,100 @@
+# full live transaction with 2 confirmations
+#   and only the final email
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    blockId: 300002
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
+
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {level: 30} }
+  - {type: xchainNotification, startOffset: 1}
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
+
+  - #### transaction handled previously (1 confirmation)
+    meta: { baseFilename: tx.previous-1.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-LTBCOIN.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-2.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-LTBCOIN.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-2confirmations.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-BTC.yml }
+    confirmations: 2
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+  - #### found a confirmed send transaction (2 confirmations)
+    meta: { baseFilename: send.confirmed-BTC.yml }
+    confirmations: 2
+    confirmationsOut: 2
+
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }
+    confirmations: '2'
+  - 
+    meta: { baseFilename: transaction_model_01-send.yml }
+    confirmations: '2'
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      LTBCOIN: 1000500
+      BTC: 0.99941 # + 0.00001 dust
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-complete.yml }
+
+
+expectedEmails:
+  - meta: { baseFilename: 03-complete.yml }
+
+
