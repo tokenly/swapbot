@@ -51,7 +51,9 @@ class StrategyHelpers {
 
     public static function isValidCost($rate) {
         $rate = floatval($rate);
-        if ($rate < 0.01) { return false; }
+
+        // minimum USD pricing
+        if ($rate < 0.00000001) { return false; }
 
         return true;
     }

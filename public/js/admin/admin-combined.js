@@ -4077,6 +4077,21 @@
       }
       return prefix + ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + formattedCurrencyString;
     };
+    exports.formatArbitraryPrecisionFiatCurrency = function(value, currencyPrefix, formatString) {
+      var formattedCurrencyString, prefix;
+      if (currencyPrefix == null) {
+        currencyPrefix = '$';
+      }
+      if (formatString == null) {
+        formatString = '0,0.00[000000]';
+      }
+      if ((value == null) || isNaN(value)) {
+        return '';
+      }
+      formattedCurrencyString = window.numeral(value).format(formatString);
+      prefix = '';
+      return prefix + ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + formattedCurrencyString;
+    };
     return exports;
   })();
 
@@ -4207,7 +4222,7 @@
     buildDesc.fiat = function(swapConfig) {
       var cost, formatCurrency, formatFiatCurrency, outAmount;
       formatCurrency = swapbot.formatters.formatCurrency;
-      formatFiatCurrency = swapbot.formatters.formatFiatCurrency;
+      formatFiatCurrency = swapbot.formatters.formatArbitraryPrecisionFiatCurrency;
       outAmount = 1;
       cost = swapConfig.cost;
       return (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatFiatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit";

@@ -29,7 +29,7 @@ swapbot.swapUtils = do ()->
 
     buildDesc.fiat = (swapConfig)->
         formatCurrency = swapbot.formatters.formatCurrency
-        formatFiatCurrency = swapbot.formatters.formatFiatCurrency
+        formatFiatCurrency = swapbot.formatters.formatArbitraryPrecisionFiatCurrency
         outAmount = 1
         cost = swapConfig.cost
         return "#{formatCurrency(outAmount)} #{swapConfig.out} for every #{formatFiatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit"

@@ -189,7 +189,15 @@ class BotValidatorTest extends TestCase {
                 'error' => null,
             ],
             [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['cost' => 0.001,]]]),
+                'error' => null,
+            ],
+            [
                 'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['cost' => 0,]]]),
+                'error' => 'The cost for swap #1 was not valid.',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['cost' => 0.000000005,]]]),
                 'error' => 'The cost for swap #1 was not valid.',
             ],
             [

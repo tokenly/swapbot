@@ -49,13 +49,17 @@ class BotValidator {
         $validator->after(function ($validator) use ($posted_data, $user) {
             // validate swaps
             $this->validateSwaps(isset($posted_data['swaps']) ? $posted_data['swaps'] : null, $validator);
+
             // validate blacklist addresses
             $this->validateBlacklistAddresses(isset($posted_data['blacklist_addresses']) ? $posted_data['blacklist_addresses'] : null, $validator);
+
             // validate income rules
             $this->validateIncomeRules(isset($posted_data['income_rules']) ? $posted_data['income_rules'] : null, $validator);
+
             // validate images
             $this->validateImageID('background', $user, isset($posted_data['background_image_id']) ? $posted_data['background_image_id'] : null, $validator);
             $this->validateImageID('logo', $user, isset($posted_data['logo_image_id']) ? $posted_data['logo_image_id'] : null, $validator);
+
             // validate overlay gradient settings
             $this->validateOverlaySettings(isset($posted_data['background_overlay_settings']) ? $posted_data['background_overlay_settings'] : null, $validator);
         });

@@ -56,13 +56,19 @@ swapbot.formatters = do ()->
         if not value? or isNaN(value) then return '0'
         return window.numeral(value).format('0.[00000000]')
 
-    exports.formatFiatCurrency = (value, currencyPrefix='$') ->
+    exports.formatFiatCurrency = (value, currencyPrefix='$')->
         if not value? or isNaN(value) then return ''
         formattedCurrencyString = window.numeral(value).format('0,0.00')
         prefix = ''
         if formattedCurrencyString == '0.00'
             prefix = 'less than '
             formattedCurrencyString = '0.01'
+        return prefix+(if currencyPrefix?.length then currencyPrefix else '')+(formattedCurrencyString)
+
+    exports.formatArbitraryPrecisionFiatCurrency = (value, currencyPrefix='$', formatString='0,0.00[000000]')->
+        if not value? or isNaN(value) then return ''
+        formattedCurrencyString = window.numeral(value).format(formatString)
+        prefix = ''
         return prefix+(if currencyPrefix?.length then currencyPrefix else '')+(formattedCurrencyString)
 
     return exports
