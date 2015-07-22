@@ -213,7 +213,7 @@ class SwapProcessor {
             $swap_process['swap_was_handled'] = true;
 
             // mark details
-            $receipt_update_vars = $this->buildReceiptUpdateVars('type', $swap_process);
+            $receipt_update_vars = $this->buildReceiptUpdateVars($swap_process);
 
             // determine if this is an update
             $any_changed = false;
@@ -230,10 +230,8 @@ class SwapProcessor {
         }
     }
 
-    protected function buildReceiptUpdateVars($type, $swap_process, $overrides=null) {
+    protected function buildReceiptUpdateVars($swap_process, $overrides=null) {
         $receipt_update_vars = [
-            'type'          => $type,
-
             'quantityIn'    => $swap_process['in_quantity'],
             'assetIn'       => $swap_process['in_asset'],
             'txidIn'        => $swap_process['transaction']['txid'],
@@ -277,7 +275,7 @@ class SwapProcessor {
 
             // mark details
             $receipt_update_vars = [
-                'type'          => 'pending',
+                // 'type'          => 'pending',
 
                 'quantityIn'    => $swap_process['in_quantity'],
                 'assetIn'       => $swap_process['in_asset'],
@@ -302,7 +300,7 @@ class SwapProcessor {
 
                 // mark details
                 $receipt_update_vars = [
-                    'type'          => 'pending',
+                    // 'type'          => 'pending',
 
                     'quantityIn'    => $swap_process['in_quantity'],
                     'assetIn'       => $swap_process['in_asset'],

@@ -12,3 +12,4 @@ confirmationsOut: 0
 state: 'refunded'
 isComplete: false
 isError: false
+type: refund

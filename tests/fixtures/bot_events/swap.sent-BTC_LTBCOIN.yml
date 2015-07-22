@@ -10,5 +10,6 @@ assetOut: 'LTBCOIN'
 txidOut: '0000000000000000000000000000001111'
 confirmationsOut: 0
 state: 'sent'
+type: 'swap'
 isComplete: false
 isError: false

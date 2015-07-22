@@ -15,3 +15,5 @@ confirmationsOut: 0
 state: 'ready'
 isComplete: false
 isError: false
+
+type: swap

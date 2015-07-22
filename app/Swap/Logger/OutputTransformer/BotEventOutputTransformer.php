@@ -25,7 +25,7 @@ class BotEventOutputTransformer {
 
     public function isMissingStandardSwapEventData($bot_event_data) {
         $event = $bot_event_data['event'];
-        if (!isset($event['quantityIn']) OR !isset($event['txidIn']) OR !isset($event['state'])) {
+        if (!isset($event['quantityIn']) OR !isset($event['txidIn']) OR !isset($event['state']) OR ($event['isComplete'] AND !isset($event['type']))) {
             return true;
         }
 

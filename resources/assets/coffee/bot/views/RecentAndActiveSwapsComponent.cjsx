@@ -46,6 +46,7 @@ do ()->
             
             icon = 'pending'
             if swap.isError then icon = 'failed'
+            else if swap.isComplete and swap.type == 'refund' then icon = 'failed'
             else if swap.isComplete then icon = 'confirmed'
 
             return <li key={"roa-"+swap.id} className={icon}>
@@ -57,6 +58,8 @@ do ()->
                             {
                                 if swap.isError or not swap.isComplete
                                     swap.message
+                                else if swap.type == 'refund'
+                                    "Refunded #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut}"
                                 else
                                     "Sold #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut} for #{swapbot.formatters.formatCurrency(swap.quantityIn)} #{swap.assetIn}"
                             }

@@ -16,5 +16,6 @@ changeOutAsset: 'BTC'
 
 confirmationsOut: 0
 state: 'sent'
+type: 'swap'
 isComplete: false
 isError: false

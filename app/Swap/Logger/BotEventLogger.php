@@ -477,6 +477,8 @@ class BotEventLogger {
 
             'completedAt'      => isset($receipt['completedAt'])      ? $receipt['completedAt']       : null,
 
+            'type'             => isset($receipt['type'])             ? $receipt['type']              : null,
+
             'state'            => $state,
             'isComplete'       => $swap->isComplete($state),
             'isError'          => $swap->isError($state),

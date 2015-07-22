@@ -13,5 +13,6 @@ changeOutAsset: 'BTC'
 txidOut: '0000000000000000000000000000001111'
 confirmationsOut: 1
 state: 'complete'
+type: swap
 isComplete: true
 isError: false

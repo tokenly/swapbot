@@ -137,3 +137,4 @@ SwapsStore = do ()->
 # isComplete
 # isError
 
+# type (for completed swaps)
