@@ -3,7 +3,10 @@
 namespace Swapbot\Handlers\Events;
 
 use Illuminate\Support\Facades\Log;
+use Rhumsaa\Uuid\Uuid;
 use Swapbot\Events\Event;
+use Swapbot\Models\Bot;
+use Swapbot\Models\BotEvent;
 use Tokenly\PusherClient\Client;
 
 
@@ -55,6 +58,19 @@ class BotUpdatesForDisplayHandler {
         $this->pusher_client->send('/swapbot_account_updates_'.$bot['uuid'], ['accountUpdated' => true]);
     }
 
+    public function sendBotUpdateToPusher(Event $event) {
+        $bot         = $event->bot;
+        $update_type = $event->update_type;
+
+        $pusher_vars = [
+            'id'          => Uuid::uuid4()->toString(),
+            'isBotUpdate' => true,
+            'bot'         => $bot->serializeForAPI(),
+        ];
+
+        $this->pusher_client->send('/swapbot_botstream_'.$bot['uuid'], $pusher_vars);
+    }
+
 
     /**
      * Register the listeners for the subscriber.
@@ -71,6 +87,8 @@ class BotUpdatesForDisplayHandler {
 
         $events->listen('Swapbot\Events\BotBalancesUpdated',       'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBalanceUpdateToPusher');
         $events->listen('Swapbot\Events\BotPaymentAccountUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
+
+        $events->listen('Swapbot\Events\BotUpdated',               'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBotUpdateToPusher');
     }
 
 

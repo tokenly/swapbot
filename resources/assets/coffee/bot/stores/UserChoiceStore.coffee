@@ -491,7 +491,7 @@ UserChoiceStore = do ()->
         return
 
     exports.getUserChoices = ()->
-        return userChoices
+        return $.extend({}, userChoices)
 
     exports.addChangeListener = (callback)->
         eventEmitter.addListener('change', callback)

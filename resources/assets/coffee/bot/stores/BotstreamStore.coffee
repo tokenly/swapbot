@@ -8,6 +8,11 @@ BotstreamStore = do ()->
     handleBotstreamEvents = (eventWrappers)->
         anyChanged = false
         for eventWrapper in eventWrappers
+            if eventWrapper.isBotUpdate
+                # handle bot updates differently
+                handleBotUpdate(eventWrapper)
+                continue
+
             eventId = eventWrapper.id
             event = eventWrapper.event
     
@@ -60,6 +65,11 @@ BotstreamStore = do ()->
         eventEmitter.emitEvent('change')
         return
 
+    handleBotUpdate = (eventWrapper)->
+        newBotData = eventWrapper.bot
+        BotStore.updateBot(newBotData)
+        return
+
 
     # #############################################
 
@@ -72,9 +82,6 @@ BotstreamStore = do ()->
             switch action.actionType
                 when BotConstants.BOT_HANDLE_NEW_BOTSTREAM_EVENTS
                     handleBotstreamEvents(action.botstreamEvents)
-
-                # else
-                #     console.log "unknown action: #{action.actionType}"
             return
 
         return

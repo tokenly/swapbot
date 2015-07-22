@@ -3,8 +3,9 @@ RecentOrActiveSwapComponent = null
 
 do ()->
 
-    getViewState = ()->
+    getViewState = (botId)->
         return {
+            bot: BotStore.getBot(botId)
             swaps: SwapsStore.getSwaps()
             swapsUI: UserInterfaceStateStore.getSwapsUIState()
         }
@@ -85,17 +86,19 @@ do ()->
         displayName: 'RecentAndActiveSwapsComponent'
 
         getInitialState: ()->
-            return getViewState()
+            return getViewState(this.props.botid)
 
         _onChange: ()->
-            this.setState(getViewState())
+            this.setState(getViewState(this.props.botid))
 
         componentDidMount: ()->
+            BotStore.addChangeListener(this._onChange)
             SwapsStore.addChangeListener(this._onChange)
             UserInterfaceStateStore.addChangeListener(this._onChange)
             return
 
         componentWillUnmount: ()->
+            BotStore.removeChangeListener(this._onChange)
             SwapsStore.removeChangeListener(this._onChange)
             UserInterfaceStateStore.removeChangeListener(this._onChange)
             return
@@ -106,9 +109,9 @@ do ()->
 
             for swap, index in this.state.swaps
                 if swap.isComplete
-                    recentSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.props.bot} swap={swap} />)
+                    recentSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.state.bot} swap={swap} />)
                 else
-                    activeSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.props.bot} swap={swap} />)
+                    activeSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.state.bot} swap={swap} />)
             
                 if index >= limit - 1
                     break

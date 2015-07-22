@@ -2,8 +2,11 @@ SwapPurchaseStepsComponent = null
 
 do ()->
 
-    getViewState = ()->
-        return UserChoiceStore.getUserChoices()
+    getViewState = (botId)->
+        state = UserChoiceStore.getUserChoices()
+        state.bot = BotStore.getBot(botId)
+        return state
+
 
 
     # ############################################################################################################
@@ -13,33 +16,31 @@ do ()->
         displayName: 'SwapPurchaseStepsComponent'
 
         getInitialState: ()->
-            return $.extend(
-                {
-                },
-                getViewState()
-            )
+            return getViewState(this.props.botid)
 
-        _onUserChoiceChange: ()->
-            this.setState(getViewState())
+        _onChange: ()->
+            this.setState(getViewState(this.props.botid))
 
 
         componentDidMount: ()->
-            UserChoiceStore.addChangeListener(this._onUserChoiceChange)
+            UserChoiceStore.addChangeListener(this._onChange)
+            BotStore.addChangeListener(this._onChange)
             return
 
         componentWillUnmount: ()->
-            UserChoiceStore.removeChangeListener(this._onUserChoiceChange)
+            UserChoiceStore.removeChangeListener(this._onChange)
+            BotStore.removeChangeListener(this._onChange)
             return
 
         render: ->
             <div>
-            { if this.props.bot?
+            { if this.state.bot?
                 <div>
-                { if this.state.step == 'choose'   then <SwapbotChoose               bot={this.props.bot} /> else null }
-                { if this.state.step == 'place'    then <SwapbotPlaceOrder           bot={this.props.bot} /> else null }
-                { if this.state.step == 'receive'  then <SwapbotReceivingTransaction bot={this.props.bot} /> else null }
-                { if this.state.step == 'wait'     then <SwapbotWait                 bot={this.props.bot} /> else null }
-                { if this.state.step == 'complete' then <SwapbotComplete             bot={this.props.bot} /> else null }
+                { if this.state.step == 'choose'   then <SwapbotChoose               bot={this.state.bot} /> else null }
+                { if this.state.step == 'place'    then <SwapbotPlaceOrder           bot={this.state.bot} /> else null }
+                { if this.state.step == 'receive'  then <SwapbotReceivingTransaction bot={this.state.bot} /> else null }
+                { if this.state.step == 'wait'     then <SwapbotWait                 bot={this.state.bot} /> else null }
+                { if this.state.step == 'complete' then <SwapbotComplete             bot={this.state.bot} /> else null }
                 </div>
             else
                 <div className="loading">Loading...</div>

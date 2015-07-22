@@ -4,6 +4,10 @@ namespace Swapbot\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Swapbot\Events\BotCreated;
+use Swapbot\Events\BotDeleted;
+use Swapbot\Events\BotUpdated;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
@@ -83,6 +87,9 @@ class BotRepository extends APIRepository
         // apply the new hash
         $model['hash'] = $model_clone['hash'];
 
+        // fire an event
+        Event::fire(new BotCreated($model));
+
         return $model;
     }
 
@@ -104,6 +111,19 @@ class BotRepository extends APIRepository
         $attributes['hash'] = $model_clone->buildHash($attributes);
 
         return $attributes;
+    }
+
+
+    public function update(Model $model, $attributes) {
+        $out = parent::update($model, $attributes);
+        Event::fire(new BotUpdated($model));
+        return $out;
+    }
+
+    public function delete(Model $model) {
+        $out = parent::delete($model);
+        Event::fire(new BotDeleted($model));
+        return $out;
     }
 
 }

@@ -6,6 +6,7 @@ window.BotApp =
         QuotebotStore.init()
         UserChoiceStore.init()
         UserInterfaceStateStore.init()
+        BotStore.init(bot)
 
         # subscribe to the swaps event stream
         BotAPIActionCreator.subscribeToBotstream(bot.id)
@@ -19,13 +20,13 @@ window.BotApp =
         # render the components
 
         # Bot copyable address
-        React.render <BotCopyableAddress            bot={bot} />, document.getElementById('BotCopyableAddress')
+        React.render <BotCopyableAddress            bot={bot} />,      document.getElementById('BotCopyableAddress')
 
         # Bot status (active/inactive)
-        React.render <BotStatusComponent            bot={bot} />, document.getElementById('BotStatusComponent')
+        React.render <BotStatusComponent            bot={bot} />,      document.getElementById('BotStatusComponent')
 
         # recent and active swaps
-        React.render <RecentAndActiveSwapsComponent bot={bot} />, document.getElementById('RecentAndActiveSwapsComponent')
+        React.render <RecentAndActiveSwapsComponent botid={bot.id} />, document.getElementById('RecentAndActiveSwapsComponent')
 
         # run the swap interface
-        React.render <SwapPurchaseStepsComponent    bot={bot} />, document.getElementById('SwapPurchaseStepsComponent')
+        React.render <SwapPurchaseStepsComponent    botid={bot.id} />, document.getElementById('SwapPurchaseStepsComponent')

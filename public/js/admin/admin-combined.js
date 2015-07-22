@@ -1039,7 +1039,7 @@
   })();
 
   sbAdmin.nav = (function() {
-    var buildAdminPanelNavLink, buildRightNav, buildSettingsNavLink, buildUsersNavLink, nav;
+    var buildAdminPanelNavLink, buildRightNav, nav;
     nav = {};
     buildRightNav = function(user) {
       var username;
@@ -1090,38 +1090,20 @@
         ]);
       }
     };
-    buildUsersNavLink = function(user) {
-      var ref;
+    buildAdminPanelNavLink = function(user) {
+      var els, ref, ref1, ref2, ref3;
+      els = [];
       if ((ref = user.privileges) != null ? ref.createUser : void 0) {
-        return m("li", {
+        els.push(m("li", {
           "class": ""
         }, [
           m("a[href='/admin/users']", {
             "class": "",
             config: m.route
-          }, "Users")
-        ]);
+          }, "Manage Users")
+        ]));
       }
-      return null;
-    };
-    buildSettingsNavLink = function(user) {
-      var ref;
-      if ((ref = user.privileges) != null ? ref.manageSettings : void 0) {
-        return m("li", {
-          "class": ""
-        }, [
-          m("a[href='/admin/settings']", {
-            "class": "",
-            config: m.route
-          }, "Settings")
-        ]);
-      }
-      return null;
-    };
-    buildAdminPanelNavLink = function(user) {
-      var els, ref, ref1;
-      els = [];
-      if ((ref = user.privileges) != null ? ref.viewBots : void 0) {
+      if ((ref1 = user.privileges) != null ? ref1.viewBots : void 0) {
         els.push(m("li", {
           "class": ""
         }, [
@@ -1131,7 +1113,7 @@
           }, "Show All Bots")
         ]));
       }
-      if ((ref1 = user.privileges) != null ? ref1.viewBots : void 0) {
+      if ((ref2 = user.privileges) != null ? ref2.viewBots : void 0) {
         els.push(m("li", {
           "class": ""
         }, [
@@ -1139,6 +1121,16 @@
             "class": "",
             config: m.route
           }, "Show All Swaps")
+        ]));
+      }
+      if ((ref3 = user.privileges) != null ? ref3.manageSettings : void 0) {
+        els.push(m("li", {
+          "class": ""
+        }, [
+          m("a[href='/admin/settings']", {
+            "class": "",
+            config: m.route
+          }, "Global Settings")
         ]));
       }
       if (els.length > 1) {
@@ -1195,7 +1187,17 @@
                 "class": "",
                 config: m.route
               }, "New Bot")
-            ]), buildUsersNavLink(user), buildSettingsNavLink(user), buildAdminPanelNavLink(user)
+            ]), buildAdminPanelNavLink(user), m("li", {
+              "class": ""
+            }, [
+              m("a[href='https://www.youtube.com/watch?v=MCdFHx3yTfE']", {
+                target: "_blank"
+              }, [
+                m('span', {
+                  "class": "glyphicon glyphicon-film"
+                }, ''), " Tutorial Video"
+              ])
+            ])
           ]), buildRightNav(user)
         ])
       ]);

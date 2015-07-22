@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UIActionListeners, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotStore, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UIActionListeners, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -759,8 +759,9 @@
 
   (function() {
     var getViewState;
-    getViewState = function() {
+    getViewState = function(botId) {
       return {
+        bot: BotStore.getBot(botId),
         swaps: SwapsStore.getSwaps(),
         swapsUI: UserInterfaceStateStore.getSwapsUIState()
       };
@@ -825,16 +826,18 @@
     return RecentAndActiveSwapsComponent = React.createClass({
       displayName: 'RecentAndActiveSwapsComponent',
       getInitialState: function() {
-        return getViewState();
+        return getViewState(this.props.botid);
       },
       _onChange: function() {
-        return this.setState(getViewState());
+        return this.setState(getViewState(this.props.botid));
       },
       componentDidMount: function() {
+        BotStore.addChangeListener(this._onChange);
         SwapsStore.addChangeListener(this._onChange);
         UserInterfaceStateStore.addChangeListener(this._onChange);
       },
       componentWillUnmount: function() {
+        BotStore.removeChangeListener(this._onChange);
         SwapsStore.removeChangeListener(this._onChange);
         UserInterfaceStateStore.removeChangeListener(this._onChange);
       },
@@ -851,13 +854,13 @@
           if (swap.isComplete) {
             recentSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
               "key": "ra-" + swap.id,
-              "bot": this.props.bot,
+              "bot": this.state.bot,
               "swap": swap
             }));
           } else {
             activeSwaps.push(React.createElement(RecentOrActiveSwapComponent, {
               "key": "ra-" + swap.id,
-              "bot": this.props.bot,
+              "bot": this.state.bot,
               "swap": swap
             }));
           }
@@ -1887,34 +1890,39 @@
 
   (function() {
     var getViewState;
-    getViewState = function() {
-      return UserChoiceStore.getUserChoices();
+    getViewState = function(botId) {
+      var state;
+      state = UserChoiceStore.getUserChoices();
+      state.bot = BotStore.getBot(botId);
+      return state;
     };
     return SwapPurchaseStepsComponent = React.createClass({
       displayName: 'SwapPurchaseStepsComponent',
       getInitialState: function() {
-        return $.extend({}, getViewState());
+        return getViewState(this.props.botid);
       },
-      _onUserChoiceChange: function() {
-        return this.setState(getViewState());
+      _onChange: function() {
+        return this.setState(getViewState(this.props.botid));
       },
       componentDidMount: function() {
-        UserChoiceStore.addChangeListener(this._onUserChoiceChange);
+        UserChoiceStore.addChangeListener(this._onChange);
+        BotStore.addChangeListener(this._onChange);
       },
       componentWillUnmount: function() {
-        UserChoiceStore.removeChangeListener(this._onUserChoiceChange);
+        UserChoiceStore.removeChangeListener(this._onChange);
+        BotStore.removeChangeListener(this._onChange);
       },
       render: function() {
-        return React.createElement("div", null, (this.props.bot != null ? React.createElement("div", null, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
-          "bot": this.props.bot
+        return React.createElement("div", null, (this.state.bot != null ? React.createElement("div", null, (this.state.step === 'choose' ? React.createElement(SwapbotChoose, {
+          "bot": this.state.bot
         }) : null), (this.state.step === 'place' ? React.createElement(SwapbotPlaceOrder, {
-          "bot": this.props.bot
+          "bot": this.state.bot
         }) : null), (this.state.step === 'receive' ? React.createElement(SwapbotReceivingTransaction, {
-          "bot": this.props.bot
+          "bot": this.state.bot
         }) : null), (this.state.step === 'wait' ? React.createElement(SwapbotWait, {
-          "bot": this.props.bot
+          "bot": this.state.bot
         }) : null), (this.state.step === 'complete' ? React.createElement(SwapbotComplete, {
-          "bot": this.props.bot
+          "bot": this.state.bot
         }) : null)) : React.createElement("div", {
           "className": "loading"
         }, "Loading...")));
@@ -1929,6 +1937,7 @@
       QuotebotStore.init();
       UserChoiceStore.init();
       UserInterfaceStateStore.init();
+      BotStore.init(bot);
       BotAPIActionCreator.subscribeToBotstream(bot.id);
       SwapAPIActionCreator.init(bot.id);
       QuotebotActionCreator.subscribeToQuotebot(quotebotCredentials.url, quotebotCredentials.apiToken, pusherURL);
@@ -1940,10 +1949,10 @@
         "bot": bot
       }), document.getElementById('BotStatusComponent'));
       React.render(React.createElement(RecentAndActiveSwapsComponent, {
-        "bot": bot
+        "botid": bot.id
       }), document.getElementById('RecentAndActiveSwapsComponent'));
       return React.render(React.createElement(SwapPurchaseStepsComponent, {
-        "bot": bot
+        "botid": bot.id
       }), document.getElementById('SwapPurchaseStepsComponent'));
     }
   };
@@ -2286,8 +2295,137 @@
     return exports;
   })();
 
+  Dispatcher = (function() {
+    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
+    exports = {};
+    _prefix = 'ID_';
+    _lastID = 1;
+    _callbacks = {};
+    _isPending = {};
+    _isHandled = {};
+    _isDispatching = false;
+    _pendingPayload = null;
+    exports.sayHi = function() {};
+    exports.register = function(callback) {
+      var id;
+      id = _prefix + _lastID++;
+      _callbacks[id] = callback;
+      return id;
+    };
+    exports.unregister = function(id) {
+      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+      delete _callbacks[id];
+    };
+    exports.waitFor = function(ids) {
+      var id, ii;
+      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+      ii = 0;
+      while (ii < ids.length) {
+        id = ids[ii];
+        if (_isPending[id]) {
+          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
+          continue;
+        }
+        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+        _invokeCallback(id);
+        ii++;
+      }
+    };
+    exports.dispatch = function(payload) {
+      var id;
+      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+      _startDispatching(payload);
+      try {
+        for (id in _callbacks) {
+          if (_isPending[id]) {
+            continue;
+          }
+          _invokeCallback(id);
+        }
+      } finally {
+        _stopDispatching();
+      }
+    };
+    exports.isDispatching = function() {
+      return _isDispatching;
+    };
+    _invokeCallback = function(id) {
+      _isPending[id] = true;
+      _callbacks[id](_pendingPayload);
+      _isHandled[id] = true;
+    };
+    _startDispatching = function(payload) {
+      var id;
+      for (id in _callbacks) {
+        _isPending[id] = false;
+        _isHandled[id] = false;
+      }
+      _pendingPayload = payload;
+      _isDispatching = true;
+    };
+    _stopDispatching = function() {
+      _pendingPayload = null;
+      _isDispatching = false;
+    };
+    return exports;
+  })();
+
+  invariant = function(condition, format, a, b, c, d, e, f) {
+    var argIndex, args, error;
+    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
+      if (format === void 0) {
+        throw new Error('invariant requires an error message argument');
+      }
+    }
+    if (!condition) {
+      error = void 0;
+      if (format === void 0) {
+        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      } else {
+        args = [a, b, c, d, e, f];
+        argIndex = 0;
+        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
+          return args[argIndex++];
+        }));
+      }
+      error.framesToPop = 1;
+      throw error;
+    }
+  };
+
+  BotStore = (function() {
+    var emitChange, eventEmitter, exports, storedBots, updateBot;
+    exports = {};
+    eventEmitter = null;
+    storedBots = {};
+    emitChange = function() {
+      eventEmitter.emitEvent('change');
+    };
+    updateBot = function(newBot) {
+      storedBots[newBot.id] = newBot;
+      emitChange();
+    };
+    exports.init = function(bot) {
+      eventEmitter = new window.EventEmitter();
+      storedBots[bot.id] = bot;
+    };
+    exports.getBot = function(botId) {
+      return storedBots[botId];
+    };
+    exports.updateBot = function(newBot) {
+      updateBot(newBot);
+    };
+    exports.addChangeListener = function(callback) {
+      eventEmitter.addListener('change', callback);
+    };
+    exports.removeChangeListener = function(callback) {
+      eventEmitter.removeListener('change', callback);
+    };
+    return exports;
+  })();
+
   BotstreamStore = (function() {
-    var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotstreamEvents, rebuildAllMyBotEvents;
+    var allMyBotstreamEvents, allMyBotstreamEventsById, buildEventFromStreamstreamEventWrapper, emitChange, eventEmitter, exports, handleBotUpdate, handleBotstreamEvents, rebuildAllMyBotEvents;
     exports = {};
     allMyBotstreamEventsById = {};
     allMyBotstreamEvents = [];
@@ -2297,6 +2435,10 @@
       anyChanged = false;
       for (_i = 0, _len = eventWrappers.length; _i < _len; _i++) {
         eventWrapper = eventWrappers[_i];
+        if (eventWrapper.isBotUpdate) {
+          handleBotUpdate(eventWrapper);
+          continue;
+        }
         eventId = eventWrapper.id;
         event = eventWrapper.event;
         if (allMyBotstreamEventsById[eventId] != null) {
@@ -2343,6 +2485,11 @@
     };
     emitChange = function() {
       eventEmitter.emitEvent('change');
+    };
+    handleBotUpdate = function(eventWrapper) {
+      var newBotData;
+      newBotData = eventWrapper.bot;
+      BotStore.updateBot(newBotData);
     };
     exports.init = function() {
       eventEmitter = new window.EventEmitter();
@@ -2901,7 +3048,7 @@
       });
     };
     exports.getUserChoices = function() {
-      return userChoices;
+      return $.extend({}, userChoices);
     };
     exports.addChangeListener = function(callback) {
       eventEmitter.addListener('change', callback);
@@ -3006,104 +3153,6 @@
     };
     return exports;
   })();
-
-  Dispatcher = (function() {
-    var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
-    exports = {};
-    _prefix = 'ID_';
-    _lastID = 1;
-    _callbacks = {};
-    _isPending = {};
-    _isHandled = {};
-    _isDispatching = false;
-    _pendingPayload = null;
-    exports.sayHi = function() {};
-    exports.register = function(callback) {
-      var id;
-      id = _prefix + _lastID++;
-      _callbacks[id] = callback;
-      return id;
-    };
-    exports.unregister = function(id) {
-      invariant(_callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
-      delete _callbacks[id];
-    };
-    exports.waitFor = function(ids) {
-      var id, ii;
-      invariant(_isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
-      ii = 0;
-      while (ii < ids.length) {
-        id = ids[ii];
-        if (_isPending[id]) {
-          invariant(_isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id);
-          continue;
-        }
-        invariant(_callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
-        _invokeCallback(id);
-        ii++;
-      }
-    };
-    exports.dispatch = function(payload) {
-      var id;
-      invariant(!_isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
-      _startDispatching(payload);
-      try {
-        for (id in _callbacks) {
-          if (_isPending[id]) {
-            continue;
-          }
-          _invokeCallback(id);
-        }
-      } finally {
-        _stopDispatching();
-      }
-    };
-    exports.isDispatching = function() {
-      return _isDispatching;
-    };
-    _invokeCallback = function(id) {
-      _isPending[id] = true;
-      _callbacks[id](_pendingPayload);
-      _isHandled[id] = true;
-    };
-    _startDispatching = function(payload) {
-      var id;
-      for (id in _callbacks) {
-        _isPending[id] = false;
-        _isHandled[id] = false;
-      }
-      _pendingPayload = payload;
-      _isDispatching = true;
-    };
-    _stopDispatching = function() {
-      _pendingPayload = null;
-      _isDispatching = false;
-    };
-    return exports;
-  })();
-
-  invariant = function(condition, format, a, b, c, d, e, f) {
-    var argIndex, args, error;
-    if (typeof __DEV__ !== "undefined" && __DEV__ !== null) {
-      if (format === void 0) {
-        throw new Error('invariant requires an error message argument');
-      }
-    }
-    if (!condition) {
-      error = void 0;
-      if (format === void 0) {
-        error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-      } else {
-        args = [a, b, c, d, e, f];
-        argIndex = 0;
-        error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-          return args[argIndex++];
-        }));
-      }
-      error.framesToPop = 1;
-      throw error;
-    }
-  };
 
   Pockets = (function() {
     var exports, pocketsImage, pocketsUrl;
