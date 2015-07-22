@@ -25,22 +25,14 @@ sbAdmin.nav = do ()->
                     ]),
                 ])
 
-    buildUsersNavLink = (user)->
-        if user.privileges?.createUser
-            return m("li", { class: ""}, [
-                m("a[href='/admin/users']", {class: "", config: m.route}, "Users"),
-            ])
-        return null
-
-    buildSettingsNavLink = (user)->
-        if user.privileges?.manageSettings
-            return m("li", { class: ""}, [
-                m("a[href='/admin/settings']", {class: "", config: m.route}, "Settings"),
-            ])
-        return null
-
     buildAdminPanelNavLink = (user)->
         els = []
+
+        if user.privileges?.createUser
+            els.push(m("li", { class: ""}, [
+                m("a[href='/admin/users']", {class: "", config: m.route}, "Manage Users"),
+            ]))
+
         if user.privileges?.viewBots
             els.push(m("li", { class: ""}, [
                 m("a[href='/admin/allbots']", {class: "", config: m.route}, "Show All Bots"),
@@ -49,6 +41,11 @@ sbAdmin.nav = do ()->
         if user.privileges?.viewBots
             els.push(m("li", { class: ""}, [
                 m("a[href='/admin/allswaps']", {class: "", config: m.route}, "Show All Swaps"),
+            ]))
+
+        if user.privileges?.manageSettings
+            els.push(m("li", { class: ""}, [
+                m("a[href='/admin/settings']", {class: "", config: m.route}, "Global Settings"),
             ]))
 
         if els.length > 1
@@ -79,9 +76,13 @@ sbAdmin.nav = do ()->
                     m("li", { class: ""}, [
                         m("a[href='/admin/edit/bot/new']", {class: "", config: m.route}, "New Bot"),
                     ]),
-                    buildUsersNavLink(user),
-                    buildSettingsNavLink(user),
                     buildAdminPanelNavLink(user),
+                    m("li", { class: ""}, [
+                        m("a[href='https://www.youtube.com/watch?v=MCdFHx3yTfE']", {target: "_blank",}, [
+                            m('span', {class: "glyphicon glyphicon-film",}, ''),
+                            " Tutorial Video"
+                        ]),
+                    ]),
                 ]),
                 buildRightNav(user),
             ]),
