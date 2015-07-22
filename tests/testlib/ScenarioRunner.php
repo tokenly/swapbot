@@ -195,6 +195,22 @@ class ScenarioRunner
         DateProvider::setNow(Carbon::parse($event['date']));
     }
 
+    protected function executeScenarioEvent_changeBot($event, $scenario_data) {
+        $update_attributes = array_replace_recursive($this->loadDataByBaseFilename($event['baseFilename'], "bots"), isset($event['data']) ? $event['data'] : []);
+
+        // find the existing bot
+        $bot_offset = isset($event['botOffset']) ? $event['botOffset'] : 0;
+        $updating_bot = $this->bot_models[$bot_offset];
+
+        // fix swaps
+        if (isset($update_attributes['swaps'])) {
+            $update_attributes['swaps'] = $updating_bot->unSerializeSwaps($update_attributes['swaps']);
+        }
+
+        $this->bot_repository->update($updating_bot, $update_attributes);
+        $this->bot_models[$bot_offset] = $updating_bot;
+    }
+
 
     protected function resolveOffset($all_xchain_notifications, $event) {
         if (isset($event['offset'])) {

@@ -1,0 +1,16 @@
+name: Sample Bot One
+description: Just a Sample Bot
+
+swaps:
+  -
+    in: BTC
+    out: LTBCOIN
+    strategy: rate
+    rate: 500000
+    min: 0
+  -
+    in: LTBCOIN
+    out: BTC
+    strategy: rate
+    rate: 0.00000050
+    min: 0

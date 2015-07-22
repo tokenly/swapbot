@@ -1,0 +1,58 @@
+# pricing changes after unconfirmed transaction is received
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: changeBot, botOffset: 0, baseFilename: bot01-price-update.yml, data: {} }
+  - {type: xchainNotification, offset: 1}
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC.yml }
+    data:
+      requestId: "buildFn:swap"
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
+
+  - #### transaction handled previously (1 confirmation)
+    meta: { baseFilename: tx.previous-1.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01.yml }
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      LTBCOIN: 1000500
+      BTC: 0.99941 # + 0.00001 dust
+
+
+
