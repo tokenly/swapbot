@@ -10,6 +10,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="/css/details.css">
+    <link rel="icon" href="{{ $bot->getRobohashURL() }}">
 </head>
 
 <body>
