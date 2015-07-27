@@ -11,6 +11,7 @@ use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use Swapbot\Swap\Logger\BotEventLogger;
 use Swapbot\Swap\Processor\Util\BalanceUpdater;
 use Swapbot\Swap\Util\RequestIDGenerator;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 
 class ProcessIncomeForwardingForAllBotsHandler {
@@ -59,6 +60,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                             }
 
                             $request_id = RequestIDGenerator::generateSendHash('incomeforward'.','.$bot['uuid'].','.$send_uuid, $destination, $quantity, $asset);
+                            EventLog::log('bot.income.process', array_merge(['name' => $bot['name'], 'id' => $bot['id']], compact('destination', 'quantity', 'asset')));
                             $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee, null, $request_id);
 
                             // log the event
@@ -73,6 +75,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                         } catch (Exception $e) {
                             // log failure
                             $this->bot_event_logger->logIncomeForwardingFailed($bot, $e);
+                            EventLog::logError('income.forward.failed', $e, ['id' => $bot['id']]);
                         }
                     }
                 }
@@ -87,6 +90,12 @@ class ProcessIncomeForwardingForAllBotsHandler {
         // send as much as we can to get below the threshold
         $threshold = $income_rule_config['minThreshold'];
         $chunk_size = $income_rule_config['paymentAmount'];
+
+        // if the bot balance is exactly equal to the threshold
+        //   then forward $chunk_size
+        if ($bot_balance == $threshold) { return $chunk_size; }
+
+        // do as many chunks as possible at once
         $number_of_chunks = ceil(($bot_balance - $threshold) / $chunk_size);
         $quantity = $number_of_chunks * $chunk_size;
 
