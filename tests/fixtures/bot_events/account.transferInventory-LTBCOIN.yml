@@ -1,0 +1,5 @@
+name: account.transferInventory
+txid: '00000000000000000000000000000000000000000000000000000xcptx111111'
+from: 'default'
+to: '/swap-.*/'
+

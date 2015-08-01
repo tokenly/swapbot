@@ -16,6 +16,16 @@ bots:
         type: buy
         divisible: true
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      HAMBURGER: 25
+      BTC: 1
+    sending:
+      BTC: 0
+
 quotebot:
   - source: bitcoinAverage
     pair: USD:BTC
@@ -95,6 +105,11 @@ expectedBotEvents:
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
     quantityIn: 0.035
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-HAMBURGER.yml }
+    balances:
+      confirmed:
+        BTC: 0.0348457
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 

@@ -13,6 +13,10 @@ bots:
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml }
+    confirmations: 2
+
+  - meta: { baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml }
+    quantity: 100000
 
   - # send income to the forwarding address (mempool)
     meta: { baseFilename: mempool_BTC_SEND_INCOME_notification_01.yml }
@@ -49,10 +53,31 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN-100.yml }
+    confirmations: 2
+    msg: Received 0.1 BTC from SENDER01 with 2 confirmations. Will vend 100000 LTBCOIN to SENDER01.
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-100.yml }
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed.yml }
+    confirmations: '2'
+    quantityIn: 0.1
+    quantityOut: 100000
+
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-BTC.yml }
+    balances:
+      confirmed:
+        BTC: 0.0998457
+
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+
+
   - #### income forwarded
     meta: { baseFilename: income.forwarded.yml }
 

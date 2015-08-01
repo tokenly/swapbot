@@ -1,0 +1,7 @@
+name: account.transferInventory
+from: 'default'
+to: '/swap-.*/'
+quantity: 0.00059
+asset: BTC
+
+

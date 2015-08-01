@@ -39,6 +39,7 @@ class BotHelper  {
             'payment_send_monitor_id'     => null,
 
             'balances'                    => null,
+            'all_balances_by_type'        => null,
 
             'balances_updated_at'         => null,
             'blacklist_addresses'         => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],

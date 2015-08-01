@@ -10,6 +10,7 @@ bots:
 xchainNotifications:
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
     quantity: 100
+    confirmations: 2
 
 
 ############################
@@ -28,11 +29,11 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap refunding
-    meta: { baseFilename: swap.refunding.yml }
+    meta: { baseFilename: swap.refunding-2confirmations.yml }
     quantityIn: 100
     quantityOut: 100
   - #### swap refunded
-    meta: { baseFilename: swap.refunded.yml }
+    meta: { baseFilename: swap.refunded-2confirmations.yml }
     quantityIn: 100
     quantityOut: 100
   - #### SENT
@@ -40,7 +41,7 @@ expectedBotEvents:
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
 
 expectedBotModels:
   - 

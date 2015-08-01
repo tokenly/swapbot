@@ -3,7 +3,7 @@ description: A Sample Fixed Rate Bot
 active: true
 state: active
 payment_plan: monthly001
-confirmations_required: 1
+confirmations_required: 2
 
 address: botaddress000000000000000000000001
 public_address_id: PUBLIC_ADDRESS_ID_01

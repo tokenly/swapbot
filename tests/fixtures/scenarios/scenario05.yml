@@ -11,6 +11,7 @@ bots:
 xchainNotifications:
   -
     meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
 
 
 
@@ -28,8 +29,11 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+    confirmations: 2
+    msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Will vend 1000 LTBCOIN to SENDER01.
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -39,6 +43,6 @@ expectedBotModels:
     # bot should be in state active when done and have balances updated
     state: active
     balances:
-      LTBCOIN: 999000
-      BTC: 1.0008457 # 1 + 0.001 (receive) - 0.0001 (fee) - 0.00005430 (dust)
+      LTBCOIN: 999000 # stock allocated
+      BTC: 1.000 # +0.0001 BTC income, -0.0001 BTC fee
 

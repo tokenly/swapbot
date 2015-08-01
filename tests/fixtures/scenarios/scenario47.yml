@@ -7,6 +7,17 @@ bots:
   - meta: { baseFilename: bot03-hamburger.yml }
     confirmations_required: 2
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      HAMBURGER: 25
+      BTC: 1
+    sending:
+      BTC: 0
+
+
 quotebot:
   - source: bitcoinAverage
     pair: USD:BTC
@@ -70,6 +81,8 @@ expectedBotEvents:
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-HAMBURGER.yml }
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 

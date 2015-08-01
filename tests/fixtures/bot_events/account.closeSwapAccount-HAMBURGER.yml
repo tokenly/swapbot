@@ -1,0 +1,5 @@
+name: account.closeSwapAccount
+balances:
+  confirmed:
+    BTC: 0.0248457
+    HAMBURGER: 0

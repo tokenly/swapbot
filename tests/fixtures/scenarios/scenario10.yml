@@ -1,4 +1,4 @@
-# unconfirmed send followed by confirmed send logs events
+# unconfirmed BTC => LTBCOIN send followed by confirmed send logs events
 
 
 ############################
@@ -12,6 +12,7 @@ bots:
 xchainNotifications:
   -
     meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
 
   - meta: { baseFilename: mempool_LTBCOIN_SEND_notification_01.yml }
   - meta: { baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml }
@@ -32,25 +33,33 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+    confirmations: 2
+    msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Will vend 1000 LTBCOIN to SENDER01.
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
 
   - #### found an unconfirmed send transaction
     meta: { baseFilename: send.unconfirmed.yml }
+    confirmations: 2
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed.yml }
+    confirmations: 2
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-BTC.yml }
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
   - #### found a previously processed send transaction
     meta: { baseFilename: send.confirmed.yml }
+    confirmations: 2
     confirmationsOut: 2
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
     txid: "00000000000000000000000000000000000000000000000000000BTCtx222222"
   - 
     meta: { baseFilename: transaction_model_EMPTY.yml }
@@ -58,4 +67,4 @@ expectedTransactionModels:
     txid: "0000000000000000000000000000001111"
     confirmations: '2'
     processed: '1'
-    balances_applied: '0'
+    balances_applied: '1'

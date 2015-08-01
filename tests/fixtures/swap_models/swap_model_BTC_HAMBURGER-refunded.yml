@@ -1,7 +1,7 @@
 name: BTC:HAMBURGER
 state: refunded
 receipt:
-    confirmations: '1'
+    confirmations: '2'
     type: refund
     quantityIn: 0.02
     assetIn: 'BTC'

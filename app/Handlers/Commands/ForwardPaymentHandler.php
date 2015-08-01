@@ -43,9 +43,9 @@ class ForwardPaymentHandler
 
         // send
         $fee = Config::get('swapbot.defaultFee');
-        $dust_size = 
+        $dust_size = null;
         $payment_address_uuid = $bot['payment_address_id'];
-        $result = $this->xchain_client->send($payment_address_uuid, $destination, $quantity, $asset, $fee, $dust_size=null, $request_id);
+        $result = $this->xchain_client->sendConfirmed($payment_address_uuid, $destination, $quantity, $asset, $fee, $dust_size=null, $request_id);
 
         // log it
         $tx_id = $result['txid'];

@@ -1,0 +1,8 @@
+name: payment.moveFuelConfirmed
+source: 'swapbotpooladdress0000000000000001'
+inQty: 0.001
+inAsset: 'BTC'
+txid: "00000000000000000000000000000000000000000000000000000BTCtx333333"
+confirmations: 2
+state: 'lowfuel'
+isActive: false

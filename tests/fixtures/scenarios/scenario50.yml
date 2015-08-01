@@ -6,6 +6,16 @@
 bots:
   - meta: { baseFilename: bot03-hamburger.yml }
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      HAMBURGER: 25
+      BTC: 1
+    sending:
+      BTC: 0
+
 quotebot:
   - source: bitcoinAverage
     pair: USD:BTC
@@ -17,6 +27,7 @@ xchainNotifications:
   -
     meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     quantity: 0.020
+    confirmations: 2
 
 
 ############################
@@ -39,11 +50,12 @@ expectedBotEvents:
     meta: { baseFilename: swap.refunding-BTC.yml }
     quantityIn: 0.02
     quantityOut: 0.0199
-    confirmations: 1
+    confirmations: 2
   - #### swap refunded
     meta: { baseFilename: swap.refunded-BTC.yml }
     quantityIn: 0.02
     quantityOut: 0.0199
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-refunded.yml }
 
@@ -53,7 +65,7 @@ expectedBotModels:
     state: active
     balances:
       HAMBURGER: 25
-      BTC: 1
+      BTC: 0.9998457 # 1
 
 expectedSwapModels:
   -

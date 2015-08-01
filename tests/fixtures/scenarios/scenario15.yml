@@ -5,6 +5,7 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot02.yml }
+    confirmations_required: 1
 
 
 ############################

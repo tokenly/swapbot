@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
+use Swapbot\Providers\Accounts\Facade\AccountHandler;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
 
@@ -37,17 +38,29 @@ class ReconcileSwapStateHandler {
             $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
                 switch ($locked_swap['state']) {
                     case SwapState::BRAND_NEW:
-                    case SwapState::OUT_OF_STOCK:
-                        if ($this->swapBalanceIsSufficient($locked_swap)) {
-                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
-                        } else if ($locked_swap['state'] == SwapState::BRAND_NEW) {
-                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                        if ($locked_swap['state'] == SwapState::BRAND_NEW) {
+                            // move the initial incoming funds
+                            AccountHandler::moveIncomingReceivedFunds($locked_swap);
+
+                            // move the stock
+                            $stock_allocated = AccountHandler::allocateStock($locked_swap);
+
+                            if ($stock_allocated) {
+                                // stock has been allocated to complete this swap
+                                $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+                            } else {
+                                // not enough stock
+                                $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                            }
                         }
                         break;
 
-                    case SwapState::READY:
-                        if (!$this->swapBalanceIsSufficient($locked_swap)) {
-                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                    case SwapState::OUT_OF_STOCK:
+                        $stock_allocated = AccountHandler::allocateStock($locked_swap);
+
+                        if ($stock_allocated) {
+                            // stock has been allocated to complete this swap
+                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
                         }
                         break;
                 }
@@ -55,16 +68,4 @@ class ReconcileSwapStateHandler {
         });
     }
 
-
-
-    public function swapBalanceIsSufficient($swap) {
-        $bot = $swap->bot;
-
-        $desired_quantity = $swap['receipt']['quantityOut'];
-        $desired_asset    = $swap['receipt']['assetOut'];
-
-        $actual_quantity = $bot->getBalance($desired_asset);
-
-        return ($actual_quantity >= $desired_quantity);
-    }
 }

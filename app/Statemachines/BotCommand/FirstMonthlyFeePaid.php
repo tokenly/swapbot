@@ -63,7 +63,7 @@ class FirstMonthlyFeePaid extends BotCommand {
         $fee = Config::get('swapbot.defaultFee');
         try {
             $request_id = RequestIDGenerator::generateSendHash('initialfuel'.','.$bot['uuid'], $destination, $quantity, $asset);
-            $send_result = $this->getXChainClient()->send($payment_address_id, $destination, $quantity, $asset, $fee, null, $request_id);
+            $send_result = $this->getXChainClient()->sendConfirmed($payment_address_id, $destination, $quantity, $asset, $fee, null, $request_id);
 
             // log event
             $bot_event = $this->getBotEventLogger()->logMoveInitialFuelTXCreated($bot, $quantity, $asset, $destination, $fee, $send_result['txid']);

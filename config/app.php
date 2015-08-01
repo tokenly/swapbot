@@ -148,10 +148,12 @@ return [
 
 		'Swapbot\Swap\Settings\Provider\BotSettingsServiceProvider',
 		'Swapbot\Swap\Logger\OutputTransformer\Provider\BotEventOutputTransformerServiceProvider',
+		'Swapbot\Swap\Logger\Provider\BotEventLoggerServiceProvider',
 		'Swapbot\Providers\Monitoring\MonitoringServiceProvider',
 		'Swapbot\Providers\Billing\PaymentPlansServiceProvider',
 		'Swapbot\Swap\DateProvider\Provider\DateProviderServiceProvider',
 		'Swapbot\Http\ViewComposers\ViewComposerServiceProvider',
+		'Swapbot\Providers\Accounts\Provider\AccountHandlerServiceProvider',
 
 
 		/*

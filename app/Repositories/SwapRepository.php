@@ -17,6 +17,8 @@ use \Exception;
 class SwapRepository extends APIRepository
 {
 
+    const DEFAULT_LOCKED_SWAP_TIMEOUT = 120; // 2 minutes
+
     protected $model_type = 'Swapbot\Models\Swap';
 
     public function findByBot(Bot $bot) {
@@ -99,7 +101,7 @@ class SwapRepository extends APIRepository
                 $swap->setRawAttributes($locked_swap->getAttributes());
 
                 return $out;
-            });
+            }, self::DEFAULT_LOCKED_SWAP_TIMEOUT);
         });
     }
 

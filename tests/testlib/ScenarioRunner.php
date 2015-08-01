@@ -34,7 +34,10 @@ class ScenarioRunner
 
     var $xchain_mock_recorder = null;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, MockBuilder $mock_builder, Repository $cache_store) {
+    static $XCHAIN_MOCK_RECORDER = false;
+    static $XCHAIN_MOCK_BUILDER = false;
+
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, Repository $cache_store) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -46,7 +49,6 @@ class ScenarioRunner
         $this->swap_repository             = $swap_repository;
         $this->bot_lease_entry_repository  = $bot_lease_entry_repository;
         $this->bot_ledger_entry_helper     = $bot_ledger_entry_helper;
-        $this->mock_builder                = $mock_builder;
         $this->cache_store                 = $cache_store;
     }
 
@@ -54,11 +56,24 @@ class ScenarioRunner
         if (!isset($this->inited)) {
             $this->inited = true;
 
-            // setup mock xchain
-            $this->xchain_mock_recorder = $this->mock_builder->installXChainMockClient($test_case);
+            $this->mock_builder = app('Tokenly\XChainClient\Mock\MockBuilder');
 
-            // setup mock mailer
-            $this->mock_mailer_recorder = $this->installMockMailer();
+            // setup mock xchain (only once)
+            if (self::$XCHAIN_MOCK_RECORDER === false) {
+                self::$XCHAIN_MOCK_RECORDER = $this->mock_builder->installXChainMockClient($test_case);
+                self::$XCHAIN_MOCK_BUILDER  = $this->mock_builder;
+
+                $this->xchain_mock_recorder = self::$XCHAIN_MOCK_RECORDER;
+            } else {
+                $this->mock_builder = self::$XCHAIN_MOCK_BUILDER;
+                $this->xchain_mock_recorder = self::$XCHAIN_MOCK_RECORDER;
+                $this->xchain_mock_recorder->calls = [];
+            }
+
+            // $this->xchain_mock_recorder = $this->mock_builder->installXChainMockClient($test_case);
+
+            $this->mock_builder->stopThrowingExceptions();
+            $this->mock_builder->clearBalances();
 
             // mock pusher client
             app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($test_case);
@@ -91,17 +106,25 @@ class ScenarioRunner
     }
 
     public function runScenario($scenario_data) {
+        $this->clearDatabasesForScenario();
+
         // clear the entire cache for consistency
         $this->cache_store->flush();
 
         // setup mock quotebot (first)
         $this->quotebot_recorder = $this->installMockQuotebot(isset($scenario_data['quotebot']) ? $scenario_data['quotebot'] : null);
 
+        // setup mock mailer
+        $this->mock_mailer_recorder = $this->installMockMailer();
+
         // set now
         DateProvider::setNow(Carbon::parse('2015-06-01'));
 
         // set up the scenario
         $bots = $this->addBots(isset($scenario_data['bots']) ? $scenario_data['bots'] : []);
+
+        // set up xchain balances
+        $this->setupXChainBalances($scenario_data, isset($scenario_data['bots']) ? $scenario_data['bots'] : []);
 
         $events = $this->normalizeScenarioEvents($scenario_data);
         foreach($events as $event) {
@@ -110,8 +133,8 @@ class ScenarioRunner
     }
 
     public function validateScenario($scenario_data) {
-        if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls']); }
-        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents']); }
+        if (isset($scenario_data['expectedXChainCalls'])) { $this->validateExpectedXChainCalls($scenario_data['expectedXChainCalls'], $scenario_data); }
+        if (isset($scenario_data['expectedBotEvents'])) { $this->validateExpectedBotEvents($scenario_data['expectedBotEvents'], $scenario_data); }
         if (isset($scenario_data['expectedTransactionModels'])) { $this->validateExpectedTransactionModels($scenario_data['expectedTransactionModels']); }
         if (isset($scenario_data['expectedBotLedgerEntries'])) { $this->validateExpectedBotLedgerEntryModels($scenario_data['expectedBotLedgerEntries']); }
         if (isset($scenario_data['expectedBotModels'])) { $this->validateExpectedBotModels($scenario_data['expectedBotModels']); }
@@ -168,10 +191,15 @@ class ScenarioRunner
                 $notification['notificationId'] = md5(json_encode($notification));
             }
 
+            // increase the mock account
+            if ($notification['event'] == 'receive') {
+                $this->mock_builder->receive($notification);
+            }
+
 
             // look for exceptions trigger
             if (isset($meta['xchainFailAfterRequests'])) {
-                $this->mock_builder->beginThrowingExceptionsAfterCount($meta['xchainFailAfterRequests']);
+                $this->mock_builder->beginThrowingExceptionsAfterCount($meta['xchainFailAfterRequests'], isset($meta['xchainFailIgnorePrefixes']) ? $meta['xchainFailIgnorePrefixes'] : $this->standardIgnoreXChainCallPrefixes());
             } else {
                 // stop throwing exceptions
                 $this->mock_builder->stopThrowingExceptions();
@@ -328,13 +356,37 @@ class ScenarioRunner
         }
     }
 
-    protected function validateExpectedBotEvents($expected_bot_events) {
+    protected function standardIgnoreEventPrefixes() {
+        return [
+            'account.transferIncome',
+            'account.transferInventory',
+            'bot.balancesSynced',
+        ];
+    }
+
+    protected function validateExpectedBotEvents($expected_bot_events, $scenario_data) {
+        $ignore_event_prefixes = $this->standardIgnoreEventPrefixes();
+        if (array_key_exists('ignoreEventPrefixes', $scenario_data)) { $ignore_event_prefixes = $scenario_data['ignoreEventPrefixes']; }
+        if ($ignore_event_prefixes === null) { $ignore_event_prefixes = []; }
+
         $actual_bot_events = [];
         foreach ($this->bot_event_repository->findAll() as $bot_event) {
             $event_vars = $bot_event->toArray()['event'];
+
+            // should ignore?
+            $ignore = false;
+            foreach($ignore_event_prefixes as $ignore_event_prefix) {
+                if (substr($event_vars['name'], 0, strlen($ignore_event_prefix)) == $ignore_event_prefix) {
+                    $ignore = true;
+                    break;
+                }
+            }
+            if ($ignore) { continue; }
+
             // ignore the test payment setup
             if ($event_vars['name'] == 'test.payment.setup') { continue; }
             if ($event_vars['name'] == 'test.lease.setup') { continue; }
+
             $actual_bot_events[] = $event_vars;
         }
         // Log::debug("\$actual_bot_events=".json_encode($actual_bot_events, 192));
@@ -395,7 +447,11 @@ class ScenarioRunner
         }
         ///////////////////
 
-
+        // regex
+        foreach($expected_bot_event as $field => $expected_val) {
+            $actual = isset($actual_bot_event[$field]) ? $actual_bot_event[$field] : null;
+            $normalized_expected_bot_event[$field] = $this->actualIfRegexMatch($expected_val, $actual);
+        }
 
         // ///////////////////
         // // Special
@@ -418,14 +474,39 @@ class ScenarioRunner
     ////////////////////////////////////////////////////////////////////////
     // ExpectedXChainCalls
 
-    protected function validateExpectedXChainCalls($expected_xchain_calls) {
+    protected function standardIgnoreXChainCallPrefixes() {
+        return [
+            '/accounts/transfer/',
+            '/accounts/balances/',
+        ];
+    }
+
+    protected function validateExpectedXChainCalls($expected_xchain_calls, $scenario_data) {
+        $actual_xchain_calls = [];
+
+        $ignore_xchain_call_prefixes = $this->standardIgnoreXChainCallPrefixes();
+        if (array_key_exists('ignoreXchainCallPrefixes', $scenario_data)) { $ignore_xchain_call_prefixes = $scenario_data['ignoreXchainCallPrefixes']; }
+        if ($ignore_xchain_call_prefixes === null) { $ignore_xchain_call_prefixes = []; }
+
+
+        foreach ($this->xchain_mock_recorder->calls as $call) {
+            $ignore = false;
+            foreach($ignore_xchain_call_prefixes as $ignore_xchain_call_prefix) {
+                if (substr($call['path'], 0, strlen($ignore_xchain_call_prefix)) == $ignore_xchain_call_prefix) {
+                    $ignore = true;
+                    break;
+                }
+            }
+            if (!$ignore) { $actual_xchain_calls[] = $call; }
+        }
+
         if ($expected_xchain_calls === 'none') {
-            $count = count($this->xchain_mock_recorder->calls);
-            PHPUnit::assertEmpty($this->xchain_mock_recorder->calls, "Found ".$count." unexpected XChain call".($count==1?'':'s')."");
+            $count = count($actual_xchain_calls);
+            PHPUnit::assertEmpty($actual_xchain_calls, "Found ".$count." unexpected XChain call".($count==1?'':'s')."\n".json_encode($actual_xchain_calls, 192));
             return;
         }
 
-        $actual_xchain_calls = $this->xchain_mock_recorder->calls;
+
         foreach ($expected_xchain_calls as $offset => $raw_expected_xchain_call) {
             $actual_xchain_call = isset($actual_xchain_calls[$offset]) ? $actual_xchain_calls[$offset] : null;
 
@@ -467,9 +548,12 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['requestId',];
+        $optional_fields = ['requestId','to','account','unconfirmed',];
         foreach ($optional_fields as $field) {
-            if (isset($expected_xchain_call['data'][$field])) { $normalized_expected_xchain_call['data'][$field] = $expected_xchain_call['data'][$field]; }
+            if (isset($expected_xchain_call['data'][$field])) {
+                $actual = isset($actual_xchain_call['data'][$field]) ? $actual_xchain_call['data'][$field] : null;
+                $normalized_expected_xchain_call['data'][$field] = $this->actualIfRegexMatch($expected_xchain_call['data'][$field], $actual);
+            }
                 else if (isset($actual_xchain_call['data'][$field])) { $normalized_expected_xchain_call['data'][$field] = $actual_xchain_call['data'][$field]; }
         }
         ///////////////////
@@ -494,7 +578,7 @@ class ScenarioRunner
     }
 
     protected function validateXchainCallRequestId($type, $actual_xchain_call) {
-        $actual_request_id = $actual_xchain_call['data']['requestId'];
+        $actual_request_id = isset($actual_xchain_call['data']['requestId']) ? $actual_xchain_call['data']['requestId'] : null;
         $expected_request_id = 'nope';
 
         // last bot
@@ -506,9 +590,9 @@ class ScenarioRunner
         $swap = $all_swaps[count($all_swaps) - 1];
 
         // build expected request id
-        $destination = $actual_xchain_call['data']['destination'];
-        $quantity = $actual_xchain_call['data']['quantity'];
-        $asset = $actual_xchain_call['data']['asset'];
+        $destination = isset($actual_xchain_call['data']['destination']) ? $actual_xchain_call['data']['destination'] : null;
+        $quantity = isset($actual_xchain_call['data']['quantity']) ? $actual_xchain_call['data']['quantity'] : null;
+        $asset = isset($actual_xchain_call['data']['asset']) ? $actual_xchain_call['data']['asset'] : null;
         $text_to_be_hashed = $type.','.$bot['uuid'].','.$swap['uuid'].','.$destination.','.$quantity.','.$asset;
         $expected_request_id = md5($text_to_be_hashed);
         return $expected_request_id;
@@ -576,7 +660,7 @@ class ScenarioRunner
 
     protected function validateExpectedTransactionRecord($expected_transaction_model, $actual_transaction_model) {
         PHPUnit::assertNotEmpty($actual_transaction_model, "Missing transaction model ".json_encode($expected_transaction_model, 192));
-        PHPUnit::assertEquals($expected_transaction_model, $actual_transaction_model, "ExpectedTransactionRecord mismatch");
+        PHPUnit::assertEquals($expected_transaction_model, $actual_transaction_model, "ExpectedTransactionRecord mismatch\nExpected Transaction:".json_encode($expected_transaction_model, 192));
     }
 
 
@@ -1161,4 +1245,74 @@ class ScenarioRunner
         PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls, "QuoteClientCalls mismatch");
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
+    protected function setupXChainBalances($scenario_data, $bots) {
+        if (isset($scenario_data['xchainBalances'])) {
+            $balances = $scenario_data['xchainBalances'];
+        } else {
+            $balances = [
+                'default' => [
+                    'unconfirmed' => ['BTC' => 0],
+                    'confirmed'   => ['BTC' => 10, 'LTBCOIN' => 100000, 'SOUP' => 10000, 'EARLY' => 100],
+                    'sending'     => ['BTC' => 0],
+                ],
+            ];
+
+            // override the balances with the bot entry
+            foreach($bots as $bot_entry) {
+                $bot_attributes = $this->loadBaseFilename($bot_entry, "bots");
+                unset($bot_entry['meta']);
+                $bot_attributes = array_replace_recursive($bot_attributes, $bot_entry);
+
+                $bot_balances = isset($bot_attributes['balances']) ? $bot_attributes['balances'] : null;
+                if ($bot_balances) {
+                    $balances['default']['confirmed'] = [];
+                    foreach($bot_balances as $asset => $quantity) {
+                        $balances['default']['confirmed'][$asset] = $quantity;
+                    }
+                }
+            }
+        }
+
+        $this->mock_builder->setBalances($balances);
+
+        $fuel_balances = [
+            'default' => [
+                'unconfirmed' => ['BTC' => 0],
+                'confirmed'   => ['BTC' => 100,],
+                'sending'     => ['BTC' => 0],
+            ],
+        ];
+        $this->mock_builder->setBalances($fuel_balances, 'XCHAIN_FUEL_POOL_ADDRESS_01');
+    }
+
+    protected function clearDatabasesForScenario() {
+        \Swapbot\Models\Bot::truncate();
+        \Swapbot\Models\BotEvent::truncate();
+        \Swapbot\Models\BotLeaseEntry::truncate();
+        \Swapbot\Models\BotLedgerEntry::truncate();
+        \Swapbot\Models\Customer::truncate();
+        \Swapbot\Models\Image::truncate();
+        \Swapbot\Models\NotificationReceipt::truncate();
+        \Swapbot\Models\Setting::truncate();
+        \Swapbot\Models\Swap::truncate();
+        \Swapbot\Models\Transaction::truncate();
+        \Swapbot\Models\User::truncate();
+
+        return;
+    }
+    
+     protected function actualIfRegexMatch($expected, $actual) {
+        if (is_string($expected) AND substr($expected, 0, 1) == '/') {
+            if (preg_match($expected, $actual)) {
+                return $actual;
+            }
+        }
+        return $expected;
+    }
+
+   
+    
 }

@@ -1,0 +1,7 @@
+method: POST
+path: /accounts/transfer/PUBLIC_ADDRESS_ID_01
+data:
+    from: 'default'
+    to: /^swap-.+/
+    quantity: 0.00059
+    asset: BTC

@@ -221,6 +221,52 @@ events:
 
 
 
+    # ### Account Events
+  -
+    name: account.transferIncome
+    label: Transfer Income
+    level: DEBUG
+    msg: Transferred Income {{ $currency($quantity) }} {{ $asset }} for txid {{ $from }} to {{ $to }}.
+    msgVars: [quantity, asset, from, to]
+  -
+    name: account.transferInventory
+    label: Transfer Inventory
+    level: DEBUG
+    msg: Transferred inventory of {{ $currency($quantity) }} {{ $asset }} from account {{ $from }} to {{ $to }}.
+    msgVars: [quantity, asset, from, to]
+  -
+    name: account.transferInventoryFailed
+    label: Transfer Inventory Failed
+    level: WARNING
+    msg: Failed to transfer inventory of {{ $currency($quantity) }} {{ $asset }} from account {{ $from }} to {{ $to }}.
+    msgVars: [quantity, asset, from, to]
+  -
+    name: account.closeSwapAccount
+    label: Swap Account Closed
+    level: DEBUG
+    msg: Closed swap account.
+    msgVars: []
+  -
+    name: account.closeSwapAccountFailed
+    label: Swap Account Close Failed
+    level: WARNING
+    msg: Failed to close swap account.
+    msgVars: []
+
+  -
+    name: bot.balancesSynced
+    label: Bot Balances Synced
+    level: DEBUG
+    msg: Bot balances were synced.
+    msgVars: []
+  -
+    name: bot.balancesSyncFailed
+    label: Bot Balances Sync Failed
+    level: WARNING
+    msg: Failed to sync bot balances
+    msgVars: []
+
+
 # name: The system event id,                                      (swap.stateChange)
 # label: A friendly label for this event type,                    (Swap State Change)
 # level: INFO, DEBUG, WARNING
@@ -232,7 +278,7 @@ events:
 
 
 
-# ### Standard Vars ### #
+# ### Standard Swap Vars ### #
 
 # destination
 # quantityIn

@@ -11,11 +11,26 @@ bots:
         LTBCOIN: 0
         BTC: 1
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      LTBCOIN: 0
+      BTC: 1
+    sending:
+      BTC: 0
+
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+
+  # make sure the original transaction is updated to 7 confirmations
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    blockId: 300007
+    confirmations: 8
 
   # many blocks later, the bot is restocked
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
@@ -23,6 +38,7 @@ xchainNotifications:
     txid: 0000000000000000000000000000000000000000000000000LTBCOINtx222222
     sources: [RESTOCKING_SENDER01]
     blockId: 300010
+    confirmations: 2
 
 
 
@@ -35,6 +51,12 @@ expectedBotEvents:
     meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - #### NOT READY
+    meta: { baseFilename: swap.notReady-outofstock.yml }
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+    confirmations: 8
   - #### NOT READY
     meta: { baseFilename: swap.notReady-outofstock.yml }
 
@@ -51,8 +73,11 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+    confirmations: 8
+    msg: Received 0.001 BTC from SENDER01 with 8 confirmations. Will vend 1000 LTBCOIN to SENDER01.
   - #### swap sent
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+    confirmations: 8
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -64,3 +89,5 @@ expectedSwapModels:
   -
     meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
     state: sent
+    receipt:
+      confirmations: 8

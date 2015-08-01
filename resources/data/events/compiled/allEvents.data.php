@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-07-16 13:34:34
+// compiled on 2015-08-01 13:40:20
 
 return array (
   'swap.new' => 
@@ -13,7 +13,7 @@ return array (
     array (
       0 => 'txidIn',
     ),
-    'swapEventStream' => false,
+    'swapEventStream' => true,
   ),
   'swap.stateChange' => 
   array (
@@ -385,6 +385,89 @@ return array (
       1 => 'outAsset',
       2 => 'destination',
       3 => 'txid',
+    ),
+  ),
+  'account.transferIncome' => 
+  array (
+    'name' => 'account.transferIncome',
+    'label' => 'Transfer Income',
+    'level' => 'DEBUG',
+    'msg' => 'Transferred Income <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> for txid <?php echo e($from); ?> to <?php echo e($to); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantity',
+      1 => 'asset',
+      2 => 'from',
+      3 => 'to',
+    ),
+  ),
+  'account.transferInventory' => 
+  array (
+    'name' => 'account.transferInventory',
+    'label' => 'Transfer Inventory',
+    'level' => 'DEBUG',
+    'msg' => 'Transferred inventory of <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> from account <?php echo e($from); ?> to <?php echo e($to); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantity',
+      1 => 'asset',
+      2 => 'from',
+      3 => 'to',
+    ),
+  ),
+  'account.transferInventoryFailed' => 
+  array (
+    'name' => 'account.transferInventoryFailed',
+    'label' => 'Transfer Inventory Failed',
+    'level' => 'WARNING',
+    'msg' => 'Failed to transfer inventory of <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> from account <?php echo e($from); ?> to <?php echo e($to); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantity',
+      1 => 'asset',
+      2 => 'from',
+      3 => 'to',
+    ),
+  ),
+  'account.closeSwapAccount' => 
+  array (
+    'name' => 'account.closeSwapAccount',
+    'label' => 'Swap Account Closed',
+    'level' => 'DEBUG',
+    'msg' => 'Closed swap account.',
+    'msgVars' => 
+    array (
+    ),
+  ),
+  'account.closeSwapAccountFailed' => 
+  array (
+    'name' => 'account.closeSwapAccountFailed',
+    'label' => 'Swap Account Close Failed',
+    'level' => 'WARNING',
+    'msg' => 'Failed to close swap account.',
+    'msgVars' => 
+    array (
+    ),
+  ),
+  'bot.balancesSynced' => 
+  array (
+    'name' => 'bot.balancesSynced',
+    'label' => 'Bot Balances Synced',
+    'level' => 'DEBUG',
+    'msg' => 'Bot balances were synced.',
+    'msgVars' => 
+    array (
+      0 => 'all_balances_by_type',
+    ),
+  ),
+  'bot.balancesSyncFailed' => 
+  array (
+    'name' => 'bot.balancesSyncFailed',
+    'label' => 'Bot Balances Sync Failed',
+    'level' => 'WARNING',
+    'msg' => 'Failed to sync bot balances',
+    'msgVars' => 
+    array (
     ),
   ),
 );

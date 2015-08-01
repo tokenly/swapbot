@@ -11,6 +11,7 @@ bots:
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
   - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
     txid: "0000000000000000000000000000001111"
 
@@ -27,23 +28,36 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
+    meta: { baseFilename: swap.found-2confirmations.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: swap.sent-2confirmations.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-BTC.yml }
+    confirmations: 2
     # msg: Saw confirmed send of 0.0005 BTC to SENDER01 with transaction ID 0000000000000000000000000000001111.
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-LTBCOIN.yml }
   - #### COMPLETE
     meta: { baseFilename: swap.stateChange-complete.yml }
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-1CONF.yml }
     type: send
     txid: "0000000000000000000000000000001111"
-    balances_applied: '0'
+    balances_applied: '1'
+
+
+# receive 500 LTBCOIN, sending 0.0005 BTC
+
+# receive 500 LTBCOIN, 0.00001 BTC dust
+#   transfer income, swap account now has: 500 LTBCOIN, 0.00001 BTC
+#                    default account has: 1000000 LTBCOIN, 1 BTC
+#   allocate stock,  swap account now has: 500 LTBCOIN, 0.0006 BTC
+#                    default account has: 1000000 LTBCOIN, 0.99941 BTC (1 BTC - 0.00059 BTC)
+#                     

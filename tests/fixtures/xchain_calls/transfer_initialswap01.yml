@@ -1,0 +1,7 @@
+method: POST
+path: /accounts/transfer/PUBLIC_ADDRESS_ID_01
+data:
+    from: 'default'
+    to: /^swap-.+/
+    txid: '00000000000000000000000000000000000000000000000000000xcptx111111'
+

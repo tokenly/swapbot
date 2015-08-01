@@ -6,6 +6,7 @@
 bots:
   - meta: { baseFilename: bot01.yml }
     return_fee: 0.00005
+    confirmations_required: 1
 
 
 ############################
@@ -36,4 +37,4 @@ expectedBotEvents:
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-1CONF.yml }

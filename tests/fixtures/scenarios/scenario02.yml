@@ -4,6 +4,7 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
+    confirmations_required: 1
 
 Customers:
   - meta: { baseFilename: customer01.yml }
@@ -23,6 +24,10 @@ events:
 # validate the expected results
 expectedXChainCalls:
   - 
+    meta: { baseFilename: transfer_initialswap01.yml }
+  -
+    meta: { baseFilename: transfer_receipt01.yml }
+  - 
     meta: { baseFilename: send_BTC.yml }
     data:
       requestId: "buildFn:swap"
@@ -30,6 +35,12 @@ expectedXChainCalls:
 expectedBotEvents:
   - #### NEW
     meta: { baseFilename: swap.new.yml }
+  - #### transfer income
+    meta: { baseFilename: account.transferIncome.yml }
+  - #### transfer inventory
+    meta: { baseFilename: account.transferInventory-BTC.yml }
+  - #### bot balances synced
+    meta: { baseFilename: bot.balancesSynced.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### UNCONFIRMED TRANSACTION
@@ -46,19 +57,23 @@ expectedBotEvents:
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-1CONF.yml }
 
 # check balance
 expectedBotModels:
   - 
     # bot should be in state active when done and have balances updated
     state: active
-    balances:
-      LTBCOIN: 1000500
-      BTC: 0.99941 # + 0.00001 dust
+    # balances:
+    #   LTBCOIN: 1000500
+    #   BTC: 0.99941 # + 0.00001 dust
 
 
 expectedEmails:
   - meta: { baseFilename: 01-welcome.yml }
+
+
+ignoreXchainCallPrefixes: ['/accounts/balances/']
+ignoreEventPrefixes: ~
 
 

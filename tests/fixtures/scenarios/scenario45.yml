@@ -65,7 +65,7 @@ expectedBotModels:
     state: active
     balances: 
       BTC: 1
-      LTBCOIN: 1000000
+      LTBCOIN: 999000 # swap account wasn't closed out yet
 
 expectedSwapModels:
   -

@@ -20,13 +20,14 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
-    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'balances', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'confirmations_required', 'hash', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'confirmations_required', 'hash', ];
 
     protected $dates = ['balances_updated_at'];
 
     protected $casts = [
         'background_overlay_settings' => 'json',
+        'all_balances_by_type'        => 'json',
     ];
 
     protected $state_machine           = null;

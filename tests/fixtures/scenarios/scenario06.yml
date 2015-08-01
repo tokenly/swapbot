@@ -4,6 +4,7 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
+    confirmations_required: 1
     swaps:
       -
         in: BTC
@@ -88,7 +89,7 @@ expectedTransactionModels:
     txid: 00000000000000000000000000000000000000000000000000000BTCtx222222
     confirmations: '1'
     processed: '1'
-    balances_applied: '1'
+    balances_applied: '0'
     # swap_receipts: 
     #     "BTC:LTBCOIN":
     #         txid: "0000000000000000000000000000001111"

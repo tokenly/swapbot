@@ -7,13 +7,16 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
+use Swapbot\Providers\Accounts\Facade\AccountHandler;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\Logger\BotEventLogger;
+use Swapbot\Swap\Processor\Util\BalanceUpdater;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class SendEventProcessor {
@@ -25,12 +28,13 @@ class SendEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, TransactionRepository $transaction_repository, BotEventLogger $bot_event_logger)
+    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, TransactionRepository $transaction_repository, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
     {
         $this->bot_repository         = $bot_repository;
         $this->swap_repository        = $swap_repository;
         $this->transaction_repository = $transaction_repository;
         $this->bot_event_logger       = $bot_event_logger;
+        $this->balance_updater        = $balance_updater;
     }
 
 
@@ -81,8 +85,9 @@ class SendEventProcessor {
 
                 'tx_is_handled'                => false,
                 'transaction_update_vars'      => [],
-                'should_update_bot_balance'    => ($xchain_notification['confirmed'] ? true : false),
-                'bot_balance_deltas'           => [],
+
+                'should_sync_bot_balances'     => false,
+                'bot_balances_synced'          => false,
             ]);
 
 
@@ -96,13 +101,20 @@ class SendEventProcessor {
             // process all swaps
             $this->processMatchedSwap($tx_process);
 
+            // update bot balances
+            $this->handleUpdateBotBalances($tx_process);
+
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
+
+            // if any balances were updated, then process income forwarding
+            $this->handleIncomeForwarding($tx_process);
         });
 
 
         return $bot;
     }
+
 
     ////////////////////////////////////////////////////////////////////////
 
@@ -188,9 +200,17 @@ class SendEventProcessor {
             $swap_update_vars_for_log = ['state' => SwapState::COMPLETE, ];
             $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars, $swap_update_vars_for_log);
 
+            // close the swap account by moving all the remaining funds back
+            AccountHandler::closeSwapAccount($swap);
+
             //   move the swap into state completed
             $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_COMPLETED);
             $tx_process['tx_is_handled'] = true;
+
+
+            // sync the bot balances
+            $tx_process['should_sync_bot_balances'] = true;
+            
 
             // this transaction was processed
             $tx_process['transaction_update_vars']['processed']     = true;
@@ -213,6 +233,17 @@ class SendEventProcessor {
         }
     }
 
+
+    protected function handleUpdateBotBalances($tx_process) {
+        if (!$tx_process['should_sync_bot_balances']) { return; }
+
+        // update the bot's balances
+        $this->balance_updater->syncBalances($tx_process['bot']);
+        $tx_process['transaction_update_vars']['balances_applied'] = true;
+
+        $tx_process['bot_balances_synced'] = true;
+
+    }
 
     protected function updateTransaction($tx_process) {
         if ($tx_process['transaction_update_vars']) {
@@ -259,6 +290,12 @@ class SendEventProcessor {
         return $this->transaction_repository->findOrCreateTransaction($xchain_notification['txid'], $bot_id, $type, ['xchain_notification' => $xchain_notification]);
     }
 
+    protected function handleIncomeForwarding($tx_process) {
+        if (!$tx_process['bot_balances_synced']) { return; }
+
+        // process any payments that are pending
+        $this->dispatch(new ProcessIncomeForwardingForAllBots());
+    }
 
 
     ////////////////////////////////////////////////////////////////////////

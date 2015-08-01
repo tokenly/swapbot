@@ -11,7 +11,9 @@ bots:
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_02.yml }
+    confirmations: 2
   # receive a confirmed payment
   - meta: { baseFilename: confirmed_BTC_RECEIVE_PAYMENT_notification_01.yml }
     blockId: 300002
@@ -26,8 +28,8 @@ events:
 ############################
 # validate the expected results
 expectedXChainCalls:
-  - meta: { baseFilename: send_BTC.yml }
-  - meta: { baseFilename: send_BTC.yml }
+  # - meta: { baseFilename: send_BTC.yml }
+  # - meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
   - #### NEW
@@ -35,9 +37,9 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
+    meta: { baseFilename: swap.found-2confirmations.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: swap.sent-2confirmations.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -71,23 +73,23 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
+    meta: { baseFilename: swap.found-2confirmations.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: swap.sent-2confirmations.yml }
     txidIn: 00000000000000000000000000000000000000000000000000000xcptx222222
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
     processed: 1
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
     txid: '00000000000000000000000000000000000000000000000000000xcptx222222'
     processed: 1
   - # payment
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-1CONF.yml }
     txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
     balances_applied: '0'
 
@@ -97,8 +99,11 @@ expectedSwapModels:
   -
     meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
     state: sent
+    receipt:
+      confirmations: 2
   -
     meta: { baseFilename: swap_model_LTBCOIN_BTC.yml }
     receipt:
       txidIn: 00000000000000000000000000000000000000000000000000000xcptx222222
+      confirmations: 2
     state: sent

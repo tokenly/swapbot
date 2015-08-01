@@ -1,5 +1,6 @@
 # Test basic income forwarding failure
 
+# Test basic income forwarding
 
 ############################
 # setup bots and payment
@@ -13,10 +14,13 @@ bots:
 ############################
 # receive notifications from xchain
 xchainNotifications:
-  -
-    meta:
-      baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml
-      xchainFailAfterRequests: 1
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification-100mBTC.yml }
+    confirmations: 2
+
+  - meta: 
+      baseFilename: confirmed_LTBCOIN_SEND_notification_01.yml
+      xchainFailAfterRequests: 0
+    quantity: 100000
 
 
 
@@ -28,8 +32,6 @@ expectedXChainCalls:
     meta: { baseFilename: send_LTBCOIN.yml }
     data:
       quantity: 100000
-  # - 
-  #   meta: { baseFilename: send_BTC_TO_FORWARDING_ADDRESS.yml }
 
 expectedBotEvents:
   - #### NEW
@@ -40,12 +42,34 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN-100.yml }
+    confirmations: 2
+    msg: Received 0.1 BTC from SENDER01 with 2 confirmations. Will vend 100000 LTBCOIN to SENDER01.
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-100.yml }
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed.yml }
+    confirmations: '2'
+    quantityIn: 0.1
+    quantityOut: 100000
+
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-BTC.yml }
+    balances:
+      confirmed:
+        BTC: 0.0998457
+
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+
+
   - #### income forwarded failed
     meta: { baseFilename: income.forward.failed.yml }
+
 
 expectedBotModels:
   - 
@@ -53,5 +77,4 @@ expectedBotModels:
     balances:
         LTBCOIN: 900000
         BTC: 10.0098457  # 9.91 start + 0.1 BTC receive + -0.0001 fee out + -0.0000543 dust out
-
 

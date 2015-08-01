@@ -20,6 +20,10 @@ class ScenariosTest extends TestCase {
         $starting_scenario_number = getenv('SCENARIO');
         if (!$starting_scenario_number) { $starting_scenario_number = 1; }
 
+        // reset scenario runner (don't know why this is necessary)
+        \ScenarioRunner::$XCHAIN_MOCK_RECORDER = false;
+        \ScenarioRunner::$XCHAIN_MOCK_BUILDER = false;
+
         // do all state tests in directory
         $scenario_number_count = count(glob(base_path().'/tests/fixtures/scenarios/*.yml'));
         PHPUnit::assertGreaterThan(0, $scenario_number_count);

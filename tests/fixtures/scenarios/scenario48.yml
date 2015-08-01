@@ -6,6 +6,16 @@
 bots:
   - meta: { baseFilename: bot03-hamburger.yml }
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      HAMBURGER: 25
+      BTC: 1
+    sending:
+      BTC: 0
+
 quotebot:
   - source: bitcoinAverage
     pair: USD:BTC
@@ -17,6 +27,7 @@ xchainNotifications:
   -
     meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     quantity: 0.035
+    confirmations: 2
 
 
 ############################
@@ -35,11 +46,11 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found-BTC_HAMBURGER.yml }
+    meta: { baseFilename: swap.found-BTC_HAMBURGER-2confirmations.yml }
     inQty: 0.035
-    msg: Received 0.035 BTC from SENDER01 with 1 confirmation. Will vend 1 HAMBURGER to SENDER01.
+    msg: Received 0.035 BTC from SENDER01 with 2 confirmations. Will vend 1 HAMBURGER to SENDER01.
   - #### swap found
-    meta: { baseFilename: swap.sent-BTC_HAMBURGER.yml }
+    meta: { baseFilename: swap.sent-BTC_HAMBURGER-2confirmations.yml }
     quantityIn: 0.035
     changeOut: 0.01
   - #### SENT
@@ -52,7 +63,7 @@ expectedBotModels:
     state: active
     balances:
       HAMBURGER: 24
-      BTC: 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
+      BTC: 1 # 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
 
 expectedQuoteClientCalls:
   - { source: bitcoinAverage, pair: USD:BTC }

@@ -37,8 +37,12 @@ class ProcessIncomeForwardingForAllBotsHandler {
      */
     public function handle(ProcessIncomeForwardingForAllBots $command)
     {
+        $bots_forwarded = [];
+
         foreach ($this->bot_repository->findAll() as $bot) {
-            $this->bot_repository->executeWithLockedBot($bot, function($bot) {
+            $was_forwarded = $this->bot_repository->executeWithLockedBot($bot, function($bot) {
+                $was_forwarded = false;
+
                 // check balance
                 foreach ($bot['income_rules'] as $income_rule_config) {
                     $bot_balance = $bot->getBalance($income_rule_config['asset']);
@@ -61,17 +65,16 @@ class ProcessIncomeForwardingForAllBotsHandler {
 
                             $request_id = RequestIDGenerator::generateSendHash('incomeforward'.','.$bot['uuid'].','.$send_uuid, $destination, $quantity, $asset);
                             EventLog::log('bot.income.process', array_merge(['name' => $bot['name'], 'id' => $bot['id']], compact('destination', 'quantity', 'asset')));
-                            $send_result = $this->xchain_client->send($bot['public_address_id'], $destination, $quantity, $asset, $fee, null, $request_id);
+                            $send_result = $this->xchain_client->sendConfirmed($bot['public_address_id'], $destination, $quantity, $asset, $fee, null, $request_id);
 
                             // log the event
                             $this->bot_event_logger->logIncomeForwardingResult($bot, $send_result, $destination, $quantity, $asset);
 
-                            // update the balance
-                            $balance_deltas = $this->balance_updater->modifyBalanceDeltasForSend([], $asset, $quantity, $fee);
-                            $this->balance_updater->updateBotBalances($bot, $balance_deltas);
-
                             // clear the send cache
                             Cache::forget($cache_key);
+
+                            // update the balance later
+                            $was_forwarded = true;
                         } catch (Exception $e) {
                             // log failure
                             $this->bot_event_logger->logIncomeForwardingFailed($bot, $e);
@@ -79,8 +82,16 @@ class ProcessIncomeForwardingForAllBotsHandler {
                         }
                     }
                 }
+
+                return $was_forwarded;
             });
 
+            if ($was_forwarded) { $bots_forwarded[] = $bot; }
+        }
+
+        // sync balances of all the bots that had income forwarded
+        foreach($bots_forwarded as $bot) {
+            $this->balance_updater->syncBalances($bot);
         }
 
 

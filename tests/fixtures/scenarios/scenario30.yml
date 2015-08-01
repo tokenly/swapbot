@@ -1,15 +1,14 @@
 # bot is out of fuel for longer than 6 confirmations and then is refueled
 #   all the unresolved transactions should then be processed
 
-### NEEDS TO BE FIXED ###
-
 ############################
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
+    blacklist_addresses: [RESTOCKING_SENDER01]
     balances:
       LTBCOIN: 1000000
-      BTC: 0
+      BTC: 0.0000543
 
 
 ############################
@@ -19,11 +18,22 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     quantity: 0.0001
 
-  # many blocks later, the bot is refueled
+
+  # make sure the original transaction is updated to 7 confirmations
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.0001
+    blockId: 300007
+    confirmations: 8
+
+  # many blocks later, the bot is refueled (with a fuel top up)
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     quantity: 0.025
     txid: 00000000000000000000000000000000000000000000000000000BTCtx333333
-    blockId: 300007
+    blockId: 300008
+    confirmations: 2
+    sources: [RESTOCKING_SENDER01]
+
+
 
 
 ############################
@@ -36,22 +46,31 @@ expectedBotEvents:
 
   - # first transaction ignored due to lowfuel state
     meta: { baseFilename: bot.lowfuel.yml }
-    msg: 'Ignored transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 because this bot is low on BTC fuel.'
+    msg: 'Transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 received while bot is low on BTC fuel.'
     txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
 
-
-  - #### NEW
+  - #### NEW (swap #1 created)
     meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
     quantityIn: 0.0001
     quantityOut: 100
 
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+    confirmations: 8
+    state: 'lowfuel'
+    isActive: false
+
+
+  - #### blacklist
+    meta: { baseFilename: swap.ignored.blacklist.yml }
+    msg: 'Ignored transaction of 0.025 BTC from RESTOCKING_SENDER01 because sender address was blacklisted.'
+    txid: '00000000000000000000000000000000000000000000000000000BTCtx333333'
+    inQty: 0.025000000000000001
+    inAsset: 'BTC'
+    source: RESTOCKING_SENDER01
+
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
-  - #### NEW (2nd swap)
-    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
-    txidIn: 00000000000000000000000000000000000000000000000000000BTCtx333333
-    quantityIn: 0.025
-    quantityOut: 25000
 
   ####
   # the original swap should now be found and handled
@@ -60,21 +79,13 @@ expectedBotEvents:
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
     meta: { baseFilename: swap.found-BTC_LTBCOIN-0001.yml }
-  - #### swap found
+    confirmations: 8
+    msg: Received 0.0001 BTC from SENDER01 with 8 confirmations. Will vend 100 LTBCOIN to SENDER01.
+  - #### swap sent
     meta: { baseFilename: swap.sent-BTC_LTBCOIN-0001.yml }
+    confirmations: 8
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
-  ####
-  # the second swap should now be handled
-
-  - #### READY
-    meta: { baseFilename: swap.stateChange-ready.yml }
-  - #### swap found
-    meta: { baseFilename: swap.found-BTC_LTBCOIN-025.yml }
-  - #### swap found
-    meta: { baseFilename: swap.sent-BTC_LTBCOIN-025.yml }
-  - #### SENT
-    meta: { baseFilename: swap.stateChange-sent.yml }
 
 

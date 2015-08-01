@@ -55,7 +55,7 @@ class BotEventLogger {
 
             case BotState::LOW_FUEL:
                 return $this->logLegacyBotEvent($bot, 'bot.lowfuel', BotEvent::LEVEL_WARNING, [
-                    'msg'   => "Ignored transaction {$xchain_notification['txid']} because this bot is low on BTC fuel.",
+                    'msg'   => "Transaction {$xchain_notification['txid']} received while bot is low on BTC fuel.",
                     'txid'  => $xchain_notification['txid'],
                     'state' => $state_name,
                 ]);
@@ -164,6 +164,13 @@ class BotEventLogger {
 
     // }
 
+    public function logBotBalancesSynced(Bot $bot, $all_balances_by_type) {
+        return $this->logStandardBotEvent('bot.balancesSynced', $bot, ['all_balances_by_type' => $all_balances_by_type]);
+    }
+
+    public function logBotBalancesSyncFailed(Bot $bot) {
+        return $this->logStandardBotEvent('bot.balancesSyncFailed', $bot, []);
+    }
 
 
 
@@ -448,59 +455,98 @@ class BotEventLogger {
         ]);
     }
 
+
+    ////////////////////////////////////////////////////////////////////////
+    // Accounts
+
+    public function logTransferIncome(Bot $bot, Swap $swap, $txid, $from, $to) {
+        $this->logSimpleSwapEvent('account.transferIncome', $bot, $swap, compact('txid', 'from', 'to'));
+    }
+    public function logTransferInventory(Bot $bot, Swap $swap, $quantity, $asset, $from, $to) {
+        $this->logSimpleSwapEvent('account.transferInventory', $bot, $swap, compact('quantity', 'asset', 'from', 'to'));
+    }
+    public function logTransferInventoryFailed(Bot $bot, Swap $swap, $quantity, $asset, $from, $to) {
+        $this->logSimpleSwapEvent('account.transferInventoryFailed', $bot, $swap, compact('quantity', 'asset', 'from', 'to'));
+    }
+
+    public function logAccountClosed(Bot $bot, Swap $swap, $balances) {
+        $this->logSimpleSwapEvent('account.closeSwapAccount', $bot, $swap, compact('balances'));
+    }
+    public function logAccountClosedFailed(Bot $bot, Swap $swap, $balances) {
+        $this->logSimpleSwapEvent('account.closeSwapAccountFailed', $bot, $swap,compact('balances'));
+    }
+
+    
+    
+
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
     // Log Swap Event
     
-    public function standardSwapDetails(Swap $swap, $receipt_update_vars=null, $swap_update_vars=null) {
+    public function standardSwapDetails(Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $use_full_swap_details=true) {
         $receipt = (array)$swap['receipt'];
         if ($receipt_update_vars !== null) { $receipt = array_merge($receipt, $receipt_update_vars); }
 
         // get the state
         $state = ($swap_update_vars !== null AND isset($swap_update_vars['state'])) ? $swap_update_vars['state'] : $swap['state'];
 
-        return [
-            'destination'      => isset($receipt['destination'])      ? $receipt['destination']       : null,
+        if ($use_full_swap_details) {
+            return [
+                'destination'      => isset($receipt['destination'])      ? $receipt['destination']       : null,
 
-            'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']        : null,
-            'assetIn'          => isset($receipt['assetIn'])          ? $receipt['assetIn']           : null,
-            'txidIn'           => isset($receipt['txidIn'])           ? $receipt['txidIn']            : null,
-            'confirmations'    => isset($receipt['confirmations'])    ? $receipt['confirmations']     : null,
+                'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']        : null,
+                'assetIn'          => isset($receipt['assetIn'])          ? $receipt['assetIn']           : null,
+                'txidIn'           => isset($receipt['txidIn'])           ? $receipt['txidIn']            : null,
+                'confirmations'    => isset($receipt['confirmations'])    ? $receipt['confirmations']     : null,
 
-            'quantityOut'      => isset($receipt['quantityOut'])      ? $receipt['quantityOut']       : null,
-            'assetOut'         => isset($receipt['assetOut'])         ? $receipt['assetOut']          : null,
-            'txidOut'          => isset($receipt['txidOut'])          ? $receipt['txidOut']           : null,
-            'confirmationsOut' => isset($receipt['confirmationsOut']) ? $receipt['confirmationsOut']  : null,
+                'quantityOut'      => isset($receipt['quantityOut'])      ? $receipt['quantityOut']       : null,
+                'assetOut'         => isset($receipt['assetOut'])         ? $receipt['assetOut']          : null,
+                'txidOut'          => isset($receipt['txidOut'])          ? $receipt['txidOut']           : null,
+                'confirmationsOut' => isset($receipt['confirmationsOut']) ? $receipt['confirmationsOut']  : null,
 
-            'changeOut'        => isset($receipt['changeOut'])        ? $receipt['changeOut']         : null,
-            'changeOutAsset'   => isset($receipt['changeOut'])        ? 'BTC'                         : null,
+                'changeOut'        => isset($receipt['changeOut'])        ? $receipt['changeOut']         : null,
+                'changeOutAsset'   => isset($receipt['changeOut'])        ? 'BTC'                         : null,
 
-            'completedAt'      => isset($receipt['completedAt'])      ? $receipt['completedAt']       : null,
+                'completedAt'      => isset($receipt['completedAt'])      ? $receipt['completedAt']       : null,
 
-            'type'             => isset($receipt['type'])             ? $receipt['type']              : null,
+                'type'             => isset($receipt['type'])             ? $receipt['type']              : null,
 
-            'state'            => $state,
-            'isComplete'       => $swap->isComplete($state),
-            'isError'          => $swap->isError($state),
-        ];
+                'state'            => $state,
+                'isComplete'       => $swap->isComplete($state),
+                'isError'          => $swap->isError($state),
+            ];
+        } else {
+            // simple details don't include any receipt information
+            return [];
+        }
     }
 
-    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $extra_event_vars=null, $write_to_application_log=true) {
+    public function logSimpleSwapEvent($event_name, Bot $bot, Swap $swap, $extra_event_vars=null, $write_to_application_log=true) {
+        return $this->logSwapEvent($event_name, $bot, $swap, null, null, $extra_event_vars, $write_to_application_log, false);
+    }
+
+    public function logSwapEvent($event_name, Bot $bot, Swap $swap, $receipt_update_vars=null, $swap_update_vars=null, $extra_event_vars=null, $write_to_application_log=true, $use_full_swap_details=true) {
         $event_template_data = $this->getEventTemplate($event_name);
 
-        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars, $swap_update_vars);
+        $swap_details_for_event_log = $this->buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars, $swap_update_vars, $use_full_swap_details);
 
         // merge $extra_event_vars
         if ($extra_event_vars !== null) { $swap_details_for_event_log = array_merge($swap_details_for_event_log, $extra_event_vars); }
 
         // log the bot event
-        if ($write_to_application_log) { EventLog::log($event_name, $swap_details_for_event_log); }
+        if ($write_to_application_log) {
+            $application_log_vars = $swap_details_for_event_log;
+            $application_log_vars['botId'] = $bot['uuid'];
+            $application_log_vars['botName'] = $bot['name'];
+            $application_log_vars['swapId'] = $swap['uuid'];
+            EventLog::log($event_name, $application_log_vars);
+        }
 
         // save the bot event
         $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, $swap, $swap_details_for_event_log);
         $serialized_bot_event_model = $bot_event_model->serializeForAPI();
 
-        if ($event_template_data['swapEventStream'] ) {
+        if (isset($event_template_data['swapEventStream']) AND $event_template_data['swapEventStream']) {
             // publish to event stream
             Event::fire(new SwapstreamEventCreated($swap, $bot, $serialized_bot_event_model));
         }
@@ -509,8 +555,8 @@ class BotEventLogger {
         Event::fire(new SwapEventCreated($swap, $bot, $serialized_bot_event_model));
     }
 
-    protected function buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars=null, $swap_update_vars=null) {
-        $swap_details_for_log = $this->standardSwapDetails($swap, $receipt_update_vars, $swap_update_vars);
+    protected function buildSwapDetailsForLog($bot, $swap, $event_template_data, $receipt_update_vars=null, $swap_update_vars=null, $use_full_swap_details=true) {
+        $swap_details_for_log = $this->standardSwapDetails($swap, $receipt_update_vars, $swap_update_vars, $use_full_swap_details);
 
         // determine event vars
         if (isset($event_template_data['eventVars'])) {

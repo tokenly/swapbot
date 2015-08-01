@@ -33,6 +33,13 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
     quantity: 0.001
     blockId: 300002
+    confirmations: 1
+
+  # confirm that the fuel was received
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_FUEL_notification_01.yml }
+    quantity: 0.001
+    blockId: 300003
+    confirmations: 2
 
 
 
@@ -63,8 +70,12 @@ expectedBotEvents:
   - #### fuel received (mempool)
     meta: { baseFilename: payment.unconfirmedMoveFuel.yml }
 
-  - #### fuel transaction (confirmed)
-    meta: { baseFilename: payment.moveFuelConfirmed.yml }
+  - #### fuel transaction (confirmed 1 conf)
+    meta: { baseFilename: payment.moveFuelConfirmed-1CONF.yml }
+
+  - #### fuel transaction (confirmed 2 conf)
+    meta: { baseFilename: payment.moveFuelConfirmed-2CONF.yml }
+
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
 

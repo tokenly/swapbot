@@ -1,0 +1,12 @@
+name: bot.balancesSynced
+all_balances_by_type: 
+  unconfirmed:
+    BTC: 0
+  confirmed:
+    LTBCOIN: 999500
+    BTC: 0.9994
+  sending:
+    BTC: 0
+
+state: active
+isActive: true

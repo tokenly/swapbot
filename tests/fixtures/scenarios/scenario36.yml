@@ -19,8 +19,8 @@ xchainNotifications:
 ############################
 # validate the expected results
 expectedXChainCalls:
-  - 
-    meta: { baseFilename: send_BTC.yml }
+  # - 
+  #   meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
   - #### NEW
@@ -48,5 +48,5 @@ expectedBotEvents:
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
     confirmations: 2

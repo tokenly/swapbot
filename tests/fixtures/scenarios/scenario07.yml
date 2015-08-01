@@ -5,6 +5,7 @@
 # setup bots and payment
 bots:
   - meta: { baseFilename: bot01.yml }
+    confirmations_required: 1
     swaps:
       -
         in: BTC

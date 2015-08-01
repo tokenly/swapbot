@@ -10,6 +10,7 @@ bots:
 xchainNotifications:
   - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
   - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
 
 events:
   - {type: xchainNotification, offset: 0}
@@ -32,18 +33,18 @@ expectedBotEvents:
   - #### UNCONFIRMED TRANSACTION
     meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
 
-  - #### transaction handled previously (1 confirmation)
-    meta: { baseFilename: tx.previous-1.yml }
+  - #### transaction handled previously (2 confirmation)
+    meta: { baseFilename: tx.previous-2.yml }
   - #### swap found
-    meta: { baseFilename: swap.found.yml }
+    meta: { baseFilename: swap.found-2confirmations.yml }
   - #### swap sent
-    meta: { baseFilename: swap.sent.yml }
+    meta: { baseFilename: swap.sent-2confirmations.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
 expectedTransactionModels:
   - 
-    meta: { baseFilename: transaction_model_01.yml }
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
 
 # check balance
 expectedBotModels:
@@ -51,7 +52,7 @@ expectedBotModels:
     # bot should be in state active when done and have balances updated
     state: active
     balances:
-      LTBCOIN: 1000500
+      LTBCOIN: 1000000 # 1000500
       BTC: 0.99941 # + 0.00001 dust
 
 

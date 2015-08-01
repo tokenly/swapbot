@@ -9,11 +9,22 @@ bots:
         LTBCOIN: 1000
         BTC: 0.01
 
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      LTBCOIN: 1000
+      BTC: 0.01
+    sending:
+      BTC: 0
+
 
 ############################
 # receive notifications from xchain
 xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
     txid: 00000000000000000000000000000000000000000000000000000BTCtx333333
     blockId: 300001
@@ -32,9 +43,11 @@ expectedBotEvents:
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
-    meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+    meta: { baseFilename: swap.found-BTC_LTBCOIN-2confirmations.yml }
+    confirmations: 2
   - #### swap found
     meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+    confirmations: 2
   - #### SENT
     meta: { baseFilename: swap.stateChange-sent.yml }
 
@@ -59,6 +72,8 @@ expectedSwapModels:
   -
     meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
     state: sent
+    receipt:
+      confirmations: 2
   -
     meta: { baseFilename: swap_model_BTC_LTBCOIN-no-receipt.yml }
     state: outofstock

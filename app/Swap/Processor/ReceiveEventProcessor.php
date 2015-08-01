@@ -8,7 +8,6 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
 use Swapbot\Commands\ProcessPendingSwaps;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
@@ -73,9 +72,6 @@ class ReceiveEventProcessor {
         // process any swaps that are pending (including those just created)
         $this->dispatch(new ProcessPendingSwaps());
         
-        // process any payments that are pending
-        $this->dispatch(new ProcessIncomeForwardingForAllBots());
-        
     }
 
     public function handlePublicAddressReceive($xchain_notification, $bot) {
@@ -98,15 +94,11 @@ class ReceiveEventProcessor {
 
                 'tx_is_handled'                    => false,
                 'transaction_update_vars'          => [],
-                'should_update_bot_balance'        => ($xchain_notification['confirmed'] ? true : false),
 
                 'any_processing_errors'            => false,
                 'should_reconcile_bot_state'       => true,
                 'should_reconcile_swap_states'     => true,
             ]);
-
-            // update bot balances
-            $this->updateBotBalances($tx_process);
 
             // previously processed transactions
             $this->checkForPreviouslyProcessedTransaction($tx_process);
@@ -125,6 +117,9 @@ class ReceiveEventProcessor {
 
             // process all newly created swaps
             $this->createNewSwaps($tx_process);
+
+            // update bot balances
+            $this->updateBotBalances($tx_process);
 
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
@@ -178,17 +173,11 @@ class ReceiveEventProcessor {
     }    
 
     protected function updateBotBalances($tx_process) {
-        if ($tx_process['tx_is_handled']) { return; }
         if ($tx_process['transaction']['balances_applied']) { return; }
 
-        if ($tx_process['is_confirmed']) {
+        if ($tx_process['is_confirmed'] AND $tx_process['confirmations'] >= BalanceUpdater::XCHAIN_INCOMING_CONFIRMATIONS_REQUIRED) {
             // update the bot's balance
-            $bot_balance_deltas = [];
-            $bot_balance_deltas = $this->balance_updater->modifyBalanceDeltasFromTransactionReceived($bot_balance_deltas, $tx_process['xchain_notification']);
-            // Log::debug("\$bot_balance_deltas=".json_encode($bot_balance_deltas, 192));
-
-            $this->balance_updater->updateBotBalances($tx_process['bot'], $bot_balance_deltas);
-
+            $this->balance_updater->syncBalances($tx_process['bot']);
             $tx_process['transaction_update_vars']['balances_applied'] = true;
         }
     }
@@ -204,7 +193,11 @@ class ReceiveEventProcessor {
             // this is a fuel transaction
             if ($confirmed) {
                 $this->bot_event_logger->logFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
-                $tx_process['transaction_update_vars']['processed'] = true;
+
+                // fuel is not completely processed until 2 transactions are received
+                if ($tx_process['confirmations'] >= BalanceUpdater::XCHAIN_INCOMING_CONFIRMATIONS_REQUIRED) {
+                    $tx_process['transaction_update_vars']['processed'] = true;
+                }
             } else {
                 $this->bot_event_logger->logUnconfirmedFuelTXReceived($tx_process['bot'], $tx_process['xchain_notification']);
             }
