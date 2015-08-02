@@ -30,7 +30,7 @@ class BalanceUpdater {
     // returns the confirmed balances
     public function syncBalances(Bot $bot) {
         try {
-            $all_balances = $this->xchain_client->getAccountBalances($bot['payment_address_id'], 'default');
+            $all_balances = $this->xchain_client->getAccountBalances($bot['address_id'], 'default');
             $this->bot_repository->update($bot, [
                 'balances'             => $all_balances['confirmed'],
                 'all_balances_by_type' => $all_balances,
