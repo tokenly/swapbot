@@ -20,6 +20,7 @@ use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Swap\Logger\OutputTransformer\Facade\BotEventOutputTransformer;
 use Tokenly\LaravelEventLog\Facade\EventLog;
+use Tokenly\XChainClient\Exception\XChainException;
 
 class BotEventLogger {
 
@@ -461,6 +462,10 @@ class BotEventLogger {
 
     public function logTransferIncome(Bot $bot, Swap $swap, $txid, $from, $to) {
         $this->logSimpleSwapEvent('account.transferIncome', $bot, $swap, compact('txid', 'from', 'to'));
+    }
+    public function logTransferIncomeFailed(Bot $bot, Swap $swap, XChainException $e, $txid, $from, $to) {
+        $error = $e->getErrorName().": ".$e->getMessage();
+        $this->logSimpleSwapEvent('account.transferIncomeFailed', $bot, $swap, compact('error', 'txid', 'from', 'to'));
     }
     public function logTransferInventory(Bot $bot, Swap $swap, $quantity, $asset, $from, $to) {
         $this->logSimpleSwapEvent('account.transferInventory', $bot, $swap, compact('quantity', 'asset', 'from', 'to'));

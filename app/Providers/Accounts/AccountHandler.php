@@ -31,8 +31,14 @@ class AccountHandler {
             $txid        = $transaction['txid'];
             // Log::debug("allocateNewSwapAccount calling transferAllByTransactionID for {$bot['public_address_id']} on swap {$swap['uuid']}");
 
-            $success = $xchain->transferAllByTransactionID($bot['public_address_id'], 'default', $this->swapAccountName($swap), $txid);
-            BotEventLogger::logTransferIncome($bot, $swap, $txid, 'default', $this->swapAccountName($swap));
+            // allow failure
+            try {
+                $success = $xchain->transferAllByTransactionID($bot['public_address_id'], 'default', $this->swapAccountName($swap), $txid);
+                BotEventLogger::logTransferIncome($bot, $swap, $txid, 'default', $this->swapAccountName($swap));
+            } catch (XChainException $e) {
+                BotEventLogger::logTransferIncomeFailed($bot, $swap, $e, $txid, 'default', $this->swapAccountName($swap));
+                $success = false;
+            }
             return $success;
         });
     }
@@ -140,10 +146,6 @@ class AccountHandler {
         $balances['BTC'] += $bot['return_fee'];
 
         return $balances;
-    }
-
-    protected function anyBalancesExist($actual_balances) {
-
     }
 
 }

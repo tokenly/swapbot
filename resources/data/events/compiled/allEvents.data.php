@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-01 13:40:20
+// compiled on 2015-08-02 02:57:27
 
 return array (
   'swap.new' => 
@@ -401,6 +401,21 @@ return array (
       3 => 'to',
     ),
   ),
+  'account.transferIncomeFailed' => 
+  array (
+    'name' => 'account.transferIncomeFailed',
+    'label' => 'Transfer Income Failed',
+    'level' => 'WARNING',
+    'msg' => 'Transferred Income Failed for <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> for txid <?php echo e($from); ?> to <?php echo e($to); ?>.  <?php echo e($error); ?>',
+    'msgVars' => 
+    array (
+      0 => 'quantity',
+      1 => 'asset',
+      2 => 'from',
+      3 => 'to',
+      4 => 'error',
+    ),
+  ),
   'account.transferInventory' => 
   array (
     'name' => 'account.transferInventory',
@@ -457,7 +472,6 @@ return array (
     'msg' => 'Bot balances were synced.',
     'msgVars' => 
     array (
-      0 => 'all_balances_by_type',
     ),
   ),
   'bot.balancesSyncFailed' => 

@@ -229,6 +229,12 @@ events:
     msg: Transferred Income {{ $currency($quantity) }} {{ $asset }} for txid {{ $from }} to {{ $to }}.
     msgVars: [quantity, asset, from, to]
   -
+    name: account.transferIncomeFailed
+    label: Transfer Income Failed
+    level: WARNING
+    msg: Transferred Income Failed for {{ $currency($quantity) }} {{ $asset }} for txid {{ $from }} to {{ $to }}.  {{ $error }}
+    msgVars: [quantity, asset, from, to, error]
+  -
     name: account.transferInventory
     label: Transfer Inventory
     level: DEBUG
