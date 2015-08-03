@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-02 02:57:27
+// compiled on 2015-08-03 12:51:05
 
 return array (
   'swap.new' => 
@@ -392,13 +392,12 @@ return array (
     'name' => 'account.transferIncome',
     'label' => 'Transfer Income',
     'level' => 'DEBUG',
-    'msg' => 'Transferred Income <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> for txid <?php echo e($from); ?> to <?php echo e($to); ?>.',
+    'msg' => 'Transferred Income for txid <?php echo e($txid); ?> from <?php echo e($from); ?> to <?php echo e($to); ?>.',
     'msgVars' => 
     array (
-      0 => 'quantity',
-      1 => 'asset',
-      2 => 'from',
-      3 => 'to',
+      0 => 'txid',
+      1 => 'from',
+      2 => 'to',
     ),
   ),
   'account.transferIncomeFailed' => 
@@ -406,14 +405,13 @@ return array (
     'name' => 'account.transferIncomeFailed',
     'label' => 'Transfer Income Failed',
     'level' => 'WARNING',
-    'msg' => 'Transferred Income Failed for <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> for txid <?php echo e($from); ?> to <?php echo e($to); ?>.  <?php echo e($error); ?>',
+    'msg' => 'Transferred Income Failed for for txid <?php echo e($txid); ?> from <?php echo e($from); ?> to <?php echo e($to); ?>.  <?php echo e($error); ?>',
     'msgVars' => 
     array (
-      0 => 'quantity',
-      1 => 'asset',
-      2 => 'from',
-      3 => 'to',
-      4 => 'error',
+      0 => 'txid',
+      1 => 'from',
+      2 => 'to',
+      3 => 'error',
     ),
   ),
   'account.transferInventory' => 

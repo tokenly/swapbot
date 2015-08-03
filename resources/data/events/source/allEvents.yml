@@ -226,14 +226,14 @@ events:
     name: account.transferIncome
     label: Transfer Income
     level: DEBUG
-    msg: Transferred Income {{ $currency($quantity) }} {{ $asset }} for txid {{ $from }} to {{ $to }}.
-    msgVars: [quantity, asset, from, to]
+    msg: Transferred Income for txid {{ $txid }} from {{ $from }} to {{ $to }}.
+    msgVars: [txid, from, to]
   -
     name: account.transferIncomeFailed
     label: Transfer Income Failed
     level: WARNING
-    msg: Transferred Income Failed for {{ $currency($quantity) }} {{ $asset }} for txid {{ $from }} to {{ $to }}.  {{ $error }}
-    msgVars: [quantity, asset, from, to, error]
+    msg: Transferred Income Failed for for txid {{ $txid }} from {{ $from }} to {{ $to }}.  {{ $error }}
+    msgVars: [txid, from, to, error]
   -
     name: account.transferInventory
     label: Transfer Inventory
