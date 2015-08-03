@@ -30,7 +30,7 @@ class BalanceUpdater {
     // returns the confirmed balances
     public function syncBalances(Bot $bot) {
         try {
-            $all_balances = $this->xchain_client->getAccountBalances($bot['address_id'], 'default');
+            $all_balances = $this->xchain_client->getAccountBalances($bot['public_address_id'], 'default');
             $this->bot_repository->update($bot, [
                 'balances'             => $all_balances['confirmed'],
                 'all_balances_by_type' => $all_balances,
@@ -42,7 +42,7 @@ class BalanceUpdater {
             return $all_balances['confirmed'];
         } catch (Exception $e) {
             EventLog::logError('bot.balancesSyncFailed', $e, ['bot' => $bot['id'], 'name' => $bot['name']]);
-            BotEventLogger::logBotBalancesSyncFailed($bot, $all_balances);
+            BotEventLogger::logBotBalancesSyncFailed($bot);
             return [];
         }
     }
