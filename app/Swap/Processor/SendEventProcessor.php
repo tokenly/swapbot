@@ -63,7 +63,7 @@ class SendEventProcessor {
         if (!$found) { throw new Exception("Unable to find bot for send monitor {$xchain_notification['notifiedAddressId']}", 1); }
 
         // lock the transaction
-        $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
+        $tx_process = $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
 
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'send');
@@ -107,10 +107,11 @@ class SendEventProcessor {
             // done going through swaps - update the transaction
             $this->updateTransaction($tx_process);
 
-            // if any balances were updated, then process income forwarding
-            $this->handleIncomeForwarding($tx_process);
+            return $tx_process;
         });
 
+        // if any balances were updated, then process income forwarding for all bots
+        $this->handleIncomeForwarding($tx_process);
 
         return $bot;
     }
