@@ -3040,12 +3040,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "20235ae6cc940ec231aa35827d01f69efdb4f7e5"
+                "reference": "dae97ab9b8acefba2f9d1b99f3c25b9149bc50d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/20235ae6cc940ec231aa35827d01f69efdb4f7e5",
-                "reference": "20235ae6cc940ec231aa35827d01f69efdb4f7e5",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/dae97ab9b8acefba2f9d1b99f3c25b9149bc50d1",
+                "reference": "dae97ab9b8acefba2f9d1b99f3c25b9149bc50d1",
                 "shasum": ""
             },
             "require": {
@@ -3076,7 +3076,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-07-30 14:57:07"
+            "time": "2015-08-04 03:56:31"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",
@@ -3249,7 +3249,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/77cfc5b7179619df31952d59a9ce9777bc47054f",
+                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/767313790a3d87f0490128506994893ead72d15e",
                 "reference": "77cfc5b7179619df31952d59a9ce9777bc47054f",
                 "shasum": ""
             },
