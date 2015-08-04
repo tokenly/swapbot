@@ -126,4 +126,14 @@ class BotRepository extends APIRepository
         return $out;
     }
 
+    public function buildFindAllFilterDefinition() {
+        return [
+            'fields' => [
+                'name'       => ['field' => 'name',],
+                'created_at' => ['sortField' => 'created_at', 'defaultSortDirection' => 'asc'],
+            ],
+            'defaults' => ['sort' => 'created_at'],
+        ];
+    }
+
 }

@@ -45,6 +45,9 @@ $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptio
 // Bot API
 $router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
 
+// Bot API
+$router->get('api/v1/public/bots', 'API\Bot\PublicBotController@showBots');
+
 // Bot Events API
 $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
 

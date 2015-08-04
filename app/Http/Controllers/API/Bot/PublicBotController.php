@@ -3,10 +3,12 @@
 namespace Swapbot\Http\Controllers\API\Bot;
 
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Http\Controllers\API\Base\APIController;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Repositories\BotRepository;
+use Tokenly\LaravelApiProvider\Filter\IndexRequestFilter;
 use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 
 class PublicBotController extends APIController {
@@ -27,5 +29,17 @@ class PublicBotController extends APIController {
         $resource = $api_helper->requireResource($id, $repository);
         return $api_helper->transformResourceForOutput($resource, 'public');
     }
+
+
+    public function showBots(Request $request, BotRepository $repository, APIControllerHelper $api_helper) {
+        $resources = $repository->findAll($this->buildFilter($request, $repository));
+        return $api_helper->transformResourcesForOutput($resources, 'public');
+    }
+
+
+    protected function buildFilter(Request $request, BotRepository $bot_repository) {
+        return IndexRequestFilter::createFromRequest($request, $bot_repository->buildFindAllFilterDefinition());
+    }
+
 
 }
