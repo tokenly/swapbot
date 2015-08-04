@@ -260,7 +260,7 @@ class SwapProcessor {
         // if the swap is not in a ready or confirmation state, we can't move it to confirming or confirmed
         if (!$swap_process['swap']->isReady() AND !$swap_process['swap']->isConfirming()) { return; }
 
-        Log::debug("\$swap_process['confirmations']=".json_encode($swap_process['confirmations'], 192));
+        // Log::debug("\$swap_process['confirmations']=".json_encode($swap_process['confirmations'], 192));
         if ($swap_process['confirmations'] < $swap_process['bot']['confirmations_required']) {
             // move the swap into the confirming state
             $swap_process['state_trigger'] = SwapStateEvent::CONFIRMING;
@@ -327,6 +327,11 @@ class SwapProcessor {
     protected function doSwap($swap_process) {
         if ($swap_process['swap_was_handled']) { return; }
 
+        // log out of stock or not ready
+        if ($swap_process['swap']->isOutOfStock()) {
+            $this->bot_event_logger->logSwapOutOfStock($swap_process['bot'], $swap_process['swap']);
+            return;
+        }
         if (!$swap_process['swap']->isReady()) {
             $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['swap']);
             return;

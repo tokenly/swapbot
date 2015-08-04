@@ -81,6 +81,8 @@
         case 'sent':
         case 'refunded':
           return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
+        case 'outofstock':
+          return React.createElement('span', {}, ['This swap is out of stock. ', buildTransactionLinkElement(swap.txidIn, ' Receiving tokens '), " and waiting to send " + swap.quantityOut + " " + swap.assetOut + "."]);
       }
       return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
     };

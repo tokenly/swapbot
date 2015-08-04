@@ -9,10 +9,12 @@ use Swapbot\Commands\DeleteSwap;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Tokenly\LaravelEventLog\Facade\EventLog;
+use Illuminate\Console\ConfirmableTrait;
 
 class DeleteSwapCommand extends Command {
 
     use DispatchesCommands;
+    use ConfirmableTrait;
 
     /**
      * The console command name.
@@ -50,6 +52,7 @@ class DeleteSwapCommand extends Command {
     {
         return [
             ['dry-run' , 'd',  InputOption::VALUE_NONE, 'Dry Run'],
+            ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
         ];
     }
 
@@ -70,19 +73,18 @@ class DeleteSwapCommand extends Command {
         if (!$swap) { throw new Exception("Unable to find swap", 1); }
 
         // delete the swap
-        $this->comment("Deleting swap {$swap['uuid']}");
+        $this->comment("Deleting swap {$swap['name']} ({$swap['uuid']})");
 
         try {
             if ($is_dry_run) {
                 $this->info("[Dry Run] Would delete swap {$swap['id']} ({$swap['uuid']})");
             } else {
-                $confirmed = $this->confirm("Are you sure you want to delete swap {$swap['id']} ({$swap['uuid']})?", false);
+                $confirmed = $this->confirmToProceed("Are you sure you want to delete swap {$swap['id']} ({$swap['uuid']})?");
                 if (!$confirmed) {
                     $this->error("Aborting");
                     return;
                 }
 
-                $this->comment("Deleting swap {$swap['name']} ({$swap['uuid']})");
                 $this->dispatch(new DeleteSwap($swap));
             }
         } catch (Exception $e) {

@@ -85,6 +85,14 @@ events:
     msgVars: []
     swapEventStream: true
 
+  -
+    name: swap.outOfStock
+    label: Swap is Out of Stock
+    level: INFO
+    msg: Received {{ $currency($quantityIn) }} {{ $assetIn }}{{ $swap ? ' '.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} from {{ $destination }}.  Not enough stock to send {{ $currency($quantityOut) }} {{ $assetOut }}.
+    msgVars: [quantityIn,assetIn,destination,quantityOut,assetOut]
+    swapEventStream: true
+
   # ### Refund
 
   -

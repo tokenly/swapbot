@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Bot;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Swap\Logger\Facade\BotEventLogger;

@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-03 12:51:05
+// compiled on 2015-08-04 13:04:33
 
 return array (
   'swap.new' => 
@@ -144,6 +144,22 @@ return array (
     'msg' => 'This swap could not be processed because it was not ready.',
     'msgVars' => 
     array (
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.outOfStock' => 
+  array (
+    'name' => 'swap.outOfStock',
+    'label' => 'Swap is Out of Stock',
+    'level' => 'INFO',
+    'msg' => 'Received <?php echo e($currency($quantityIn)); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> from <?php echo e($destination); ?>.  Not enough stock to send <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityIn',
+      1 => 'assetIn',
+      2 => 'destination',
+      3 => 'quantityOut',
+      4 => 'assetOut',
     ),
     'swapEventStream' => true,
   ),

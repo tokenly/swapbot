@@ -315,6 +315,9 @@ class BotEventLogger {
     public function logSwapNotReady(Bot $bot, Swap $swap) {
         $this->logSwapEvent('swap.notReady', $bot, $swap);
     }
+    public function logSwapOutOfStock(Bot $bot, Swap $swap) {
+        $this->logSwapEvent('swap.outOfStock', $bot, $swap);
+    }
 
 
 

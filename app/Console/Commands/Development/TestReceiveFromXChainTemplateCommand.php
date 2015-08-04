@@ -64,6 +64,8 @@ class TestReceiveFromXChainTemplateCommand extends Command {
             ['asset',              'a',  InputOption::VALUE_OPTIONAL, 'Asset', 'BTC'],
             ['quantity',           'u',  InputOption::VALUE_OPTIONAL, 'Quantity', '0.005'],
             ['confirmations',      'c',  InputOption::VALUE_OPTIONAL, 'Confirmations', '0'],
+            ['persist-balances',   'p',  InputOption::VALUE_OPTIONAL, 'Persist test balances to disk', true],
+            ['mock-balances-file', 'm',  InputOption::VALUE_OPTIONAL, 'Load mock balances file', null],
         ];
     }
 
@@ -95,8 +97,33 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         }
         $mock = $mock_builder->installXChainMockClient();
 
+        // load mock balances
+        $mock_balances_file = $this->input->getOption('mock-balances-file');
+        if ($mock_balances_file) {
+            $data = json_decode(file_get_contents($mock_balances_file), true);
+            if ($data) {
+                $mock_builder->clearBalances();
+                if (isset($data['balances'])) {
+                    $this->comment("importing balances: ".json_encode($data['balances']['default']));
+                    $mock_builder->importBalances($data);
+                } else {
+                    // new balances
+                    $this->comment("setting new balances");
+                    $mock_builder->setBalances($data, 'default');
+                }
+            }
+        }
+
         // fire the notification webhook
         $this->dispatch(new ReceiveWebhook($notification));
+
+
+        // persist the balances
+        if ($mock_balances_file AND $this->input->getOption('persist-balances')) {
+            $balances_data = $mock_builder->exportBalances();
+            $this->comment('persisting balances to disk: '.json_encode($balances_data['balances']['default']));
+            file_put_contents($mock_balances_file, json_encode($balances_data, 192));
+        }
 
 
         $this->info("done");

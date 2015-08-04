@@ -52,13 +52,13 @@ expectedBotEvents:
   - #### OUT OF STOCK
     meta: { baseFilename: swap.stateChange-outofstock.yml }
   - #### NOT READY
-    meta: { baseFilename: swap.notReady-outofstock.yml }
+    meta: { baseFilename: swap.outOfStock.yml }
 
   - #### transaction handled previously
     meta: { baseFilename: tx.previous-BTC-2.yml }
     confirmations: 8
   - #### NOT READY
-    meta: { baseFilename: swap.notReady-outofstock.yml }
+    meta: { baseFilename: swap.outOfStock.yml }
 
   - #### blacklist
     meta: { baseFilename: swap.ignored.blacklist.yml }

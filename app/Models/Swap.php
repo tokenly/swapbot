@@ -77,6 +77,9 @@ class Swap extends APIModel {
     public function isConfirming() {
         return ($this['state'] == SwapState::CONFIRMING);
     }
+    public function isOutOfStock() {
+        return ($this['state'] == SwapState::OUT_OF_STOCK);
+    }
     public function isComplete($state=null) {
         return (($state === null ? $this['state'] : $state) == SwapState::COMPLETE);
     }

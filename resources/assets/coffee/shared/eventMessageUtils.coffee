@@ -27,6 +27,12 @@ swapbot.eventMessageUtils = do ()->
                     buildTransactionLinkElement(swap.txidOut, (if swap.state == 'refunded' then 'refund' else 'delivery')),
                     " with #{swapbot.formatters.confirmationsProse(swap.confirmationsOut)}."
                 ])
+            when 'outofstock'
+                return React.createElement('span', {}, [
+                    'This swap is out of stock. '
+                    buildTransactionLinkElement(swap.txidIn, ' Receiving tokens '),
+                    " and waiting to send #{swap.quantityOut} #{swap.assetOut}."
+                ]);
         
         return React.createElement('span', {}, [
             "Waiting for ",
