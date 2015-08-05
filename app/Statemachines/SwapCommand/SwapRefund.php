@@ -20,9 +20,6 @@ class SwapRefund extends SwapCommand {
     {
         // update the bot state in the database
         $this->updateSwapState($swap, SwapState::REFUNDED);
-
-        // reconcile the state again
-        // $this->dispatch(new ReconcileSwapState($swap));
     }
 
     /**

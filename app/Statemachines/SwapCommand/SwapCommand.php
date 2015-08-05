@@ -20,10 +20,9 @@ class SwapCommand extends Command {
     public function updateSwapState(Swap $swap, $new_state) {
         $this->getSwapRepository()->update($swap, ['state' => $new_state]);
 
-        // log the swap event
+        // log the new swap state as an event
         $this->getBotEventLogger()->logSwapStateChange($swap, $new_state);
     }
-
 
     public function getSwapRepository() {
         if (!isset($this->swap_repository)) { $this->swap_repository = app('Swapbot\Repositories\SwapRepository'); }

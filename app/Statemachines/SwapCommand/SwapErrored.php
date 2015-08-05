@@ -20,9 +20,6 @@ class SwapErrored extends SwapCommand {
     {
         // update the bot state in the database
         $this->updateSwapState($swap, SwapState::ERROR);
-
-        // reconcile the state again
-        // $this->dispatch(new ReconcileSwapState($swap));
     }
 
     /**

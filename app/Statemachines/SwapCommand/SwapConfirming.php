@@ -20,9 +20,6 @@ class SwapConfirming extends SwapCommand {
     {
         // update the bot state in the database
         $this->updateSwapState($swap, SwapState::CONFIRMING);
-
-        // reconcile the state again
-        // $this->dispatch(new ReconcileSwapState($swap));
     }
 
     /**

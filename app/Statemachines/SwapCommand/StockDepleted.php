@@ -20,9 +20,6 @@ class StockDepleted extends SwapCommand {
     {
         // update the bot state in the database
         $this->updateSwapState($swap, SwapState::OUT_OF_STOCK);
-
-        // reconcile the state again
-        // $this->dispatch(new ReconcileSwapState($swap));
     }
 
     /**
