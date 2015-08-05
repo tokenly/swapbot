@@ -484,7 +484,7 @@ class SwapProcessor {
             // BTC Refund
             $fee = $bot['return_fee'];
             $dust_size = null;
-            $out_quantity = $xchain_notification['quantity'] - $fee;
+            $out_quantity = max(0, $xchain_notification['quantity'] - $fee);
             $out_asset = $xchain_notification['asset'];
 
         } else {
