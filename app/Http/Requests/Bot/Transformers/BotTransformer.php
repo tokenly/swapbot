@@ -4,6 +4,7 @@ namespace Swapbot\Http\Requests\Bot\Transformers;
 
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\IncomeRuleConfig;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\ImageRepository;
 
@@ -41,6 +42,11 @@ class BotTransformer {
         // santize incomeRules
         if (isset($attributes['incomeRules'])) {
             $out['income_rules'] = $this->sanitizeIncomeRules($attributes['incomeRules']);
+        }
+
+        // santize refundConfig
+        if (isset($attributes['refundConfig'])) {
+            $out['refund_config'] = $this->sanitizeRefundConfig($attributes['refundConfig']);
         }
 
         // lookup background image id
@@ -120,6 +126,15 @@ class BotTransformer {
         if ($config->isEmpty()) { return null; }
         return $config;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Refund Config
+
+    protected function sanitizeRefundConfig($refund_config) {
+        return RefundConfig::createFromSerialized($refund_config);
+    }
+
 
 
     ////////////////////////////////////////////////////////////////////////

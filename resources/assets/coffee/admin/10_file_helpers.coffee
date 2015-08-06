@@ -73,7 +73,7 @@ sbAdmin.fileHelper = do ()->
         fileUploadDomEl = null
 
         attributes.onclick = (e)->
-            console.log "click! fileUploadDomEl=",fileUploadDomEl
+            # console.log "click! fileUploadDomEl=",fileUploadDomEl
             if fileUploadDomEl?
                 e.stopPropagation()
                 fileUploadDomEl.click()

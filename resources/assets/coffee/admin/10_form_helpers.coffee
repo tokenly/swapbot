@@ -38,6 +38,10 @@ sbAdmin.form = do ()->
         inputProps.class = 'form-control' if not inputProps.class?
         inputProps.name = inputProps.id if not inputProps.name?
 
+        # postfix
+        delete inputProps.prefix
+        delete inputProps.postfix
+
         switch inputProps.type
             when 'textarea'
                 delete inputProps.type
@@ -50,6 +54,13 @@ sbAdmin.form = do ()->
             else
                 inputEl = m("input", inputProps)
 
+
+        if attributes.prefix? or attributes.postfix?
+            return m('div', {class: 'input-group'}, [
+                if attributes.prefix? then m('div', {class: 'input-group-addon'}, attributes.prefix) else null,
+                inputEl,
+                if attributes.postfix? then m('div', {class: 'input-group-addon'}, attributes.postfix) else null,
+            ])
 
         return inputEl;
 

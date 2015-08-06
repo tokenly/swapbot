@@ -535,7 +535,6 @@
       };
       fileUploadDomEl = null;
       attributes.onclick = function(e) {
-        console.log("click! fileUploadDomEl=", fileUploadDomEl);
         if (fileUploadDomEl != null) {
           e.stopPropagation();
           fileUploadDomEl.click();
@@ -934,6 +933,8 @@
       if (inputProps.name == null) {
         inputProps.name = inputProps.id;
       }
+      delete inputProps.prefix;
+      delete inputProps.postfix;
       switch (inputProps.type) {
         case 'textarea':
           delete inputProps.type;
@@ -952,6 +953,17 @@
           break;
         default:
           inputEl = m("input", inputProps);
+      }
+      if ((attributes.prefix != null) || (attributes.postfix != null)) {
+        return m('div', {
+          "class": 'input-group'
+        }, [
+          attributes.prefix != null ? m('div', {
+            "class": 'input-group-addon'
+          }, attributes.prefix) : null, inputEl, attributes.postfix != null ? m('div', {
+            "class": 'input-group-addon'
+          }, attributes.postfix) : null
+        ]);
       }
       return inputEl;
     };
@@ -1966,7 +1978,7 @@
           "class": "row"
         }, [
           m("div", {
-            "class": "col-md-3"
+            "class": "col-md-2"
           }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-1"
           }, [
@@ -1991,7 +2003,7 @@
               'placeholder': "1"
             }, swap.cost)
           ]), m("div", {
-            "class": "col-md-1"
+            "class": "col-md-2"
           }, [
             sbAdmin.form.mFormField("Minimum", {
               type: "number",
@@ -2120,6 +2132,7 @@
         vm.paymentPlan = m.prop('monthly001');
         vm.returnFee = m.prop(0.0001);
         vm.confirmationsRequired = m.prop(2);
+        vm.refundAfterBlocks = m.prop(3);
         vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
@@ -2132,7 +2145,7 @@
         vm.isNew = id === 'new';
         if (!vm.isNew) {
           sbAdmin.api.getBot(id).then(function(botData) {
-            var ref, ref1, ref2;
+            var ref, ref1, ref2, ref3;
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
@@ -2141,13 +2154,14 @@
             vm.swaps(buildSwapsPropValue(botData.swaps));
             vm.returnFee(botData.returnFee || "0.0001");
             vm.confirmationsRequired(botData.confirmationsRequired || "2");
+            vm.refundAfterBlocks(((ref = botData.refundConfig) != null ? ref.refundAfterBlocks : void 0) || "3");
             vm.incomeRulesGroup.unserialize(botData.incomeRules);
             vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
-            vm.backgroundOverlaySettings(((ref = botData.backgroundOverlaySettings) != null ? ref.start : void 0) ? window.JSON.stringify(botData.backgroundOverlaySettings) : '');
+            vm.backgroundOverlaySettings(((ref1 = botData.backgroundOverlaySettings) != null ? ref1.start : void 0) ? window.JSON.stringify(botData.backgroundOverlaySettings) : '');
             vm.backgroundImageDetails(botData.backgroundImageDetails);
-            vm.backgroundImageId((ref1 = botData.backgroundImageDetails) != null ? ref1.id : void 0);
+            vm.backgroundImageId((ref2 = botData.backgroundImageDetails) != null ? ref2.id : void 0);
             vm.logoImageDetails(botData.logoImageDetails);
-            vm.logoImageId((ref2 = botData.logoImageDetails) != null ? ref2.id : void 0);
+            vm.logoImageId((ref3 = botData.logoImageDetails) != null ? ref3.id : void 0);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -2184,6 +2198,9 @@
             incomeRules: vm.incomeRulesGroup.serialize(),
             blacklistAddresses: vm.blacklistAddressesGroup.serialize(),
             confirmationsRequired: vm.confirmationsRequired() + "",
+            refundConfig: {
+              refundAfterBlocks: vm.refundAfterBlocks() + ""
+            },
             backgroundImageId: vm.backgroundImageId() || '',
             backgroundOverlaySettings: vm.backgroundOverlaySettings() ? window.JSON.parse(vm.backgroundOverlaySettings()) : '',
             logoImageId: vm.logoImageId() || ''
@@ -2287,7 +2304,7 @@
                 "class": "row"
               }, [
                 m("div", {
-                  "class": "col-md-5"
+                  "class": "col-md-4"
                 }, [
                   sbAdmin.form.mFormField("Confirmations", {
                     id: 'confirmations_required',
@@ -2299,7 +2316,7 @@
                     required: true
                   }, vm.confirmationsRequired)
                 ]), m("div", {
-                  "class": "col-md-5"
+                  "class": "col-md-4"
                 }, [
                   sbAdmin.form.mFormField("Return Transaction Fee", {
                     id: 'return_fee',
@@ -2308,8 +2325,22 @@
                     step: "0.00001",
                     min: "0.00001",
                     max: "0.001",
-                    required: true
+                    required: true,
+                    postfix: 'BTC'
                   }, vm.returnFee)
+                ]), m("div", {
+                  "class": "col-md-4"
+                }, [
+                  sbAdmin.form.mFormField("Refund Out of Stock Swaps After", {
+                    id: 'refund_after_blocks',
+                    'placeholder': "3",
+                    type: "number",
+                    step: "1",
+                    min: "3",
+                    max: "72",
+                    required: true,
+                    postfix: 'blocks'
+                  }, vm.refundAfterBlocks)
                 ])
               ]), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddressesGroup.buildInputs(), m("hr"), m("h4", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("hr"), m("h4", "Payment"), m("div", {
                 "class": "row"
@@ -2821,6 +2852,7 @@
         vm.balances = m.prop(buildBalancesPropValue([]));
         vm.confirmationsRequired = m.prop('');
         vm.returnFee = m.prop('');
+        vm.refundAfterBlocks = m.prop('');
         vm.paymentBalances = m.prop('');
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
@@ -2829,6 +2861,7 @@
         vm.backgroundOverlaySettings = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
+          var ref;
           vm.resourceId(botData.id);
           vm.name(botData.name);
           vm.address(botData.address);
@@ -2847,6 +2880,7 @@
           vm.backgroundImageDetails(botData.backgroundImageDetails);
           vm.logoImageDetails(botData.logoImageDetails);
           vm.backgroundOverlaySettings(botData.backgroundOverlaySettings);
+          vm.refundAfterBlocks((ref = botData.refundConfig) != null ? ref.refundAfterBlocks : void 0);
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
@@ -2938,17 +2972,23 @@
                 "class": "row"
               }, [
                 m("div", {
-                  "class": "col-md-4"
+                  "class": "col-md-3"
                 }, [
-                  sbAdmin.form.mValueDisplay("Return Transaction Fee", {
+                  sbAdmin.form.mValueDisplay("Return Fee", {
                     id: 'return_fee'
                   }, vm.returnFee() + ' BTC')
                 ]), m("div", {
-                  "class": "col-md-4"
+                  "class": "col-md-3"
                 }, [
                   sbAdmin.form.mValueDisplay("Confirmations", {
                     id: 'confirmations_required'
                   }, vm.confirmationsRequired())
+                ]), m("div", {
+                  "class": "col-md-6"
+                }, [
+                  sbAdmin.form.mValueDisplay("Refund Out of Stock Swaps After", {
+                    id: 'refund_after_blocks'
+                  }, vm.refundAfterBlocks() + " blocks")
                 ])
               ]), m("div", {
                 "class": "row"

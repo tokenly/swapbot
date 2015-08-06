@@ -70,7 +70,7 @@ do ()->
         return m("div", {class: "asset-group"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
+                m("div", {class: "col-md-2"}, [sharedSwapTypeFormField(number, swap),]),
 
                 m("div", {class: "col-md-1"}, [
                     sbAdmin.form.mValueDisplay("Receives", {id: "swap_in_#{number}", }, swap.in()),
@@ -81,7 +81,7 @@ do ()->
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("At USD Price", {type: "number", step: "any", min: "0", id: "swap_cost_#{number}", 'placeholder': "1", }, swap.cost),
                 ]),
-                m("div", {class: "col-md-1"}, [
+                m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Minimum", {type: "number", step: "any", min: "0", id: "swap_min_out_#{number}", 'placeholder': "1", }, swap.min_out),
                 ]),
                 m("div", {class: "col-md-2"}, [
@@ -184,10 +184,12 @@ do ()->
             vm.paymentPlan = m.prop('monthly001')
             vm.returnFee = m.prop(0.0001)
             vm.confirmationsRequired = m.prop(2)
+            vm.refundAfterBlocks = m.prop(3)
             vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
             
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
+
 
             vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()))
             vm.backgroundImageDetails = m.prop('')
@@ -210,6 +212,7 @@ do ()->
                         vm.swaps(buildSwapsPropValue(botData.swaps))
                         vm.returnFee(botData.returnFee or "0.0001")
                         vm.confirmationsRequired(botData.confirmationsRequired or "2")
+                        vm.refundAfterBlocks(botData.refundConfig?.refundAfterBlocks or "3")
 
                         vm.incomeRulesGroup.unserialize(botData.incomeRules)
                         vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
@@ -268,6 +271,7 @@ do ()->
                     incomeRules: vm.incomeRulesGroup.serialize()
                     blacklistAddresses: vm.blacklistAddressesGroup.serialize()
                     confirmationsRequired: vm.confirmationsRequired() + ""
+                    refundConfig: {refundAfterBlocks: vm.refundAfterBlocks() + ""}
                     backgroundImageId: vm.backgroundImageId() or ''
                     backgroundOverlaySettings: if vm.backgroundOverlaySettings() then window.JSON.parse(vm.backgroundOverlaySettings()) else ''
                     logoImageId: vm.logoImageId() or ''
@@ -352,11 +356,14 @@ do ()->
                         # return fee
                         m("div", {class: "spacer1"}),
                         m("div", { class: "row"}, [
-                            m("div", {class: "col-md-5"}, [
+                            m("div", {class: "col-md-4"}, [
                                 sbAdmin.form.mFormField("Confirmations", {id: 'confirmations_required', 'placeholder': "2", type: "number", step: "1", min: "2", max: "6", required: true, }, vm.confirmationsRequired),
                             ]),
-                            m("div", {class: "col-md-5"}, [
-                                sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0001", type: "number", step: "0.00001", min: "0.00001", max: "0.001", required: true, }, vm.returnFee),
+                            m("div", {class: "col-md-4"}, [
+                                sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0001", type: "number", step: "0.00001", min: "0.00001", max: "0.001", required: true, postfix: 'BTC' }, vm.returnFee),
+                            ]),
+                            m("div", {class: "col-md-4"}, [
+                                sbAdmin.form.mFormField("Refund Out of Stock Swaps After", {id: 'refund_after_blocks', 'placeholder': "3", type: "number", step: "1", min: "3", max: "72", required: true, postfix: 'blocks' }, vm.refundAfterBlocks),
                             ]),
                         ]),
 

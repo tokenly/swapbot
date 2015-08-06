@@ -139,6 +139,16 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['background_overlay_settings' => ['start' => 'bold', 'end' => '']]),
                 'error' => 'This gradient was empty.',
             ],
+
+            // refund config
+            [
+                'vars' => array_replace_recursive($sample_vars, ['refund_config' => ['refundAfterBlocks' => '2']]),
+                'error' => '3 or more',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['refund_config' => ['refundAfterBlocks' => '73']]),
+                'error' => 'no more than 72 confirmations',
+            ],
         ];
 
         // fixed

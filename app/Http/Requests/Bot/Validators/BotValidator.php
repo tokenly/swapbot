@@ -56,6 +56,9 @@ class BotValidator {
             // validate income rules
             $this->validateIncomeRules(isset($posted_data['income_rules']) ? $posted_data['income_rules'] : null, $validator);
 
+            // validate refund config
+            $this->validateRefundConfig(isset($posted_data['refund_config']) ? $posted_data['refund_config'] : null, $validator);
+
             // validate images
             $this->validateImageID('background', $user, isset($posted_data['background_image_id']) ? $posted_data['background_image_id'] : null, $validator);
             $this->validateImageID('logo', $user, isset($posted_data['logo_image_id']) ? $posted_data['logo_image_id'] : null, $validator);
@@ -172,6 +175,26 @@ class BotValidator {
 
 
     }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // refund config
+    
+    protected function validateRefundConfig($refund_config, $validator) {
+        if ($refund_config) {
+            if (isset($refund_config['refundAfterBlocks'])) {
+                if ($refund_config['refundAfterBlocks'] < 3) {
+                    $validator->errors()->add('refund_config', "You must specify 3 or more confirmations for automatic refunds.");
+                }
+                if ($refund_config['refundAfterBlocks'] > 72) {
+                    $validator->errors()->add('refund_config', "You must specify no more than 72 confirmations for automatic refunds.");
+                }
+            }
+        }
+    }
+
+
+
 
     protected function validateImageID($image_type, User $user, $image_id, $validator) {
         if (strlen($image_id)) {

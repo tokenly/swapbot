@@ -22,7 +22,7 @@ class RefundConfig extends ArrayObject implements APISerializeable {
     }
 
     public function unSerialize($data) {
-        $this['refundAfterBlocks']  = isset($data['refundAfterBlocks'])  ? $data['refundAfterBlocks']  : 36;
+        $this['refundAfterBlocks']  = isset($data['refundAfterBlocks'])  ? $data['refundAfterBlocks']  : 72;
 
         return $this;
     }

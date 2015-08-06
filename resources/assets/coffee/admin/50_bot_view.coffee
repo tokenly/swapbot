@@ -246,6 +246,7 @@ do ()->
             vm.balances = m.prop(buildBalancesPropValue([]))
             vm.confirmationsRequired = m.prop('')
             vm.returnFee = m.prop('')
+            vm.refundAfterBlocks = m.prop('')
             vm.paymentBalances = m.prop('')
 
             vm.incomeRulesGroup = buildIncomeRulesGroup()
@@ -283,6 +284,8 @@ do ()->
                     vm.backgroundImageDetails(botData.backgroundImageDetails)
                     vm.logoImageDetails(botData.logoImageDetails)
                     vm.backgroundOverlaySettings(botData.backgroundOverlaySettings)
+
+                    vm.refundAfterBlocks(botData.refundConfig?.refundAfterBlocks)
 
                     return
                 , (errorResponse)->
@@ -392,11 +395,14 @@ do ()->
                             ]),
 
                             m("div", { class: "row"}, [
-                                m("div", {class: "col-md-4"}, [
-                                    sbAdmin.form.mValueDisplay("Return Transaction Fee", {id: 'return_fee',  }, vm.returnFee()+' BTC'),
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Return Fee", {id: 'return_fee',  }, vm.returnFee()+' BTC'),
                                 ]),
-                                m("div", {class: "col-md-4"}, [
+                                m("div", {class: "col-md-3"}, [
                                     sbAdmin.form.mValueDisplay("Confirmations", {id: 'confirmations_required', }, vm.confirmationsRequired()),
+                                ]),
+                                m("div", {class: "col-md-6"}, [
+                                    sbAdmin.form.mValueDisplay("Refund Out of Stock Swaps After", {id: 'refund_after_blocks', }, vm.refundAfterBlocks()+" blocks"),
                                 ]),
                             ]),
 
