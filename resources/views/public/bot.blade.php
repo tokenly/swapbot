@@ -1,9 +1,14 @@
 <!doctype html>
+<?php $logo_image = ($bot['logoImageDetails'] AND isset($bot['logoImageDetails']['thumbUrl'])) ? $bot['logoImageDetails']['thumbUrl'] : ''; $has_logo_image = !!strlen($logo_image); ?>
 
 <head>
     <meta charset="utf-8">
     <title>Swapbot | {{ $bot['name'] }}</title>
-    <meta name="description" content="">
+    <meta name="description" content="{{ trim(strip_tags($bot['descriptionHtml'])) }}">
+    <meta property="og:title" content="{{ trim(strip_tags($bot['name'])) }}">
+@if ($has_logo_image)
+    <meta property="og:image" content="{{ $logo_image }}">
+@endif
     <meta name="viewport" content="width=device-width">
     <link href="/css/main.css" rel="stylesheet">
     <link rel="icon" href="{{ $bot->getRobohashURL() }}">
@@ -54,7 +59,6 @@
                 </div>
                 <div class="clearfix"></div>
             </div>
-            <?php $logo_image = ($bot['logoImageDetails'] AND isset($bot['logoImageDetails']['thumbUrl'])) ? $bot['logoImageDetails']['thumbUrl'] : ''; $has_logo_image = !!strlen($logo_image); ?>
             @if ($has_logo_image)
             <div id="details-logo">
                 <span><img src="{{ $logo_image }}" class="center"></span>
@@ -73,7 +77,10 @@
             <!-- DEFAULT CONTENT -->
     
 
-            <div id="SwapPurchaseStepsComponent">{{-- REACT --}}</div>
+            <div id="SwapPurchaseStepsComponent">
+                {{-- REACT --}}
+                <div class="description">{!! $bot['descriptionHtml'] !!}</div>
+            </div>
 
 
             <div class="clearfix"></div>
