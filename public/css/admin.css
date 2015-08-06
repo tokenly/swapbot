@@ -6383,6 +6383,11 @@ ul.bot-list .payment .amount {
   min-width: 140px;
   padding-right: 6px;
 }
+.bot-status .note {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-top: 10px;
+}
 .remove-link {
   margin-top: 29px;
   display: block;

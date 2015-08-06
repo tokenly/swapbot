@@ -53,7 +53,11 @@ sbAdmin.stateutils = do ()->
                 details.class = "panel-warning inactive new"
             when 'lowfuel'
                 details.label = stateutils.buildStateLabel(stateValue)
-                details.subtitle = "This swapbot is low on BTC fuel.  Please send 0.005 BTC to #{paymentAddress}."
+                details.subtitle = m('div', {}, [
+                        "This swapbot is low on BTC fuel.  Please send 0.005 BTC to #{paymentAddress}.",
+                        m('br'),
+                        m('div', {class: 'note'}, "Note: If you've just added fuel or paid to set up this Swapbot, you can ignore this message.")
+                    ])
                 details.class = "panel-warning inactive lowfuel"
             when 'active'
                 details.label = stateutils.buildStateLabel(stateValue)
