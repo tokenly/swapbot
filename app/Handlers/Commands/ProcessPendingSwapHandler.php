@@ -29,12 +29,13 @@ class ProcessPendingSwapHandler {
      */
     public function handle(ProcessPendingSwap $command)
     {
-        $swap = $command->swap;
+        $swap         = $command->swap;
+        $block_height = $command->block_height;
 
-        $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
+        $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) use ($block_height) {
             if ($locked_swap->isPending()) {
                 // process the swap
-                $this->swap_processor->processSwap($locked_swap);
+                $this->swap_processor->processSwap($locked_swap, $block_height);
             }
         });
     }

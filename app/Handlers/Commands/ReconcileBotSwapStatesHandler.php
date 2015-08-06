@@ -34,13 +34,14 @@ class ReconcileBotSwapStatesHandler {
     public function handle(ReconcileBotSwapStates $command)
     {
         $bot = $command->bot;
+        $block_height = $command->block_height;
 
-        DB::transaction(function () use ($bot) {
+        DB::transaction(function () use ($bot, $block_height) {
             $states = [SwapState::OUT_OF_STOCK];
             $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
             
             foreach($swaps as $swap) {
-                $this->dispatch(new ReconcileSwapState($swap));
+                $this->dispatch(new ReconcileSwapState($swap, $block_height));
             }
         });
     }

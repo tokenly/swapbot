@@ -319,6 +319,10 @@ class BotEventLogger {
         $this->logSwapEvent('swap.outOfStock', $bot, $swap);
     }
 
+    public function logAutomaticRefund(Bot $bot, Swap $swap, $refund_config) {
+        $this->logSimpleSwapEvent('swap.automaticRefund', $bot, $swap, ['refundAfterBlocks' => $refund_config['refundAfterBlocks']]);
+    }
+
 
 
     public function logSwapFailed(Bot $bot, Swap $swap, Exception $e, $receipt_update_vars) {

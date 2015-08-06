@@ -5,12 +5,12 @@ namespace Swapbot\Handlers\Commands;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\ProcessPendingSwaps;
+use Swapbot\Commands\ProcessPendingSwapsForBot;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Processor\SwapProcessor;
 
-class ProcessPendingSwapsHandler {
+class ProcessPendingSwapsForBotHandler {
 
     /**
      * Create the command handler.
@@ -26,18 +26,19 @@ class ProcessPendingSwapsHandler {
     /**
      * Handle the command.
      *
-     * @param  ProcessPendingSwaps  $command
+     * @param  ProcessPendingSwapsForBot  $command
      * @return void
      */
-    public function handle(ProcessPendingSwaps $command)
+    public function handle(ProcessPendingSwapsForBot $command)
     {
-        $swaps = $this->swap_repository->findByStates(SwapState::allPendingStates());
+        $swaps = $this->swap_repository->findByBotIDWithStates($command->bot['id'], SwapState::allPendingStates());
+        $block_height = $command->block_height;
         
         foreach($swaps as $swap) {
-            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
+            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) use ($block_height) {
                 if ($locked_swap->isPending()) {
                     // handle this swap
-                    $this->swap_processor->processSwap($locked_swap);
+                    $this->swap_processor->processSwap($locked_swap, $block_height);
                 }
             });
         }

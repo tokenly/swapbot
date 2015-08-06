@@ -18,7 +18,7 @@ class ReceiveWebhookHandlerTest extends TestCase {
         });
 
 
-        $notification = ['notificationId' => 'test00001', 'event' => 'block'];
+        $notification = ['notificationId' => 'test00001', 'event' => 'block', 'height' => 300000, 'hash' => '0000000000000000000000000000000000000000000000000000000000001111'];
         $command = new ReceiveWebhook($notification);
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($command);
 
@@ -44,12 +44,12 @@ class ReceiveWebhookHandlerTest extends TestCase {
             return new TestingEventLog();
         });
 
-        $notification = ['notificationId' => 'test00001', 'event' => 'block'];
+        $notification = ['notificationId' => 'test00001', 'event' => 'block', 'height' => 300000, 'hash' => '0000000000000000000000000000000000000000000000000000000000001111'];
         $command = new ReceiveWebhook($notification);
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($command);
 
         // send a second one
-        $notification = ['notificationId' => 'test00001', 'event' => 'block'];
+        $notification = ['notificationId' => 'test00001', 'event' => 'block', 'height' => 300000, 'hash' => '0000000000000000000000000000000000000000000000000000000000001111'];
         $command = new ReceiveWebhook($notification);
         app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($command);
 

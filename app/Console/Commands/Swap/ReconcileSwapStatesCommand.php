@@ -86,7 +86,10 @@ class ReconcileSwapStatesCommand extends Command {
                 return;
             }
 
-            $this->dispatch(new ReconcileBotSwapStates($bot));
+            $block_height = app('Swapbot\Repositories\BlockRepository')->findBestBlockHeight();
+            $this->comment("Using block height $block_height");
+
+            $this->dispatch(new ReconcileBotSwapStates($bot, $block_height));
             $this->info('done');
 
 

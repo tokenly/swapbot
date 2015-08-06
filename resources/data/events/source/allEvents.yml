@@ -96,6 +96,13 @@ events:
   # ### Refund
 
   -
+    name: swap.automaticRefund
+    label: Automatic Refund Triggered
+    level: DEBUG
+    msg: Automatic refund triggered after {{ $refundAfterBlocks }} blocks.
+    msgVars: [refundAfterBlocks]
+
+  -
     name: swap.refunding
     label: Refunding Swap
     level: DEBUG

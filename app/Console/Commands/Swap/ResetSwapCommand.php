@@ -5,8 +5,6 @@ namespace Swapbot\Console\Commands\Swap;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesCommands;
-use Swapbot\Commands\ProcessPendingSwap;
-use Swapbot\Commands\ProcessPendingSwaps;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Logger\BotEventLogger;

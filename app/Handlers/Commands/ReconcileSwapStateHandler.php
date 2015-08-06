@@ -32,10 +32,11 @@ class ReconcileSwapStateHandler {
      */
     public function handle(ReconcileSwapState $command)
     {
-        $swap = $command->swap;
+        $swap         = $command->swap;
+        $block_height = $command->block_height;
 
-        DB::transaction(function () use ($swap) {
-            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
+        DB::transaction(function () use ($swap, $block_height) {
+            $this->swap_repository->executeWithLockedSwap($swap, function($locked_swap) use ($block_height) {
                 switch ($locked_swap['state']) {
                     case SwapState::BRAND_NEW:
                         if ($locked_swap['state'] == SwapState::BRAND_NEW) {

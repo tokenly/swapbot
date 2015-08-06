@@ -11,6 +11,7 @@ use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStatusDetails;
 use Swapbot\Models\Data\IncomeRuleConfig;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Image;
 use Swapbot\Repositories\ImageRepository;
@@ -56,6 +57,9 @@ class Bot extends APIModel {
 
     public function setIncomeRulesAttribute($income_rules) { $this->attributes['income_rules'] = json_encode($this->serializeIncomeRules($income_rules)); }
     public function getIncomeRulesAttribute() { return $this->unSerializeIncomeRules(json_decode($this->attributes['income_rules'], true)); }
+    
+    public function setRefundConfigAttribute($refund_config) { $this->attributes['refund_config'] = json_encode($this->serializeRefundConfig($refund_config)); }
+    public function getRefundConfigAttribute() { return $this->unSerializeRefundConfig(json_decode($this->attributes['refund_config'], true)); }
     
     public function getUsernameAttribute() {
         // get username
@@ -259,6 +263,20 @@ class Bot extends APIModel {
             $addresses_map[$income_rule['address']] = true;
         }
         return array_keys($addresses_map);
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
+    public function serializeRefundConfig($refund_config) {
+        if (!($refund_config instanceof RefundConfig)) {
+            throw new Exception("Invalid RefundConfig Type of ".(is_object($refund_config) ? get_class($refund_config) : (is_array($refund_config) ? 'array' : 'unknown')), 1);
+        }
+        return $refund_config->serialize();
+    }
+
+    public function unSerializeRefundConfig($serialized_refund_config_data) {
+        return RefundConfig::createFromSerialized($serialized_refund_config_data);
     }
 
 

@@ -8,14 +8,18 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Commands\ProcessPendingSwaps;
+use Swapbot\Commands\ProcessPendingSwap;
+use Swapbot\Commands\ProcessPendingSwapsForBot;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
 use Swapbot\Commands\UpdateBotBalances;
 use Swapbot\Commands\UpdateBotPaymentAccount;
+use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Repositories\BlockRepository;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Swapbot\Swap\Logger\BotEventLogger;
@@ -33,9 +37,11 @@ class ReceiveEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, TransactionRepository $transaction_repository, SwapProcessor $swap_processor, ReceivePaymentProcessor $receive_payment_processor, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
+    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, BlockRepository $block_repository, TransactionRepository $transaction_repository, SwapProcessor $swap_processor, ReceivePaymentProcessor $receive_payment_processor, BotEventLogger $bot_event_logger, BalanceUpdater $balance_updater)
     {
         $this->bot_repository            = $bot_repository;
+        $this->block_repository          = $block_repository;
+        $this->swap_repository           = $swap_repository;
         $this->transaction_repository    = $transaction_repository;
         $this->swap_processor            = $swap_processor;
         $this->bot_event_logger          = $bot_event_logger;
@@ -50,8 +56,13 @@ class ReceiveEventProcessor {
         // find a bot for this notification if it is received on a public address
         $bot = $this->bot_repository->findByPublicMonitorID($xchain_notification['notifiedAddressId']);
         if ($bot) { 
-            $this->handlePublicAddressReceive($xchain_notification, $bot);
+            $block_height = $this->getCurrentBlockHeight($xchain_notification);
+            $public_tx_process = $this->handlePublicAddressReceive($xchain_notification, $bot, $block_height);
             $found = true;
+
+
+            // process any swaps that were created or affected
+            $this->processAnySwapsAffected($bot, $public_tx_process['transaction']['id'], $block_height);
         }
 
         // find a bot for this notification if it is received on the payment address
@@ -60,6 +71,10 @@ class ReceiveEventProcessor {
             if ($bot) { 
                 $this->receive_payment_processor->handlePaymentAddressReceive($xchain_notification, $bot);
                 $found = true;
+
+                // process any swaps that might have been waiting for payment
+                $block_height = $this->getCurrentBlockHeight($xchain_notification);
+                $this->processAnySwapsAffected($bot, null, $block_height);
             }
         }
 
@@ -69,13 +84,12 @@ class ReceiveEventProcessor {
             throw new Exception("Unable to find bot for monitor {$xchain_notification['notifiedAddressId']}.  notificationId was {$xchain_notification['notificationId']}", 1);
         }
 
-        // process any swaps that are pending (including those just created)
-        $this->dispatch(new ProcessPendingSwaps());
-        
     }
 
-    public function handlePublicAddressReceive($xchain_notification, $bot) {
-        $tx_process = $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification) {
+    // returns an array of data with
+    //   new_swaps_created
+    public function handlePublicAddressReceive($xchain_notification, $bot, $block_height) {
+        $tx_process = $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($xchain_notification, $block_height) {
 
             // load or create a new transaction from the database
             $transaction_model = $this->findOrCreateTransaction($xchain_notification, $bot['id'], 'receive');
@@ -87,6 +101,7 @@ class ReceiveEventProcessor {
                 'transaction'                      => $transaction_model,
                 'xchain_notification'              => $xchain_notification,
                 'bot'                              => $bot,
+                'block_height'                     => $block_height,
 
                 'confirmations'                    => $xchain_notification['confirmations'],
                 'is_confirmed'                     => $xchain_notification['confirmed'],
@@ -98,6 +113,8 @@ class ReceiveEventProcessor {
                 'any_processing_errors'            => false,
                 'should_reconcile_bot_state'       => true,
                 'should_reconcile_swap_states'     => true,
+
+                'new_swaps_created'                => [],
             ]);
 
             // previously processed transactions
@@ -133,7 +150,9 @@ class ReceiveEventProcessor {
             return $tx_process;
         });
 
-
+        return [
+            'transaction' => $tx_process['transaction'],
+        ];
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -295,6 +314,8 @@ class ReceiveEventProcessor {
                 // if there wasn't a swap yet, create one
                 if (!$swap) {
                     $swap = $this->swap_processor->createNewSwap($swap_config, $tx_process['bot'], $tx_process['transaction']);
+
+                    $tx_process['new_swaps_created'][] = $swap;
                 }
 
                 $any_swap_processed = true;
@@ -339,12 +360,37 @@ class ReceiveEventProcessor {
     protected function handleReconcileSwapStates($tx_process) {
         if ($tx_process['should_reconcile_swap_states']) {
             // some swap states might have changed, so check those
-            $this->dispatch(new ReconcileBotSwapStates($tx_process['bot']));
+            $this->dispatch(new ReconcileBotSwapStates($tx_process['bot'], $tx_process['block_height']));
         }
     }
 
     protected function reloadBot($tx_process) {
         $tx_process['bot'] = $this->bot_repository->findByID($tx_process['bot']['id']);
+    }
+
+    protected function processAnySwapsAffected(Bot $bot, $transaction_id, $block_height) {
+        $any_swap_processed = false;
+
+        if ($transaction_id) {
+            $swaps_updated = $this->swap_repository->findByTransactionID($transaction_id);
+            foreach ($swaps_updated as $swap) {
+                $this->dispatch(new ProcessPendingSwap($swap, $block_height));
+                $any_swap_processed = true;
+            }
+        }
+
+        if (!$any_swap_processed) {
+            // maybe this was a refueling transaction
+            $this->dispatch(new ProcessPendingSwapsForBot($bot, $block_height));
+        }
+
+    }
+
+
+    protected function getCurrentBlockHeight($xchain_notification) {
+        $block_height = (isset($xchain_notification['bitcoinTx']) AND isset($xchain_notification['bitcoinTx']['blockheight'])) ? $xchain_notification['bitcoinTx']['blockheight'] : null;
+        if (!$block_height) { $block_height = $this->block_repository->findBestBlockHeight(); }
+        return $block_height;
     }
 
 }

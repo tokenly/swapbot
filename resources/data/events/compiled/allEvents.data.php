@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-04 13:04:33
+// compiled on 2015-08-05 13:18:25
 
 return array (
   'swap.new' => 
@@ -162,6 +162,17 @@ return array (
       4 => 'assetOut',
     ),
     'swapEventStream' => true,
+  ),
+  'swap.automaticRefund' => 
+  array (
+    'name' => 'swap.automaticRefund',
+    'label' => 'Automatic Refund Triggered',
+    'level' => 'DEBUG',
+    'msg' => 'Automatic refund triggered after <?php echo e($refundAfterBlocks); ?> blocks.',
+    'msgVars' => 
+    array (
+      0 => 'refundAfterBlocks',
+    ),
   ),
   'swap.refunding' => 
   array (

@@ -9,14 +9,16 @@ class ProcessPendingSwap extends Command
 {
 
     var $swap;
+    var $block_height;
 
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct(Swap $swap)
+    public function __construct(Swap $swap, $block_height)
     {
-        $this->swap = $swap;
+        $this->swap         = $swap;
+        $this->block_height = $block_height;
     }
 }

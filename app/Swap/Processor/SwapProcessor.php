@@ -64,6 +64,7 @@ class SwapProcessor {
         $strategy = $swap_config->getStrategy();
         $in_quantity = $transaction['xchain_notification']['quantity'];
         $initial_receipt_vars = $strategy->caculateInitialReceiptValues($swap_config, $in_quantity);
+        Log::debug("createNewSwap \$transaction=".json_encode($transaction, 192));
 
         // new swap vars
         $new_swap = $this->swap_repository->create([
@@ -81,7 +82,7 @@ class SwapProcessor {
         return $new_swap;
     }
 
-    public function processSwap(Swap $swap) {
+    public function processSwap(Swap $swap, $block_height) {
         try {
             $swap_process = null;
 
@@ -91,7 +92,7 @@ class SwapProcessor {
             if (!$this->botIsActive($bot)) { return $swap; }
 
             // start by reconciling the swap state
-            $this->dispatch(new ReconcileSwapState($swap));
+            $this->dispatch(new ReconcileSwapState($swap, $block_height));
 
             $swap_config = $swap->getSwapConfig();
 
@@ -105,6 +106,7 @@ class SwapProcessor {
                 'swap_config'              => $swap_config,
                 'swap_id'                  => $swap_config->buildName(),
 
+                'block_height'             => $block_height,
                 'transaction'              => $transaction,
                 'bot'                      => $bot,
 
@@ -329,6 +331,17 @@ class SwapProcessor {
 
         // log out of stock or not ready
         if ($swap_process['swap']->isOutOfStock()) {
+            $refund_config = $swap_process['bot']['refund_config'];
+            Log::debug("({$swap_process['block_height']}) swapShouldBeAutomaticallyRefunded: ".json_encode($refund_config->swapShouldBeAutomaticallyRefunded($swap_process['swap'], $swap_process['block_height']), 192));
+            if ($refund_config->swapShouldBeAutomaticallyRefunded($swap_process['swap'], $swap_process['block_height'])) {
+                // log automatic refund
+                $this->bot_event_logger->logAutomaticRefund($swap_process['bot'], $swap_process['swap'], $refund_config);
+
+                // do automatic refund
+                $this->doRefund($swap_process);
+                return;
+            }
+
             $this->bot_event_logger->logSwapOutOfStock($swap_process['bot'], $swap_process['swap']);
             return;
         }

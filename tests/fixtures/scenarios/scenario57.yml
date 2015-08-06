@@ -1,0 +1,68 @@
+# out of stock swaps are refunded when configured
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    balances:
+      LTBCOIN: 0
+      BTC: 0.01
+    refund_config:
+      refundAutomatically: true
+      refundAfterBlocks: 8
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+  - { meta: { baseFilename: block_notification_01.yml }, height: 300001 }
+  - { meta: { baseFilename: block_notification_01.yml }, height: 300008 }
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  # - 
+  #   meta: { baseFilename: send_LTBCOIN-refund.yml }
+  #   data:
+  #     requestId: "buildFn:refund"
+
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
+  - #### OUT OF STOCK
+    meta: { baseFilename: swap.stateChange-outofstock.yml }
+  - #### NOT READY
+    meta: { baseFilename: swap.outOfStock.yml }
+
+  - #### NOT READY (block 300001)
+    meta: { baseFilename: swap.outOfStock.yml }
+
+  - #### automatic refund triggered
+    meta: { baseFilename: swap.automaticRefund.yml }
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding-BTC.yml }
+    confirmations: '1'
+    state: outofstock
+    isError: true
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded-BTC.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-refunded.yml }
+
+
+expectedBotModels:
+  - 
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
+    state: refunded
+    receipt:
+      quantityIn: 0.001
+      assetIn: 'BTC'
+      quantityOut: 0.0009
+      assetOut: 'BTC'
+      type: refund

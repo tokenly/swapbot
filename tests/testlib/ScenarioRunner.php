@@ -193,7 +193,19 @@ class ScenarioRunner
 
             // increase the mock account
             if ($notification['event'] == 'receive') {
+                // fix blockId and blockhash
+                if (isset($notification['blockId']) AND $notification['blockId']) {
+                    $notification['bitcoinTx']['blockheight'] = $notification['blockId'];
+                }
+
                 $this->mock_builder->receive($notification);
+            }
+
+            // ensure a hash for the block event
+            if ($notification['event'] == 'block') {
+                if (!isset($notification['hash'])) {
+                    $notification['hash'] = app('BlockHelper')->sampleBlockHash($notification['height']);
+                }
             }
 
 

@@ -8,6 +8,7 @@ use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\IncomeRuleConfig;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
 
@@ -69,6 +70,12 @@ class BotHelper  {
                     'minThreshold'  => 10.0,
                     'paymentAmount' => 2.0,
                     'address'       => '1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B',
+                ],
+            ],
+
+            'refund_config'               => [
+                [
+                    'refundAfterBlocks'   => 6,
                 ],
             ],
 
@@ -140,6 +147,10 @@ class BotHelper  {
                     $income_rules[] = IncomeRuleConfig::createFromSerialized($income_rule_data);
                 }
                 $attributes['income_rules'] = $income_rules;
+            }
+
+            if (isset($attributes['refund_config'])) {
+                $attributes['refund_config'] = RefundConfig::createFromSerialized($attributes['refund_config']);
             }
 
             $bot_model = $this->bot_repository->create($attributes);

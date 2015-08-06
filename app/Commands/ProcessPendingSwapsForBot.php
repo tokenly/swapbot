@@ -3,12 +3,11 @@
 namespace Swapbot\Commands;
 
 use Swapbot\Commands\Command;
-use Swapbot\Models\Swap;
+use Swapbot\Models\Bot;
 
-class ReconcileSwapState extends Command {
+class ProcessPendingSwapsForBot extends Command {
 
-
-    var $swap;
+    var $bot;
     var $block_height;
 
     /**
@@ -16,9 +15,9 @@ class ReconcileSwapState extends Command {
      *
      * @return void
      */
-    public function __construct(Swap $swap, $block_height)
+    public function __construct(Bot $bot, $block_height)
     {
-        $this->swap         = $swap;
+        $this->bot          = $bot;
         $this->block_height = $block_height;
     }
 
