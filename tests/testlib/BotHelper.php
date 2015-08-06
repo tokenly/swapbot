@@ -100,10 +100,11 @@ class BotHelper  {
             }
         }
 
-        // add swaps, blacklist addresses and income rules
+        // add swaps, blacklist addresses, income rules and refundConfig
         $out['swaps']              = $sample_bot_vars['swaps'];
         $out['blacklistAddresses'] = $sample_bot_vars['blacklist_addresses'];
         $out['incomeRules']        = $sample_bot_vars['income_rules'];
+        $out['refundConfig']       = $sample_bot_vars['refund_config'];
         
         return $out;
     }
