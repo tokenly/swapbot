@@ -100,7 +100,7 @@ class SwapIndexRepository
                 ],
             ],
 
-            'defaults' => ['sort' => 'in,out'],
+            'defaults' => ['sort' => ['inToken','outToken']],
         ];
     }
 

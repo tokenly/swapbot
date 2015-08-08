@@ -140,8 +140,10 @@ class BotRepository extends APIRepository
                     },
                     'useSortFn' => function($query, $parsed_sort_query, $params) {
                         $query
+                            // ->select('bots.*','bidx1s.contents')
                             ->join('bot_index AS bidx1s', 'bots.id','=','bidx1s.bot_id')
-                            ->orderBy('name', $parsed_sort_query['direction']);
+                            ->where('bidx1s.field', '=', BotIndexRepository::FIELD_NAME)
+                            ->orderBy('bidx1s.contents', isset($parsed_sort_query['direction']) ? $parsed_sort_query['direction'] : 'ASC');
                     },
                 ],
                 'description' => ['useFilterFn' => function($query, $param_value, $params) {
@@ -159,23 +161,32 @@ class BotRepository extends APIRepository
                         ->groupBy('bots.id');
                 }],
 
-                'inToken'     => ['useFilterFn' => function($query, $param_value, $params) {
+                'inToken'     => ['useFilterFn' => function($query, $param_value, $params, $context) {
+                    if (!isset($context['swidx1'])) {
+                        $context['swidx1'] = true;
+                        $query->join('swap_index AS swidx1', 'bots.id','=','swidx1.bot_id');
+                    }
                     $query
-                        ->join('swap_index AS swidx1', 'bots.id','=','swidx1.bot_id')
                         ->where('swidx1.in', '=', strtoupper(trim($param_value)))
                         ->groupBy('bots.id');
                 }],
-                'outToken'    => ['useFilterFn' => function($query, $param_value, $params) {
+                'outToken'    => ['useFilterFn' => function($query, $param_value, $params, $context) {
+                    if (!isset($context['swidx1'])) {
+                        $context['swidx1'] = true;
+                        $query->join('swap_index AS swidx1', 'bots.id','=','swidx1.bot_id');
+                    }
                     $query
-                        ->join('swap_index AS swidx2', 'bots.id','=','swidx2.bot_id')
-                        ->where('swidx2.out', '=', strtoupper(trim($param_value)))
+                        ->where('swidx1.out', '=', strtoupper(trim($param_value)))
                         ->groupBy('bots.id');
                 }],
 
-                'cost'    => ['useSortFn' => function($query, $parsed_sort_query, $params) {
+                'cost'    => ['useSortFn' => function($query, $parsed_sort_query, $params, $context) {
+                    if (!isset($context['swidx1'])) {
+                        $context['swidx1'] = true;
+                        $query->join('swap_index AS swidx1', 'bots.id','=','swidx1.bot_id');
+                    }
                     $query
-                        ->join('swap_index AS swidx3', 'bots.id','=','swidx3.bot_id')
-                        ->orderBy('cost', $parsed_sort_query['direction']);
+                        ->orderBy('swidx1.cost', isset($parsed_sort_query['direction']) ? $parsed_sort_query['direction'] : 'ASC');
                 }],
 
                 'created_at'  => ['sortField' => 'created_at', 'defaultSortDirection' => 'asc'],

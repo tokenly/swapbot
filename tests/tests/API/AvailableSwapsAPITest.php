@@ -196,6 +196,7 @@ class AvailableSwapsAPITest extends TestCase {
 
     protected function runSearch($attributes) {
         $test_helper = app('APITestHelper');
+        // if (!isset($attributes['sort'])) { $attributes['sort'] = ''; }
         return $test_helper->callAPIWithoutAuthenticationAndValidateResponse('GET', '/api/v1/public/availableswaps', $attributes, 200);
     }
 
