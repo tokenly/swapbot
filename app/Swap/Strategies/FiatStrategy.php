@@ -169,6 +169,8 @@ class FiatStrategy implements Strategy {
     }
 
     public function buildSwapDetailsForAPI(SwapConfig $swap_config, $in=null) {
+        $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
+
         if ($in AND $in == $swap_config['fiat']) {
             return [
                 'in'        => $swap_config['fiat'],
