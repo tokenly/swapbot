@@ -32,7 +32,7 @@ class UserHelper
 
         if ($randomize) {
             $create_vars['email'] = $this->randomEmail();
-            $create_vars['username'] = $this->usernameFromEmail($create_vars['email']);
+            if (!isset($override_vars['username'])) { $create_vars['username'] = $this->usernameFromEmail($create_vars['email']); }
             $create_vars['apitoken'] = $this->testingTokenFromEmail($create_vars['email']);
         }
 

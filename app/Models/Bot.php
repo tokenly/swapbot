@@ -21,8 +21,9 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', ];
-    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', ];
+    protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', ];
+    protected $api_attributes_public_simple = ['id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address', 'state', 'created_at', ];
 
     protected $dates = ['balances_updated_at'];
 
@@ -72,6 +73,33 @@ class Bot extends APIModel {
             '<hr><hr/><li><li/><ol><ol/><caption><caption/><col><col/><p><p/><colgroup><colgroup/><pre><pre/><dd><dd/><div><div/><dl><dl/><table><table/><td><td/><dt><dt/><tbody><tbody/><tfoot><tfoot/><th><th/><thead><thead/><tr><tr/><ul><ul/><h1><h1/><h2><h2/><h3><h3/><h4><h4/><h5><h5/><h6><h6/>'
         ));
     }
+
+    public function getRobohashImageAttribute() {
+        return $this->getRobohashURL();
+    }
+
+    public function getBackgroundImageAttribute() {
+        $image = $this->getBackgroundImage();
+        if ($image) { return $image->url('full'); }
+
+        // default
+        return Config::get('swapbot.site_host')."/images/background/marketplace.png";
+
+        return null;
+    }
+
+    public function getLogoImageAttribute() {
+        $image = $this->getLogoImage();
+        if ($image) { return $image->url('thumb'); }
+        return null;
+    }
+
+    public function getBotUrlAttribute() {
+        return $this->getPublicBotURL();
+    }
+
+
+
 
     public function getRobohashURL() {
         return str_replace('%%HASH%%', $this['hash'], Config::get('swapbot.robohash_url'));

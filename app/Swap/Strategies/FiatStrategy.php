@@ -147,6 +147,55 @@ class FiatStrategy implements Strategy {
     }
 
     ////////////////////////////////////////////////////////////////////////
+    // Index
+
+    public function buildIndexEntries(SwapConfig $swap_config) {
+        $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
+
+        return [
+            [
+                'in'   => $swap_config['fiat'],
+                'out'  => $swap_config['out'],
+                // 'rate' => (1 / $swap_config['cost']),
+                'cost' => ($swap_config['cost']),
+            ],
+            [
+                'in'   => $swap_config['in'],
+                'out'  => $swap_config['out'],
+                // 'rate' => ($conversion_rate / $swap_config['cost']),
+                'cost' => ($swap_config['cost'] / $conversion_rate),
+            ],
+        ];
+    }
+
+    public function buildSwapDetailsForAPI(SwapConfig $swap_config, $in=null) {
+        if ($in AND $in == $swap_config['fiat']) {
+            return [
+                'in'        => $swap_config['fiat'],
+                'out'       => $swap_config['out'],
+                'rate'      => (1 / $swap_config['cost']),
+                'cost'      => ($swap_config['cost']),
+
+                'divisible' => $swap_config['divisible'],
+                'min'       => $swap_config['min_out'],
+                'fiat'      => $swap_config['fiat'],
+            ];
+        }
+
+        return [
+            'in'        => $swap_config['in'],
+            'out'       => $swap_config['out'],
+            'rate'      => ($conversion_rate / $swap_config['cost']),
+            'cost'      => ($swap_config['cost'] / $conversion_rate),
+
+            'divisible' => $swap_config['divisible'],
+            'min'       => $swap_config['min_out'],
+            'fiat'      => $swap_config['fiat'],
+        ];
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
     // Conversion
 
@@ -155,7 +204,7 @@ class FiatStrategy implements Strategy {
 
         return $quote_entry['last'];
     }
-    
+
     
 
 }

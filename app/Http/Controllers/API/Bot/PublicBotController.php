@@ -33,7 +33,7 @@ class PublicBotController extends APIController {
 
     public function showBots(Request $request, BotRepository $repository, APIControllerHelper $api_helper) {
         $resources = $repository->findAll($this->buildFilter($request, $repository));
-        return $api_helper->transformResourcesForOutput($resources, 'public');
+        return $api_helper->transformResourcesForOutput($resources, 'public_simple');
     }
 
 

@@ -11,6 +11,7 @@ use Swapbot\Events\BotUpdated;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
+use Swapbot\Repositories\BotIndexRepository;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use Tokenly\RecordLock\Facade\RecordLock;
 use \Exception;
@@ -82,13 +83,13 @@ class BotRepository extends APIRepository
 
         // force an update to build the hash
         $model_clone = clone $model;
-        $this->update($model_clone, []);
+        parent::update($model_clone, []);
 
         // apply the new hash
         $model['hash'] = $model_clone['hash'];
 
         // fire an event
-        Event::fire(new BotCreated($model));
+        Event::fire(new BotCreated(clone $model));
 
         return $model;
     }
@@ -116,21 +117,69 @@ class BotRepository extends APIRepository
 
     public function update(Model $model, $attributes) {
         $out = parent::update($model, $attributes);
-        Event::fire(new BotUpdated($model));
+        Event::fire(new BotUpdated(clone $model));
         return $out;
     }
 
     public function delete(Model $model) {
         $out = parent::delete($model);
-        Event::fire(new BotDeleted($model));
+        Event::fire(new BotDeleted(clone $model));
         return $out;
     }
 
     public function buildFindAllFilterDefinition() {
         return [
             'fields' => [
-                'name'       => ['field' => 'name',],
-                'created_at' => ['sortField' => 'created_at', 'defaultSortDirection' => 'asc'],
+                'name'        => [
+                    'useFilterFn' => function($query, $param_value, $params) {
+                        $query
+                            ->join('bot_index AS bidx1', 'bots.id','=','bidx1.bot_id')
+                            ->where('bidx1.field', '=', BotIndexRepository::FIELD_NAME)
+                            ->where('bidx1.contents', 'like', '%'.$param_value.'%')
+                            ->groupBy('bots.id');
+                    },
+                    'useSortFn' => function($query, $parsed_sort_query, $params) {
+                        $query
+                            ->join('bot_index AS bidx1s', 'bots.id','=','bidx1s.bot_id')
+                            ->orderBy('name', $parsed_sort_query['direction']);
+                    },
+                ],
+                'description' => ['useFilterFn' => function($query, $param_value, $params) {
+                    $query
+                        ->join('bot_index AS bidx2', 'bots.id','=','bidx2.bot_id')
+                        ->where('bidx2.field', '=', BotIndexRepository::FIELD_DESCRIPTION)
+                        ->where('bidx2.contents', 'like', '%'.$param_value.'%')
+                        ->groupBy('bots.id');
+                }],
+                'username'    => ['useFilterFn' => function($query, $param_value, $params) {
+                    $query
+                        ->join('bot_index AS bidx3', 'bots.id','=','bidx3.bot_id')
+                        ->where('bidx3.field', '=', BotIndexRepository::FIELD_USERNAME)
+                        ->where('bidx3.contents', 'like', '%'.$param_value.'%')
+                        ->groupBy('bots.id');
+                }],
+
+                'inToken'     => ['useFilterFn' => function($query, $param_value, $params) {
+                    $query
+                        ->join('swap_index AS swidx1', 'bots.id','=','swidx1.bot_id')
+                        ->where('swidx1.in', '=', strtoupper(trim($param_value)))
+                        ->groupBy('bots.id');
+                }],
+                'outToken'    => ['useFilterFn' => function($query, $param_value, $params) {
+                    $query
+                        ->join('swap_index AS swidx2', 'bots.id','=','swidx2.bot_id')
+                        ->where('swidx2.out', '=', strtoupper(trim($param_value)))
+                        ->groupBy('bots.id');
+                }],
+
+                'cost'    => ['useSortFn' => function($query, $parsed_sort_query, $params) {
+                    $query
+                        ->join('swap_index AS swidx3', 'bots.id','=','swidx3.bot_id')
+                        ->orderBy('cost', $parsed_sort_query['direction']);
+                }],
+
+                'created_at'  => ['sortField' => 'created_at', 'defaultSortDirection' => 'asc'],
+                'state'       => ['field' => 'state', 'default' => 'active',],
             ],
             'defaults' => ['sort' => 'created_at'],
         ];

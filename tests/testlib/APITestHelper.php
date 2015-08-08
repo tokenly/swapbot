@@ -157,7 +157,7 @@ class APITestHelper  {
         return $created_models;
     }
 
-    public function testShow() {
+    public function testShow($api_context=null) {
         $this->cleanup();
 
         // create a model
@@ -171,7 +171,7 @@ class APITestHelper  {
         PHPUnit::assertNotEmpty($actual_response_from_api);
 
         // populate the $expected_created_resource
-        $expected_api_response = $created_model->serializeForAPI();
+        $expected_api_response = $created_model->serializeForAPI($api_context);
         $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
 
         // check response
@@ -181,7 +181,7 @@ class APITestHelper  {
         return $created_model;
     }
 
-    public function testPublicShow($public_url_base) {
+    public function testPublicShow($public_url_base, $api_context='public') {
         $this->cleanup();
 
         // create a model
@@ -195,7 +195,7 @@ class APITestHelper  {
         PHPUnit::assertNotEmpty($actual_response_from_api);
 
         // populate the $expected_created_resource
-        $expected_api_response = $created_model->serializeForAPI('public');
+        $expected_api_response = $created_model->serializeForAPI($api_context);
         $expected_api_response = $this->normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api);
 
         // check response

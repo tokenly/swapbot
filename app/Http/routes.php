@@ -1,41 +1,22 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the controller to call when that URI is requested.
-|
-*/
-
-$router->get('/', 'WelcomeController@index');
-
 
 ////////////////////////////////////////////////////////////////////////
-// Website
+// Website Routes
+
+// home
+$router->get('/', 'WelcomeController@index');
 
 // admin
 $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 
-
-////////////////////////////////////////////////////////////////////////
 // Public Bot Pages
 $router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
 $router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap');
 
-////////////////////////////////////////////////////////////////////////
 // Unsubscribe Pages
 $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptionController@unsubscribe');
 
-
-
-// $router->get('/uploadtest', 'UploadTestController@index');
-// $router->post('/uploadtest', 'UploadTestController@post');
-// $router->get('/uploadshow', 'UploadTestController@show');
-// $router->get('/uploaddelete/{id}', 'UploadTestController@delete');
 
 
 
@@ -45,7 +26,7 @@ $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptio
 // Bot API
 $router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
 
-// Bot API
+// Bots API
 $router->get('api/v1/public/bots', 'API\Bot\PublicBotController@showBots');
 
 // Bot Events API
@@ -59,6 +40,9 @@ $router->get('api/v1/public/swapevents/{botuuid}', 'API\BotEvents\PublicBotEvent
 
 // Swaps API
 $router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');
+
+// Available Swaps API
+$router->get('api/v1/public/availableswaps', 'API\Swap\PublicAvailableSwapsController@index');
 
 // Customer API
 $router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@store');

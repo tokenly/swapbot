@@ -53,4 +53,11 @@ class Image extends APIModel implements StaplerableInterface {
         return $details;
     }
 
+    public function url($style) {
+        $image = $this->image;
+        if (!$image) { return null; }
+
+        return $image->url($style);
+    }
+
 }

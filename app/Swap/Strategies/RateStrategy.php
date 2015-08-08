@@ -97,4 +97,29 @@ class RateStrategy implements Strategy {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Index
+
+    public function buildIndexEntries(SwapConfig $swap_config) {
+        return [
+            [
+                'in'   => $swap_config['in'],
+                'out'  => $swap_config['out'],
+                // 'rate' => $swap_config['rate'],
+                'cost' => $swap_config['rate'] > 0 ? (1 / $swap_config['rate']) : 0,
+            ]
+        ];
+    }
+
+    public function buildSwapDetailsForAPI(SwapConfig $swap_config, $in=null) {
+        return [
+            'in'   => $swap_config['in'],
+            'out'  => $swap_config['out'],
+            'rate' => $swap_config['rate'],
+            'cost' => $swap_config['rate'] > 0 ? (1 / $swap_config['rate']) : 0,
+            'min'  => $swap_config['min'],
+        ];
+    }
+
+
 }

@@ -29,4 +29,13 @@ class StrategyFactory {
     }
 
 
+    public function getStrategy($type) {
+        if (!isset($this->strategy_objects)) { $this->strategy_objects = []; }
+        if (!isset($this->strategy_objects[$type])) {
+            $this->strategy_objects[$type] = $this->newStrategy($type);
+        }
+        return $this->strategy_objects[$type];
+    }
+
+
 }

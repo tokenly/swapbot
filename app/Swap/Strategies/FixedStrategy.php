@@ -90,4 +90,30 @@ class FixedStrategy implements Strategy {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Index
+
+    public function buildIndexEntries(SwapConfig $swap_config) {
+        return [
+            [
+                'in'   => $swap_config['in'],
+                'out'  => $swap_config['out'],
+                // 'rate' => ($swap_config['out_qty'] / $swap_config['in_qty']),
+                'cost' => ($swap_config['in_qty'] / $swap_config['out_qty']),
+            ]
+        ];
+    }
+
+    public function buildSwapDetailsForAPI(SwapConfig $swap_config, $in=null) {
+        return [
+            'in'      => $swap_config['in'],
+            'out'     => $swap_config['out'],
+            'rate'    => ($swap_config['out_qty'] / $swap_config['in_qty']),
+            'cost'    => ($swap_config['in_qty'] / $swap_config['out_qty']),
+
+            'inQuantity'  => $swap_config['in_qty'],
+            'outQuantity' => $swap_config['out_qty'],
+        ];
+    }
+
 }

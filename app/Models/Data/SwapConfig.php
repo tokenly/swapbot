@@ -39,6 +39,8 @@ class SwapConfig extends ArrayObject implements APISerializeable {
 
     public function serializeForAPI() { return $this->serialize(); }
 
+    public function buildIndexEntries() { return $this->getStrategy()->buildIndexEntries($this); }
+
 
     public function buildName() {
         return $this['in'].':'.$this['out'];
