@@ -1353,7 +1353,7 @@
         case 'lowfuel':
           details.label = stateutils.buildStateLabel(stateValue);
           details.subtitle = m('div', {}, [
-            "This swapbot is low on BTC fuel.  Please send 0.005 BTC to " + paymentAddress + ".", m('br'), m('div', {
+            "This swapbot is low on BTC fuel.  Please send 0.005 BTC to " + botAddress + ".", m('br'), m('div', {
               "class": 'note'
             }, "Note: If you've just added fuel or paid to set up this Swapbot, you can ignore this message.")
           ]);
