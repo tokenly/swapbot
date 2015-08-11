@@ -359,7 +359,9 @@ class Bot extends APIModel {
         }
         $source = substr($source, 0, strlen($source) - 1);
 
-        return hash("sha256", $source);
+        $hash = hash("sha256", $source);
+        // Log::debug("For bot: {$this['uuid']}\nsource=\n$source\nhash: $hash");
+        return $hash;
     }
     
 }
