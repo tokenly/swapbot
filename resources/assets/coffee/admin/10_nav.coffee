@@ -13,7 +13,8 @@ sbAdmin.nav = do ()->
                         ]),
                         m("ul", { class: "dropdown-menu", role: "menu"}, [
                             m("li", { class: ""}, [
-                                m("a[href='/admin/logout']", {class: "", config: m.route}, "Logout"),
+                                # m("a[href='/admin/logout']", {class: "", config: m.route}, "Logout"),
+                                m("a[href='/account/logout']", {class: ""}, "Logout"),
                             ]),
                         ]),
                     ]),
@@ -21,7 +22,8 @@ sbAdmin.nav = do ()->
         else
             return m("ul", { class: "nav navbar-nav navbar-right"}, [
                     m("li", { class: ""}, [
-                        m("a[href='/admin/login']", {class: "", config: m.route}, "Login"),
+                        # m("a[href='/admin/login']", {class: "", config: m.route}, "Login"),
+                        m("a[href='/account/login']", {class: ""}, "Login"),
                     ]),
                 ])
 

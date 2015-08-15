@@ -1,7 +1,7 @@
 @extends('public.base')
 
-@section('page_title')
-    Oh oh.  There was a problem.
+@section('header_content')
+<h1>Oh oh.  There was a problem.</h1>
 @stop
 
 @section('content')

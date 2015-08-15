@@ -18,6 +18,16 @@ $router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap'
 $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptionController@unsubscribe');
 
 
+////////////////////////////////////////////////////////////////////////
+// Account Routes
+
+$router->get('/account/login', 'Account\AccountController@login');
+$router->get('/account/credentialscheck', 'Account\AccountController@credentialsCheck');
+$router->get('/account/welcome', 'Account\AccountController@welcome');
+$router->get('/account/logout', 'Account\AccountController@logout');
+
+$router->get('/account/authorize', 'Account\AccountController@redirectToProvider');
+$router->get('/account/authorize/callback', 'Account\AccountController@handleProviderCallback');
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -32,7 +42,7 @@ $router->get('api/v1/public/bots', 'API\Bot\PublicBotController@showBots');
 // Bot Events API
 $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
 
-// Swap Event Stream API
+// Bot Event Stream API
 $router->get('api/v1/public/boteventstream/{botuuid}', 'API\BotEvents\PublicBotEventsController@botEventStreamIndex');
 
 // Swap Event Stream API

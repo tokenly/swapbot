@@ -226,7 +226,7 @@
     auth = {};
     auth.redirectIfNotLoggedIn = function() {
       if (!auth.isLoggedIn()) {
-        m.route('/admin/login');
+        window.location.href = '/account/login';
       }
     };
     auth.isLoggedIn = function() {
@@ -1079,9 +1079,8 @@
               m("li", {
                 "class": ""
               }, [
-                m("a[href='/admin/logout']", {
-                  "class": "",
-                  config: m.route
+                m("a[href='/account/logout']", {
+                  "class": ""
                 }, "Logout")
               ])
             ])
@@ -1094,9 +1093,8 @@
           m("li", {
             "class": ""
           }, [
-            m("a[href='/admin/login']", {
-              "class": "",
-              config: m.route
+            m("a[href='/account/login']", {
+              "class": ""
             }, "Login")
           ])
         ]);

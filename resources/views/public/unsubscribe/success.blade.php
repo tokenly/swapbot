@@ -1,7 +1,7 @@
 @extends('public.base')
 
-@section('page_title')
-    Unsubscribed.
+@section('header_content')
+<h1>Unsubscribed.</h1>
 @stop
 
 @section('content')

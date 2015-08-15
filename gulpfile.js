@@ -115,7 +115,7 @@ elixir(function(mix) {
     // less
     mix
         // less files
-        .less(['admin.less', 'main.less', 'details.less'])
+        .less(['admin.less', 'main.less', 'details.less', 'utility.less'])
 
         // admin
         .combineAdmin()

@@ -5,29 +5,32 @@
     <title>Swapbot</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/utility.css" rel="stylesheet">
 </head>
 
 <body>
 
-    <div id="navigation-bar">
+{{--     <div id="navigation-bar">
         <div class="content-width">
         </div>
     </div>
+ --}}
+
     <div id="top-background">
         <div></div>
     </div>
+
     <div id="container" class="content-width">
         <!-- HEAD SECTION -->
-        <div id="details">
-            <div id="details-content">
-                <h1>@yield('page_title')</h1>
+        <div id="header">
+            <div id="header-content">
+                @yield('header_content')
             </div>
         </div>
     </div>
 
     <!-- CONTENT SECTION -->
-    <div id="content" class="grid-container">
+    <div id="content" class="content-width">
         @yield('content')
         <div class="clearfix"></div>
     </div>

@@ -1,0 +1,108 @@
+
+@flat-green: #2ecc71;
+@flat-blue: #2ea1cc;
+@flat-red: #e74c3c;
+@flat-yellow: #f1c40f;
+@dark-grey: #666;
+
+@primary-font-color: #121212;
+@secondary-font-color: #8e8e8e;
+
+@wide-list-background: #eeeeee;
+@wide-list-border: #dddddd;
+
+@background-color: #f7f7f7;
+@panels-background-color: #fefefe;
+@panels-border-color: #dddddd;
+
+@content-width: 1200px;
+
+
+
+@import "shared/spacers.less";
+
+// bootstrap
+
+// Core variables and mixins
+@import "../../../node_modules/bootstrap/less/variables.less";
+@font-size-base: 16px;
+@import "../../../node_modules/bootstrap/less/mixins.less";
+
+// Reset and dependencies
+@import "../../../node_modules/bootstrap/less/normalize.less";
+@import "../../../node_modules/bootstrap/less/print.less";
+@import "../../../node_modules/bootstrap/less/glyphicons.less";
+
+// Core CSS
+@import "../../../node_modules/bootstrap/less/scaffolding.less";
+@import "../../../node_modules/bootstrap/less/type.less";
+// @import "../../../node_modules/bootstrap/less/code.less";
+@import "../../../node_modules/bootstrap/less/grid.less";
+// @import "../../../node_modules/bootstrap/less/tables.less";
+// @import "../../../node_modules/bootstrap/less/forms.less";
+@import "../../../node_modules/bootstrap/less/buttons.less";
+@import "../../../node_modules/bootstrap/less/panels.less";
+
+
+html {
+	font-size: 16px;
+}
+
+body {
+    background-color: @background-color;
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+}
+
+.content-width {
+	width: @content-width;
+	margin: auto;
+}
+
+#top-background {
+	position:absolute;
+	z-index: -1;
+	background: url(../images/background/marketplace.png);
+	background-size: cover;
+	height:500px;
+	width:100%;
+	div {
+		background: linear-gradient(90deg, rgba(0,29,62,0.90), rgba(8,85,135,0.90));
+		height:100%;
+		width:100%;
+	}
+}
+
+#container {
+}
+
+#header {
+	color: white;
+
+	h1 {
+		margin: 0px;
+	}
+	a {
+		color: white;
+	}
+	div {
+		display: inline-block;
+	}
+
+	#header-content {
+		margin-top: 10px;
+		margin-bottom: 10px;
+		padding: 22px;
+	}
+
+}
+
+#content {
+	background-color: @panels-background-color;
+	border: 1px solid @panels-border-color;
+	padding: 22px;
+	min-height: 1000px;
+}
+
+
+@import "utility/utility-page-elements.less";

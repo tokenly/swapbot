@@ -41,6 +41,10 @@ class UserRepository extends APIRepository implements APIUserRepositoryContract
         return User::where('apitoken', $api_token)->first();
     }
 
+    public function findByTokenlyUuid($tokenly_uuid) {
+        return User::where('tokenly_uuid', $tokenly_uuid)->first();
+    }
+
 
 
     protected function modifyAttributesBeforeCreate($attributes) {

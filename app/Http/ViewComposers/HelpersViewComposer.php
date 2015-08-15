@@ -33,6 +33,8 @@ class HelpersViewComposer
             'fmt'               => $this->formatting_helper,
             'currency'          => function($value, $places=null) { return $this->formatting_helper->formatCurrency($value, $places); },
 
+            'tokenlyAccountsUrl' => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/auth',
+
             'quotebotPusherUrl' => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
             'analyticsId'       => env('GOOGLE_ANALYTICS_ID'),
             'quotebot'          => [
