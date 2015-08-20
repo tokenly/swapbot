@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="alert alert-danger">
-        <p><strong>This login was not successful.</strong></p>
+        <p><strong>This sync attempt was not successful.</strong></p>
         <p>{{$error_msg}}</p>
     </div>
 
@@ -14,5 +14,5 @@
     <p>Sorry about that.</p>
 
     <div class="spacer2"></div>
-    <p><a class="btn btn-primary" href="/account/login">Try Again ?</a></p>
+    <p><a class="btn btn-primary" href="/account/sync">Try Again ?</a></p>
 @stop

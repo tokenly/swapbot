@@ -29,6 +29,8 @@ $router->get('/account/logout', 'Account\AccountController@logout');
 $router->get('/account/authorize', 'Account\AccountController@redirectToProvider');
 $router->get('/account/authorize/callback', 'Account\AccountController@handleProviderCallback');
 
+$router->get('/account/sync', 'Account\AccountController@sync');
+
 
 ////////////////////////////////////////////////////////////////////////
 // Public API

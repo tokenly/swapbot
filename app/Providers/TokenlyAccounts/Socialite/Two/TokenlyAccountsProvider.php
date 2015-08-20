@@ -57,6 +57,15 @@ class TokenlyAccountsProvider extends AbstractProvider implements ProviderInterf
         return $user;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getUserByExistingToken($token) {
+        $user = $this->mapUserToObject($this->getUserByToken($token));
+        return $user->setToken($token);
+    }
+
+
 
     /**
      * {@inheritdoc}

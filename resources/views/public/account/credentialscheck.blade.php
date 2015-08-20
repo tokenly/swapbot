@@ -14,7 +14,7 @@
     window.localStorage.setItem("apiSecretKey", '{!! $user['apisecretkey'] !!}');
     window.localStorage.setItem("user", '{!! json_encode($user->serializeForAPI(), JSON_HEX_APOS) !!}');
 
-    setTimeout(function() { window.location.href = '/account/welcome'; }, 500);
+    setTimeout(function() { window.location.href = '/account/welcome'; }, 750);
     </script>
 
 @stop

@@ -15,7 +15,7 @@
 @panels-background-color: #fefefe;
 @panels-border-color: #dddddd;
 
-@content-width: 1200px;
+@content-width: 1220px;
 
 
 
@@ -42,6 +42,7 @@
 // @import "../../../node_modules/bootstrap/less/forms.less";
 @import "../../../node_modules/bootstrap/less/buttons.less";
 @import "../../../node_modules/bootstrap/less/panels.less";
+@import "../../../node_modules/bootstrap/less/alerts.less";
 
 
 html {
@@ -55,7 +56,7 @@ body {
 }
 
 .content-width {
-	width: @content-width;
+	max-width: @content-width;
 	margin: auto;
 }
 
@@ -104,5 +105,9 @@ body {
 	min-height: 1000px;
 }
 
+
+.panel-home {
+	min-height: 250px;
+}
 
 @import "utility/utility-page-elements.less";

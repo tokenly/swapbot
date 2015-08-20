@@ -1,7 +1,7 @@
 @extends('public.base')
 
 @section('header_content')
-<h1>Swapbot Adminstration</h1>
+<h1>My Swapbot Account</h1>
 @stop
 
 @section('content')
@@ -15,15 +15,16 @@
 
                 <div class="spacer1"></div>
 
-                <p>You have successfully signed in as user <span class="username">{{$user['username']}}</span>.  To manage your Swapbots or create a new one, please proceed to your <a href="/admin">Swapbot Dashboard</a>.</p>
+                <p>You have are signed in as user <span class="username">{{$user['username']}}</span>.</p>
 
                 <div class="spacer1"></div>
 
+                <p>To manage your Swapbots or create a new one, please proceed to your <a href="/admin">Swapbot Dashboard</a>.</p>
+
+                <div class="spacer2"></div>
+
                 <a href="/admin" class="btn btn-success">Go to My Swapbot Dashboard</a>
 
-                <div class="spacer4"></div>
-
-                <p>To edit your account settings, visit your <a href="{{$tokenlyAccountsUrl}}">Tokenly Accounts profile</a> or you can <a href="/account/logout">Logout</a>.</p>
             </div>
         </div>
     </div>

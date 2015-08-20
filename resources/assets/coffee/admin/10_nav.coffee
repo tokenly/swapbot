@@ -13,6 +13,9 @@ sbAdmin.nav = do ()->
                         ]),
                         m("ul", { class: "dropdown-menu", role: "menu"}, [
                             m("li", { class: ""}, [
+                                m("a[href='/account/welcome']", {class: ""}, "My Swapbot Account"),
+                            ]),
+                            m("li", { class: ""}, [
                                 # m("a[href='/admin/logout']", {class: "", config: m.route}, "Logout"),
                                 m("a[href='/account/logout']", {class: ""}, "Logout"),
                             ]),
