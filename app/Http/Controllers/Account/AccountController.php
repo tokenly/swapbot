@@ -98,6 +98,8 @@ class AccountController extends Controller
 
         // find an existing user based on the credentials provided
         $existing_user = $user_repository->findByTokenlyUuid($tokenly_uuid);
+        $mergable_user = ($existing_user ? null : $user_repository->findByUsername($username));
+
         if ($existing_user) {
             Auth::login($existing_user);
 
@@ -119,6 +121,25 @@ class AccountController extends Controller
             }
 
             $user_to_login = $existing_user;
+        } else if ($mergable_user) {
+            // an existing user was found with a matching username
+            //  migrate it to the tokenly accounts control
+
+            if ($mergable_user['tokenly_uuid']) {
+                throw new Exception("Can't merge a user already associated with a different tokenly account", 1);
+            }
+
+            $user_repository->update($mergable_user, [
+                'username'           => $username,
+                'name'               => $name,
+                'email'              => $email,
+                'email_is_confirmed' => $email_is_confirmed,
+                'oauth_token'        => $oauth_token,
+            ]);
+            $user_to_login = $mergable_user;
+
+            EventLog::log('oauth.userMerged', ['id' => $mergable_user['uuid'], 'username' => $username,]);
+
         } else {
             // no user was found - create a new user based on the credentials we received
             $new_user = $user_repository->create([
@@ -130,7 +151,10 @@ class AccountController extends Controller
                 'oauth_token'        => $oauth_token,
             ]);
             $user_to_login = $new_user;
+
+            EventLog::log('oauth.userCreated', ['id' => $new_user['uuid'], 'username' => $username,]);
         }
+
 
         Auth::login($user_to_login);
 
