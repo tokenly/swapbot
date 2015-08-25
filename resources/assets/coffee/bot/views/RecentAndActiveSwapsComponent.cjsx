@@ -47,7 +47,7 @@ do ()->
             
             icon = 'pending'
             if swap.isError then icon = 'failed'
-            else if swap.isComplete and swap.type == 'refund' then icon = 'failed'
+            else if swap.isComplete and swap.type == 'refund' then icon = 'refunded'
             else if swap.isComplete then icon = 'confirmed'
 
             return <li key={"roa-"+swap.id} className={icon}>

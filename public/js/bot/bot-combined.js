@@ -803,7 +803,7 @@
         if (swap.isError) {
           icon = 'failed';
         } else if (swap.isComplete && swap.type === 'refund') {
-          icon = 'failed';
+          icon = 'refunded';
         } else if (swap.isComplete) {
           icon = 'confirmed';
         }

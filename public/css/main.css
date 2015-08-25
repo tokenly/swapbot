@@ -552,6 +552,10 @@ a {
   border: 1px solid #e74c3c;
   background: url(../images/icons/fail-icon.png) center center no-repeat;
 }
+.icon-refunded {
+  border: 1px solid #8c8c8c;
+  background: url(../images/icons/refunded-icon.png) center center no-repeat;
+}
 div.sendInstructions {
   margin-top: 22px;
   font-size: 16px;
@@ -853,6 +857,10 @@ ul.swaps-list li p {
 .swap-list .failed {
   background-color: #fce6e4;
   border-bottom: 1px solid #f9d6d2;
+}
+.swap-list .refunded {
+  background-color: #F2FAFD;
+  border-bottom: 1px solid #D1DDE2;
 }
 .swap-list .status-icon {
   float: left;
