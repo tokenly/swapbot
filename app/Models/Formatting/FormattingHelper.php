@@ -88,7 +88,7 @@ class FormattingHelper {
     public function formatBlockchainHref($txid, $asset) {
         if (!strlen($txid)) { return '#unknown'; }
         if ($asset == 'BTC') {
-            return 'https://blockchain.info/tx/'.$txid;
+            return 'https://chain.so/tx/BTC/'.$txid;
         } else {
             return 'https://counterpartychain.io/transaction/'.$txid;
         }
