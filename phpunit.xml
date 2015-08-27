@@ -19,6 +19,7 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="DATABASE_DRIVER" value="testing"/>
+        <env name="MAIL_DRIVER" value="log"/>
         <!-- <env name="DB_DATABASE" value="swapbot_test"/> -->
     </php>
 </phpunit>
