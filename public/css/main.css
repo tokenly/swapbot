@@ -387,6 +387,10 @@ a {
 #swapbot-container .content p.description .more-link :hover {
   color: #121212;
 }
+.swapbot-container .content .description-light,
+#swapbot-container .content .description-light {
+  color: #404040;
+}
 .swapbot-container .content .pulse-spinner,
 #swapbot-container .content .pulse-spinner {
   padding: 28px;
@@ -916,6 +920,19 @@ button {
   border: 0px;
   border-radius: 4px;
   cursor: pointer;
+}
+a.btn-action {
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 2px 6px 3px;
+  border-radius: 4px;
+  display: inline-block;
+  line-height: 2.8rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 .btn-action {
   height: 46px;

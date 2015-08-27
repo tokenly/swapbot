@@ -1,5 +1,5 @@
 (function() {
-  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotStore, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UIActionListeners, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
+  var BotAPIActionCreator, BotConstants, BotCopyableAddress, BotStatusComponent, BotStore, BotstreamEventActions, BotstreamStore, Dispatcher, NeedHelpLink, PlaceOrderInput, Pockets, QuotebotActionCreator, QuotebotEventActions, QuotebotStore, ReactZeroClipboard, RecentAndActiveSwapsComponent, RecentOrActiveSwapComponent, Settings, SwapAPIActionCreator, SwapMatcher, SwapPurchaseStepsComponent, SwapbotChoose, SwapbotComplete, SwapbotConfirmWallet, SwapbotPlaceOrder, SwapbotReceivingTransaction, SwapbotWait, SwapsStore, SwapstreamEventActions, UIActionListeners, UserChoiceStore, UserInputActions, UserInterfaceActions, UserInterfaceStateStore, invariant, swapbot;
 
   if (typeof swapbot === "undefined" || swapbot === null) {
     swapbot = {};
@@ -1440,6 +1440,86 @@
     });
   })();
 
+  SwapbotConfirmWallet = null;
+
+  (function() {
+    var getViewState;
+    getViewState = function() {
+      return {};
+    };
+    return SwapbotConfirmWallet = React.createClass({
+      displayName: 'SwapbotConfirmWallet',
+      getInitialState: function() {
+        return $.extend({}, getViewState());
+      },
+      _onChange: function() {
+        this.setState(getViewState());
+      },
+      componentDidMount: function() {},
+      componentWillUnmount: function() {},
+      confirmWalletOnClick: function(e) {
+        e.preventDefault();
+        return UserInputActions.confirmWallet();
+      },
+      render: function() {
+        var bot;
+        bot = this.props.bot;
+        return React.createElement("div", {
+          "id": "swapbot-container",
+          "className": "section grid-100"
+        }, React.createElement("div", {
+          "id": "swap-step-2",
+          "className": "content"
+        }, React.createElement("h2", null, "Confirm Your Wallet"), React.createElement("div", {
+          "className": "segment-control"
+        }, React.createElement("div", {
+          "className": "line"
+        }), React.createElement("br", null), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot selected"
+        }), React.createElement("div", {
+          "className": "dot"
+        }), React.createElement("div", {
+          "className": "dot"
+        })), React.createElement("div", null, React.createElement("strong", null, "Are you using a Counterparty compatible bitcoin wallet?"), React.createElement("div", {
+          "style": {
+            height: "26px"
+          }
+        }), React.createElement("a", {
+          "href": "#yes",
+          "onClick": this.confirmWalletOnClick,
+          "className": "btn-action bckg-green"
+        }, "YES"), React.createElement("a", {
+          "href": "http://pockets.tokenly.com",
+          "target": "_blank",
+          "className": "btn-action bckg-red"
+        }, "NO"), React.createElement("a", {
+          "href": "http://pockets.tokenly.com",
+          "target": "_blank",
+          "className": "btn-action bckg-yellow"
+        }, "I DON\u2019T KNOW"), React.createElement("div", {
+          "style": {
+            height: "36px"
+          }
+        }), React.createElement("p", {
+          "className": "description"
+        }, React.createElement("strong", null, "Warning:"), " DO NOT PURCHASE using Coinbase, Circle, currency exchange or other wallets where you do not control the address."), React.createElement("p", {
+          "className": "description description-light"
+        }, React.createElement("strong", null, "Did You Know?"), React.createElement("br", null), "The Tokens you purchase will be sent back to the exact same address you use to send them, so it\u2019s very important that you make your purchase from your own wallet.")), React.createElement("div", {
+          "id": "GoBackLink"
+        }, React.createElement("a", {
+          "id": "go-back",
+          "onClick": UserInputActions.goBackOnClick,
+          "href": "#go-back",
+          "className": "shadow-link"
+        }, "Go Back"), React.createElement(NeedHelpLink, {
+          "botName": bot.name
+        }))));
+      }
+    });
+  })();
+
   SwapbotReceivingTransaction = null;
 
   (function() {
@@ -1919,6 +1999,8 @@
           "bot": this.state.bot
         }) : null), (this.state.step === 'place' ? React.createElement(SwapbotPlaceOrder, {
           "bot": this.state.bot
+        }) : null), (this.state.step === 'confirmwallet' ? React.createElement(SwapbotConfirmWallet, {
+          "bot": this.state.bot
         }) : null), (this.state.step === 'receive' ? React.createElement(SwapbotReceivingTransaction, {
           "bot": this.state.bot
         }) : null), (this.state.step === 'wait' ? React.createElement(SwapbotWait, {
@@ -2183,6 +2265,11 @@
         actionType: BotConstants.BOT_USER_RESET_SWAP
       });
     };
+    exports.confirmWallet = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CONFIRM_WALLET
+      });
+    };
     exports.updateEmailValue = function(email) {
       Dispatcher.dispatch({
         actionType: BotConstants.BOT_UPDATE_EMAIL_VALUE,
@@ -2271,6 +2358,7 @@
     exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
     exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
     exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
     exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
     exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
     exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
@@ -2666,7 +2754,7 @@
   })();
 
   UserChoiceStore = (function() {
-    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStep, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailLevel, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
+    var MATCH_AUTO, MATCH_SHOW_ALL, changeSwapMatchMode, checkForAutoMatch, clearChosenSwap, clearChosenSwapConfig, confirmWallet, emitChange, eventEmitter, exports, goBack, ignoreAllSwaps, initRouter, onQuotebotPriceUpdated, onRouteUpdate, onSwapStoreChanged, refreshMatchedSwaps, resetEmailChoices, resetSwap, resetUserChoices, routeToStep, routeToStepOrEmitChange, router, submitEmail, swapIsComplete, updateChosenOutAsset, updateChosenSwap, updateChosenSwapConfig, updateEmailLevel, updateEmailValue, updateOutAmount, userChoices, _recalculateSwapConfigArtifacts;
     exports = {};
     exports.MATCH_AUTO = MATCH_AUTO = 'AUTO';
     exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL';
@@ -2737,7 +2825,7 @@
         if (matched) {
           return;
         }
-        router.setRoute('receive');
+        router.setRoute('confirmwallet');
       }
     };
     updateOutAmount = function(newOutAmount) {
@@ -2757,6 +2845,9 @@
         }
         routeToStepOrEmitChange('wait');
       }
+    };
+    confirmWallet = function() {
+      routeToStepOrEmitChange('receive');
     };
     clearChosenSwap = function() {
       if (userChoices.swap != null) {
@@ -2832,6 +2923,9 @@
         case 'place':
           resetUserChoices();
           router.setRoute('/choose');
+          break;
+        case 'confirmwallet':
+          router.setRoute('/place');
           break;
         case 'receive':
           userChoices.swapConfig = null;
@@ -2930,6 +3024,7 @@
           valid = true;
           break;
         case 'place':
+        case 'confirmwallet':
         case 'receive':
         case 'wait':
         case 'complete':
@@ -2966,6 +3061,7 @@
       router = Router({
         '/choose': onRouteUpdate.bind(null, 'choose'),
         '/place': onRouteUpdate.bind(null, 'place'),
+        '/confirmwallet': onRouteUpdate.bind(null, 'confirmwallet'),
         '/receive': onRouteUpdate.bind(null, 'receive'),
         '/wait': onRouteUpdate.bind(null, 'wait'),
         '/complete': onRouteUpdate.bind(null, 'complete')
@@ -3005,6 +3101,9 @@
             break;
           case BotConstants.BOT_USER_CHOOSE_SWAP:
             updateChosenSwap(action.swap);
+            break;
+          case BotConstants.BOT_USER_CONFIRM_WALLET:
+            confirmWallet();
             break;
           case BotConstants.BOT_USER_CLEAR_SWAP:
             clearChosenSwap();

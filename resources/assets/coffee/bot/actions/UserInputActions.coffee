@@ -44,6 +44,12 @@ UserInputActions = do ()->
 
 
 
+    exports.confirmWallet = ()->
+        Dispatcher.dispatch({
+            actionType: BotConstants.BOT_USER_CONFIRM_WALLET
+        })
+        return
+
 
     exports.updateEmailValue = (email)->
         Dispatcher.dispatch({

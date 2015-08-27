@@ -88,7 +88,7 @@ UserChoiceStore = do ()->
             matched = checkForAutoMatch()
             return if matched
 
-            router.setRoute('receive')
+            router.setRoute('confirmwallet')
 
         return
 
@@ -124,6 +124,10 @@ UserChoiceStore = do ()->
 
         return
 
+
+    confirmWallet = ()->
+        routeToStepOrEmitChange('receive')
+        return
 
     clearChosenSwap = ()->
         if userChoices.swap?
@@ -211,6 +215,8 @@ UserChoiceStore = do ()->
             when 'place'
                 resetUserChoices()
                 router.setRoute('/choose')
+            when 'confirmwallet'
+                router.setRoute('/place')
             when 'receive'
                 userChoices.swapConfig           = null
                 userChoices.inAmount             = null
@@ -322,7 +328,7 @@ UserChoiceStore = do ()->
                 # all good
                 valid = true
                 
-            when 'place', 'receive', 'wait', 'complete'
+            when 'place', 'confirmwallet', 'receive', 'wait', 'complete'
                 if userChoices.outAsset == null
                     # no out amount was chosen - go back
                     valid = false
@@ -361,11 +367,12 @@ UserChoiceStore = do ()->
 
     initRouter = ()->
         router = Router({
-            '/choose'  : onRouteUpdate.bind(null, 'choose'),
-            '/place'   : onRouteUpdate.bind(null, 'place'),
-            '/receive' : onRouteUpdate.bind(null, 'receive'),
-            '/wait'    : onRouteUpdate.bind(null, 'wait'),
-            '/complete': onRouteUpdate.bind(null, 'complete'),
+            '/choose'       : onRouteUpdate.bind(null, 'choose'),
+            '/place'        : onRouteUpdate.bind(null, 'place'),
+            '/confirmwallet': onRouteUpdate.bind(null, 'confirmwallet'),
+            '/receive'      : onRouteUpdate.bind(null, 'receive'),
+            '/wait'         : onRouteUpdate.bind(null, 'wait'),
+            '/complete'     : onRouteUpdate.bind(null, 'complete'),
         })
 
         router.init(userChoices.step)
@@ -422,6 +429,9 @@ UserChoiceStore = do ()->
 
                 when BotConstants.BOT_USER_CHOOSE_SWAP
                     updateChosenSwap(action.swap)
+
+                when BotConstants.BOT_USER_CONFIRM_WALLET
+                    confirmWallet()
 
                 when BotConstants.BOT_USER_CLEAR_SWAP
                     clearChosenSwap()

@@ -36,11 +36,12 @@ do ()->
             <div>
             { if this.state.bot?
                 <div>
-                { if this.state.step == 'choose'   then <SwapbotChoose               bot={this.state.bot} /> else null }
-                { if this.state.step == 'place'    then <SwapbotPlaceOrder           bot={this.state.bot} /> else null }
-                { if this.state.step == 'receive'  then <SwapbotReceivingTransaction bot={this.state.bot} /> else null }
-                { if this.state.step == 'wait'     then <SwapbotWait                 bot={this.state.bot} /> else null }
-                { if this.state.step == 'complete' then <SwapbotComplete             bot={this.state.bot} /> else null }
+                { if this.state.step == 'choose'         then <SwapbotChoose               bot={this.state.bot} /> else null }
+                { if this.state.step == 'place'          then <SwapbotPlaceOrder           bot={this.state.bot} /> else null }
+                { if this.state.step == 'confirmwallet'  then <SwapbotConfirmWallet        bot={this.state.bot} /> else null }
+                { if this.state.step == 'receive'        then <SwapbotReceivingTransaction bot={this.state.bot} /> else null }
+                { if this.state.step == 'wait'           then <SwapbotWait                 bot={this.state.bot} /> else null }
+                { if this.state.step == 'complete'       then <SwapbotComplete             bot={this.state.bot} /> else null }
                 </div>
             else
                 <div className="loading">Loading...</div>

@@ -387,6 +387,10 @@ a {
 #swapbot-container .content p.description .more-link :hover {
   color: #121212;
 }
+.swapbot-container .content .description-light,
+#swapbot-container .content .description-light {
+  color: #404040;
+}
 .swapbot-container .content .pulse-spinner,
 #swapbot-container .content .pulse-spinner {
   padding: 28px;
