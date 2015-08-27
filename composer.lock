@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ecbe56b7480e0d7ca836c23eb2eb4120",
+    "hash": "f20a72f46c1f71c70598d8c3c05020d9",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -698,6 +698,52 @@
             "time": "2014-10-12 19:18:40"
         },
         {
+            "name": "illuminate/html",
+            "version": "v5.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/html.git",
+                "reference": "3d1009bb8e0f25720c914af5c1f4015dd373c9ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/html/zipball/3d1009bb8e0f25720c914af5c1f4015dd373c9ef",
+                "reference": "3d1009bb8e0f25720c914af5c1f4015dd373c9ef",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/http": "~5.0",
+                "illuminate/session": "~5.0",
+                "illuminate/support": "~5.0",
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Illuminate\\Html\\": ""
+                },
+                "files": [
+                    "helpers.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylorotwell@gmail.com"
+                }
+            ],
+            "time": "2015-01-01 16:31:18"
+        },
+        {
             "name": "imagine/imagine",
             "version": "v0.5.0",
             "source": {
@@ -1032,7 +1078,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/socialite/zipball/0f7c3b02f7e3fd715592b49da080973bd8aec2bb",
+                "url": "https://api.github.com/repos/laravel/socialite/zipball/8a9e4b61f5078ca1c10fb608d76e845825ca5a3b",
                 "reference": "0f7c3b02f7e3fd715592b49da080973bd8aec2bb",
                 "shasum": ""
             },
@@ -3157,12 +3203,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "0218052fbf4ff8aa758365f9fd0ec8fd58347ff6"
+                "reference": "4f38ada567aa7e02f8d7ba11ac12e35be1f64067"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/0218052fbf4ff8aa758365f9fd0ec8fd58347ff6",
-                "reference": "0218052fbf4ff8aa758365f9fd0ec8fd58347ff6",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/4f38ada567aa7e02f8d7ba11ac12e35be1f64067",
+                "reference": "4f38ada567aa7e02f8d7ba11ac12e35be1f64067",
                 "shasum": ""
             },
             "require": {
@@ -3193,7 +3239,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-08-08 19:26:49"
+            "time": "2015-08-27 19:33:52"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",

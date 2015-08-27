@@ -85,6 +85,24 @@ class AdminNotificationTest extends TestCase {
 
     }
 
+
+    public function testNoAdminEmailWhenPrefsSet()
+    {
+        // install mocks
+        $mailer_recorder = $this->installMocks();
+
+        // setup
+        list($bot, $state_machine) = $this->makeActiveBotAndPaymentStateMachine();
+        app('Swapbot\Repositories\UserRepository')->update($bot->user, ['email_preferences' => ['adminEvents' => false]]);
+
+        // go to NOTICE state
+        $this->runPaymentStateTransitionTest($state_machine, $bot, BotPaymentStateEvent::ENTERED_NOTICE, BotPaymentState::NOTICE);
+
+        // No emails are sent because opt-out prefs are set
+        PHPUnit::assertCount(0, $mailer_recorder->emails);
+    }
+
+
     ////////////////////////////////////////////////////////////////////////
     
     protected function installMocks() {

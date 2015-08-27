@@ -10,16 +10,6 @@ class UploadTestController extends Controller {
 
 
 
-	/**
-	 * Show the application welcome screen to the user.
-	 *
-	 * @return Response
-	 */
-	public function index()
-	{
-		return view('uploadtest');
-	}
-
 	public function show()
 	{
 		$image = Image::first();

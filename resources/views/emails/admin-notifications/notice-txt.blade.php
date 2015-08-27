@@ -15,7 +15,7 @@ Please vist our Swapbot administration app at {{ $adminUrl }} and follow the ins
 If you have any questions or comments about your experience please email the team@tokenly.com.
 
 
-To stop receiving these notifications, please update your communication preferences at {{ $updateProfileLink }}.
+To stop receiving these notifications, please update your email preferences at {{ $updateEmailPrefsLink }}.
 
 
 @stop

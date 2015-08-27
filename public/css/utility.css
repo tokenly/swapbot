@@ -3174,6 +3174,14 @@ body {
 .panel-home {
   min-height: 250px;
 }
+form .checkbox-input {
+  position: relative;
+  float: left;
+  top: 5px;
+}
+form .checkbox-label {
+  margin-left: 24px;
+}
 .username {
   color: #666666;
 }

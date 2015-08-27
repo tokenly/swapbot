@@ -19,6 +19,6 @@
 
 <p>&nbsp;</p>
 
-<small>To stop receiving these notifications, please <a href="{{ $updateProfileLink }}">update your communication preferences</a>.</small>
+<small>To stop receiving these notifications, please <a href="{{ $updateEmailPrefsLink }}">update your email preferences</a>.</small>
 
 @stop

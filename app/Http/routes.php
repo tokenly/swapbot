@@ -31,6 +31,9 @@ $router->get('/account/authorize/callback', 'Account\AccountController@handlePro
 
 $router->get('/account/sync', 'Account\AccountController@sync');
 
+$router->get('/account/emails', 'Account\AccountEmailPrefsController@getEmailNotifications');
+$router->post('/account/emails', 'Account\AccountEmailPrefsController@postEmailNotifications');
+
 
 ////////////////////////////////////////////////////////////////////////
 // Public API

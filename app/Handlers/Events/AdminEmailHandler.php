@@ -28,7 +28,7 @@ class AdminEmailHandler {
         $bot  = $event->bot;
         $user = $bot->user;
 
-        if (!$user['email']) { return; }
+        if (!$user['email'] OR !$user->getEmailPreference('adminEvents')) { return; }
 
         // build variables
         $email_vars = $this->buildEmailVariables($bot, $user);
@@ -43,7 +43,7 @@ class AdminEmailHandler {
         $bot  = $event->bot;
         $user = $bot->user;
 
-        if (!$user['email']) { return; }
+        if (!$user['email'] OR !$user->getEmailPreference('adminEvents')) { return; }
 
         // build variables
         $email_vars = $this->buildEmailVariables($bot, $user);
@@ -57,7 +57,7 @@ class AdminEmailHandler {
         $bot  = $event->bot;
         $user = $bot->user;
 
-        if (!$user['email']) { return; }
+        if (!$user['email'] OR !$user->getEmailPreference('adminEvents')) { return; }
 
         // build variables
         $email_vars = $this->buildEmailVariables($bot, $user);
@@ -71,7 +71,7 @@ class AdminEmailHandler {
         $bot  = $event->bot;
         $user = $bot->user;
 
-        if (!$user['email']) { return; }
+        if (!$user['email'] OR !$user->getEmailPreference('adminEvents')) { return; }
 
         // build variables
         $email_vars = $this->buildEmailVariables($bot, $user);
@@ -85,7 +85,7 @@ class AdminEmailHandler {
         $bot  = $event->bot;
         $user = $bot->user;
 
-        if (!$user['email']) { return; }
+        if (!$user['email'] OR !$user->getEmailPreference('adminEvents')) { return; }
 
         // build variables
         $email_vars = $this->buildEmailVariables($bot, $user);
@@ -113,21 +113,20 @@ class AdminEmailHandler {
     protected function buildEmailVariables($bot, $user) {
         $host = Config::get('swapbot.site_host');
         $admin_url = "$host/admin/view/bot/{$bot['uuid']}";
-        // $unsubscribe_link = "$host/public/unsubscribe/{$customer['uuid']}/{$customer['unsubscribe_token']}";
-        $update_profile_link = '#pending';
+        $update_profile_link = "$host/account/emails";
         $bot_url = $bot->getPublicBotURL();
         $bot_link = '<a href="'.$bot_url.'">'.$bot['name'].'</a>';
 
         $email_vars = [
-            'bot'               => $bot->serializeForAPI(),
-            'user'              => $user->serializeForAPI(),
-            'host'              => $host,
-            'updateProfileLink' => $update_profile_link,
-            'robohashUrl'       => $bot->getRobohashURL(),
-            'adminUrl'          => $admin_url,
-            'botUrl'            => $bot_url,
-            'botLink'           => $bot_link,
-            'botBlacklist'      => $this->formatting_helper->implodeWithConjunction($bot['blacklist_addresses'], 'or'),
+            'bot'                  => $bot->serializeForAPI(),
+            'user'                 => $user->serializeForAPI(),
+            'host'                 => $host,
+            'updateEmailPrefsLink' => $update_profile_link,
+            'robohashUrl'          => $bot->getRobohashURL(),
+            'adminUrl'             => $admin_url,
+            'botUrl'               => $bot_url,
+            'botLink'              => $bot_link,
+            'botBlacklist'         => $this->formatting_helper->implodeWithConjunction($bot['blacklist_addresses'], 'or'),
         ];
         return $email_vars;
      

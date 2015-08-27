@@ -5,6 +5,7 @@
     <ul class="list-unstyled">
         <li><a href="/account/welcome">Welcome</a></li>
         <li><a href="/admin">My Swapbot Dashboard</a></li>
+        <li><a href="/account/emails">Communication Preferences</a></li>
         <li><a href="/account/sync">My Account</a></li>
         
         <li>
