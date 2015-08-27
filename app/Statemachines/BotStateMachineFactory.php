@@ -7,11 +7,13 @@ use Metabor\Statemachine\Transition;
 use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStateEvent;
+use Swapbot\Statemachines\BotCommand\ExhaustedBotMonthlyFeePaid;
 use Swapbot\Statemachines\BotCommand\FirstMonthlyFeePaid;
 use Swapbot\Statemachines\BotCommand\FuelExhausted;
 use Swapbot\Statemachines\BotCommand\Fueled;
-use Swapbot\Statemachines\BotCommand\MonthlyFeePaid;
 use Swapbot\Statemachines\BotCommand\LeaseExpired;
+use Swapbot\Statemachines\BotCommand\MonthlyFeePaid;
+use Swapbot\Statemachines\BotCommand\PaymentExhausted;
 use Swapbot\Statemachines\StateMachineFactory;
 
 /*
@@ -31,6 +33,7 @@ class BotStateMachineFactory extends StateMachineFactory {
         // build states
         return [
             BotState::BRAND_NEW => new BotState(BotState::BRAND_NEW),
+            BotState::PAYING    => new BotState(BotState::PAYING),
             BotState::UNPAID    => new BotState(BotState::UNPAID),
             BotState::LOW_FUEL  => new BotState(BotState::LOW_FUEL),
             BotState::ACTIVE    => new BotState(BotState::ACTIVE),
@@ -47,17 +50,25 @@ class BotStateMachineFactory extends StateMachineFactory {
         // BotState::LOW_FUEL => BotState::ACTIVE
         $this->addTransitionToStates($states, BotState::LOW_FUEL,  BotState::ACTIVE,   BotStateEvent::FUELED,                 new Fueled());
 
-        // BotState::LOW_FUEL => BotState::UNPAID
-        $this->addTransitionToStates($states, BotState::LOW_FUEL,  BotState::UNPAID,   BotStateEvent::LEASE_EXPIRED,          new LeaseExpired());
+        // BotState::LOW_FUEL => BotState::PAYING
+        $this->addTransitionToStates($states, BotState::LOW_FUEL,  BotState::PAYING,   BotStateEvent::LEASE_EXPIRED,          new LeaseExpired());
 
         // BotState::ACTIVE => BotState::LOW_FUEL
         $this->addTransitionToStates($states, BotState::ACTIVE,    BotState::LOW_FUEL, BotStateEvent::FUEL_EXHAUSTED,         new FuelExhausted());
 
-        // BotState::ACTIVE => BotState::UNPAID
-        $this->addTransitionToStates($states, BotState::ACTIVE,    BotState::UNPAID,   BotStateEvent::LEASE_EXPIRED,          new LeaseExpired());
+        // BotState::ACTIVE => BotState::PAYING
+        $this->addTransitionToStates($states, BotState::ACTIVE,    BotState::PAYING,   BotStateEvent::LEASE_EXPIRED,          new LeaseExpired());
+
+        // BotState::PAYING => BotState::ACTIVE
+        $this->addTransitionToStates($states, BotState::PAYING,    BotState::ACTIVE,   BotStateEvent::MONTHLY_FEE_PAID,       new MonthlyFeePaid());
+
+        // BotState::PAYING => BotState::UNPAID
+        $this->addTransitionToStates($states, BotState::PAYING,    BotState::UNPAID,   BotStateEvent::PAYMENT_EXHAUSTED,      new PaymentExhausted());
+
 
         // BotState::UNPAID => BotState::ACTIVE
-        $this->addTransitionToStates($states, BotState::UNPAID,    BotState::ACTIVE,   BotStateEvent::MONTHLY_FEE_PAID,       new MonthlyFeePaid());
+        $this->addTransitionToStates($states, BotState::UNPAID,    BotState::ACTIVE,   BotStateEvent::MONTHLY_FEE_PAID,       new ExhaustedBotMonthlyFeePaid());
+
 
         return $states;
     }

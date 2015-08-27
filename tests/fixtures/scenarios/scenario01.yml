@@ -17,6 +17,8 @@ xchainNotifications:
 expectedXChainCalls: none
 
 expectedBotEvents:
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
   - #### NEW
     meta: { baseFilename: swap.new.yml }
   - #### READY
@@ -24,4 +26,7 @@ expectedBotEvents:
   - #### UNCONFIRMED TRANSACTION
     meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
 
-
+ignoreEventPrefixes:
+  - account.transferIncome
+  - account.transferInventory
+  - bot.balancesSynced

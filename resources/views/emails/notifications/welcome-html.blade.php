@@ -25,6 +25,6 @@
 
 <p>&nbsp;</p>
 
-<small>If you did not leave your email address after making a purchase at swapbot.co please click <a href="{{ $unsubscribeLink }}">here to unsubscribe</a>.</small>
+<small>If you did not leave your email address after making a purchase at swapbot.tokenly.com please click <a href="{{ $unsubscribeLink }}">here to unsubscribe</a>.</small>
 
 @stop

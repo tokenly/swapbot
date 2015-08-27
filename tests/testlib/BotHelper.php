@@ -6,6 +6,7 @@ use Rhumsaa\Uuid\Uuid;
 use Swapbot\Commands\CreateBot;
 use Swapbot\Http\Requests\Bot\Validators\CreateBotValidator;
 use Swapbot\Models\Bot;
+use Swapbot\Models\Data\BotPaymentState;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\RefundConfig;
@@ -47,6 +48,7 @@ class BotHelper  {
             'return_fee'                  => 0.0001,
             'confirmations_required'      => 2,
             'state'                       => BotState::BRAND_NEW,
+            'payment_state'               => BotPaymentState::NONE,
 
             'status_details'              => null,
 
@@ -152,6 +154,11 @@ class BotHelper  {
 
             if (isset($attributes['refund_config'])) {
                 $attributes['refund_config'] = RefundConfig::createFromSerialized($attributes['refund_config']);
+            }
+
+            // sample address
+            if (!isset($attributes['address'])) {
+                $attributes['address'] = '1xxxxxxxxxxxxxxxxxxxxxxxx'. substr(md5(uniqid()),-8);
             }
 
             $bot_model = $this->bot_repository->create($attributes);

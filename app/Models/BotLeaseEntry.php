@@ -13,4 +13,8 @@ class BotLeaseEntry extends APIModel {
 
     protected $dates = ['start_date', 'end_date',];
 
+
+    public function getPaidUpThroughDate() {
+        // code
+    }
 }

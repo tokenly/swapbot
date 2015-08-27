@@ -1,0 +1,4 @@
+name: bot.paymentStateChange
+state: active
+payment_state: ok
+isActive: true

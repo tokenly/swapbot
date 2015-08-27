@@ -18,7 +18,7 @@ class LeaseExpired extends BotCommand {
     public function __invoke(Bot $bot)
     {
         // update the bot state in the database
-        $this->updateBotState($bot, BotState::UNPAID);
+        $this->updateBotState($bot, BotState::PAYING);
 
     }
 

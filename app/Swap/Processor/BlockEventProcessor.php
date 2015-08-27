@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ProcessPendingSwapsForBot;
+use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
 use Swapbot\Repositories\BlockRepository;
@@ -38,6 +39,9 @@ class BlockEventProcessor {
         foreach ($this->bot_repository->findAll() as $bot) {
             // make sure the bot is in good standing
             $this->dispatch(new ReconcileBotState($bot));
+
+            // check the bot payment state
+            $this->dispatch(new ReconcileBotPaymentState($bot));
 
             // and process all pending swaps (swaps may have timed out)
             $this->dispatch(new ProcessPendingSwapsForBot($bot, $xchain_notification['height']));

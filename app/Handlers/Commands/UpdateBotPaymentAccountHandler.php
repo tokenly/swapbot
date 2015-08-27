@@ -5,6 +5,7 @@ namespace Swapbot\Handlers\Commands;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Events\BotPaymentAccountUpdated;
@@ -52,6 +53,9 @@ class UpdateBotPaymentAccountHandler {
 
         // the bot state might have changed, so check it now
         $this->dispatch(new ReconcileBotState($command->bot));
+        
+        // the bot payment state might have changed, so also check it now
+        $this->dispatch(new ReconcileBotPaymentState($command->bot));
         
         // fire an event
         Event::fire(new BotPaymentAccountUpdated($command->bot, $command->amount, $command->asset));

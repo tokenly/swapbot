@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ProcessPendingSwap;
 use Swapbot\Commands\ProcessPendingSwapsForBot;
+use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
 use Swapbot\Commands\UpdateBotBalances;
@@ -352,6 +353,7 @@ class ReceiveEventProcessor {
         if ($tx_process['should_reconcile_bot_state']) {
             // the bot state might have changed, so check it now
             $this->dispatch(new ReconcileBotState($tx_process['bot']));
+            $this->dispatch(new ReconcileBotPaymentState($tx_process['bot']));
 
             // reload the bot
             $this->reloadBot($tx_process);

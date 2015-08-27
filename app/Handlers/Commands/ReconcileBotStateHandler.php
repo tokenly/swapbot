@@ -45,57 +45,62 @@ class ReconcileBotStateHandler {
         $bot = $command->bot;
 
         $this->bot_repository->executeWithLockedBot($bot, function ($locked_bot) {
-            $done = false;
+            $loop_again = true;
 
-            while (!$done) {
-                $done = true;
+            while ($loop_again) {
+                $loop_again = false;
                 switch ($locked_bot['state']) {
                     case BotState::BRAND_NEW:
                         if ($this->paymentAddressHasEnoughForMonthlyFee($locked_bot)) {
-                            // update the state
                             $locked_bot->stateMachine()->triggerEvent(BotStateEvent::FIRST_MONTHLY_FEE_PAID);
 
                             // loop again to allow the low fuel state to be processed once
-                            $done = false;
+                            $loop_again = true;
                         }
                         break;
 
                     case BotState::LOW_FUEL:
                         if ($this->publicAddressHasEnoughFuel($locked_bot)) {
-                            // update the state
                             $locked_bot->stateMachine()->triggerEvent(BotStateEvent::FUELED);
 
                             // loop again
-                            $done = false;
+                            $loop_again = true;
                         }
                         break;
 
                     case BotState::ACTIVE:
                         // check monthly fee
                         if ($this->monthlyFeeHasExpired($locked_bot)) {
-                            Log::debug('monthlyFeeHasExpired!');
-                            // update the state to unpaid
                             $locked_bot->stateMachine()->triggerEvent(BotStateEvent::LEASE_EXPIRED);
 
                             // loop again
-                            $done = false;
+                            $loop_again = true;
                             break;
                         }
 
                         // check out of fuel
                         if (!$this->publicAddressHasEnoughFuel($locked_bot)) {
-                            // update the state to unfueled
                             $locked_bot->stateMachine()->triggerEvent(BotStateEvent::FUEL_EXHAUSTED);
                         }
                         break;
 
+                    case BotState::PAYING:
+                        if ($this->paymentAddressHasEnoughForMonthlyFee($locked_bot)) {
+                            $locked_bot->stateMachine()->triggerEvent(BotStateEvent::MONTHLY_FEE_PAID);
+                        } else {
+                            $locked_bot->stateMachine()->triggerEvent(BotStateEvent::PAYMENT_EXHAUSTED);
+                        }
+
+                        // loop again
+                        $loop_again = true;
+                        break;
+
                     case BotState::UNPAID:
                         if ($this->paymentAddressHasEnoughForMonthlyFee($locked_bot)) {
-                            // update the state
                             $locked_bot->stateMachine()->triggerEvent(BotStateEvent::MONTHLY_FEE_PAID);
 
                             // loop again
-                            $done = false;
+                            $loop_again = true;
                         }
                         break;
                 }

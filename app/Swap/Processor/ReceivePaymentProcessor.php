@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\UpdateBotPaymentAccount;
 use Swapbot\Models\Data\BotState;
@@ -158,6 +159,7 @@ class ReceivePaymentProcessor {
         if ($tx_process['should_reconcile_bot_state']) {
             // the bot state might have changed, so check it now
             $this->dispatch(new ReconcileBotState($tx_process['bot']));
+            $this->dispatch(new ReconcileBotPaymentState($tx_process['bot']));
         }
     }
 

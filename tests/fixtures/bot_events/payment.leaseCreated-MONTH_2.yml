@@ -1,5 +1,5 @@
 name: payment.leaseCreated
-start_date: "2015-07-01 00:00:00"
-end_date: "2015-08-01 00:00:00"
+start_date: "2015-07-02 00:00:00"
+end_date: "2015-08-02 00:00:00"
 state: unpaid
 isActive: false

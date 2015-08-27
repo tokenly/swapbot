@@ -31,8 +31,8 @@ class BotStateTest extends TestCase {
         // transition to LOW_FUEL
         $this->runTransitionTest($state_machine, $bot, BotStateEvent::FIRST_MONTHLY_FEE_PAID, BotState::LOW_FUEL);
 
-        // go to unpaid state
-        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::UNPAID);
+        // go to paying state
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::PAYING);
 
         // receive payment again
         $this->runTransitionTest($state_machine, $bot, BotStateEvent::MONTHLY_FEE_PAID, BotState::ACTIVE);
@@ -43,8 +43,14 @@ class BotStateTest extends TestCase {
         // receive fuel
         $this->runTransitionTest($state_machine, $bot, BotStateEvent::FUELED, BotState::ACTIVE);
 
+        // go to paying state
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::PAYING);
+
         // go to unpaid state
-        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::UNPAID);
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::PAYMENT_EXHAUSTED, BotState::UNPAID);
+
+        // receive payment again
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::MONTHLY_FEE_PAID, BotState::ACTIVE);
 
     }
 

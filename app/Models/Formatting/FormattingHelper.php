@@ -125,4 +125,15 @@ class FormattingHelper {
         return CurrencyUtil::valueToFormattedString($value, $places);
     }
 
+    public function implodeWithConjunction($list, $article='and') {
+        if (count($list) == 0) {
+            return '';
+        } else if (count($list) <= 1) {
+            return $list[0];
+        }
+
+        $out = implode(', ', array_slice($list, 0, -1));
+        return $out.' '.$article.' '.$list[count($list)-1];
+    }
+
 }

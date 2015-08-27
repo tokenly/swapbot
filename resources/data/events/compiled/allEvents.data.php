@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-05 13:18:25
+// compiled on 2015-08-27 15:37:38
 
 return array (
   'swap.new' => 
@@ -255,6 +255,18 @@ return array (
       0 => 'state',
     ),
     'botEventStream' => true,
+  ),
+  'bot.paymentStateChange' => 
+  array (
+    'name' => 'bot.paymentStateChange',
+    'label' => 'Bot Payment State Change',
+    'level' => 'DEBUG',
+    'msg' => 'Bot payments entered state <?php echo e($payment_state); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'payment_state',
+    ),
+    'botEventStream' => false,
   ),
   'payment.unconfirmedMoveFuel' => 
   array (

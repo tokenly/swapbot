@@ -116,7 +116,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                 </li>
             </ul>
         </div>
-        <div class="footer">powered by <a href="http://swapbot.co/" target="_blank">Swapbot</a></div>
+        <div class="footer">powered by <a href="http://swapbot.tokenly.com/" target="_blank">Swapbot</a></div>
     </div>
 
 {{-- Scripts --}}

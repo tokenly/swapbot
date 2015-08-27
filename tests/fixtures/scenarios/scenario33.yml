@@ -32,6 +32,8 @@ expectedXChainCalls:
   # - meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
   - #### NEW
     meta: { baseFilename: swap.new.yml }
   - #### READY
@@ -45,8 +47,12 @@ expectedBotEvents:
 
   #### now the bot is out of payment
 
+  - #### PAYING
+    meta: { baseFilename: bot.stateChange-paying.yml }
   - #### UNPAID
     meta: { baseFilename: bot.stateChange-unpaid.yml }
+  - #### PAYMENT STATE PAST DUE
+    meta: { baseFilename: bot.paymentStateChange-pastdue.yml }
   - #### unpaid bot
     meta: { baseFilename: bot.unpaid.yml }
     msg: Ignored transaction 00000000000000000000000000000000000000000000000000000xcptx222222 because this bot is unpaid.
@@ -70,6 +76,8 @@ expectedBotEvents:
 
   ### send the delayed swap
 
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found
@@ -107,3 +115,8 @@ expectedSwapModels:
       txidIn: 00000000000000000000000000000000000000000000000000000xcptx222222
       confirmations: 2
     state: sent
+
+ignoreEventPrefixes:
+  - account.transferIncome
+  - account.transferInventory
+  - bot.balancesSynced

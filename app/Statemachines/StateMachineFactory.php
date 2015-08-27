@@ -14,10 +14,10 @@ use Metabor\Statemachine\Transition;
 abstract class StateMachineFactory {
 
 
-    public function buildStateMachineFromModel(Model $model) {
+    public function buildStateMachineFromModel(Model $model, $field='state') {
         // build a statemachine
         $process_name = (new \ReflectionClass($model))->getShortName()." Process";
-        $state_machine = new Statemachine($model, $this->buildStateMachineProcess($model['state'], $process_name));
+        $state_machine = new Statemachine($model, $this->buildStateMachineProcess($model[$field], $process_name));
         return $state_machine;
     }
 

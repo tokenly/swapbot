@@ -1,0 +1,4 @@
+name: bot.stateChange
+# msg: Entered state paying
+state: paying
+isActive: false

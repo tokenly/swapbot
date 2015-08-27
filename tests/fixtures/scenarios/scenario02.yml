@@ -33,6 +33,8 @@ expectedXChainCalls:
       requestId: "buildFn:swap"
 
 expectedBotEvents:
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
   - #### NEW
     meta: { baseFilename: swap.new.yml }
   - #### transfer income

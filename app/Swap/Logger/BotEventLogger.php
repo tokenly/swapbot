@@ -42,6 +42,10 @@ class BotEventLogger {
         return $this->logStandardBotEvent('bot.stateChange', $bot, ['state' => $new_state]);
     }
 
+    public function logBotPaymentStateChange(Bot $bot, $new_state) {
+        return $this->logStandardBotEvent('bot.paymentStateChange', $bot, ['payment_state' => $new_state]);
+    }
+
     public function logInactiveBotState(Bot $bot, $xchain_notification, BotState $bot_state) {
         $state_name = $bot_state->getName();
 

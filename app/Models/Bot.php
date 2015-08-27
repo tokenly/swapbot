@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Billing\PaymentPlan\PaymentPlan;
 use Swapbot\Models\Base\APIModel;
+use Swapbot\Models\BotLeaseEntry;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\BotStatusDetails;
 use Swapbot\Models\Data\IncomeRuleConfig;
@@ -21,7 +22,7 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', ];
+    protected $api_attributes = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', ];
     protected $api_attributes_public = ['id', 'name', 'username', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', ];
     protected $api_attributes_public_simple = ['id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address', 'state', 'created_at', ];
 
@@ -33,6 +34,7 @@ class Bot extends APIModel {
     ];
 
     protected $state_machine           = null;
+    protected $payment_state_machine   = null;
     protected $payment_plan_details    = null;
     protected $payment_plan_object     = null;
     protected $background_image_object = null;
@@ -317,6 +319,12 @@ class Bot extends APIModel {
         }
         return $this->state_machine;
     }
+    public function paymentStateMachine() {
+        if (!isset($this->payment_state_machine)) {
+            $this->payment_state_machine = app('Swapbot\Statemachines\BotPaymentStateMachineFactory')->buildStateMachineFromBot($this);
+        }
+        return $this->payment_state_machine;
+    }
 
 
     public function paymentPlanDetails() {
@@ -332,6 +340,19 @@ class Bot extends APIModel {
             $this->payment_plan_object = new PaymentPlan($this->paymentPlanDetails());
         }
         return $this->payment_plan_object;
+    }
+
+    public function calculatePaymentExpirationDate(BotLeaseEntry $last_lease_entry=null, $swapbotmonth_quantity) {
+        if (!$last_lease_entry) { return null; }
+
+        $end_date = $last_lease_entry['end_date'];
+
+        // get number of SWAPBOTMONTH tokens credited
+        if ($swapbotmonth_quantity > 0) {
+            $end_date->addMonths($swapbotmonth_quantity);
+        }
+
+        return $end_date;
     }
 
 

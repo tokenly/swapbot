@@ -31,6 +31,8 @@ expectedXChainCalls:
     meta: { baseFilename: send_BTC.yml }
 
 expectedBotEvents:
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
   - #### NEW
     meta: { baseFilename: swap.new.yml }
   - #### transfer income

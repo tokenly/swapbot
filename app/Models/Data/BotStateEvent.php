@@ -9,7 +9,7 @@ class BotStateEvent {
     const MONTHLY_FEE_PAID       = 'monthlyFeePaid';
     const FUELED                 = 'botFueled';
     const FUEL_EXHAUSTED         = 'fuelExhausted';
-    const LEASE_EXPIRED      = 'paymentExhausted';
-
+    const LEASE_EXPIRED          = 'leaseExpired';
+    const PAYMENT_EXHAUSTED      = 'paymentExhausted';
 
 }

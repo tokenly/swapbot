@@ -43,6 +43,8 @@ expectedBotEvents:
 
   #### now the bot is out of payment
 
+  - #### PAYING
+    meta: { baseFilename: bot.stateChange-paying.yml }
   - #### UNPAID
     meta: { baseFilename: bot.stateChange-unpaid.yml }
   - #### unpaid bot

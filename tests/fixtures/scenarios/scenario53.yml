@@ -58,12 +58,12 @@ expectedBotEvents:
     meta: { baseFilename: payment.moveFuelCreated.yml }
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
-  - #### UNPAID
-    meta: { baseFilename: bot.stateChange-unpaid.yml }
+  - #### PAYING
+    meta: { baseFilename: bot.stateChange-paying.yml }
   - #### monthly fee paid
-    meta: { baseFilename: payment.monthlyFeePaid.yml }
+    meta: { baseFilename: payment.monthlyFeePaid-paying.yml }
   - #### lease created
-    meta: { baseFilename: payment.leaseCreated-MONTH_2.yml }
+    meta: { baseFilename: payment.leaseCreated-MONTH_2_continued.yml }
   - #### ACTIVE
     meta: { baseFilename: bot.stateChange-active.yml }
 

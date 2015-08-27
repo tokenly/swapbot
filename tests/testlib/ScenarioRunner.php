@@ -373,6 +373,7 @@ class ScenarioRunner
             'account.transferIncome',
             'account.transferInventory',
             'bot.balancesSynced',
+            'bot.paymentStateChange',
         ];
     }
 
@@ -1213,7 +1214,7 @@ class ScenarioRunner
                     'text'    => $plain_text_content,
                 ];
                 $mailer_recorder->emails[] = $email;
-                // app('Illuminate\Mail\Transport\LogTransport')->send($msg);
+                app('Illuminate\Mail\Transport\LogTransport')->send($msg);
             });
 
         return $mailer_recorder;

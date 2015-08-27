@@ -11,7 +11,8 @@ class BotState extends State {
     const ACTIVE    = 'active';
     const INACTIVE  = 'inactive'; // manually deactivated
 
-    const UNPAID   = 'unpaid';
+    const PAYING    = 'paying'; // temporary - will go back to active or fail to unpaid
+    const UNPAID    = 'unpaid';
 
     public function isActive() {
         switch ($this->getName()) {

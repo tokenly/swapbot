@@ -1,0 +1,4 @@
+name: bot.paymentStateChange
+state: unpaid
+payment_state: pastdue
+isActive: false
