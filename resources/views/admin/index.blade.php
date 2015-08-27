@@ -31,6 +31,9 @@
 
     <div id="admin"></div>
 
+    {{-- pockets data holders --}}
+    <div data-pockets-url class="pockets-url" style="display: none;"></div><div data-pockets-image class="pockets-image" style="display: none;"></div>
+
     <!-- deps -->
     <script src="/bower_components/cryptojslib/rollups/sha1.js"></script>
     <script src="/bower_components/cryptojslib/rollups/sha256.js"></script>
@@ -44,6 +47,11 @@
     <script src="{{$pusherUrl}}/public/client.js"></script>
 
     <!-- app -->
+    <script>
+        window.QUOTEBOT_PUSHER_URL = '{{$quotebotPusherUrl}}';
+        window.QUOTEBOT_URL = '{{$quotebot['url']}}';
+        window.QUOTEBOT_API_TOKEN = '{{$quotebot['apiToken']}}';
+    </script>
     @foreach ($admin_scripts as $script)
         <script src="/js/admin/{{$script}}"></script>
     @endforeach

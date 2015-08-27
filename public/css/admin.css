@@ -6383,6 +6383,12 @@ ul.bot-list .payment .amount {
   min-width: 140px;
   padding-right: 6px;
 }
+ul.event-list {
+  max-height: 120px;
+}
+ul.event-list-debug {
+  max-height: 500px;
+}
 .bot-status .note {
   font-size: 1.2rem;
   opacity: 0.8;
@@ -6540,6 +6546,22 @@ td.not-found {
   font-weight: bold;
   font-size: 1.8rem;
   line-height: 4.2rem;
+}
+.label-big {
+  font-size: 1.3rem;
+}
+.payment-total {
+  color: #5cb85c;
+  font-weight: 400;
+}
+.payment-status-watching {
+  color: #337ab7;
+}
+.payment-status-unconfirmed {
+  color: #f0ad4e;
+}
+.payment-status-confirmed {
+  color: #5cb85c;
 }
 footer {
   margin-top: 24px;

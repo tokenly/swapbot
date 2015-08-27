@@ -2,8 +2,10 @@
 sbAdmin.pusherutils = do ()->
     pusherutils = {}
 
-    pusherutils.subscribeToPusherChanel = (chanelName, callbackFn)->
-        client = new window.Faye.Client("#{window.PUSHER_URL}/public")
+    pusherutils.subscribeToPusherChanel = (chanelName, callbackFn, pusherUrl=null)->
+        # console.log "pusherUrl=",pusherUrl
+        if not pusherUrl? then pusherUrl = window.PUSHER_URL
+        client = new window.Faye.Client("#{pusherUrl}/public")
         client.subscribe "/#{chanelName}", (data)->
             callbackFn(data)
             return

@@ -21,3 +21,6 @@ m.route(
         "/admin/swapevents/:id"    : sbAdmin.ctrl.swapEvents,
     }
 )
+
+# init the quotebot
+sbAdmin.quotebotSubscriber.initSubscriber(window.QUOTEBOT_URL, window.QUOTEBOT_API_TOKEN, window.QUOTEBOT_PUSHER_URL);

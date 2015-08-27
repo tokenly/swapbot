@@ -72,5 +72,20 @@ class PaymentsController extends APIController {
     }
 
 
+    // public function prices($botuuid, Guard $auth, PaymentPlans $payment_plans, BotRepository $bot_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, APIControllerHelper $api_helper)
+    // {
+    //     $user = $auth->getUser();
+
+    //     // get the bot
+    //     $bot = $api_helper->requireResourceOwnedByUserOrWithPermssion($botuuid, $user, $bot_repository, 'viewBots');
+
+    //     // get rates for this bot
+    //     $rates = $payment_plans->getMonthlyRates($bot['payment_plan']);
+
+    //     // format for API
+    //     return $api_helper->transformValueForOutput($rates);
+    // }
+
+
 
 }

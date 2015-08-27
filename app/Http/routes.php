@@ -90,6 +90,7 @@ $router->resource('api/v1/settings', 'API\Settings\SettingsController', ['except
 // Payments API
 $router->get('api/v1/payments/{botuuid}/all', 'API\Payments\PaymentsController@index');
 $router->get('api/v1/payments/{botuuid}/balances', 'API\Payments\PaymentsController@balances');
+// $router->get('api/v1/payments/{botuuid}/prices', 'API\Payments\PaymentsController@prices');
 
 // Image API
 $router->post('api/v1/images', 'API\Image\ImageController@store');

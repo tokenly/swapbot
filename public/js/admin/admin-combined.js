@@ -267,6 +267,254 @@
     return auth;
   })();
 
+  sbAdmin.botPaymentUtils = (function() {
+    var assetPostfix, botPaymentUtils, buildPaymentDetails, buildPaymentStatusAndDetails, buildPocketsBtn, monthOpts, paymentOpts, paymentPrices;
+    botPaymentUtils = {};
+    paymentPrices = function(allPlansData, btcUSDValue) {
+      var id, key, planData, prices, qty, ref;
+      prices = {};
+      if ((allPlansData != null ? allPlansData.monthly001 : void 0) != null) {
+        ref = allPlansData.monthly001.monthlyRates;
+        for (id in ref) {
+          planData = ref[id];
+          key = planData.asset;
+          qty = planData.quantity;
+          if (planData.fiatAmount != null) {
+            qty = planData.fiatAmount / btcUSDValue;
+            qty = qty * 1.005;
+          }
+          prices[key] = qty;
+        }
+      }
+      return prices;
+    };
+    paymentOpts = function(allPlansData, btcUSDValue) {
+      var asset, opts, quantity, ref;
+      opts = [
+        {
+          k: '- Choose One -',
+          v: ''
+        }
+      ];
+      ref = paymentPrices(allPlansData, btcUSDValue);
+      for (asset in ref) {
+        quantity = ref[asset];
+        opts.push({
+          k: sbAdmin.currencyutils.formatValue(quantity, asset) + assetPostfix(quantity, asset, btcUSDValue),
+          v: asset
+        });
+      }
+      return opts;
+    };
+    assetPostfix = function(qty, asset, btcUSDValue) {
+      if (asset !== 'BTC') {
+        return '';
+      }
+      return " (" + (sbAdmin.currencyutils.formatFiatCurrency(qty * btcUSDValue)) + ")";
+    };
+    monthOpts = function() {
+      var i, j, monthOptions;
+      monthOptions = [
+        {
+          k: '- Choose One -',
+          v: ''
+        }
+      ];
+      for (i = j = 1; j <= 36; i = ++j) {
+        monthOptions.push({
+          k: i + ' Month' + (i === 1 ? '' : 's'),
+          v: i
+        });
+      }
+      return monthOptions;
+    };
+    buildPocketsBtn = function(address, monthsText, quantity, asset) {
+      return sbAdmin.pocketsUtils.buildPaymentButton(address, "Swapbot Payment for " + monthsText, quantity, asset);
+    };
+    buildPaymentDetails = function(asset, months, allPlansData, btcUSDValue) {
+      var monthsText, price, quantity;
+      monthsText = months + ' month' + (months > 1 ? 's' : '');
+      price = paymentPrices(allPlansData, btcUSDValue)[asset];
+      quantity = months * price;
+      return [monthsText, quantity];
+    };
+    buildPaymentStatusAndDetails = function(botEventsProp) {
+      var botEvent, botEvents, details, event, isOld, j, len, status;
+      status = 'watching';
+      details = null;
+      botEvents = botEventsProp().slice(0);
+      botEvents.reverse();
+      for (j = 0, len = botEvents.length; j < len; j++) {
+        botEvent = botEvents[j];
+        event = botEvent.event;
+        if (event.name === 'payment.unconfirmed' || event.name === 'payment.confirmed') {
+          isOld = true;
+          if (moment(botEvent.createdAt).add(2, 'minutes').isAfter(moment())) {
+            isOld = false;
+          }
+          if (isOld) {
+            continue;
+          }
+          if (event.name === 'payment.unconfirmed') {
+            status = 'unconfirmed';
+          } else if (event.name === 'payment.confirmed') {
+            status = 'confirmed';
+          } else {
+            continue;
+          }
+          details = {
+            txid: event.txid,
+            source: event.source,
+            inAsset: event.inAsset,
+            inQty: event.inQty
+          };
+        }
+      }
+      return [status, details];
+    };
+    botPaymentUtils.buildFormattedBotDueDateText = function(payments, balances) {
+      var dueDate, formattedDate, now;
+      dueDate = botPaymentUtils.buildBotDueDate(payments, balances);
+      if (dueDate == null) {
+        return m('span', {
+          "class": "label label-default label-big"
+        }, 'Unknown');
+      }
+      now = moment();
+      formattedDate = dueDate.format('MMM D YYYY, h:mm a');
+      if (dueDate.isBefore(moment())) {
+        return m('span', {
+          "class": "label label-danger label-big"
+        }, 'Past Due');
+      }
+      if (dueDate.isBefore(moment().add(1, 'week'))) {
+        return [
+          '', m('span', {
+            "class": "label label-danger label-big"
+          }, formattedDate)
+        ];
+      }
+      if (dueDate.isBefore(moment().add(1, 'month'))) {
+        return [
+          '', m('span', {
+            "class": "label label-warning label-big"
+          }, formattedDate)
+        ];
+      }
+      if (dueDate.isBefore(moment().add(2, 'months'))) {
+        return [
+          '', m('span', {
+            "class": "label label-primary label-big"
+          }, formattedDate)
+        ];
+      }
+      return [
+        '', m('span', {
+          "class": "label label-success label-big"
+        }, formattedDate)
+      ];
+    };
+    botPaymentUtils.buildBotDueDate = function(payments, balances) {
+      var dueDate, lastPayment, monthsToAdd, swapbotMonthBalance;
+      if (payments.length === 0) {
+        return null;
+      }
+      lastPayment = null;
+      payments.map(function(botPaymentObj) {
+        var dateObj;
+        if (!botPaymentObj.isCredit && botPaymentObj.asset === 'SWAPBOTMONTH') {
+          dateObj = window.moment(botPaymentObj.createdAt);
+          if (lastPayment != null) {
+            if (dateObj.diff(lastPayment) > 0) {
+              return lastPayment = dateObj;
+            }
+          } else {
+            return lastPayment = dateObj;
+          }
+        }
+      });
+      if (lastPayment == null) {
+        return null;
+      }
+      swapbotMonthBalance = 0;
+      balances.map(function(balanceEntry) {
+        var asset, quantity;
+        asset = balanceEntry.asset;
+        quantity = balanceEntry.val;
+        if (asset === 'SWAPBOTMONTH') {
+          return swapbotMonthBalance = quantity;
+        }
+      });
+      monthsToAdd = 1 + swapbotMonthBalance;
+      dueDate = lastPayment.clone().add(monthsToAdd, 'months');
+      return dueDate;
+    };
+    botPaymentUtils.buildMakePaymentPulldown = function(paymentAssetProp, allPlansDataProp, btcUSDValueProp) {
+      var paymentOptions;
+      paymentOptions = paymentOpts(allPlansDataProp(), btcUSDValueProp());
+      return sbAdmin.form.mFormField("Make a Payment With", {
+        type: "select",
+        options: paymentOptions,
+        id: "payment-options"
+      }, paymentAssetProp);
+    };
+    botPaymentUtils.buildMonthsPaymentPulldown = function(monthsProp) {
+      var monthOptions;
+      monthOptions = monthOpts();
+      return sbAdmin.form.mFormField("For How Many Months", {
+        type: "select",
+        options: monthOptions,
+        id: "payment-months"
+      }, monthsProp);
+    };
+    botPaymentUtils.buildPayHereDisplay = function(paymentAssetProp, monthsProp, addressProp, allPlansDataProp, btcUSDValueProp) {
+      var asset, months, monthsText, paymentButton, quantity, ref, totalValue;
+      asset = paymentAssetProp();
+      months = monthsProp();
+      if (!asset || !months) {
+        return null;
+      }
+      ref = buildPaymentDetails(asset, months, allPlansDataProp(), btcUSDValueProp()), monthsText = ref[0], quantity = ref[1];
+      paymentButton = buildPocketsBtn(addressProp(), monthsText, quantity, asset);
+      totalValue = m('span', {
+        "class": 'payment-total'
+      }, "" + (sbAdmin.currencyutils.formatValue(quantity, asset)) + (assetPostfix(quantity, asset, btcUSDValueProp())) + " ");
+      return sbAdmin.form.mValueDisplay("Your Total", {
+        id: "payment-total"
+      }, [totalValue, ' ', paymentButton]);
+    };
+    botPaymentUtils.buildReceivingPayment = function(paymentAssetProp, monthsProp, addressProp, botEventsProp, allPlansDataProp, btcUSDValueProp) {
+      var asset, href, months, monthsText, msg, paymentButton, paymentDetails, quantity, ref, ref1, status;
+      asset = paymentAssetProp();
+      months = monthsProp();
+      if (!asset || !months) {
+        return null;
+      }
+      ref = buildPaymentStatusAndDetails(botEventsProp), status = ref[0], paymentDetails = ref[1];
+      if (status === 'watching') {
+        ref1 = buildPaymentDetails(asset, months, allPlansDataProp(), btcUSDValueProp()), monthsText = ref1[0], quantity = ref1[1];
+        paymentButton = buildPocketsBtn(addressProp(), monthsText, quantity, asset);
+        msg = ["Watching for payment to " + (addressProp()) + " ", paymentButton];
+      }
+      if (status === 'unconfirmed' || status === 'confirmed') {
+        href = "https://chain.so/tx/BTC/" + paymentDetails.txid;
+        msg = [
+          "Received " + (status === 'unconfirmed' ? 'an' : 'a') + " ", m('a', {
+            href: href,
+            target: "_blank"
+          }, status), " payment of " + (sbAdmin.currencyutils.formatValue(paymentDetails.inQty, paymentDetails.inAsset)) + " from " + paymentDetails.source + "."
+        ];
+      }
+      return sbAdmin.form.mValueDisplay("Payment Status", {
+        id: "payment-status",
+        "class": "payment-status-" + status
+      }, msg);
+    };
+    return botPaymentUtils;
+  })();
+
+  window.botPaymentUtils = sbAdmin.botPaymentUtils;
+
   sbAdmin.botutils = (function() {
     var botutils, findSetting, settings;
     botutils = {};
@@ -451,7 +699,23 @@
       if (currencyPostfix == null) {
         currencyPostfix = 'BTC';
       }
-      return window.numeral(value).format('0.0[0000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
+      return window.numeral(value).format('0,0.[00000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
+    };
+    currencyutils.formatFiatCurrency = function(value, currencyPrefix) {
+      var formattedCurrencyString, prefix;
+      if (currencyPrefix == null) {
+        currencyPrefix = '$';
+      }
+      if ((value == null) || isNaN(value)) {
+        return '';
+      }
+      formattedCurrencyString = window.numeral(value).format('0,0.00');
+      prefix = '';
+      if (formattedCurrencyString === '0.00') {
+        prefix = 'less than ';
+        formattedCurrencyString = '0.01';
+      }
+      return prefix + ((currencyPrefix != null ? currencyPrefix.length : void 0) ? currencyPrefix : '') + formattedCurrencyString;
     };
     return currencyutils;
   })();
@@ -1288,12 +1552,78 @@
     return planutils;
   })();
 
+  sbAdmin.pocketsUtils = (function() {
+    var pocketsImage, pocketsUrl, pocketsUtils;
+    pocketsUtils = {};
+    pocketsUrl = null;
+    pocketsImage = null;
+    pocketsUtils.buildPaymentButton = function(address, label, amount, acceptedTokens) {
+      var encodedLabel, urlAttributes;
+      if (amount == null) {
+        amount = null;
+      }
+      if (acceptedTokens == null) {
+        acceptedTokens = 'btc';
+      }
+      if (!pocketsUrl) {
+        return null;
+      }
+      encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape);
+      urlAttributes = "?address=" + address + "&label=" + encodedLabel + "&tokens=" + acceptedTokens;
+      if (amount != null) {
+        urlAttributes += '&amount=' + swapbot.formatters.formatCurrencyAsNumber(amount);
+      }
+      return m("a", {
+        href: pocketsUrl + urlAttributes,
+        "class": "pocketsLink",
+        title: "Pay Using Tokenly Pockets",
+        target: "_blank"
+      }, [
+        m('img', {
+          src: pocketsImage,
+          height: '24px',
+          'width': '24px'
+        })
+      ]);
+    };
+    pocketsUtils.exists = function() {
+      return pocketsUrl != null;
+    };
+    jQuery(function($) {
+      var attempts, maxAttempts, tryToLoadURL;
+      maxAttempts = 10;
+      attempts = 0;
+      tryToLoadURL = function() {
+        var timeoutRef;
+        ++attempts;
+        pocketsUrl = $('.pockets-url').text();
+        if (pocketsUrl === '') {
+          pocketsUrl = null;
+          if (attempts > maxAttempts) {
+            return;
+          }
+          timeoutRef = setTimeout(tryToLoadURL, 250);
+          return;
+        }
+        return pocketsImage = $('.pockets-image').text();
+      };
+      tryToLoadURL();
+    });
+    return pocketsUtils;
+  })();
+
   sbAdmin.pusherutils = (function() {
     var pusherutils;
     pusherutils = {};
-    pusherutils.subscribeToPusherChanel = function(chanelName, callbackFn) {
+    pusherutils.subscribeToPusherChanel = function(chanelName, callbackFn, pusherUrl) {
       var client;
-      client = new window.Faye.Client(window.PUSHER_URL + "/public");
+      if (pusherUrl == null) {
+        pusherUrl = null;
+      }
+      if (pusherUrl == null) {
+        pusherUrl = window.PUSHER_URL;
+      }
+      client = new window.Faye.Client(pusherUrl + "/public");
       client.subscribe("/" + chanelName, function(data) {
         callbackFn(data);
       });
@@ -1303,6 +1633,57 @@
       client.disconnect();
     };
     return pusherutils;
+  })();
+
+  sbAdmin.quotebotSubscriber = (function() {
+    var changeListenerID, changeListeners, currentQuote, handleQuotebotUpdate, quotebotSubscriber;
+    currentQuote = null;
+    changeListeners = {};
+    changeListenerID = 0;
+    quotebotSubscriber = {};
+    handleQuotebotUpdate = function(quote) {
+      var changeListenerCallback, id;
+      currentQuote = quote;
+      for (id in changeListeners) {
+        changeListenerCallback = changeListeners[id];
+        changeListenerCallback(currentQuote.last, currentQuote);
+      }
+    };
+    quotebotSubscriber.initSubscriber = function(quotebotURL, apiToken, quotebotPusherURL) {
+      var opts, path, pusherClient;
+      path = quotebotURL + "/api/v1/quote/all?apitoken=" + apiToken;
+      opts = {
+        method: 'GET',
+        url: path,
+        background: true
+      };
+      m.request(opts).then(function(quotesJSON) {
+        var j, len, quote, ref;
+        if (quotesJSON.quotes != null) {
+          ref = quotesJSON.quotes;
+          for (j = 0, len = ref.length; j < len; j++) {
+            quote = ref[j];
+            if (quote.source === 'bitcoinAverage' && quote.pair === 'USD:BTC') {
+              handleQuotebotUpdate(quote);
+            }
+          }
+        }
+      }, function(errorResponse) {
+        console.error(errorResponse.errors);
+      });
+      pusherClient = sbAdmin.pusherutils.subscribeToPusherChanel("quotebot_quote_bitcoinAverage_USD_BTC", handleQuotebotUpdate, quotebotPusherURL);
+    };
+    quotebotSubscriber.addChangeListener = function(changeListenerCallback) {
+      changeListeners[++changeListenerID] = changeListenerCallback;
+      if (currentQuote != null) {
+        changeListenerCallback(currentQuote.last, currentQuote);
+      }
+      return changeListenerID;
+    };
+    quotebotSubscriber.removeChangeListener = function(id) {
+      delete changeListeners[id];
+    };
+    return quotebotSubscriber;
   })();
 
   sbAdmin.stateutils = (function() {
@@ -2393,7 +2774,7 @@
   })();
 
   (function() {
-    var buildPaymentTypeLabel, curryHandleAccountUpdatesMessage, updateAllAccountPayments, vm;
+    var buildPaymentTypeLabel, curryHandleAccountUpdatesMessage, handleBotEventMessage, updateAllAccountPayments, vm;
     sbAdmin.ctrl.botPaymentsView = {};
     curryHandleAccountUpdatesMessage = function(id) {
       return function(data) {
@@ -2434,13 +2815,23 @@
         }, "Debit");
       }
     };
+    handleBotEventMessage = function(data) {
+      var ref;
+      if ((data != null ? (ref = data.event) != null ? ref.msg : void 0 : void 0) || (data != null ? data.message : void 0)) {
+        vm.botEvents().unshift(data);
+        m.redraw(true);
+      }
+    };
     vm = sbAdmin.ctrl.botPaymentsView.vm = (function() {
       vm = {};
       vm.init = function() {
-        var id;
+        var handleQuotebotUpdate, id;
         vm.errorMessages = m.prop([]);
         vm.resourceId = m.prop('');
-        vm.pusherClient = m.prop(null);
+        vm.pusherClients = [];
+        vm.quotebotSubscriberID = null;
+        vm.btcQuote = m.prop(null);
+        vm.botEvents = m.prop([]);
         vm.allPlansData = m.prop(null);
         vm.name = m.prop('');
         vm.address = m.prop('');
@@ -2449,6 +2840,8 @@
         vm.state = m.prop('');
         vm.paymentBalances = m.prop('');
         vm.payments = m.prop([]);
+        vm.paymentAssetType = m.prop('');
+        vm.paymentMonths = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           vm.resourceId(botData.id);
@@ -2465,7 +2858,18 @@
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
-        vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        sbAdmin.api.getBotEvents(id).then(function(apiResponse) {
+          vm.botEvents(apiResponse);
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+        handleQuotebotUpdate = function(btcUSDValue) {
+          vm.btcQuote(btcUSDValue);
+          m.redraw(true);
+        };
+        vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
+        vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        vm.quotebotSubscriberID = sbAdmin.quotebotSubscriber.addChangeListener(handleQuotebotUpdate);
         updateAllAccountPayments(id);
       };
       return vm;
@@ -2473,7 +2877,13 @@
     sbAdmin.ctrl.botPaymentsView.controller = function() {
       sbAdmin.auth.redirectIfNotLoggedIn();
       this.onunload = function(e) {
-        sbAdmin.pusherutils.closePusherChanel(vm.pusherClient());
+        var j, len, pusherClient, ref;
+        ref = vm.pusherClients;
+        for (j = 0, len = ref.length; j < len; j++) {
+          pusherClient = ref[j];
+          sbAdmin.pusherutils.closePusherChanel(pusherClient);
+        }
+        sbAdmin.quotebotSubscriber.removeChangeListener(vm.quotebotSubscriberID);
       };
       vm.init();
     };
@@ -2489,17 +2899,47 @@
             "class": "row"
           }, [
             m("div", {
-              "class": "col-md-4"
+              "class": "col-md-9"
             }, [
-              sbAdmin.form.mValueDisplay("Payment Plan", {
-                id: 'rate'
-              }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData()))
-            ]), m("div", {
-              "class": "col-md-5"
-            }, [
-              sbAdmin.form.mValueDisplay("Payment Address", {
-                id: 'paymentAddress'
-              }, vm.paymentAddress())
+              m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-3"
+                }, [
+                  sbAdmin.form.mValueDisplay("Next Payment Due", {
+                    id: 'due-date'
+                  }, sbAdmin.botPaymentUtils.buildFormattedBotDueDateText(vm.payments(), vm.paymentBalances()))
+                ]), m("div", {
+                  "class": "col-md-3"
+                }, [
+                  sbAdmin.form.mValueDisplay("Payment Plan", {
+                    id: 'rate'
+                  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData()))
+                ]), m("div", {
+                  "class": "col-md-6"
+                }, [
+                  sbAdmin.form.mValueDisplay("Payment Address", {
+                    id: 'paymentAddress'
+                  }, vm.paymentAddress())
+                ])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-3"
+                }, [botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)]), m("div", {
+                  "class": "col-md-3"
+                }, [botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)]), m("div", {
+                  "class": "col-md-6"
+                }, [botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)])
+              ]), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)])
+              ])
             ]), m("div", {
               "class": "col-md-3"
             }, [
@@ -2753,7 +3193,7 @@
       };
     };
     updateBotAccountBalance = function(id) {
-      return sbAdmin.api.getBotPaymentBalances(id).then(function(apiResponse) {
+      sbAdmin.api.getBotPaymentBalances(id).then(function(apiResponse) {
         var asset, paymentBalances, ref, val;
         paymentBalances = [];
         ref = apiResponse.balances;
@@ -2765,6 +3205,15 @@
           });
         }
         vm.paymentBalances(paymentBalances);
+        m.redraw(true);
+      }, function(errorResponse) {
+        vm.errorMessages(errorResponse.errors);
+      });
+      sbAdmin.api.getAllBotPayments(id).then(function(apiResponse) {
+        apiResponse.reverse();
+        vm.payments(apiResponse);
+        vm.paymentsSet(true);
+        m.redraw(true);
       }, function(errorResponse) {
         vm.errorMessages(errorResponse.errors);
       });
@@ -2840,8 +3289,10 @@
         vm.showDebug = !vm.showDebug;
       };
       vm.init = function() {
-        var id;
+        var handleQuotebotUpdate, id;
         vm.pusherClients = [];
+        vm.quotebotSubscriberID = null;
+        vm.btcQuote = m.prop(null);
         vm.showDebug = false;
         vm.errorMessages = m.prop([]);
         vm.formStatus = m.prop('active');
@@ -2862,11 +3313,15 @@
         vm.returnFee = m.prop('');
         vm.refundAfterBlocks = m.prop('');
         vm.paymentBalances = m.prop('');
+        vm.payments = m.prop([]);
+        vm.paymentsSet = m.prop(false);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
         vm.backgroundImageDetails = m.prop('');
         vm.logoImageDetails = m.prop('');
         vm.backgroundOverlaySettings = m.prop('');
+        vm.paymentAssetType = m.prop('');
+        vm.paymentMonths = m.prop('');
         id = m.route.param('id');
         sbAdmin.api.getBot(id).then(function(botData) {
           var ref;
@@ -2903,9 +3358,14 @@
           vm.errorMessages(errorResponse.errors);
         });
         updateBotAccountBalance(id);
+        handleQuotebotUpdate = function(btcUSDValue) {
+          vm.btcQuote(btcUSDValue);
+          m.redraw(true);
+        };
         vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_" + id, handleBotEventMessage));
         vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_balances_" + id, handleBotBalancesMessage));
         vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_" + id, curryHandleAccountUpdatesMessage(id)));
+        vm.quotebotSubscriberID = sbAdmin.quotebotSubscriber.addChangeListener(handleQuotebotUpdate);
       };
       return vm;
     })();
@@ -2918,11 +3378,13 @@
           pusherClient = ref[j];
           sbAdmin.pusherutils.closePusherChanel(pusherClient);
         }
+        sbAdmin.quotebotSubscriber.removeChangeListener(vm.quotebotSubscriberID);
       };
       vm.init();
     };
     sbAdmin.ctrl.botView.view = function() {
-      var mEl;
+      var botPaymentUtils, mEl;
+      botPaymentUtils = sbAdmin.botPaymentUtils;
       mEl = m("div", [
         m("div", {
           "class": "row"
@@ -3052,7 +3514,7 @@
             ]), m("div", {
               "class": "col-md-4"
             }, [
-              sbAdmin.form.mValueDisplay("Balances", {
+              sbAdmin.form.mValueDisplay("Bot Balances", {
                 id: 'balances'
               }, sbAdmin.utils.buildBalancesMElement(vm.balances()))
             ])
@@ -3061,6 +3523,69 @@
           }), m("hr"), m("h4", "Blacklisted Addresses"), vm.blacklistAddressesGroup.buildValues(), m("div", {
             "class": "spacer1"
           }), m("hr"), vm.incomeRulesGroup.buildValues(), m("hr"), m("div", {
+            "class": "bot-payments"
+          }, [
+            m("h3", "Payment"), m("div", {
+              "class": "row"
+            }, [
+              m("div", {
+                "class": "col-md-9"
+              }, [
+                m("div", {
+                  "class": "row"
+                }, [
+                  m("div", {
+                    "class": "col-md-3"
+                  }, [
+                    sbAdmin.form.mValueDisplay("Next Payment Due", {
+                      id: 'due-date'
+                    }, vm.paymentsSet() ? botPaymentUtils.buildFormattedBotDueDateText(vm.payments(), vm.paymentBalances()) : 'loading...')
+                  ]), m("div", {
+                    "class": "col-md-3"
+                  }, [
+                    sbAdmin.form.mValueDisplay("Payment Plan", {
+                      id: 'rate'
+                    }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData()))
+                  ]), m("div", {
+                    "class": "col-md-6"
+                  }, [
+                    sbAdmin.form.mValueDisplay("Payment Address", {
+                      id: 'paymentAddress'
+                    }, vm.paymentAddress())
+                  ])
+                ]), m("div", {
+                  "class": "row"
+                }, [
+                  m("div", {
+                    "class": "col-md-3"
+                  }, [botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)]), m("div", {
+                    "class": "col-md-3"
+                  }, [botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)]), m("div", {
+                    "class": "col-md-6"
+                  }, [botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)])
+                ]), m("div", {
+                  "class": "row"
+                }, [
+                  m("div", {
+                    "class": "col-md-12"
+                  }, [botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)])
+                ])
+              ]), m("div", {
+                "class": "col-md-3"
+              }, [
+                sbAdmin.form.mValueDisplay("Payment Account Balances", {
+                  id: 'balances'
+                }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances()))
+              ])
+            ])
+          ]), m("div", {
+            "class": "spacer1"
+          }), m("a[href='/admin/payments/bot/" + (vm.resourceId()) + "']", {
+            "class": "btn btn-info",
+            config: m.route
+          }, "View Payment History"), m("div", {
+            "class": "spacer1"
+          }), m("hr"), m("div", {
             "class": "bot-events"
           }, [
             m("div", {
@@ -3080,7 +3605,7 @@
             ]), m("h3", "Events"), vm.botEvents().length === 0 ? m("div", {
               "class": "no-events"
             }, "No Events Yet") : null, m("ul", {
-              "class": "list-unstyled striped-list bot-list event-list"
+              "class": "list-unstyled striped-list bot-list event-list" + (vm.showDebug ? ' event-list-debug' : '')
             }, [
               vm.botEvents().map(function(botEventObj) {
                 var dateObj, ref;
@@ -3115,45 +3640,14 @@
           ]), m("div", {
             "class": "spacer1"
           }), m("hr"), m("div", {
-            "class": "bot-payments"
-          }, [
-            m("h3", "Payment Status"), m("div", {
-              "class": "row"
-            }, [
-              m("div", {
-                "class": "col-md-4"
-              }, [
-                sbAdmin.form.mValueDisplay("Payment Plan", {
-                  id: 'rate'
-                }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData()))
-              ]), m("div", {
-                "class": "col-md-5"
-              }, [
-                sbAdmin.form.mValueDisplay("Payment Address", {
-                  id: 'paymentAddress'
-                }, vm.paymentAddress())
-              ]), m("div", {
-                "class": "col-md-3"
-              }, [
-                sbAdmin.form.mValueDisplay("Account Balances", {
-                  id: 'balances'
-                }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances()))
-              ])
-            ])
-          ]), m("a[href='/admin/payments/bot/" + (vm.resourceId()) + "']", {
-            "class": "btn btn-info",
-            config: m.route
-          }, "View Payment Details"), m("div", {
-            "class": "spacer1"
-          }), m("hr"), m("div", {
             "class": "spacer2"
-          }), (vm.username() === sbAdmin.auth.getUser().username ? m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
-            "class": "btn btn-success",
-            config: m.route
-          }, "Edit This Bot") : null), m("a[href='/admin/dashboard']", {
+          }), m("a[href='/admin/dashboard']", {
             "class": "btn btn-default pull-right",
             config: m.route
-          }, "Back to Dashboard")
+          }, "Back to Dashboard"), (vm.username() === sbAdmin.auth.getUser().username ? m("a[href='/admin/edit/bot/" + (vm.resourceId()) + "']", {
+            "class": "btn btn-success",
+            config: m.route
+          }, "Edit This Bot") : null)
         ])
       ]);
       return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
@@ -3993,6 +4487,8 @@
     "/admin/allswaps": sbAdmin.ctrl.allswaps,
     "/admin/swapevents/:id": sbAdmin.ctrl.swapEvents
   });
+
+  sbAdmin.quotebotSubscriber.initSubscriber(window.QUOTEBOT_URL, window.QUOTEBOT_API_TOKEN, window.QUOTEBOT_PUSHER_URL);
 
   if (swapbot == null) {
     swapbot = {};

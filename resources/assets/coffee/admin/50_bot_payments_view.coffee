@@ -43,6 +43,13 @@ do ()->
             return m('span', {class: "label label-warning"}, "Debit")
 
 
+    handleBotEventMessage = (data)->
+        if data?.event?.msg or data?.message
+            vm.botEvents().unshift(data)
+            # this is outside of mithril, so we must force a redraw
+            m.redraw(true)
+        return
+
     # ################################################
 
     vm = sbAdmin.ctrl.botPaymentsView.vm = do ()->
@@ -54,7 +61,10 @@ do ()->
             # view status
             vm.errorMessages = m.prop([])
             vm.resourceId = m.prop('')
-            vm.pusherClient = m.prop(null)
+            vm.pusherClients = []
+            vm.quotebotSubscriberID = null
+            vm.btcQuote = m.prop(null)
+            vm.botEvents = m.prop([])
             vm.allPlansData = m.prop(null)
 
             # fields
@@ -65,6 +75,11 @@ do ()->
             vm.state = m.prop('')
             vm.paymentBalances = m.prop('')
             vm.payments = m.prop([])
+
+            # payment calculator
+            vm.paymentAssetType = m.prop('')
+            vm.paymentMonths = m.prop('')
+
 
             # if there is an id, then load it from the api
             id = m.route.param('id')
@@ -96,8 +111,25 @@ do ()->
                     return
             )
 
+            # also get the bot events
+            sbAdmin.api.getBotEvents(id).then(
+                (apiResponse)->
+                    vm.botEvents(apiResponse)
+                    return
+                , (errorResponse)->
+                    vm.errorMessages(errorResponse.errors)
+                    return
+            )
 
-            vm.pusherClient(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
+            handleQuotebotUpdate = (btcUSDValue)->
+                vm.btcQuote(btcUSDValue)
+                m.redraw(true)
+                return
+
+
+            vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_events_#{id}", handleBotEventMessage))
+            vm.pusherClients.push(sbAdmin.pusherutils.subscribeToPusherChanel("swapbot_account_updates_#{id}", curryHandleAccountUpdatesMessage(id)))
+            vm.quotebotSubscriberID = sbAdmin.quotebotSubscriber.addChangeListener(handleQuotebotUpdate)
             updateAllAccountPayments(id)
 
             return
@@ -109,8 +141,9 @@ do ()->
 
         # bind unload event
         this.onunload = (e)->
-            # console.log "unload bot view vm.pusherClient()=",vm.pusherClient()
-            sbAdmin.pusherutils.closePusherChanel(vm.pusherClient())
+            for pusherClient in vm.pusherClients
+                sbAdmin.pusherutils.closePusherChanel(pusherClient)
+            sbAdmin.quotebotSubscriber.removeChangeListener(vm.quotebotSubscriberID)
             return
 
         vm.init()
@@ -130,19 +163,45 @@ do ()->
                 m("div", {class: "bot-payments-view"}, [
                     sbAdmin.form.mAlerts(vm.errorMessages),
 
+        
                     m("h3", "Payment Status"),
                     m("div", { class: "row"}, [
-                            m("div", {class: "col-md-4"}, [
-                                sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
+                        m("div", {class: "col-md-9"}, [
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Next Payment Due", {id: 'due-date',  }, sbAdmin.botPaymentUtils.buildFormattedBotDueDateText(vm.payments(), vm.paymentBalances())),
+                                ]),
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
+                                ]),
+                                m("div", {class: "col-md-6"}, [
+                                    sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
+                                ]),
                             ]),
-                            m("div", {class: "col-md-5"}, [
-                                sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
+        
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-3"}, [
+                                    botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)
+                                ]),
+                                m("div", {class: "col-md-3"}, [
+                                    botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)
+                                ]),
+                                m("div", {class: "col-md-6"}, [
+                                    botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)
+                                ]),
                             ]),
-                            m("div", {class: "col-md-3"}, [
-                                sbAdmin.form.mValueDisplay("Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
-                            ]),
-                    ]),
 
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-12"}, [
+                                    botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)
+                                ]),
+                            ]),
+                        ]),
+                        m("div", {class: "col-md-3"}, [
+                            sbAdmin.form.mValueDisplay("Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
+                        ]),
+                    ]),
+                
 
                     m("div", {class: "bot-payments"}, [
                         m("small", {class: "pull-right"}, "newest first"),

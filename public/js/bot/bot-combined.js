@@ -2262,41 +2262,6 @@
     return exports;
   })();
 
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
-    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
-    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
-    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
-    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
-    return exports;
-  })();
-
-  Settings = (function() {
-    var exports;
-    exports = {};
-    exports.SWAPS_TO_SHOW = 10;
-    exports.MORE_SWAPS_TO_SHOW = 10;
-    return exports;
-  })();
-
   Dispatcher = (function() {
     var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
     exports = {};
@@ -2394,6 +2359,150 @@
       throw error;
     }
   };
+
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
+    return exports;
+  })();
+
+  Pockets = (function() {
+    var exports, pocketsImage, pocketsUrl;
+    exports = {};
+    pocketsUrl = null;
+    pocketsImage = null;
+    exports.buildPaymentButton = function(address, label, amount, acceptedTokens) {
+      var encodedLabel, urlAttributes;
+      if (amount == null) {
+        amount = null;
+      }
+      if (acceptedTokens == null) {
+        acceptedTokens = 'btc';
+      }
+      if (!pocketsUrl) {
+        return null;
+      }
+      encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape);
+      urlAttributes = "?address=" + address + "&label=" + encodedLabel + "&tokens=" + acceptedTokens;
+      if (amount != null) {
+        urlAttributes += '&amount=' + swapbot.formatters.formatCurrencyAsNumber(amount);
+      }
+      return React.createElement('a', {
+        href: pocketsUrl + urlAttributes,
+        target: '_blank',
+        className: 'pocketsLink',
+        title: "Pay Using Tokenly Pockets"
+      }, [
+        React.createElement('img', {
+          src: pocketsImage,
+          height: '24px',
+          'width': '24px'
+        })
+      ]);
+    };
+    exports.exists = function() {
+      return pocketsUrl != null;
+    };
+    jQuery(function($) {
+      var attempts, maxAttempts, tryToLoadURL;
+      maxAttempts = 10;
+      attempts = 0;
+      tryToLoadURL = function() {
+        var timeoutRef;
+        ++attempts;
+        pocketsUrl = $('.pockets-url').text();
+        if (pocketsUrl === '') {
+          pocketsUrl = null;
+          if (attempts > maxAttempts) {
+            return;
+          }
+          timeoutRef = setTimeout(tryToLoadURL, 250);
+          return;
+        }
+        return pocketsImage = $('.pockets-image').text();
+      };
+      tryToLoadURL();
+    });
+    return exports;
+  })();
+
+  SwapMatcher = (function() {
+    var exports, swapIsMatched, swapIsValid;
+    exports = {};
+    swapIsMatched = function(swap, userChoices) {
+      if (!swapIsValid(swap, userChoices)) {
+        return false;
+      }
+      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
+        return true;
+      }
+      if (swap.assetIn === userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
+        return true;
+      }
+      return false;
+    };
+    swapIsValid = function(swap, userChoices) {
+      if (swap.isComplete) {
+        return false;
+      }
+      if (userChoices.swapIDsToIgnore[swap.id] != null) {
+        return false;
+      }
+      return true;
+    };
+    exports.buildMatchedSwaps = function(swaps, userChoices) {
+      var matchedSwaps, swap, _i, _len;
+      matchedSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsMatched(swap, userChoices)) {
+          matchedSwaps.push(swap);
+        }
+      }
+      return matchedSwaps;
+    };
+    exports.buildValidSwaps = function(swaps, userChoices) {
+      var swap, validSwaps, _i, _len;
+      validSwaps = [];
+      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
+        swap = swaps[_i];
+        if (swapIsValid(swap, userChoices)) {
+          validSwaps.push(swap);
+        }
+      }
+      return validSwaps;
+    };
+    return exports;
+  })();
 
   BotStore = (function() {
     var emitChange, eventEmitter, exports, storedBots, updateBot;
@@ -3152,115 +3261,6 @@
     };
     exports.getSwapsUIState = function() {
       return uiState.swaps;
-    };
-    return exports;
-  })();
-
-  Pockets = (function() {
-    var exports, pocketsImage, pocketsUrl;
-    exports = {};
-    pocketsUrl = null;
-    pocketsImage = null;
-    exports.buildPaymentButton = function(address, label, amount, acceptedTokens) {
-      var encodedLabel, urlAttributes;
-      if (amount == null) {
-        amount = null;
-      }
-      if (acceptedTokens == null) {
-        acceptedTokens = 'btc';
-      }
-      if (!pocketsUrl) {
-        return null;
-      }
-      encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape);
-      urlAttributes = "?address=" + address + "&label=" + encodedLabel + "&tokens=" + acceptedTokens;
-      if (amount != null) {
-        urlAttributes += '&amount=' + swapbot.formatters.formatCurrencyAsNumber(amount);
-      }
-      return React.createElement('a', {
-        href: pocketsUrl + urlAttributes,
-        target: '_blank',
-        className: 'pocketsLink',
-        title: "Pay Using Tokenly Pockets"
-      }, [
-        React.createElement('img', {
-          src: pocketsImage,
-          height: '24px',
-          'width': '24px'
-        })
-      ]);
-    };
-    exports.exists = function() {
-      return pocketsUrl != null;
-    };
-    jQuery(function($) {
-      var attempts, maxAttempts, tryToLoadURL;
-      maxAttempts = 10;
-      attempts = 0;
-      tryToLoadURL = function() {
-        var timeoutRef;
-        ++attempts;
-        pocketsUrl = $('.pockets-url').text();
-        if (pocketsUrl === '') {
-          pocketsUrl = null;
-          if (attempts > maxAttempts) {
-            return;
-          }
-          timeoutRef = setTimeout(tryToLoadURL, 250);
-          return;
-        }
-        return pocketsImage = $('.pockets-image').text();
-      };
-      tryToLoadURL();
-    });
-    return exports;
-  })();
-
-  SwapMatcher = (function() {
-    var exports, swapIsMatched, swapIsValid;
-    exports = {};
-    swapIsMatched = function(swap, userChoices) {
-      if (!swapIsValid(swap, userChoices)) {
-        return false;
-      }
-      if (userChoices.swapMatchMode === UserChoiceStore.MATCH_SHOW_ALL) {
-        return true;
-      }
-      if (swap.assetIn === userChoices.inAsset && swapbot.formatters.formatCurrency(swap.quantityIn) === swapbot.formatters.formatCurrency(userChoices.inAmount)) {
-        return true;
-      }
-      return false;
-    };
-    swapIsValid = function(swap, userChoices) {
-      if (swap.isComplete) {
-        return false;
-      }
-      if (userChoices.swapIDsToIgnore[swap.id] != null) {
-        return false;
-      }
-      return true;
-    };
-    exports.buildMatchedSwaps = function(swaps, userChoices) {
-      var matchedSwaps, swap, _i, _len;
-      matchedSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsMatched(swap, userChoices)) {
-          matchedSwaps.push(swap);
-        }
-      }
-      return matchedSwaps;
-    };
-    exports.buildValidSwaps = function(swaps, userChoices) {
-      var swap, validSwaps, _i, _len;
-      validSwaps = [];
-      for (_i = 0, _len = swaps.length; _i < _len; _i++) {
-        swap = swaps[_i];
-        if (swapIsValid(swap, userChoices)) {
-          validSwaps.push(swap);
-        }
-      }
-      return validSwaps;
     };
     return exports;
   })();
