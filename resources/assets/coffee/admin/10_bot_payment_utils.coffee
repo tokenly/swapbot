@@ -23,7 +23,8 @@ sbAdmin.botPaymentUtils = do ()->
     paymentOpts = (allPlansData, btcUSDValue)->
         opts = [{k: '- Choose One -', v: ''},]
         for asset, quantity of paymentPrices(allPlansData, btcUSDValue)
-            opts.push({k: sbAdmin.currencyutils.formatValue(quantity, asset)+assetPostfix(quantity, asset, btcUSDValue), v: asset})
+            if quantity?
+                opts.push({k: sbAdmin.currencyutils.formatValue(quantity, asset)+assetPostfix(quantity, asset, btcUSDValue), v: asset})
         return opts
 
     assetPostfix = (qty, asset, btcUSDValue)->
@@ -96,7 +97,7 @@ sbAdmin.botPaymentUtils = do ()->
         return ['', m('span', {class: "label label-success label-big"}, formattedDate)]
             
     botPaymentUtils.buildBotDueDate = (payments, balances)->
-        if payments.length == 0
+        if not payments? or payments.length == 0
             return null
 
         lastPayment = null

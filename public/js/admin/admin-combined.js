@@ -299,10 +299,12 @@
       ref = paymentPrices(allPlansData, btcUSDValue);
       for (asset in ref) {
         quantity = ref[asset];
-        opts.push({
-          k: sbAdmin.currencyutils.formatValue(quantity, asset) + assetPostfix(quantity, asset, btcUSDValue),
-          v: asset
-        });
+        if (quantity != null) {
+          opts.push({
+            k: sbAdmin.currencyutils.formatValue(quantity, asset) + assetPostfix(quantity, asset, btcUSDValue),
+            v: asset
+          });
+        }
       }
       return opts;
     };
@@ -416,7 +418,7 @@
     };
     botPaymentUtils.buildBotDueDate = function(payments, balances) {
       var dueDate, lastPayment, monthsToAdd, swapbotMonthBalance;
-      if (payments.length === 0) {
+      if ((payments == null) || payments.length === 0) {
         return null;
       }
       lastPayment = null;
