@@ -6409,6 +6409,16 @@ ul.event-list-debug {
 textarea.form-control {
   height: 230px;
 }
+.duplicate-asset-group .receives-label {
+  color: #c9302c;
+}
+.duplicate-warning {
+  background-color: #d9534f;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 28px;
+}
 .uploader {
   width: 100%;
   height: 105px;

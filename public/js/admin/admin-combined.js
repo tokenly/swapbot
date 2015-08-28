@@ -1143,8 +1143,32 @@
   })();
 
   sbAdmin.form = (function() {
-    var buildOpts, form;
+    var buildLabelEl, buildOpts, form;
     form = {};
+    buildLabelEl = function(label, id) {
+      var k, labelText, properties, v;
+      if (typeof label === 'object') {
+        labelText = label.text;
+        properties = {
+          "for": id,
+          "class": 'control-label'
+        };
+        for (k in label) {
+          v = label[k];
+          if (k === 'text') {
+            continue;
+          }
+          properties[k] = v;
+        }
+      } else {
+        labelText = label;
+        properties = {
+          "for": id,
+          "class": 'control-label'
+        };
+      }
+      return m("label", properties, labelText);
+    };
     form.mValueDisplay = function(label, attributes, value) {
       var id, inputEl, inputProps;
       inputProps = sbAdmin.utils.clone(attributes);
@@ -1154,24 +1178,14 @@
       id = inputProps.id || 'value';
       return m("div", {
         "class": "form-group"
-      }, [
-        m("label", {
-          "for": id,
-          "class": 'control-label'
-        }, label), inputEl = m("div", inputProps, value)
-      ]);
+      }, [buildLabelEl(label, id), inputEl = m("div", inputProps, value)]);
     };
     form.mFormField = function(label, attributes, prop) {
       var inputEl;
       inputEl = form.mInputEl(attributes, prop);
       return m("div", {
         "class": "form-group"
-      }, [
-        m("label", {
-          "for": attributes.id,
-          "class": 'control-label'
-        }, label), inputEl
-      ]);
+      }, [buildLabelEl(label, attributes.id), inputEl]);
     };
     form.mInputEl = function(attributes, prop) {
       var inputEl, inputProps, name, options;
@@ -2213,7 +2227,7 @@
   })();
 
   (function() {
-    var buildBlacklistAddressesGroup, buildIncomeRulesGroup, buildOnSwaptypeChange, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, vm;
+    var buildBlacklistAddressesGroup, buildDuplicateSwapOffsetsMap, buildIncomeRulesGroup, buildOnSwaptypeChange, duplicateWarning, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, vm;
     sbAdmin.ctrl.botForm = {};
     buildOnSwaptypeChange = function(number, swap) {
       return function(e) {
@@ -2233,9 +2247,9 @@
       }, swap.strategy);
     };
     swapGroupRenderers = {};
-    swapGroupRenderers.rate = function(number, swap) {
+    swapGroupRenderers.rate = function(number, swap, isDuplicate) {
       return m("div", {
-        "class": "asset-group"
+        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
       }, [
         m("h4", "Swap #" + number), m("div", {
           "class": "row"
@@ -2245,7 +2259,10 @@
           }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-2"
           }, [
-            sbAdmin.form.mFormField("Receives Asset", {
+            sbAdmin.form.mFormField({
+              text: "Receives Asset",
+              "class": 'control-label receives-label'
+            }, {
               id: "swap_in_" + number,
               'placeholder': "BTC"
             }, swap["in"])
@@ -2293,12 +2310,12 @@
               }, '')
             ])
           ])
-        ])
+        ]), (isDuplicate ? duplicateWarning() : null)
       ]);
     };
-    swapGroupRenderers.fixed = function(number, swap) {
+    swapGroupRenderers.fixed = function(number, swap, isDuplicate) {
       return m("div", {
-        "class": "asset-group"
+        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
       }, [
         m("h4", "Swap #" + number), m("div", {
           "class": "row"
@@ -2308,7 +2325,10 @@
           }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-2"
           }, [
-            sbAdmin.form.mFormField("Receives Asset", {
+            sbAdmin.form.mFormField({
+              text: "Receives Asset",
+              "class": 'control-label receives-label'
+            }, {
               id: "swap_in_" + number,
               'placeholder': "BTC"
             }, swap["in"])
@@ -2356,12 +2376,12 @@
               }, '')
             ])
           ])
-        ])
+        ]), (isDuplicate ? duplicateWarning() : null)
       ]);
     };
-    swapGroupRenderers.fiat = function(number, swap) {
+    swapGroupRenderers.fiat = function(number, swap, isDuplicate) {
       return m("div", {
-        "class": "asset-group"
+        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
       }, [
         m("h4", "Swap #" + number), m("div", {
           "class": "row"
@@ -2371,7 +2391,10 @@
           }, [sharedSwapTypeFormField(number, swap)]), m("div", {
             "class": "col-md-1"
           }, [
-            sbAdmin.form.mValueDisplay("Receives", {
+            sbAdmin.form.mValueDisplay({
+              text: "Receives",
+              "class": 'control-label receives-label'
+            }, {
               id: "swap_in_" + number
             }, swap["in"]())
           ]), m("div", {
@@ -2426,11 +2449,16 @@
               }, '')
             ])
           ])
-        ])
+        ]), (isDuplicate ? duplicateWarning() : null)
       ]);
     };
-    swapGroup = function(number, swapProp) {
-      return swapGroupRenderers[swapProp().strategy()](number, swapProp());
+    swapGroup = function(number, swapProp, isDuplicate) {
+      return swapGroupRenderers[swapProp().strategy()](number, swapProp(), isDuplicate);
+    };
+    duplicateWarning = function() {
+      return m("div", {
+        "class": "duplicate-warning"
+      }, [m('strong', {}, 'Warning:'), " This asset is received by 2 or more swaps. Multiple swaps will be triggered when this asset is received. This is not recommended."]);
     };
     buildIncomeRulesGroup = function() {
       return sbAdmin.formGroup.newGroup({
@@ -2481,6 +2509,22 @@
         translateFieldToNumberedValues: 'address',
         useCompactNumberedLayout: true
       });
+    };
+    buildDuplicateSwapOffsetsMap = function(swaps) {
+      var duplicateOffsetsMap, offsetByToken;
+      duplicateOffsetsMap = {};
+      offsetByToken = {};
+      swaps().map(function(swap, offset) {
+        var inToken;
+        inToken = swap()["in"]().toUpperCase();
+        if (offsetByToken[inToken] != null) {
+          duplicateOffsetsMap[offsetByToken[inToken]] = true;
+          return duplicateOffsetsMap[offset] = true;
+        } else {
+          return offsetByToken[inToken] = offset;
+        }
+      });
+      return duplicateOffsetsMap;
     };
     vm = sbAdmin.ctrl.botForm.vm = (function() {
       var buildBlacklistAddressesPropValue, buildSwapsPropValue;
@@ -2619,7 +2663,8 @@
       vm.init();
     };
     return sbAdmin.ctrl.botForm.view = function() {
-      var mEl;
+      var duplicateSwapsOffsetsMap, mEl;
+      duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.swaps);
       mEl = m("div", [
         m("div", {
           "class": "row"
@@ -2746,7 +2791,7 @@
                   }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())) : null)
                 ])
               ]), m("hr"), vm.swaps().map(function(swap, offset) {
-                return swapGroup(offset + 1, swap);
+                return swapGroup(offset + 1, swap, duplicateSwapsOffsetsMap[offset] != null);
               }), m("div", {
                 "class": "form-group"
               }, [

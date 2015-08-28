@@ -2,6 +2,18 @@
 sbAdmin.form = do ()->
     form = {}
 
+    buildLabelEl = (label, id)->
+        if typeof label == 'object'
+            labelText = label.text
+            properties = {for: id, class: 'control-label'}
+            for k, v of label
+                if k == 'text' then continue
+                properties[k] = v
+        else
+            labelText = label
+            properties = {for: id, class: 'control-label'}
+        return m("label", properties, labelText)
+
     form.mValueDisplay = (label, attributes, value)->
         inputProps = sbAdmin.utils.clone(attributes)
         inputProps.class = 'form-control-static' if not inputProps.class?
@@ -9,7 +21,7 @@ sbAdmin.form = do ()->
         id = inputProps.id or 'value'
 
         return m("div", {class: "form-group"}, [
-            m("label", {for: id, class: 'control-label'}, label),
+            buildLabelEl(label, id)
             inputEl = m("div", inputProps, value)
         ])
 
@@ -17,7 +29,7 @@ sbAdmin.form = do ()->
         inputEl = form.mInputEl(attributes, prop)
 
         return m("div", {class: "form-group"}, [
-            m("label", {for: attributes.id, class: 'control-label'}, label),
+            buildLabelEl(label, attributes.id)
             inputEl,
         ])
 

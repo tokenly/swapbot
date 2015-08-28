@@ -14,14 +14,14 @@ do ()->
 
     # ### helpers #####################################
     swapGroupRenderers = {}
-    swapGroupRenderers.rate = (number, swap)->
-        return m("div", {class: "asset-group"}, [
+    swapGroupRenderers.rate = (number, swap, isDuplicate)->
+        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
 
                 m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
+                    sbAdmin.form.mFormField({text: "Receives Asset", class: 'control-label receives-label'}, {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
                 ]),
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
@@ -38,16 +38,17 @@ do ()->
                     ]),
                 ]),
             ]),
+            (if isDuplicate then duplicateWarning() else null),
         ])
 
-    swapGroupRenderers.fixed = (number, swap)->
-        return m("div", {class: "asset-group"}, [
+    swapGroupRenderers.fixed = (number, swap, isDuplicate)->
+        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
 
                 m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Receives Asset", {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
+                    sbAdmin.form.mFormField({text: "Receives Asset", class: 'control-label receives-label'}, {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
                 ]),
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Receives Quantity", {type: "number", step: "any", min: "0", id: "swap_in_qty_#{number}", 'placeholder': "1", }, swap.in_qty),
@@ -64,16 +65,17 @@ do ()->
                     ]),
                 ]),
             ]),
+            (if isDuplicate then duplicateWarning() else null),
         ])
 
-    swapGroupRenderers.fiat = (number, swap)->
-        return m("div", {class: "asset-group"}, [
+    swapGroupRenderers.fiat = (number, swap, isDuplicate)->
+        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
             m("h4", "Swap ##{number}"),
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-2"}, [sharedSwapTypeFormField(number, swap),]),
 
                 m("div", {class: "col-md-1"}, [
-                    sbAdmin.form.mValueDisplay("Receives", {id: "swap_in_#{number}", }, swap.in()),
+                    sbAdmin.form.mValueDisplay({text: "Receives", class: 'control-label receives-label'}, {id: "swap_in_#{number}", }, swap.in()),
                 ]),
                 m("div", {class: "col-md-2"}, [
                     sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "MYPRODUCT", }, swap.out),
@@ -93,12 +95,16 @@ do ()->
                     ]),
                 ]),
             ]),
+            (if isDuplicate then duplicateWarning() else null),
         ])
 
 
 
-    swapGroup = (number, swapProp)->
-        return swapGroupRenderers[swapProp().strategy()](number, swapProp())
+    swapGroup = (number, swapProp, isDuplicate)->
+        return swapGroupRenderers[swapProp().strategy()](number, swapProp(), isDuplicate)
+
+    duplicateWarning = ()->
+        return m("div", class: "duplicate-warning", [m('strong', {}, 'Warning:'), " This asset is received by 2 or more swaps. Multiple swaps will be triggered when this asset is received. This is not recommended."])
 
     # ################################################
 
@@ -142,6 +148,24 @@ do ()->
             translateFieldToNumberedValues: 'address'
             useCompactNumberedLayout: true
         })
+
+    # ################################################
+
+    buildDuplicateSwapOffsetsMap = (swaps)->
+        duplicateOffsetsMap = {}
+        offsetByToken = {}
+        swaps().map (swap, offset)->
+            inToken = swap().in().toUpperCase()
+            if offsetByToken[inToken]?
+                duplicateOffsetsMap[offsetByToken[inToken]] = true
+                duplicateOffsetsMap[offset] = true
+            else
+                offsetByToken[inToken] = offset
+
+        return duplicateOffsetsMap
+
+            
+
 
     # ################################################
 
@@ -311,6 +335,8 @@ do ()->
         return
 
     sbAdmin.ctrl.botForm.view = ()->
+        duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.swaps)
+
         mEl = m("div", [
             m("div", { class: "row"}, [
                 m("div", {class: "col-md-12"}, [
@@ -393,7 +419,7 @@ do ()->
                         m("hr"),
 
                         vm.swaps().map((swap, offset)->
-                            return swapGroup(offset+1, swap)
+                            return swapGroup(offset+1, swap, duplicateSwapsOffsetsMap[offset]?)
                         ),
 
                         # add asset
