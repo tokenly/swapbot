@@ -1,5 +1,6 @@
 <?php namespace Swapbot\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -11,7 +12,10 @@ class AppServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		//
+		// make all forms use https
+		if (env('USE_SSL', false)) {
+		    URL::forceSchema('https');
+		}
 	}
 
 	/**
