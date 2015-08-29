@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Bot;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
@@ -338,7 +339,7 @@ class SwapProcessor {
                 $this->bot_event_logger->logAutomaticRefund($swap_process['bot'], $swap_process['swap'], $refund_config);
 
                 // do automatic refund
-                $this->doRefund($swap_process);
+                $this->doRefund($swap_process, RefundConfig::REASON_OUT_OF_STOCK);
                 return;
             }
 
@@ -351,18 +352,24 @@ class SwapProcessor {
         }
 
         // do we need to refund
-        $is_refunding = $swap_process['swap_config']->getStrategy()->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+        $strategy = $swap_process['swap_config']->getStrategy();
+        $refund_reason = null;
+        $is_refunding = $strategy->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+        if ($is_refunding) {
+            $refund_reason = $strategy->buildRefundReason($swap_process['swap_config'], $swap_process['in_quantity']);
+        }
 
         // check forced refund
         $forced_refund = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['forcedRefund']) AND $swap_process['swap']['receipt']['forcedRefund']);
         if (!$is_refunding AND $forced_refund) {
             $is_refunding = true;
+            $refund_reason = RefundConfig::REASON_MANUAL_REFUND;
             EventLog::log('Forced refund triggered', ['botName' => $swap_process['bot']['name'], 'swapId' => $swap_process['swap']['id']]);
         }
 
         if ($is_refunding) {
             // refund
-            $this->doRefund($swap_process);
+            $this->doRefund($swap_process, $refund_reason);
         } else {
             // do forward swap
             $this->doForwardSwap($swap_process);
@@ -431,7 +438,7 @@ class SwapProcessor {
         $swap_process['swap_was_sent'] = true;
     }
 
-    protected function doRefund($swap_process) {
+    protected function doRefund($swap_process, $refund_reason) {
         // send the refund
         try {
             list($out_quantity, $out_asset, $fee, $dust_size) = $this->buildRefundDetails($swap_process['bot'], $swap_process['xchain_notification']);
@@ -439,6 +446,7 @@ class SwapProcessor {
             // build trial receipt vars
             $receipt_update_vars = [
                 'type'             => 'refund',
+                'refundReason'     => $refund_reason,
 
                 'quantityIn'       => $swap_process['in_quantity'],
                 'assetIn'          => $swap_process['in_asset'],

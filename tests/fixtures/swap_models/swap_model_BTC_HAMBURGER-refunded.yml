@@ -12,3 +12,4 @@ receipt:
     destination: 'SENDER01'
     confirmationsOut: 0
     conversionRate: 200
+    refundReason: 'belowMinimum'

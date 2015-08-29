@@ -10,21 +10,19 @@
 <?php $receipt = $swap['receipt']; $receipt_type = (isset($receipt['type']) ? $receipt['type'] : null); ?>
 
 
-<p>The tokens you recently purchased from {!! $botLink !!} have been delivered.</p>
+<p>Hi there! You recently tried to place an order from {!! $botLink !!} and your deposit of {{ $currency($inQty) }} {{ $inAsset }} has been refunded. Why? {{ $refundReason }}.
+</p>
 
-<p>When you’re ready, log into your wallet to use, send or redeem them as you see fit.</p>
+<p>The next time you check your wallet, you'll find your deposit of {{ $currency($inQty) }} {{ $inAsset }}, available for your use (less any bitcoin miner's fee).
+</p>
 
-<p>To recap your order, you sent {!! $botLink !!} {{ $currency($inQty) }} {{ $inAsset }} and we’ve just sent you {{ $currency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$currency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}}.</p>
+<p>Sorry for the inconvenience.</p>
 
 
-<p style="height: 12px;">&nbsp;</p>
-<hr />
+
 <p style="height: 2px;">&nbsp;</p>
-<h4>Your Swap Receipt</h4>
+<h4>Your Refund Receipt</h4>
 <p>&nbsp;</p>
-
-<p><strong>Status</strong></p>
-<p>{{ $fmt->formatState($swap['state']) }}</p>
 
 <p><strong>Deposit Received</strong></p>
 <p>{{ $fmt->formatDate($swap['createdAt']) }}</p>
@@ -38,22 +36,8 @@
 
     Received {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
     {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
-
-@elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-
-    {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
-    →
-    {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
-
 @else
     <span class="none">none</span>
-@endif
-
-@if (isset($receipt['changeOut']) AND $receipt['changeOut'] > 0)
-<p><strong>Change</strong></p>
-<p>
-{{ $currency($receipt['changeOut']) }} {{ isset($receipt['changeOutAsset']) ? $receipt['changeOutAsset'] : 'BTC' }} in change
-</p>
 @endif
 
 <p><strong>Recipient's address</strong></p>

@@ -1,0 +1,4 @@
+subject: Your Swap was Refunded
+body: ['has been refunded', 'out of stock']
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

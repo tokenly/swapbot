@@ -23,7 +23,13 @@ xchainNotifications:
     meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
     confirmations: 2
     blockId: 300001
+  - meta: { baseFilename: confirmed_LTBCOIN_REFUND_notification_01.yml }
+    blockId: 300002
 
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
+  - {type: xchainNotification, startOffset: 1}
 
 ############################
 # validate the expected results
@@ -56,10 +62,12 @@ expectedBotEvents:
   - #### SENT
     meta: { baseFilename: swap.stateChange-refunded.yml }
 
-expectedTransactionModels:
-  - 
-    meta: { baseFilename: transaction_model_01-2CONF.yml }
-    confirmations: 2
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-LTBCOIN-refund.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-LTBCOIN-refund.yml }
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
 
 expectedBotModels:
   - 
@@ -67,6 +75,11 @@ expectedBotModels:
 
 expectedSwapModels:
   -
-    meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded.yml }
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded-complete.yml }
     receipt:
-        confirmations: '2'
+        refundReason: 'belowMinimum'
+
+expectedEmails:
+  - meta: { baseFilename: 01-welcome.yml }
+  - meta: { baseFilename: 02-received.yml }
+  - meta: { baseFilename: refunded-belowMinimum.yml }

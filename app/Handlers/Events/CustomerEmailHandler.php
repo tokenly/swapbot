@@ -11,6 +11,7 @@ use Swapbot\Events\Event;
 use Swapbot\Events\SwapWasCompleted;
 use Swapbot\Events\SwapWasConfirmed;
 use Swapbot\Models\Customer;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Formatting\FormattingHelper;
 use Swapbot\Models\Swap;
 use Swapbot\Repositories\CustomerRepository;
@@ -81,7 +82,11 @@ class CustomerEmailHandler {
             $email_vars = $this->buildEmailVariables($swap, $customer);
 
             // send an email
-            $send_email = new SendEmail('emails.notifications.complete', $email_vars, "Swap Complete", $customer['email'], null);
+            if ($swap['receipt']['type'] == 'swap') {
+                $send_email = new SendEmail('emails.notifications.complete', $email_vars, "Swap Complete", $customer['email'], null);
+            } else if ($swap['receipt']['type'] == 'refund') {
+                $send_email = new SendEmail('emails.notifications.refunded', $email_vars, "Your Swap was Refunded", $customer['email'], null);
+            }
             $this->dispatch($send_email);
         }
     }
@@ -102,10 +107,10 @@ class CustomerEmailHandler {
     protected function buildEmailVariables($swap, $customer) {
         $bot = $swap->bot;
 
-        $out_quantity = $swap['receipt']['quantityOut'];
-        $out_asset    = $swap['receipt']['assetOut'];
-
-        // change will be here
+        $out_quantity  = $swap['receipt']['quantityOut'];
+        $out_asset     = $swap['receipt']['assetOut'];
+        $refund_reason_code = isset($swap['receipt']['refundReason']) ? $swap['receipt']['refundReason'] : RefundConfig::REASON_UNKNOWN;
+        $refund_reason = RefundConfig::refundReasonCodeToRefundReasonDescription($refund_reason_code);
 
         $host = Config::get('swapbot.site_host');
         $unsubscribe_link = "$host/public/unsubscribe/{$customer['uuid']}/{$customer['unsubscribe_token']}";
@@ -129,6 +134,7 @@ class CustomerEmailHandler {
             'robohashUrl'     => $bot->getRobohashURL(),
             'botUrl'          => $bot_url,
             'botLink'         => $bot_link,
+            'refundReason'    => $refund_reason,
         ];
         return $email_vars;
      

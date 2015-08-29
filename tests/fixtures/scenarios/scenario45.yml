@@ -74,3 +74,4 @@ expectedSwapModels:
     receipt:
       confirmations: '2'
       type: refund
+      refundReason: 'belowMinimum'

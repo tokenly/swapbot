@@ -17,15 +17,21 @@ xchainNotifications:
   - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
   - { meta: { baseFilename: block_notification_01.yml }, height: 300001 }
   - { meta: { baseFilename: block_notification_01.yml }, height: 300008 }
+  - { meta: { baseFilename: block_notification_01.yml }, height: 300009 }
+  - meta: { baseFilename: confirmed_BTC_REFUND_notification_01.yml }
 
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
+  - {type: xchainNotification, startOffset: 1}
 
 ############################
 # validate the expected results
 expectedXChainCalls:
-  # - 
-  #   meta: { baseFilename: send_LTBCOIN-refund.yml }
-  #   data:
-  #     requestId: "buildFn:refund"
+  - 
+    meta: { baseFilename: send_BTC-refund.yml }
+    data:
+      requestId: "buildFn:refund"
 
 
 expectedBotEvents:
@@ -50,6 +56,15 @@ expectedBotEvents:
     meta: { baseFilename: swap.refunded-BTC.yml }
   - #### SENT
     meta: { baseFilename: swap.stateChange-refunded.yml }
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-BTC-refund.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-BTC-refund.yml }
+    balances:
+      confirmed:
+        BTC: 0
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
 
 
 expectedBotModels:
@@ -59,10 +74,18 @@ expectedBotModels:
 expectedSwapModels:
   -
     meta: { baseFilename: swap_model_BTC_LTBCOIN.yml }
-    state: refunded
+    state: complete
     receipt:
       quantityIn: 0.001
       assetIn: 'BTC'
       quantityOut: 0.0009
       assetOut: 'BTC'
       type: refund
+      refundReason: 'outOfStock'
+      confirmationsOut: 1
+
+expectedEmails:
+  - meta: { baseFilename: 01-welcome.yml }
+    body: "you sent Sample Bot One 0.001 BTC and will be receiving 1,000 LTBCOIN shortly."
+  # - meta: { baseFilename: 02-received.yml }
+  - meta: { baseFilename: refunded-outofstock.yml }

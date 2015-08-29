@@ -7,18 +7,14 @@
 Hello Again!
 
 
-The tokens you recently purchased from {{ $bot['name'] }} have been delivered.
+Hi there! You recently tried to place an order from {!! $bot['name'] !!} ({!! $botLink !!}) and your deposit of {{ $currency($inQty) }} {{ $inAsset }} has been refunded. Why? {{ $refundReason }}.
 
-When you’re ready, log into your wallet to use, send or redeem them as you see fit.
+The next time you check your wallet, you'll find your deposit of {{ $currency($inQty) }} {{ $inAsset }}, available for your use (less any bitcoin miner's fee).
 
-To recap your order, you sent {!! $botLink !!} {{ $currency($inQty) }} {{ $inAsset }} and we’ve just sent you {{ $currency($outQty) }} {{ $outAsset }}{{ $hasChange ? " along with ".$currency($swap['receipt']['changeOut'])." {$inAsset} in change" : ''}}.
+Sorry for the inconvenience.
 
 
-
-Your Swap Receipt
-
-Status
-  {{ $fmt->formatState($swap['state']) }}
+Your Refund Receipt
 
 Deposit Received
   {{ $fmt->formatDate($swap['createdAt']) }}
@@ -29,10 +25,6 @@ Tokens Delivered
 Amount
 @if (($receipt_type == 'refund'))
   Received {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }} and refunded
-  {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
-@elseif (isset($receipt['assetIn']) AND isset($receipt['assetOut']))
-  {{ $currency($receipt['quantityIn']) }} {{ $receipt['assetIn'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
-  →
   {{ $currency($receipt['quantityOut']) }} {{ $receipt['assetOut'] }}{{ $fmt->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null) }}
 @else
   none

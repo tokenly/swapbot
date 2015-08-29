@@ -1,0 +1,4 @@
+subject: Your Swap was Refunded
+body: ['has been refunded', 'deposit was less than the required minimum']
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

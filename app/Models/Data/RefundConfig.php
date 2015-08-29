@@ -11,8 +11,37 @@ class RefundConfig extends ArrayObject implements APISerializeable {
 
     protected $strategy_obj = null;
 
+    const REASON_OUT_OF_STOCK  = 'outOfStock';
+    const REASON_BELOW_MINIMUM = 'belowMinimum';
+    const REASON_MANUAL_REFUND = 'manualRefund';
+    const REASON_UNKNOWN       = 'unknown';
+    
+
+
     function __construct($data=[]) {
         parent::__construct($data);
+    }
+
+    public static function refundReasonCodeToRefundReasonDescription($refund_reason_code) {
+        switch ($refund_reason_code) {
+            case self::REASON_OUT_OF_STOCK:
+                $refund_reason = 'Your swap was out of stock';
+                break;
+            
+            case self::REASON_BELOW_MINIMUM:
+                $refund_reason = 'Your deposit was less than the required minimum';
+                break;
+            
+            case self::REASON_MANUAL_REFUND:
+                $refund_reason = 'Your deposit was refunded by an administrator';
+                break;
+            
+            default:
+                $refund_reason = 'Your swap could not be processed';
+                break;
+        }
+
+        return $refund_reason;
     }
 
     public static function createFromSerialized($data) {

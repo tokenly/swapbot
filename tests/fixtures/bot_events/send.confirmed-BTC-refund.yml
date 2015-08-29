@@ -1,0 +1,14 @@
+name: send.confirmed
+destination: SENDER01
+confirmations: '1'
+quantityIn: 0.001
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 0.0009
+assetOut: 'BTC'
+txidOut: '0000000000000000000000000000001111'
+confirmationsOut: 1
+state: 'complete'
+type: refund
+isComplete: true
+isError: false

@@ -372,6 +372,7 @@ class ScenarioRunner
         return [
             'account.transferIncome',
             'account.transferInventory',
+            // 'account.closeSwapAccount',
             'bot.balancesSynced',
             'bot.paymentStateChange',
         ];
@@ -1056,7 +1057,9 @@ class ScenarioRunner
                     $normalized_expected_email_model[$field] = $actual_email_model[$field];
                     $fields_matched[$field] = true;
                 } else {
-                    $normalized_expected_email_model[$field] = join(' [AND] ', $normalized_expected_email_model[$field]);
+                    if (is_array($normalized_expected_email_model[$field])) {
+                        $normalized_expected_email_model[$field] = implode(' [AND] ', $normalized_expected_email_model[$field]);
+                    }
                 }
             }
         }

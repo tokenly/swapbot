@@ -1,0 +1,4 @@
+name: account.closeSwapAccount
+balances:
+  confirmed:
+    BTC: 0

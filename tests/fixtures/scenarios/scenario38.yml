@@ -52,3 +52,4 @@ expectedSwapModels:
     meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded.yml }
     receipt:
       confirmations: 2
+      refundReason: 'belowMinimum'

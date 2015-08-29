@@ -1,16 +1,15 @@
-name: LTBCOIN:EARLY
-state: refunded
+name: LTBCOIN:BTC
+state: complete
 receipt:
     confirmations: '2'
     type: refund
-    quantityIn: 100
+    quantityIn: 500
     assetIn: 'LTBCOIN'
     txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
-    quantityOut: 100
+    quantityOut: 500
     assetOut: 'LTBCOIN'
     txidOut: '0000000000000000000000000000001111'
     destination: 'SENDER01'
-    confirmationsOut: 0
-    refundReason: 'belowMinimum'
+    confirmationsOut: '1'
 
 

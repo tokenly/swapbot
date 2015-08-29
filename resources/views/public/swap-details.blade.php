@@ -51,7 +51,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     <p>{{ $fmt->formatState($swap['state']) }}</p>
                 </li>
                 <li>
-                    <div class="item-header">Deposit Recieved</div>
+                    <div class="item-header">Deposit Received</div>
                     <p>{{ $fmt->formatDate($swap['created_at']) }}</p>
                 </li>
                 <li>

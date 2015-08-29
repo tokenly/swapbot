@@ -3,6 +3,7 @@
 namespace Swapbot\Swap\Strategies;
 
 use Illuminate\Support\MessageBag;
+use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Swapbot\Swap\Strategies\StrategyHelpers;
@@ -23,6 +24,11 @@ class RateStrategy implements Strategy {
 
         return false;
     }
+
+    public function buildRefundReason(SwapConfig $swap_config, $quantity_in) {
+        return RefundConfig::REASON_BELOW_MINIMUM;
+    }
+
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
         $quantity_out = $quantity_in * $swap_config['rate'];
