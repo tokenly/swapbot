@@ -6,6 +6,10 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <link href="/css/utility.css" rel="stylesheet">
+    @if ($bugsnag['apiKey'])
+    <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
+    <script>Bugsnag.releaseStage = "{{$bugsnag['releaseStage']}}";</script>
+    @endif
 </head>
 
 <body>

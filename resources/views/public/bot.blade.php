@@ -12,6 +12,10 @@
     <meta name="viewport" content="width=device-width">
     <link href="/css/main.css" rel="stylesheet">
     <link rel="icon" href="{{ $bot->getRobohashURL() }}">
+    @if ($bugsnag['apiKey'])
+    <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
+    <script>Bugsnag.releaseStage = "{{$bugsnag['releaseStage']}}";</script>
+    @endif
 </head>
 
 <body>

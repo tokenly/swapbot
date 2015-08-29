@@ -11,6 +11,10 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="/css/details.css">
     <link rel="icon" href="{{ $bot->getRobohashURL() }}">
+    @if ($bugsnag['apiKey'])
+    <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
+    <script>Bugsnag.releaseStage = "{{$bugsnag['releaseStage']}}";</script>
+    @endif
 </head>
 
 <body>

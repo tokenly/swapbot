@@ -42,6 +42,12 @@ class HelpersViewComposer
                 'url'           => rtrim(Config::get('quotebot.connection_url'), '/'),
                 'apiToken'      => Config::get('quotebot.api_token'),
             ],
+
+            'bugsnag'           => [
+                'apiKey'        => env('BUGSNAG_API_KEY'),
+                'releaseStage'  => env('BUGSNAG_RELEASE_STAGE', 'production'),
+            ],
+
         ]);
     }
 
