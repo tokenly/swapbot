@@ -1597,8 +1597,8 @@
       }, [
         m('img', {
           src: pocketsImage,
-          height: '24px',
-          'width': '24px'
+          height: '32px',
+          'width': '87px'
         })
       ]);
     };

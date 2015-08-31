@@ -14,7 +14,9 @@ sbAdmin.pocketsUtils = do ()->
             urlAttributes += '&amount='+swapbot.formatters.formatCurrencyAsNumber(amount)
 
         return m("a", {href: pocketsUrl+urlAttributes, class: "pocketsLink", title: "Pay Using Tokenly Pockets", target: "_blank"}, [
-            m('img', {src: pocketsImage, height: '24px', 'width': '24px'})
+            # m('img', {src: pocketsImage, height: '24px', 'width': '24px'})
+            # m('img', {src: pocketsImage, height: '56px', 'width': '152px'})
+            m('img', {src: pocketsImage, height: '32px', 'width': '87px'})
         ])
 
 

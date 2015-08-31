@@ -12,7 +12,8 @@ Pockets = do ()->
         if amount?
             urlAttributes += '&amount='+swapbot.formatters.formatCurrencyAsNumber(amount)
         return React.createElement('a', {href: pocketsUrl+urlAttributes, target: '_blank', className: 'pocketsLink', title: "Pay Using Tokenly Pockets"}, [
-            React.createElement('img', {src: pocketsImage, height: '24px', 'width': '24px'}),
+            # React.createElement('img', {src: pocketsImage, height: '24px', 'width': '24px'}),
+            React.createElement('img', {src: pocketsImage, height: '32px', 'width': '87px'}),
         ])
 
     exports.exists = ()->
