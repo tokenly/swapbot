@@ -36,6 +36,7 @@ class HelpersViewComposer
             'tokenlyAccountsSiteUrl'   => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/',
             'tokenlyAccountsUpdateUrl' => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/auth/update',
 
+            'robohashUrl'              => rtrim(env('ROBOHASH_URL', 'https://robohash.tokenly.com'), '/'),
             'quotebotPusherUrl'        => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
             'analyticsId'              => env('GOOGLE_ANALYTICS_ID'),
             'quotebot'          => [

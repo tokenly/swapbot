@@ -346,7 +346,7 @@ do ()->
                             m("h2", if vm.resourceId() then "Edit SwapBot #{vm.name()}" else "Create a New Swapbot"),
                         ]),
                         m("div", {class: "col-md-2 text-right"}, [
-                            if vm.hash().length then m("img", {class: 'mediumRoboHead', src: "http://robohash.tokenly.com/#{vm.hash()}.png?set=set3"}) else null,
+                            sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead'),
                         ]),
                     ]),
 

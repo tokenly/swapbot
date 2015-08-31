@@ -57,6 +57,7 @@
         window.QUOTEBOT_PUSHER_URL = '{{$quotebotPusherUrl}}';
         window.QUOTEBOT_URL = '{{$quotebot['url']}}';
         window.QUOTEBOT_API_TOKEN = '{{$quotebot['apiToken']}}';
+        window.ROBOHASH_URL = '{{$robohashUrl}}';
     </script>
     @foreach ($admin_scripts as $script)
         <script src="/js/admin/{{$script}}"></script>

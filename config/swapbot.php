@@ -8,7 +8,7 @@ return [
 
     'defaultFee'                  => 0.0001,
 
-    'robohash_url'                => env('ROBOHASH_URL', 'http://robohash.org').'/%%HASH%%.png?set=set3',
+    'robohash_url'                => env('ROBOHASH_URL', 'http://robohash.tokenly.com').'/%%HASH%%.png?set=set3',
 
     'xchain_fuel_pool_address'    => env('XCHAIN_FUEL_POOL_ADDRESS'),
     'xchain_fuel_pool_address_id' => env('XCHAIN_FUEL_POOL_ADDRESS_ID'),

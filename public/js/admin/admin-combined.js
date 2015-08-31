@@ -1,5 +1,5 @@
 (function() {
-  var sbAdmin, swapbot;
+  var robohashURLBase, sbAdmin, swapbot;
 
   sbAdmin = {
     ctrl: {}
@@ -1702,6 +1702,42 @@
     return quotebotSubscriber;
   })();
 
+  robohashURLBase = null;
+
+  sbAdmin.robohashUtils = (function() {
+    var getRobohashURLBase, robohashUtils;
+    robohashUtils = {};
+    getRobohashURLBase = function() {
+      if (robohashURLBase == null) {
+        robohashURLBase = window.ROBOHASH_URL;
+      }
+      return robohashURLBase;
+    };
+    robohashUtils.img = function(hash, className) {
+      var attrs;
+      if (className == null) {
+        className = null;
+      }
+      if (!hash) {
+        return null;
+      }
+      attrs = {
+        src: robohashUtils.robohashURL(hash)
+      };
+      if (className != null) {
+        attrs["class"] = className;
+      }
+      return m("img", attrs);
+    };
+    robohashUtils.robohashURL = function(hash) {
+      if (!hash) {
+        return null;
+      }
+      return (getRobohashURLBase()) + "/" + hash + ".png?set=set3";
+    };
+    return robohashUtils;
+  })();
+
   sbAdmin.stateutils = (function() {
     var stateutils;
     stateutils = {};
@@ -2681,12 +2717,7 @@
                 "class": "col-md-10"
               }, [m("h2", vm.resourceId() ? "Edit SwapBot " + (vm.name()) : "Create a New Swapbot")]), m("div", {
                 "class": "col-md-2 text-right"
-              }, [
-                vm.hash().length ? m("img", {
-                  "class": 'mediumRoboHead',
-                  src: "http://robohash.tokenly.com/" + (vm.hash()) + ".png?set=set3"
-                }) : null
-              ])
+              }, [sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead')])
             ]), m("div", {
               "class": "spacer1"
             }), sbAdmin.form.mForm({
@@ -3440,12 +3471,7 @@
             "class": "col-md-10"
           }, [m("h2", "SwapBot " + (vm.name()))]), m("div", {
             "class": "col-md-2 text-right"
-          }, [
-            vm.hash().length ? m("img", {
-              "class": 'mediumRoboHead',
-              src: "http://robohash.tokenly.com/" + (vm.hash()) + ".png?set=set3"
-            }) : null
-          ])
+          }, [sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead')])
         ]), m("div", {
           "class": "spacer1"
         }), m("div", {
@@ -3745,12 +3771,7 @@
                     m("div", {}, [
                       bot.hash.length ? m("a[href='/admin/view/bot/" + bot.id + "']", {
                         config: m.route
-                      }, [
-                        m("img", {
-                          "class": 'tinyRoboHead',
-                          src: "http://robohash.tokenly.com/" + bot.hash + ".png?set=set3"
-                        })
-                      ]) : m('div', {
+                      }, sbAdmin.robohashUtils.img(bot.hash, 'tinyRoboHead')) : m('div', {
                         "class": 'emptyRoboHead'
                       }, ''), m("a[href='/admin/view/bot/" + bot.id + "']", {
                         "class": "",
