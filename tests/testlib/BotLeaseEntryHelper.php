@@ -13,7 +13,7 @@ class BotLeaseEntryHelper  {
     public function sampleBotLeaseEntryVars() {
         return [
             'start_date'   => Carbon\Carbon::now(),
-            'end_date'     => Carbon\Carbon::now()->modify('1 month'),
+            'end_date'     => Carbon\Carbon::now()->addMonthNoOverflow(1),
             'user_id'      => null,
             'bot_id'       => null,
             'bot_event_id' => null,

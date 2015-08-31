@@ -345,11 +345,13 @@ class Bot extends APIModel {
     public function calculatePaymentExpirationDate(BotLeaseEntry $last_lease_entry=null, $swapbotmonth_quantity) {
         if (!$last_lease_entry) { return null; }
 
-        $end_date = $last_lease_entry['end_date'];
+        $end_date = $last_lease_entry['end_date']->copy();
 
         // get number of SWAPBOTMONTH tokens credited
         if ($swapbotmonth_quantity > 0) {
-            $end_date->addMonths($swapbotmonth_quantity);
+            for ($i=0; $i < $swapbotmonth_quantity; $i++) { 
+                $end_date = $end_date->addMonthNoOverflow(1);
+            }
         }
 
         return $end_date;

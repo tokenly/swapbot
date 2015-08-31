@@ -16,6 +16,23 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         $helper->cleanup()->testFindAll();
     }
 
+    public function testAddOneMonthNewLease() {
+        $helper = $this->createRepositoryTestHelper();
+        $helper->cleanup();
+
+        $bot = app('BotHelper')->newSampleBot();
+
+        // add lease
+        $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
+        $now = Carbon\Carbon::now();
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, 1);
+
+        $loaded_models = array_values(iterator_to_array($repo->findByBot($bot)));
+        PHPUnit::assertCount(1, $loaded_models);
+        PHPUnit::assertEquals($now, $loaded_models[0]['start_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[0]['end_date']);
+    }
+
     public function testAddLease() {
         $helper = $this->createRepositoryTestHelper();
         $helper->cleanup();
@@ -25,15 +42,15 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon\Carbon::now();
-        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, '1 month');
-        $repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->modify('1 month'), '1 month');
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, 1);
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addMonthNoOverflow(1), 1);
 
         $loaded_models = array_values(iterator_to_array($repo->findByBot($bot)));
         PHPUnit::assertCount(2, $loaded_models);
         PHPUnit::assertEquals($now, $loaded_models[0]['start_date']);
-        PHPUnit::assertEquals($now->copy()->modify('1 month'), $loaded_models[0]['end_date']);
-        PHPUnit::assertEquals($now->copy()->modify('1 month'), $loaded_models[1]['start_date']);
-        PHPUnit::assertEquals($now->copy()->modify('2 months'), $loaded_models[1]['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[0]['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[1]['start_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_models[1]['end_date']);
     }
 
     public function testGetLastLeaseEntryForBot() {
@@ -45,13 +62,13 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon\Carbon::now();
-        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, '1 month');
-        $repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->modify('1 month'), '1 month');
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, 1);
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addMonthNoOverflow(1), 1);
 
         $loaded_model = $repo->getLastEntryForBot($bot);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals($now->copy()->modify('1 month'), $loaded_model['start_date']);
-        PHPUnit::assertEquals($now->copy()->modify('2 months'), $loaded_model['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_model['start_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_model['end_date']);
     }
 
 
@@ -64,13 +81,13 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon\Carbon::now();
-        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, '1 month');
-        $repo->extendLease($bot, $this->sampleEvent($bot), '2 months');
+        $repo->addNewLease($bot, $this->sampleEvent($bot), $now, 1);
+        $repo->extendLease($bot, $this->sampleEvent($bot), 2);
 
         $loaded_model = $repo->getLastEntryForBot($bot);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals($now->copy()->modify('1 month'), $loaded_model['start_date']);
-        PHPUnit::assertEquals($now->copy()->modify('3 months'), $loaded_model['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_model['start_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_model['end_date']);
     }
 
 

@@ -29,8 +29,7 @@ class BotPaymentStateReconiliationTest extends TestCase {
         // add lease
         $lease_repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon::now();
-        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now, '1 month');
-        // $lease_repo->extendLease($bot, $this->sampleEvent($bot), '2 months');
+        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now, 1);
 
 
         // go to ok
@@ -47,7 +46,7 @@ class BotPaymentStateReconiliationTest extends TestCase {
         // add lease that expires in 2 weeks
         $lease_repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon::now();
-        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addWeeks(2)->subMonths(1), '1 month');
+        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addWeeks(2)->subMonths(1), 1);
 
 
         $this->dispatch(new ReconcileBotPaymentState($bot));
@@ -64,7 +63,7 @@ class BotPaymentStateReconiliationTest extends TestCase {
         // add lease that expires in 1 week
         $lease_repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon::now();
-        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addWeeks(1)->subMonths(1), '1 month');
+        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addWeeks(1)->subMonths(1), 1);
 
 
         $this->dispatch(new ReconcileBotPaymentState($bot));
@@ -81,7 +80,7 @@ class BotPaymentStateReconiliationTest extends TestCase {
         // add lease that expires in 1 week
         $lease_repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon::now();
-        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addDays(1)->subMonths(1), '1 month');
+        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addDays(1)->subMonths(1), 1);
 
 
         $this->dispatch(new ReconcileBotPaymentState($bot));

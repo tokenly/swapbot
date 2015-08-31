@@ -43,25 +43,28 @@ class BotLeaseEntryRepository extends APIRepository
             ->get(['bot_lease_entries.*', 'bot_events.event']);
     }
 
-    public function addNewLease(Bot $bot, BotEvent $bot_event, Carbon $start_date, $length='1 month') {
-        return $this->addEntryForBot($bot, $bot_event['id'], $start_date, $length);
+    public function addNewLease(Bot $bot, BotEvent $bot_event, Carbon $start_date, $length_in_months=1) {
+        return $this->addEntryForBot($bot, $bot_event['id'], $start_date, $length_in_months);
     }
 
-    public function extendLease(Bot $bot, BotEvent $bot_event, $length='1 month') {
+    public function extendLease(Bot $bot, BotEvent $bot_event, $length_in_months=1) {
         $last_lease = $this->getLastEntryForBot($bot);
         if ($last_lease) {
-            return $this->addEntryForBot($bot, $bot_event['id'], Carbon::parse($last_lease['end_date']), $length);
+            return $this->addEntryForBot($bot, $bot_event['id'], Carbon::parse($last_lease['end_date']), $length_in_months);
         }
 
         // create a new lease if no old one was found
-        return $this->addEntryForBot($bot, $bot_event['id'], DateProvider::now(), $length);
+        return $this->addEntryForBot($bot, $bot_event['id'], DateProvider::now(), $length_in_months);
 
     }
 
     public function update(Model $model, $attributes) { throw new Exception("Updates are not allowed", 1); }
 
-    protected function addEntryForBot(Bot $bot, $bot_event_id, Carbon $start_date, $length) {
-        $end_date = $start_date->copy()->modify($length);
+    protected function addEntryForBot(Bot $bot, $bot_event_id, Carbon $start_date, $length_in_months) {
+        $end_date = $start_date->copy();
+        for ($i=0; $i < $length_in_months; $i++) { 
+            $end_date = $end_date->addMonthNoOverflow(1);
+        }
 
         $create_vars = [
             'user_id'      => $bot['user_id'],
