@@ -17,7 +17,7 @@ return [
         'secret'  => env('S3_SECRET'),
         'region'  => env('S3_REGION'),
 
-        'scheme'  => 'http',
+        'scheme'  => 'https',
         'version' => '2006-03-01',
     ],
     
