@@ -125,6 +125,12 @@ do ()->
                 </span>
             # console.log "fiatSuffix=",fiatSuffix
 
+            # zeroClipboard = <ReactZeroClipboard 
+            #     text={bot.address}
+            #     onAfterCopy={this.onAfterCopy}
+            # >
+            #    <button className={"copyToClipboard"+(if this.state.addressCopied then ' copied' else '')} title="copy to clipboard"><i className="fa fa-clipboard"></i> {if this.state.addressCopied then 'Copied' else 'Copy'}</button>
+            # </ReactZeroClipboard>
 
 
             return <div id="swapbot-container" className="section grid-100">
@@ -145,14 +151,6 @@ do ()->
                         To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
 
                         { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
-
-
-                        <ReactZeroClipboard 
-                            text={bot.address}
-                            onAfterCopy={this.onAfterCopy}
-                        >
-                           <button className={"copyToClipboard"+(if this.state.addressCopied then ' copied' else '')} title="copy to clipboard"><i className="fa fa-clipboard"></i> {if this.state.addressCopied then 'Copied' else 'Copy'}</button>
-                        </ReactZeroClipboard>
 
                     </div>
 

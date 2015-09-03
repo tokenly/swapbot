@@ -4,8 +4,15 @@ Pockets = do ()->
     pocketsUrl = null
     pocketsImage = null
 
+    buildPromoLink = ()->
+        # isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+        href = "http://pockets.tokenly.com"
+        return React.createElement('a', {href: href, target: '_blank', className: 'pocketsLink', title: "Learn More About Tokenly Pockets"}, [
+            React.createElement('img', {src: '/images/pockets/paywithpockets-blue.png', height: '32px', 'width': '87px'}),
+        ])
+
     exports.buildPaymentButton = (address, label, amount=null, acceptedTokens='btc')->
-        return null if not pocketsUrl
+        return buildPromoLink() if not pocketsUrl
 
         encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape)
         urlAttributes = "?address="+address+"&label="+encodedLabel+"&tokens="+acceptedTokens;

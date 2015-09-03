@@ -2504,5 +2504,8 @@ a.btn-action {
   color: #900;
   font-weight: bold;
 }
+.keyboard-shortcut {
+  text-decoration: underline;
+}
 
 /*# sourceMappingURL=main.css.map */

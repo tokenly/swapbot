@@ -23,9 +23,22 @@ do ()->
             return
 
         componentDidMount: ()->
+            this.listenForKeyboardShortcuts()
             return
 
         componentWillUnmount: ()->
+            this.stopListeningForKeyboardShortcuts()
+            return
+
+        listenForKeyboardShortcuts: ()->
+            $(document).on 'keydown.confirmwallet', (e)->
+                if e.keyCode == 89
+                    UserInputActions.confirmWallet()
+                return
+            return
+
+        stopListeningForKeyboardShortcuts: ()->
+            $(document).off '.confirmwallet'
             return
 
         confirmWalletOnClick: (e)->
@@ -51,7 +64,7 @@ do ()->
                     <div>
                         <strong>Are you using a Counterparty compatible bitcoin wallet?</strong>
                         <div style={height: "26px"}></div>
-                        <a href="#yes" onClick={this.confirmWalletOnClick} className="btn-action bckg-green">YES</a>
+                        <a href="#yes" onClick={this.confirmWalletOnClick} className="btn-action bckg-green"><span className="keyboard-shortcut">Y</span>ES</a>
                         <a href="http://pockets.tokenly.com" target="_blank" className="btn-action bckg-red">NO</a>
                         <a href="http://pockets.tokenly.com" target="_blank" className="btn-action bckg-yellow">I DON&rsquo;T KNOW</a>
                         <div style={height: "36px"}></div>
