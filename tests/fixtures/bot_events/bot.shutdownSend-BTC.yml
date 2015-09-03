@@ -1,0 +1,7 @@
+name: "bot.shutdownSend"
+destination: "1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD"
+quantity: 0.99974570
+asset: "BTC"
+txid: "0000000000000000000000000000001111"
+state: "shuttingDown"
+isActive: true

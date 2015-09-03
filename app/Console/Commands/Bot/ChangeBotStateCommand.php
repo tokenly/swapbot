@@ -41,7 +41,7 @@ class ChangeBotStateCommand extends Command {
             ->addArgument('bot-id', InputArgument::REQUIRED, 'Bot ID')
             ->addArgument('event', InputArgument::REQUIRED, 'State Change Event')
             ->setHelp(<<<EOF
-Changes a bot's state by triggering a state change event (monthlyFeePaid, botFueled, fuelExhausted, paymentExhausted, paid).
+Changes a bot's state by triggering a state change event (monthlyFeePaid, botFueled, fuelExhausted, paymentExhausted, paid, startShutdown, completeShutdown).
 EOF
         );
     }

@@ -1,0 +1,3 @@
+name: bot.stateChange
+state: shutdown
+isActive: false

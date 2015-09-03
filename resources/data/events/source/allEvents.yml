@@ -148,6 +148,13 @@ events:
     msgVars: [txid, confirmations]
 
   -
+    name: tx.botShuttingDown
+    label: Bot Shutting Down
+    level: DEBUG
+    msg: Transaction {{ $txid }} was received while bot was shutting down.
+    msgVars: [txid]
+
+  -
     name: bot.stateChange
     label: Bot State Change
     level: DEBUG
@@ -162,6 +169,42 @@ events:
     msg: Bot payments entered state {{ $payment_state }}.
     msgVars: [payment_state]
     botEventStream: false
+
+    # ### Shutdown Events
+
+  -
+    name: bot.shutdownBegan
+    label: Bot Shutdown Began
+    level: INFO
+    msg: |
+        Bot shutdown began.  Will shutdown at block {{ $shutdown_block }} and send funds to {{ $shutdown_address }}.
+    msgVars: [shutdown_block, shutdown_address]
+    botEventStream: true
+
+  -
+    name: bot.shutdownDelayed
+    label: Bot Shutdown Delayed
+    level: INFO
+    msg: |
+        This bot could not complete shutdown because there are still swaps pending.
+    msgVars: []
+
+  -
+    name: bot.shutdownSend
+    label: Bot Shutdown Funds Sent
+    level: INFO
+    msg: |
+        While shutting down bot, sent {{ $currency($quantity) }} {{ $asset }} to {{ $destination }} with transaction id {{ $txid }}.
+    msgVars: [destination, quantity, asset, txid]
+
+  -
+    name: bot.shutdownComplete
+    label: Bot Shutdown Complete
+    level: INFO
+    msg: Bot finished shutting down.
+    msgVars: []
+
+
 
 
     # ### Fuel Events

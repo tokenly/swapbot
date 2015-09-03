@@ -1,6 +1,6 @@
 name: send.confirmed
 destination: SENDER01
-confirmations: '1'
+confirmations: '2'
 quantityIn: 0.001
 assetIn: 'BTC'
 txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'

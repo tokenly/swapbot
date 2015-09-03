@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Mockery as m;
 use Swapbot\Commands\ReceiveWebhook;
+use Swapbot\Commands\ShutdownBot;
 use Swapbot\Events\CustomerAddedToSwap;
 use Swapbot\Repositories\BotEventRepository;
 use Swapbot\Repositories\BotLeaseEntryRepository;
@@ -250,6 +251,20 @@ class ScenarioRunner
         $this->bot_repository->update($updating_bot, $update_attributes);
         $this->bot_models[$bot_offset] = $updating_bot;
     }
+
+    protected function executeScenarioEvent_shutdownBot($event, $scenario_data) {
+        // find the existing bot
+        $bot_offset = isset($event['botOffset']) ? $event['botOffset'] : 0;
+        $bot = $this->bot_models[$bot_offset];
+
+        // get the shutdown address
+        $shutdown_address = isset($event['shutdownAddress']) ? $event['shutdownAddress'] : '1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD';
+
+        // execute the command
+        $this->dispatch(new ShutdownBot($bot, $shutdown_address));
+
+    }
+
 
 
     protected function resolveOffset($all_xchain_notifications, $event) {
@@ -859,7 +874,7 @@ class ScenarioRunner
         ///////////////////
         // NOT REQUIRED
         $optional_fields = [];
-        $optional_fields = array_merge(array_keys(app('BotHelper')->sampleBotVars()), ['id','uuid','user_id','created_at','updated_at',]);
+        $optional_fields = array_merge(array_keys(app('BotHelper')->sampleBotVars()), ['id','uuid','user_id','created_at','updated_at','shutdown_block','shutdown_address']);
         foreach ($optional_fields as $field) {
             if (isset($expected_bot_model[$field])) { $normalized_expected_bot_model[$field] = $expected_bot_model[$field]; }
                 else if (isset($actual_bot_model[$field])) { $normalized_expected_bot_model[$field] = $actual_bot_model[$field]; }
@@ -1314,6 +1329,7 @@ class ScenarioRunner
         \Swapbot\Models\NotificationReceipt::truncate();
         \Swapbot\Models\Setting::truncate();
         \Swapbot\Models\Swap::truncate();
+        \Swapbot\Models\Block::truncate();
         \Swapbot\Models\Transaction::truncate();
         \Swapbot\Models\User::truncate();
 

@@ -1,0 +1,4 @@
+name: tx.botShuttingDown
+confirmations: 1
+state: 'shuttingDown'
+isActive: true

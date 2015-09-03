@@ -56,6 +56,9 @@ class BotHelper  {
             'logo_image_id'               => null,
             'background_overlay_settings' => '',
 
+            'shutdown_block'              => null,
+            'shutdown_address'            => null,
+
             'swaps'                       => [
                 [
                     'in'       => 'BTC',

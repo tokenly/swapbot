@@ -1,0 +1,117 @@
+# swaps are refunded while in state shuttingDown
+#  then shutdown completes when finished with swap
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333000
+
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    blockId: 300001
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300002
+
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333006
+
+  # confirm the refund
+  - meta: { baseFilename: confirmed_BTC_REFUND_notification_01.yml }
+    height: 333007
+
+  # on the next block, the bot is closed
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333008
+
+
+events:
+  - {type: xchainNotification, offset: 0 }
+  - {type: shutdownBot }
+  - {type: xchainNotification, startOffset: 1 }
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - meta: { baseFilename: send_BTC-refund.yml }
+  - meta: { baseFilename: get_accounts.yml } # first try - found other accounts
+  - meta: { baseFilename: get_accounts.yml } # later block, found no other accounts
+  - meta: { baseFilename: shutdown-send_LTBCOIN.yml }
+  - meta: { baseFilename: shutdown-send_BTC.yml }
+
+expectedBotEvents:
+  - #### shutdownBegan
+    meta: { baseFilename: bot.shutdownBegan.yml }
+
+  - #### state shuttingDown
+    meta: { baseFilename: bot.stateChange-shuttingDown.yml }
+
+
+  #### BEGIN REFUND ####
+
+  - #### bot shutting down
+    meta: { baseFilename: tx.botShuttingDown.yml }
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-BTC.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+    state: shuttingDown
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-BTC.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding-BTC.yml }
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded-BTC-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-refunded.yml }
+
+  #### END REFUND   ####
+
+  - #### bot.shutdownDelayed.yml
+    meta: { baseFilename: bot.shutdownDelayed.yml }
+
+
+  - #### confirm the refund
+    meta: { baseFilename: send.confirmed-BTC-refund.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-BTC-refund.yml }
+    balances:
+      confirmed:
+        LTBCOIN: 1000
+  - #### swap complete
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+
+
+  - #### shutdownSend LTBCOIN
+    meta: { baseFilename: bot.shutdownSend-LTBCOIN.yml }
+
+  - #### shutdownSend BTC
+    meta: { baseFilename: bot.shutdownSend-BTC.yml }
+
+  - #### state shutdown
+    meta: { baseFilename: bot.stateChange-shutdown.yml }
+
+  - #### shutdownComplete
+    meta: { baseFilename: bot.shutdownComplete.yml }
+
+expectedBotModels:
+  - 
+    # bot should be in state shuttingDown
+    state: shutdown

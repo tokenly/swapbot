@@ -12,4 +12,7 @@ class BotStateEvent {
     const LEASE_EXPIRED          = 'leaseExpired';
     const PAYMENT_EXHAUSTED      = 'paymentExhausted';
 
+    const START_SHUTDOWN         = 'startShutdown';
+    const COMPLETE_SHUTDOWN      = 'completeShutdown';
+
 }

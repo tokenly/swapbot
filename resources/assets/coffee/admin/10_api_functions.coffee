@@ -74,6 +74,10 @@ sbAdmin.api = do ()->
     api.updateBot = (id, botAttributes)->
         return api.send('PUT', "bots/#{id}", botAttributes)
 
+    api.shutdownBot = (id, botAttributes)->
+        return api.send('POST', "bots/shutdown/#{id}", botAttributes)
+
+
     api.getAllBots = ()->
         return api.send('GET', 'bots')
 

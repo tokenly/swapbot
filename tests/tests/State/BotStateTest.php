@@ -51,7 +51,63 @@ class BotStateTest extends TestCase {
 
         // receive payment again
         $this->runTransitionTest($state_machine, $bot, BotStateEvent::MONTHLY_FEE_PAID, BotState::ACTIVE);
+    }
 
+
+    public function testBotShutdownStateTransitions()
+    {
+        list($bot, $state_machine) = $this->setupActiveBotForStateTest();
+
+        // check active to shutdown
+
+        // ACTIVE -> SHUTTING_DOWN
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::START_SHUTDOWN, BotState::SHUTTING_DOWN);
+
+        // SHUTTING_DOWN -> SHUTDOWN
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::COMPLETE_SHUTDOWN, BotState::SHUTDOWN);
+
+
+
+        // check shutting down an UNPAID bot
+        list($bot, $state_machine) = $this->setupActiveBotForStateTest();
+
+        // ACTIVE -> PAYING -> UNPAID
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::LEASE_EXPIRED, BotState::PAYING);
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::PAYMENT_EXHAUSTED, BotState::UNPAID);
+
+        // UNPAID -> SHUTTING_DOWN
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::START_SHUTDOWN, BotState::SHUTTING_DOWN);
+
+
+
+        // check shutting down a LOW_FUEL bot
+        list($bot, $state_machine) = $this->setupActiveBotForStateTest();
+
+        // ACTIVE -> LOW_FUEL
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FUEL_EXHAUSTED, BotState::LOW_FUEL);
+
+        // LOW_FUEL -> SHUTTING_DOWN
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::START_SHUTDOWN, BotState::SHUTTING_DOWN);
+
+    }
+
+    protected function setupActiveBotForStateTest() {
+        app('Tokenly\PusherClient\Mock\MockBuilder')->installPusherMockClient($this);
+
+        // install xchain mocks
+        app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
+
+        // make a sample bot
+        $bot = app('BotHelper')->newSampleBot();
+
+        // build a statemachine
+        $state_machine = app('Swapbot\Statemachines\BotStateMachineFactory')->buildStateMachineFromBot($bot);
+
+        // make active
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FIRST_MONTHLY_FEE_PAID, BotState::LOW_FUEL);
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::FUELED, BotState::ACTIVE);
+
+        return [$bot, $state_machine];
     }
 
     protected function runTransitionTest($state_machine, $bot, $event, $new_state) {

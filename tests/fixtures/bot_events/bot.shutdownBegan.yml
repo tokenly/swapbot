@@ -1,0 +1,5 @@
+name: bot.shutdownBegan
+shutdown_block: 333006
+shutdown_address: '1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD'
+state: active
+isActive: true

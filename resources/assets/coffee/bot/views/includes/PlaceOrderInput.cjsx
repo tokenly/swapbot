@@ -41,7 +41,12 @@ do ()->
 
             return <div>
                         {
-                            if bot.state != 'active'
+                            if bot.state == 'shuttingDown'
+                                <div className="warning">
+                                    <img src="/images/misc/stop.png" alt="STOP" />
+                                    <p>This bot is currently shutting down. <br/> Swaps by this bot will not be processed.</p>
+                                </div>
+                            else if bot.state != 'active'
                                 <div className="warning">
                                     <img src="/images/misc/stop.png" alt="STOP" />
                                     <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>

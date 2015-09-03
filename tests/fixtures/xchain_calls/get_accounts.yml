@@ -1,0 +1,4 @@
+method: GET
+path: /accounts/PUBLIC_ADDRESS_ID_01?active=1
+data: {}
+

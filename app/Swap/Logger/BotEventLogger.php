@@ -46,6 +46,27 @@ class BotEventLogger {
         return $this->logStandardBotEvent('bot.paymentStateChange', $bot, ['payment_state' => $new_state]);
     }
 
+    public function logBotShutdownBegan(Bot $bot, $shutdown_block, $shutdown_address) {
+        return $this->logStandardBotEvent('bot.shutdownBegan', $bot, compact('shutdown_block','shutdown_address'));
+    }
+
+    public function logBotShutdownDelayed(Bot $bot) {
+        return $this->logStandardBotEvent('bot.shutdownDelayed', $bot);
+    }
+
+    public function logBotShutdownSend(Bot $bot, $destination, $quantity, $asset, $txid) {
+        return $this->logStandardBotEvent('bot.shutdownSend', $bot, compact('destination', 'quantity', 'asset', 'txid'));
+    }
+
+    public function logBotShutdownComplete(Bot $bot) {
+        return $this->logStandardBotEvent('bot.shutdownComplete', $bot);
+    }
+
+
+    public function logShuttingDownTransactionReceived(Bot $bot, $xchain_notification) {
+        return $this->logXChainBotEvent('tx.botShuttingDown', $bot, $xchain_notification);
+    }
+    
     public function logInactiveBotState(Bot $bot, $xchain_notification, BotState $bot_state) {
         $state_name = $bot_state->getName();
 

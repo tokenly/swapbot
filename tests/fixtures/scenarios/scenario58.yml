@@ -1,0 +1,35 @@
+# shutting down a bot moves bot to shutting down state
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333000
+
+events:
+  - {type: xchainNotification, offset: 0 }
+  - {type: shutdownBot }
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls: none
+
+expectedBotEvents:
+  - #### shutdownBegan
+    meta: { baseFilename: bot.shutdownBegan.yml }
+
+  - #### state shuttingDown
+    meta: { baseFilename: bot.stateChange-shuttingDown.yml }
+
+expectedBotModels:
+  - 
+    # bot should be in state shuttingDown
+    state: shuttingDown

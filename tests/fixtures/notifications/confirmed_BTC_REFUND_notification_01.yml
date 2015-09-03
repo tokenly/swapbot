@@ -1,5 +1,3 @@
-# a simple XCP notification
-
 txid: "0000000000000000000000000000001111"
 network: bitcoin
 event: send

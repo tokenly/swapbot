@@ -116,11 +116,17 @@ class Bot extends APIModel {
 
         switch ($state) {
             case BotState::ACTIVE:
+            case BotState::SHUTTING_DOWN:
                 return true;
         }
 
         return false;
 
+    }
+
+    public function isShuttingDown($state=null) {
+        $state = ($state === null ? $this['state'] : $state);
+        return ($state == BotState::SHUTTING_DOWN);
     }
 
 

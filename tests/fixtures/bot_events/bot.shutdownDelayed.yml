@@ -1,0 +1,3 @@
+name: bot.shutdownDelayed
+state: 'shuttingDown'
+isActive: true

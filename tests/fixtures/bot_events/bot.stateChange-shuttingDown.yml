@@ -1,0 +1,4 @@
+name: bot.stateChange
+state: shuttingDown
+isActive: true
+

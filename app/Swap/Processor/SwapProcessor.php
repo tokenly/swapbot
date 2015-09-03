@@ -351,20 +351,34 @@ class SwapProcessor {
             return;
         }
 
-        // do we need to refund
-        $strategy = $swap_process['swap_config']->getStrategy();
+        $is_refunding = false;
         $refund_reason = null;
-        $is_refunding = $strategy->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
-        if ($is_refunding) {
-            $refund_reason = $strategy->buildRefundReason($swap_process['swap_config'], $swap_process['in_quantity']);
+        $strategy = $swap_process['swap_config']->getStrategy();
+
+        // check shutting down state for refund
+        if (!$is_refunding) {
+            if ($swap_process['bot']->isShuttingDown()) {
+                $is_refunding = true;
+                $refund_reason = RefundConfig::REASON_SHUTTING_DOWN;
+            }
+        }
+
+        // check strategy for refund
+        if (!$is_refunding) {
+            $is_refunding = $strategy->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+            if ($is_refunding) {
+                $refund_reason = $strategy->buildRefundReason($swap_process['swap_config'], $swap_process['in_quantity']);
+            }
         }
 
         // check forced refund
-        $forced_refund = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['forcedRefund']) AND $swap_process['swap']['receipt']['forcedRefund']);
-        if (!$is_refunding AND $forced_refund) {
-            $is_refunding = true;
-            $refund_reason = RefundConfig::REASON_MANUAL_REFUND;
-            EventLog::log('Forced refund triggered', ['botName' => $swap_process['bot']['name'], 'swapId' => $swap_process['swap']['id']]);
+        if (!$is_refunding) {
+            $forced_refund = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['forcedRefund']) AND $swap_process['swap']['receipt']['forcedRefund']);
+            if ($forced_refund) {
+                $is_refunding = true;
+                $refund_reason = RefundConfig::REASON_MANUAL_REFUND;
+                EventLog::log('Forced refund triggered', ['botName' => $swap_process['bot']['name'], 'swapId' => $swap_process['swap']['id']]);
+            }
         }
 
         if ($is_refunding) {

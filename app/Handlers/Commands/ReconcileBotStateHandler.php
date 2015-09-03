@@ -15,7 +15,7 @@ use Swapbot\Repositories\BotRepository;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use Swapbot\Swap\Logger\BotEventLogger;
-use Tokenly\XChainClient\Client;
+use Swapbot\Swapbot\ShutdownHandler;
 
 class ReconcileBotStateHandler {
 
@@ -24,14 +24,13 @@ class ReconcileBotStateHandler {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventLogger $bot_event_logger, Client $xchain_client)
+    public function __construct(BotRepository $bot_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventLogger $bot_event_logger, ShutdownHandler $shutdown_handler)
     {
         $this->bot_repository              = $bot_repository;
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->bot_lease_entry_repository  = $bot_lease_entry_repository;
         $this->bot_event_logger            = $bot_event_logger;
-        $this->xchain_client               = $xchain_client;
-
+        $this->shutdown_handler            = $shutdown_handler;
     }
 
     /**
@@ -101,6 +100,21 @@ class ReconcileBotStateHandler {
 
                             // loop again
                             $loop_again = true;
+                        }
+                        break;
+
+                    case BotState::SHUTTING_DOWN:
+                        if ($this->shutdown_handler->botHasPassedShutdownBlock($locked_bot)) {
+                            // send funds
+                            $refunded = $this->shutdown_handler->refundBot($locked_bot);
+
+                            if ($refunded) {
+                                // change state
+                                $locked_bot->stateMachine()->triggerEvent(BotStateEvent::COMPLETE_SHUTDOWN);
+
+                                // log shutdown complete
+                                $this->bot_event_logger->logBotShutdownComplete($locked_bot);
+                            }
                         }
                         break;
                 }

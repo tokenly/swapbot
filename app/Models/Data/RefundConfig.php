@@ -14,6 +14,7 @@ class RefundConfig extends ArrayObject implements APISerializeable {
     const REASON_OUT_OF_STOCK  = 'outOfStock';
     const REASON_BELOW_MINIMUM = 'belowMinimum';
     const REASON_MANUAL_REFUND = 'manualRefund';
+    const REASON_SHUTTING_DOWN = 'shuttingDown';
     const REASON_UNKNOWN       = 'unknown';
     
 
@@ -34,6 +35,10 @@ class RefundConfig extends ArrayObject implements APISerializeable {
             
             case self::REASON_MANUAL_REFUND:
                 $refund_reason = 'Your deposit was refunded by an administrator';
+                break;
+            
+            case self::REASON_SHUTTING_DOWN:
+                $refund_reason = 'This bot is shutting down';
                 break;
             
             default:

@@ -294,6 +294,11 @@ class ReceiveEventProcessor {
                 $tx_process['transaction_update_vars']['confirmations'] = $tx_process['confirmations'];
             }
         }
+
+        // special case for shutting down
+        if ($bot_state->getName() == BotState::SHUTTING_DOWN) {
+            $this->bot_event_logger->logShuttingDownTransactionReceived($tx_process['bot'], $tx_process['xchain_notification']);
+        }
     }
 
     protected function createNewSwaps($tx_process) {

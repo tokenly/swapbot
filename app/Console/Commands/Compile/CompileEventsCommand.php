@@ -58,7 +58,7 @@ class CompileEventsCommand extends Command {
         foreach ($parsed_data['events'] as $event) {
             // compile msg
             if (isset($event['msg'])) {
-                $event['msg'] = Blade::compileString($event['msg']);
+                $event['msg'] = trim(Blade::compileString($event['msg']));
             }
 
             $events_by_name[$event['name']] = $event;

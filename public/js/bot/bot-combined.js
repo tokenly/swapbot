@@ -743,14 +743,22 @@
         BotstreamStore.removeChangeListener(this._onChange);
       },
       render: function() {
-        var isActive, lastEvent;
+        var inActiveText, isActive, lastEvent;
         lastEvent = this.state.lastEvent;
-        isActive = lastEvent != null ? lastEvent.isActive : false;
+        isActive = false;
+        inActiveText = "Inactive";
+        if (lastEvent != null) {
+          isActive = lastEvent.isActive;
+          if (this.props.bot.state === 'shuttingDown') {
+            isActive = false;
+            inActiveText = "Shutting Down";
+          }
+        }
         return React.createElement("div", null, (isActive ? React.createElement("div", null, React.createElement("div", {
           "className": "status-dot bckg-green"
         }), "Active") : React.createElement("div", null, React.createElement("div", {
           "className": "status-dot bckg-red"
-        }), "Inactive")));
+        }), inActiveText)));
       }
     });
   })();
@@ -999,7 +1007,12 @@
         swapConfigIsChosen = !(this.state.userChoices.swapConfig == null);
         outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset]);
         isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset]);
-        return React.createElement("div", null, (bot.state !== 'active' ? React.createElement("div", {
+        return React.createElement("div", null, (bot.state === 'shuttingDown' ? React.createElement("div", {
+          "className": "warning"
+        }, React.createElement("img", {
+          "src": "/images/misc/stop.png",
+          "alt": "STOP"
+        }), React.createElement("p", null, "This bot is currently shutting down. ", React.createElement("br", null), " Swaps by this bot will not be processed.")) : bot.state !== 'active' ? React.createElement("div", {
           "className": "warning"
         }, React.createElement("img", {
           "src": "/images/misc/stop.png",
@@ -2041,170 +2054,6 @@
     }
   };
 
-  BotstreamEventActions = (function() {
-    var exports;
-    exports = {};
-    exports.handleBotstreamEvents = function(botstreamEvents) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_HANDLE_NEW_BOTSTREAM_EVENTS,
-        botstreamEvents: botstreamEvents
-      });
-    };
-    return exports;
-  })();
-
-  QuotebotEventActions = (function() {
-    var exports;
-    exports = {};
-    exports.addNewQuote = function(quote) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_ADD_NEW_QUOTE,
-        quote: quote
-      });
-    };
-    return exports;
-  })();
-
-  SwapstreamEventActions = (function() {
-    var exports;
-    exports = {};
-    exports.addNewSwaps = function(swaps) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_ADD_NEW_SWAPS,
-        swaps: swaps
-      });
-    };
-    exports.handleSwapstreamEvents = function(swapstreamEvents) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS,
-        swapstreamEvents: swapstreamEvents
-      });
-    };
-    return exports;
-  })();
-
-  UserInputActions = (function() {
-    var exports;
-    exports = {};
-    exports.chooseOutAsset = function(chosenOutAsset) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_OUT_ASSET,
-        outAsset: chosenOutAsset
-      });
-    };
-    exports.chooseSwapConfigAtRate = function(chosenSwapConfig, currentRate) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG,
-        swapConfig: chosenSwapConfig,
-        currentRate: currentRate
-      });
-    };
-    exports.updateOutAmount = function(newOutAmount) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT,
-        outAmount: newOutAmount
-      });
-    };
-    exports.chooseSwap = function(swap) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_SWAP,
-        swap: swap
-      });
-    };
-    exports.clearSwap = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CLEAR_SWAP
-      });
-    };
-    exports.resetSwap = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_RESET_SWAP
-      });
-    };
-    exports.confirmWallet = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CONFIRM_WALLET
-      });
-    };
-    exports.updateEmailValue = function(email) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_UPDATE_EMAIL_VALUE,
-        email: email
-      });
-    };
-    exports.updateEmailLevel = function(level) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE,
-        level: level
-      });
-    };
-    exports.submitEmail = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_SUBMIT_EMAIL
-      });
-    };
-    exports.goBackOnClick = function(e) {
-      e.preventDefault();
-      exports.goBack();
-    };
-    exports.goBack = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_GO_BACK
-      });
-    };
-    exports.showAllTransactionsOnClick = function(e) {
-      e.preventDefault();
-      exports.showAllTransactions();
-    };
-    exports.showAllTransactions = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_SHOW_ALL_TRANSACTIONS
-      });
-    };
-    exports.ignoreAllSwapsOnClick = function(e) {
-      e.preventDefault();
-      exports.ignoreAllSwaps();
-    };
-    exports.ignoreAllSwaps = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS
-      });
-    };
-    return exports;
-  })();
-
-  UserInterfaceActions = window.UserInterfaceActions = (function() {
-    var exports;
-    exports = {};
-    exports.beginSwaps = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.UI_BEGIN_SWAPS
-      });
-    };
-    exports.updateMaxSwapsToShow = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
-      });
-    };
-    exports.beginLoadingMoreSwaps = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.UI_SWAPS_LOADING_BEGIN
-      });
-    };
-    exports.endLoadingMoreSwaps = function() {
-      Dispatcher.dispatch({
-        actionType: BotConstants.UI_SWAPS_LOADING_END
-      });
-    };
-    exports.updateMaxSwapsRequestedFromServer = function(maxSwapsRequestedFromServer) {
-      Dispatcher.dispatch({
-        actionType: BotConstants.UI_SWAPS_LOADING_END,
-        maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
-      });
-    };
-    return exports;
-  })();
-
   BotAPIActionCreator = (function() {
     var exports, handleBotstreamEvents, subscriberId;
     exports = {};
@@ -2349,6 +2198,42 @@
     return exports;
   })(jQuery);
 
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
+    return exports;
+  })();
+
   Dispatcher = (function() {
     var exports, _callbacks, _invokeCallback, _isDispatching, _isHandled, _isPending, _lastID, _pendingPayload, _prefix, _startDispatching, _stopDispatching;
     exports = {};
@@ -2446,42 +2331,6 @@
       throw error;
     }
   };
-
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
-    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
-    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
-    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
-    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
-    return exports;
-  })();
-
-  Settings = (function() {
-    var exports;
-    exports = {};
-    exports.SWAPS_TO_SHOW = 10;
-    exports.MORE_SWAPS_TO_SHOW = 10;
-    return exports;
-  })();
 
   BotStore = (function() {
     var emitChange, eventEmitter, exports, storedBots, updateBot;
@@ -3360,6 +3209,170 @@
         }
       }
       return validSwaps;
+    };
+    return exports;
+  })();
+
+  BotstreamEventActions = (function() {
+    var exports;
+    exports = {};
+    exports.handleBotstreamEvents = function(botstreamEvents) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_HANDLE_NEW_BOTSTREAM_EVENTS,
+        botstreamEvents: botstreamEvents
+      });
+    };
+    return exports;
+  })();
+
+  QuotebotEventActions = (function() {
+    var exports;
+    exports = {};
+    exports.addNewQuote = function(quote) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_ADD_NEW_QUOTE,
+        quote: quote
+      });
+    };
+    return exports;
+  })();
+
+  SwapstreamEventActions = (function() {
+    var exports;
+    exports = {};
+    exports.addNewSwaps = function(swaps) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_ADD_NEW_SWAPS,
+        swaps: swaps
+      });
+    };
+    exports.handleSwapstreamEvents = function(swapstreamEvents) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS,
+        swapstreamEvents: swapstreamEvents
+      });
+    };
+    return exports;
+  })();
+
+  UserInputActions = (function() {
+    var exports;
+    exports = {};
+    exports.chooseOutAsset = function(chosenOutAsset) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CHOOSE_OUT_ASSET,
+        outAsset: chosenOutAsset
+      });
+    };
+    exports.chooseSwapConfigAtRate = function(chosenSwapConfig, currentRate) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG,
+        swapConfig: chosenSwapConfig,
+        currentRate: currentRate
+      });
+    };
+    exports.updateOutAmount = function(newOutAmount) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT,
+        outAmount: newOutAmount
+      });
+    };
+    exports.chooseSwap = function(swap) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CHOOSE_SWAP,
+        swap: swap
+      });
+    };
+    exports.clearSwap = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CLEAR_SWAP
+      });
+    };
+    exports.resetSwap = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_RESET_SWAP
+      });
+    };
+    exports.confirmWallet = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_CONFIRM_WALLET
+      });
+    };
+    exports.updateEmailValue = function(email) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_UPDATE_EMAIL_VALUE,
+        email: email
+      });
+    };
+    exports.updateEmailLevel = function(level) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_UPDATE_EMAIL_LEVEL_VALUE,
+        level: level
+      });
+    };
+    exports.submitEmail = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_USER_SUBMIT_EMAIL
+      });
+    };
+    exports.goBackOnClick = function(e) {
+      e.preventDefault();
+      exports.goBack();
+    };
+    exports.goBack = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_GO_BACK
+      });
+    };
+    exports.showAllTransactionsOnClick = function(e) {
+      e.preventDefault();
+      exports.showAllTransactions();
+    };
+    exports.showAllTransactions = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_SHOW_ALL_TRANSACTIONS
+      });
+    };
+    exports.ignoreAllSwapsOnClick = function(e) {
+      e.preventDefault();
+      exports.ignoreAllSwaps();
+    };
+    exports.ignoreAllSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.BOT_IGNORE_ALL_PREVIOUS_SWAPS
+      });
+    };
+    return exports;
+  })();
+
+  UserInterfaceActions = window.UserInterfaceActions = (function() {
+    var exports;
+    exports = {};
+    exports.beginSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_BEGIN_SWAPS
+      });
+    };
+    exports.updateMaxSwapsToShow = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
+      });
+    };
+    exports.beginLoadingMoreSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_BEGIN
+      });
+    };
+    exports.endLoadingMoreSwaps = function() {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END
+      });
+    };
+    exports.updateMaxSwapsRequestedFromServer = function(maxSwapsRequestedFromServer) {
+      Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END,
+        maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
+      });
     };
     return exports;
   })();

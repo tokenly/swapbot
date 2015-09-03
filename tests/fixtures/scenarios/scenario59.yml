@@ -1,0 +1,55 @@
+# shutting down a bot moves bot to shutting down state
+#  and reaching the 6th block refunds all tokens
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333000
+  - meta: { baseFilename: block_notification_01.yml }
+    height: 333006
+
+events:
+  - {type: xchainNotification, offset: 0 }
+  - {type: shutdownBot }
+  - {type: xchainNotification, startOffset: 1 }
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - meta: { baseFilename: get_accounts.yml }
+  - meta: { baseFilename: shutdown-send_LTBCOIN.yml }
+  - meta: { baseFilename: shutdown-send_BTC.yml }
+
+expectedBotEvents:
+  - #### shutdownBegan
+    meta: { baseFilename: bot.shutdownBegan.yml }
+
+  - #### state shuttingDown
+    meta: { baseFilename: bot.stateChange-shuttingDown.yml }
+
+  - #### shutdownSend LTBCOIN
+    meta: { baseFilename: bot.shutdownSend-LTBCOIN.yml }
+
+  - #### shutdownSend BTC
+    meta: { baseFilename: bot.shutdownSend-BTC.yml }
+
+  - #### state shutdown
+    meta: { baseFilename: bot.stateChange-shutdown.yml }
+
+  - #### shutdownComplete
+    meta: { baseFilename: bot.shutdownComplete.yml }
+
+
+expectedBotModels:
+  - 
+    # bot should be in state shutdown
+    state: shutdown

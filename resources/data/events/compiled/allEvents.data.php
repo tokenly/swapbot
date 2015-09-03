@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-08-27 15:37:38
+// compiled on 2015-09-03 01:16:34
 
 return array (
   'swap.new' => 
@@ -83,8 +83,7 @@ return array (
     'name' => 'swap.sent',
     'label' => 'Swap Sent',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.
-',
+    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -114,8 +113,7 @@ return array (
     'name' => 'send.confirmed',
     'label' => 'Swap Send Confirmed',
     'level' => 'INFO',
-    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.
-',
+    'msg' => 'Sent <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?> with <?php echo e($confirmationsOut); ?> <?php echo e(str_plural(\'confirmation\', $confirmationsOut)); ?>.',
     'msgVars' => 
     array (
       0 => 'quantityOut',
@@ -244,6 +242,17 @@ return array (
       1 => 'confirmations',
     ),
   ),
+  'tx.botShuttingDown' => 
+  array (
+    'name' => 'tx.botShuttingDown',
+    'label' => 'Bot Shutting Down',
+    'level' => 'DEBUG',
+    'msg' => 'Transaction <?php echo e($txid); ?> was received while bot was shutting down.',
+    'msgVars' => 
+    array (
+      0 => 'txid',
+    ),
+  ),
   'bot.stateChange' => 
   array (
     'name' => 'bot.stateChange',
@@ -267,6 +276,53 @@ return array (
       0 => 'payment_state',
     ),
     'botEventStream' => false,
+  ),
+  'bot.shutdownBegan' => 
+  array (
+    'name' => 'bot.shutdownBegan',
+    'label' => 'Bot Shutdown Began',
+    'level' => 'INFO',
+    'msg' => 'Bot shutdown began.  Will shutdown at block <?php echo e($shutdown_block); ?> and send funds to <?php echo e($shutdown_address); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'shutdown_block',
+      1 => 'shutdown_address',
+    ),
+    'botEventStream' => true,
+  ),
+  'bot.shutdownDelayed' => 
+  array (
+    'name' => 'bot.shutdownDelayed',
+    'label' => 'Bot Shutdown Delayed',
+    'level' => 'INFO',
+    'msg' => 'This bot could not complete shutdown because there are still swaps pending.',
+    'msgVars' => 
+    array (
+    ),
+  ),
+  'bot.shutdownSend' => 
+  array (
+    'name' => 'bot.shutdownSend',
+    'label' => 'Bot Shutdown Funds Sent',
+    'level' => 'INFO',
+    'msg' => 'While shutting down bot, sent <?php echo e($currency($quantity)); ?> <?php echo e($asset); ?> to <?php echo e($destination); ?> with transaction id <?php echo e($txid); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'destination',
+      1 => 'quantity',
+      2 => 'asset',
+      3 => 'txid',
+    ),
+  ),
+  'bot.shutdownComplete' => 
+  array (
+    'name' => 'bot.shutdownComplete',
+    'label' => 'Bot Shutdown Complete',
+    'level' => 'INFO',
+    'msg' => 'Bot finished shutting down.',
+    'msgVars' => 
+    array (
+    ),
   ),
   'payment.unconfirmedMoveFuel' => 
   array (

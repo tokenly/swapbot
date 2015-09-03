@@ -75,6 +75,9 @@ $router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVe
 // Bot API
 $router->resource('api/v1/bots', 'API\Bot\BotController', ['except' => ['create','edit']]);
 
+// shutdown bot API
+$router->post('api/v1/bots/shutdown/{botuuid}', 'API\Bot\BotController@shutdown');
+
 // Bot Plans API
 $router->get('api/v1/plans', 'API\Bot\PlansController@getPaymentPlans');
 

@@ -66,6 +66,9 @@
     api.updateBot = function(id, botAttributes) {
       return api.send('PUT', "bots/" + id, botAttributes);
     };
+    api.shutdownBot = function(id, botAttributes) {
+      return api.send('POST', "bots/shutdown/" + id, botAttributes);
+    };
     api.getAllBots = function() {
       return api.send('GET', 'bots');
     };
@@ -1265,10 +1268,13 @@
         }, opt.k);
       });
     };
-    form.mSubmitBtn = function(label) {
+    form.mSubmitBtn = function(label, className) {
+      if (className == null) {
+        className = 'btn btn-primary';
+      }
       return m("button", {
         type: 'submit',
-        "class": 'btn btn-primary'
+        "class": className
       }, label);
     };
     form.mAlerts = function(errorsProp) {
@@ -2839,10 +2845,16 @@
                 ])
               ]), m("div", {
                 "class": "spacer1"
-              }), sbAdmin.form.mSubmitBtn("Save Bot"), m("a[href='/admin/dashboard']", {
+              }), m("a[href='/admin/dashboard']", {
                 "class": "btn btn-default pull-right",
                 config: m.route
-              }, "Return without Saving")
+              }, "Return without Saving"), sbAdmin.form.mSubmitBtn("Save Bot"), m("a[href='/admin/shutdown/bot/" + (vm.resourceId()) + "']", {
+                "class": "btn btn-warning ",
+                config: m.route,
+                style: {
+                  'margin-left': '24px'
+                }
+              }, "Shutdown Bot")
             ])
           ])
         ])
@@ -3065,6 +3077,126 @@
       return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
     };
     return sbAdmin.ctrl.botPaymentsView.UnloadEvent;
+  })();
+
+  (function() {
+    var vm;
+    sbAdmin.ctrl.botShutdownForm = {};
+    vm = sbAdmin.ctrl.botShutdownForm.vm = (function() {
+      vm = {};
+      vm.init = function() {
+        var id;
+        vm.errorMessages = m.prop([]);
+        vm.formStatus = m.prop('active');
+        vm.resourceId = m.prop('');
+        vm.allPlansData = m.prop(null);
+        vm.name = m.prop('');
+        vm.description = m.prop('');
+        vm.hash = m.prop('');
+        vm.shutdownAddress = m.prop('');
+        id = m.route.param('id');
+        sbAdmin.api.getBot(id).then(function(botData) {
+          vm.resourceId(botData.id);
+          vm.name(botData.name);
+          vm.description(botData.description);
+          vm.hash(botData.hash);
+          vm.shutdownAddress(botData.shutdownAddress != null ? botData.shutdownAddress : '');
+        }, function(errorResponse) {
+          vm.errorMessages(errorResponse.errors);
+        });
+        vm.doShutdown = function(e) {
+          var apiArgs, attributes;
+          e.preventDefault();
+          attributes = {
+            shutdownAddress: vm.shutdownAddress()
+          };
+          apiArgs = [vm.resourceId(), attributes];
+          return sbAdmin.form.submit(sbAdmin.api.shutdownBot, apiArgs, vm.errorMessages, vm.formStatus).then(function(apiResponse) {
+            var botId;
+            botId = vm.resourceId();
+            m.route("/admin/view/bot/" + botId);
+          });
+        };
+      };
+      return vm;
+    })();
+    sbAdmin.ctrl.botShutdownForm.controller = function() {
+      sbAdmin.auth.redirectIfNotLoggedIn();
+      vm.init();
+    };
+    return sbAdmin.ctrl.botShutdownForm.view = function() {
+      var mEl;
+      mEl = m("div", [
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-12"
+          }, [
+            m("div", {
+              "class": "row"
+            }, [
+              m("div", {
+                "class": "col-md-10"
+              }, [m("h2", vm.resourceId() ? "Shutdown SwapBot " + (vm.name()) : "")]), m("div", {
+                "class": "col-md-2 text-right"
+              }, [sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead')])
+            ]), m("div", {
+              "class": "spacer1"
+            }), sbAdmin.form.mForm({
+              errors: vm.errorMessages,
+              status: vm.formStatus
+            }, {
+              onsubmit: vm.doShutdown
+            }, [
+              sbAdmin.form.mAlerts(vm.errorMessages), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-12"
+                }, [
+                  m("div", {
+                    "class": "spacer2"
+                  }), m("div", {
+                    "class": "panel panel-danger"
+                  }, [
+                    m("div", {
+                      "class": 'panel-heading'
+                    }, [
+                      m("h4", {
+                        "class": 'panel-title'
+                      }, "Are you sure you want to shutdown this bot?")
+                    ]), m("div", {
+                      "class": 'panel-body'
+                    }, "If you shutdown this bot it will be permanently deactivated and not complete any more new swaps.  Any new swaps will be refunded automatically.  After 6 confirmations, all of the remaining funds will be forwarded to the address entered below.")
+                  ])
+                ])
+              ]), m("div", {
+                "class": "spacer1"
+              }), m("div", {
+                "class": "row"
+              }, [
+                m("div", {
+                  "class": "col-md-6"
+                }, [
+                  sbAdmin.form.mFormField("Refund Address to send all Reminaing Tokens and BTC", {
+                    id: 'shutdownAddress',
+                    'placeholder': "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    required: true
+                  }, vm.shutdownAddress)
+                ])
+              ]), m("div", {
+                "class": "spacer1"
+              }), m("a[href='/admin/dashboard']", {
+                "class": "btn btn-default pull-right",
+                config: m.route
+              }, "Return without Saving"), sbAdmin.form.mSubmitBtn("Permanently Shutdown Bot", 'btn btn-danger')
+            ])
+          ])
+        ])
+      ]);
+      return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)];
+    };
   })();
 
   (function() {
@@ -4546,6 +4678,7 @@
     "/admin/dashboard": sbAdmin.ctrl.dashboard,
     "/admin/edit/bot/:id": sbAdmin.ctrl.botForm,
     "/admin/view/bot/:id": sbAdmin.ctrl.botView,
+    "/admin/shutdown/bot/:id": sbAdmin.ctrl.botShutdownForm,
     "/admin/payments/bot/:id": sbAdmin.ctrl.botPaymentsView,
     "/admin/users": sbAdmin.ctrl.usersView,
     "/admin/edit/user/:id": sbAdmin.ctrl.userForm,

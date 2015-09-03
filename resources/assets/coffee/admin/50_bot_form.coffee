@@ -433,8 +433,9 @@ do ()->
 
                         m("div", {class: "spacer1"}),
 
-                        sbAdmin.form.mSubmitBtn("Save Bot"),
                         m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
+                        sbAdmin.form.mSubmitBtn("Save Bot"),
+                        m("a[href='/admin/shutdown/bot/#{vm.resourceId()}']", {class: "btn btn-warning ", config: m.route, style: {'margin-left': '24px'}}, "Shutdown Bot"),
                         
 
                     ]),

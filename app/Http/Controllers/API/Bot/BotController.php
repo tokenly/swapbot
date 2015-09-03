@@ -10,14 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use LinusU\Bitcoin\AddressValidator;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Commands\ActivateBot;
 use Swapbot\Commands\CreateBot;
 use Swapbot\Commands\DeleteBot;
+use Swapbot\Commands\ShutdownBot;
 use Swapbot\Commands\UpdateBot;
 use Swapbot\Http\Controllers\API\Base\APIController;
-use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 use Swapbot\Repositories\BotRepository;
+use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 
 class BotController extends APIController {
 
@@ -130,6 +132,33 @@ class BotController extends APIController {
         // issue an update bot command
         try {
             $this->dispatch(new UpdateBot($resource, $attributes, $user));
+        } catch (ValidationException $e) {
+            // handle validation errors
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));
+        }
+
+        // return a 204 response
+        return new Response('', 204);
+    }
+
+    public function shutdown($id, Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper) {
+        $user = $auth->getUser();
+        $resource = $api_helper->requireResourceOwnedByUser($id, $user, $repository);
+
+        // get the update attributes
+        $attributes = $request->all();
+        $shutdown_address = isset($attributes['shutdownAddress']) ? $attributes['shutdownAddress'] : null;
+
+        // issue an update bot command
+        try {
+            if (!$shutdown_address) {
+                return $api_helper->newJsonResponseWithErrors("Please specify a bitcoin address to refund to.", 422);
+            }
+            if (!AddressValidator::isValid($shutdown_address)) {
+                return $api_helper->newJsonResponseWithErrors("This address is not a valid bitcoin address.", 422);
+            }
+
+            $this->dispatch(new ShutdownBot($resource, $shutdown_address));
         } catch (ValidationException $e) {
             // handle validation errors
             throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->errors()->all(), 422));

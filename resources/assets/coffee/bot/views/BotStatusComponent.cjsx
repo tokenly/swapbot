@@ -32,15 +32,20 @@ do ()->
 
         render: ->
             lastEvent = this.state.lastEvent
-            isActive = if lastEvent? then lastEvent.isActive else false
-            # console.log "lastEvent",lastEvent
-            # console.log "isActive",isActive
+            isActive = false
+            inActiveText = "Inactive"
+            if lastEvent?
+                isActive = lastEvent.isActive
+                if this.props.bot.state == 'shuttingDown'
+                    isActive = false
+                    inActiveText = "Shutting Down"
+
             <div>
                 {
                     if isActive
                         <div><div className="status-dot bckg-green"></div>Active</div>
                     else
-                        <div><div className="status-dot bckg-red"></div>Inactive</div>
+                        <div><div className="status-dot bckg-red"></div>{inActiveText}</div>
                 }
             </div>
 

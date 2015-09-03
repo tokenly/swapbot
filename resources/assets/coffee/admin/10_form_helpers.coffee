@@ -85,8 +85,8 @@ sbAdmin.form = do ()->
                 val = window.JSON.stringify(opt.v)
             return m("option", {value: val, label: opt.k}, opt.k)
 
-    form.mSubmitBtn = (label)->
-        return m("button", {type: 'submit', class: 'btn btn-primary'}, label)
+    form.mSubmitBtn = (label, className='btn btn-primary')->
+        return m("button", {type: 'submit', class: className}, label)
 
 
 

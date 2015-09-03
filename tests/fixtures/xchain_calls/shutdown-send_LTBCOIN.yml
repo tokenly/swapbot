@@ -1,0 +1,8 @@
+method: POST
+path: /sends/PUBLIC_ADDRESS_ID_01
+data:
+    destination: 1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD
+    quantity: 1000000
+    asset: LTBCOIN
+    sweep: false
+    fee: 0.0001
