@@ -46,4 +46,8 @@ class BotEvent extends APIModel {
         return $this->belongsTo('Swapbot\Models\Swap');
     }
 
+    public function bot() {
+        return $this->belongsTo('Swapbot\Models\Bot');
+    }
+
 }

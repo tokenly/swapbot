@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e79785f152329e28f7169d8d70805b1d",
+    "hash": "380a091f9864a74aa82f389659328fb3",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3373,6 +3373,46 @@
             "time": "2015-07-02 20:58:07"
         },
         {
+            "name": "tokenly/laravel-keen-events",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/laravel-keen-events.git",
+                "reference": "4ab7452ca3a6020d5c63969640b72c67bef9d53c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/laravel-keen-events/zipball/4ab7452ca3a6020d5c63969640b72c67bef9d53c",
+                "reference": "4ab7452ca3a6020d5c63969640b72c67bef9d53c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Tokenly\\LaravelKeenEvents": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "dweller@tokenly.com",
+                    "homepage": "http://tokenly.com"
+                }
+            ],
+            "description": "A Laravel component for queueing events for background uploading to keen.io",
+            "time": "2015-09-03 20:42:27"
+        },
+        {
             "name": "tokenly/laravel-record-lock",
             "version": "dev-master",
             "source": {
@@ -5305,6 +5345,7 @@
         "codesleeve/laravel-stapler": 20,
         "laravel/socialite": 20,
         "fideloper/proxy": 20,
+        "tokenly/laravel-keen-events": 20,
         "mockery/mockery": 20
     },
     "prefer-stable": true,

@@ -138,6 +138,7 @@ return [
 		'Illuminate\Broadcasting\BroadcastServiceProvider',
 
 	    Swapbot\Providers\TokenlyAccounts\TokenlyAccountsServiceProvider::class,
+	    Tokenly\LaravelKeenEvents\Provider\KeenEventsServiceProvider::class,
 
 
 		/*
