@@ -103,9 +103,9 @@
 </script>
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 @if ($env == 'production')
-<script src="http://fb.me/react-0.13.3.min.js"></script>
+<script src="https://fb.me/react-0.13.3.min.js"></script>
 @else
-<script src="http://fb.me/react-0.13.3.js"></script>
+<script src="https://fb.me/react-0.13.3.js"></script>
 @endif
 <script src="/bower_components/numeral/min/numeral.min.js"></script>
 <script src="/bower_components/director/build/director.min.js"></script>
