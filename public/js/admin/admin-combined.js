@@ -2074,12 +2074,7 @@
                   m("td", {}, [
                     bot.hash.length ? m("a[href='" + address + "']", {
                       target: "_blank"
-                    }, [
-                      m("img", {
-                        "class": 'tinyRoboHead',
-                        src: "http://robohash.tokenly.com/" + bot.hash + ".png?set=set3"
-                      })
-                    ]) : m('div', {
+                    }, [sbAdmin.robohashUtils.img(bot.hash, 'tinyRoboHead')]) : m('div', {
                       "class": 'emptyRoboHead'
                     }, ''), m("a[href='" + address + "']", {
                       target: "_blank",
