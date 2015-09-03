@@ -704,6 +704,9 @@
       if (currencyPostfix == null) {
         currencyPostfix = 'BTC';
       }
+      if ((value == null) || isNaN(value)) {
+        return '';
+      }
       return window.numeral(value).format('0,0.[00000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
     };
     currencyutils.formatFiatCurrency = function(value, currencyPrefix) {

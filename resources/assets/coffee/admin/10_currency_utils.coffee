@@ -8,6 +8,7 @@ sbAdmin.currencyutils = do ()->
         return currencyutils.formatValue(amount / SATOSHI, currencyPostfix)
 
     currencyutils.formatValue = (value, currencyPostfix='BTC') ->
+        if not value? or isNaN(value) then return ''
         return window.numeral(value).format('0,0.[00000000]') + (if currencyPostfix.length then ' '+currencyPostfix else '')
 
     currencyutils.formatFiatCurrency = (value, currencyPrefix='$')->
