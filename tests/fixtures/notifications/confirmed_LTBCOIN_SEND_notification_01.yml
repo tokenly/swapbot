@@ -11,7 +11,7 @@ confirmed: true
 confirmations: 1
 asset: LTBCOIN
 quantity: 500
-blockId: 300000
+blockId: 333007
 counterpartyTx:
   type: send
   sources: [SENDER01]

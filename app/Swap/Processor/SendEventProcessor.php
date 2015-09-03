@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
 use Swapbot\Models\BotEvent;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Providers\Accounts\Facade\AccountHandler;
@@ -95,8 +96,11 @@ class SendEventProcessor {
             // previously processed transaction
             $this->handlePreviouslyProcessedTransaction($tx_process);
 
+            // process shutdown send
+            $this->processSutdownSend($tx_process);
+
             // process income forwarding send
-            $this->processIncomingForwardingSend($tx_process);
+            $this->processIncomeForwardingSend($tx_process);
 
             // process all swaps
             $this->processMatchedSwap($tx_process);
@@ -130,7 +134,11 @@ class SendEventProcessor {
             $tx_process['tx_is_handled'] = true;
             $tx_process['transaction_update_vars']['confirmations'] = $tx_process['xchain_notification']['confirmations'];
 
-            if ($this->isIncomeForwardingTransaction($tx_process)) {
+            if ($this->isShutdownTransaction($tx_process)) {
+                // log the confirmed income forward
+                $this->bot_event_logger->logShutdownTxSent($bot, $xchain_notification);
+
+            } else if ($this->isIncomeForwardingTransaction($tx_process)) {
                 // log the confirmed income forward
                 $this->bot_event_logger->logIncomeForwardingTxSent($bot, $xchain_notification);
 
@@ -148,7 +156,25 @@ class SendEventProcessor {
     }
 
 
-    protected function processIncomingForwardingSend($tx_process) {
+    protected function processSutdownSend($tx_process) {
+        if ($tx_process['tx_is_handled']) { return; }
+
+        // see if this is a shutdown send from the public address
+        //   to the shutdown address
+        if ($this->isShutdownTransaction($tx_process)) {
+            $bot                 = $tx_process['bot'];
+            $xchain_notification = $tx_process['xchain_notification'];
+
+            $this->bot_event_logger->logShutdownTxSent($bot, $xchain_notification);
+            $tx_process['tx_is_handled'] = true;
+
+            if ($tx_process['is_confirmed']) {
+                $tx_process['transaction_update_vars']['processed'] = true;
+            }
+        }
+    }
+
+    protected function processIncomeForwardingSend($tx_process) {
         if ($tx_process['tx_is_handled']) { return; }
 
         // see if this is a send from the public address
@@ -263,6 +289,26 @@ class SendEventProcessor {
     }
 
 
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Shutdown Transaction
+    
+    protected function isShutdownTransaction($tx_process) {
+        $bot                 = $tx_process['bot'];
+        Log::debug("isShutdownTransaction \$bot['state']=".json_encode($bot['state'], 192));
+        if ($bot['state'] != BotState::SHUTDOWN) { return false; }
+
+        $xchain_notification = $tx_process['xchain_notification'];
+        if (
+            in_array($bot['address'], $xchain_notification['sources'])
+            AND $xchain_notification['destinations'][0] == $bot['shutdown_address']
+        ) {
+            return true;
+        }
+
+        return false;
+    }
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////

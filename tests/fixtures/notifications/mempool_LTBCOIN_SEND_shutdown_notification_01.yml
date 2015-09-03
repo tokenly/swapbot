@@ -1,0 +1,23 @@
+# a simple XCP notification
+
+txid: "000000000000000000000000000000aaaa"
+network: counterparty
+event: send
+notifiedAddress: botaddress000000000000000000000001
+notifiedAddressId: PUBLIC_SEND_MONITOR_ID_01
+sources: [botaddress000000000000000000000001]
+destinations: [1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD]
+confirmed: false
+confirmations: 0
+asset: LTBCOIN
+quantity: 1000000
+blockId: 300000
+counterpartyTx:
+  type: send
+  sources: [botaddress000000000000000000000001]
+  destinations: [1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD]
+  quantity: 1000000
+  quantitySat: 100000000000000
+  asset: LTBCOIN
+  dustSize: 0.00001
+  dustSizeSat: 1000

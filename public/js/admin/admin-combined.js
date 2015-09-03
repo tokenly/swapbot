@@ -442,14 +442,16 @@
         return null;
       }
       swapbotMonthBalance = 0;
-      balances.map(function(balanceEntry) {
-        var asset, quantity;
-        asset = balanceEntry.asset;
-        quantity = balanceEntry.val;
-        if (asset === 'SWAPBOTMONTH') {
-          return swapbotMonthBalance = quantity;
-        }
-      });
+      if ((balances != null) && balances.length > 0) {
+        balances.map(function(balanceEntry) {
+          var asset, quantity;
+          asset = balanceEntry.asset;
+          quantity = balanceEntry.val;
+          if (asset === 'SWAPBOTMONTH') {
+            return swapbotMonthBalance = quantity;
+          }
+        });
+      }
       monthsToAdd = 1 + swapbotMonthBalance;
       dueDate = lastPayment.clone().add(monthsToAdd, 'months');
       return dueDate;

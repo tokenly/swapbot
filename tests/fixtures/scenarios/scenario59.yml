@@ -14,6 +14,9 @@ xchainNotifications:
     height: 333000
   - meta: { baseFilename: block_notification_01.yml }
     height: 333006
+  - meta: { baseFilename: mempool_LTBCOIN_SEND_shutdown_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_SEND_shutdown_notification_01.yml }
+    height: 333007
 
 events:
   - {type: xchainNotification, offset: 0 }
@@ -47,6 +50,11 @@ expectedBotEvents:
 
   - #### shutdownComplete
     meta: { baseFilename: bot.shutdownComplete.yml }
+
+  - #### confirm a shutdown transaction
+    meta: { baseFilename: bot.shutdownTxSent-LTBCOIN_mempool.yml }
+  - #### confirm a shutdown transaction
+    meta: { baseFilename: bot.shutdownTxSent-LTBCOIN_confirmed.yml }
 
 
 expectedBotModels:

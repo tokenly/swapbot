@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-09-03 01:16:34
+// compiled on 2015-09-03 15:28:20
 
 return array (
   'swap.new' => 
@@ -323,6 +323,21 @@ return array (
     'msgVars' => 
     array (
     ),
+  ),
+  'bot.shutdownTxSent' => 
+  array (
+    'name' => 'bot.shutdownTxSent',
+    'label' => 'Bot Shutdown Transaction Sent',
+    'level' => 'INFO',
+    'msg' => 'A shutdown transaction of <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?> was sent to <?php echo e($destination); ?> with <?php echo e($confirmations); ?> <?php echo e(str_plural(\'confirmation\', $confirmations)); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityOut',
+      1 => 'assetOut',
+      2 => 'destination',
+      3 => 'confirmations',
+    ),
+    'botEventStream' => true,
   ),
   'payment.unconfirmedMoveFuel' => 
   array (

@@ -115,11 +115,12 @@ sbAdmin.botPaymentUtils = do ()->
 
         # for each unspent SWAPBOTMONTH token, add a month
         swapbotMonthBalance = 0
-        balances.map (balanceEntry)->
-            asset = balanceEntry.asset
-            quantity = balanceEntry.val
-            if asset == 'SWAPBOTMONTH'
-                swapbotMonthBalance = quantity
+        if balances? and balances.length > 0
+            balances.map (balanceEntry)->
+                asset = balanceEntry.asset
+                quantity = balanceEntry.val
+                if asset == 'SWAPBOTMONTH'
+                    swapbotMonthBalance = quantity
 
         monthsToAdd = 1 + swapbotMonthBalance
         dueDate = lastPayment.clone().add(monthsToAdd, 'months')

@@ -204,6 +204,14 @@ events:
     msg: Bot finished shutting down.
     msgVars: []
 
+  -
+    name: bot.shutdownTxSent
+    label: Bot Shutdown Transaction Sent
+    level: INFO
+    msg: A shutdown transaction of {{ $currency($quantityOut) }} {{ $assetOut }} was sent to {{ $destination }} with {{ $confirmations }} {{ str_plural('confirmation', $confirmations) }}.
+    msgVars: [quantityOut,assetOut,destination,confirmations]
+    botEventStream: true
+
 
 
 

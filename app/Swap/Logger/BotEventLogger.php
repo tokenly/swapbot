@@ -58,6 +58,22 @@ class BotEventLogger {
         return $this->logStandardBotEvent('bot.shutdownSend', $bot, compact('destination', 'quantity', 'asset', 'txid'));
     }
 
+    public function logShutdownTxSent(Bot $bot, $xchain_notification) {
+        $quantity    = $xchain_notification['quantity'];
+        $asset       = $xchain_notification['asset'];
+        $tx_id       = $xchain_notification['txid'];
+        $destination = $xchain_notification['destinations'][0];
+
+        return $this->logStandardBotEvent('bot.shutdownTxSent', $bot, [
+            'quantityOut'   => $quantity,
+            'assetOut'      => $asset,
+            'txid'          => $tx_id,
+            'destination'   => $destination,
+            'confirmations' => $xchain_notification['confirmations'],
+        ]);
+    }
+
+
     public function logBotShutdownComplete(Bot $bot) {
         return $this->logStandardBotEvent('bot.shutdownComplete', $bot);
     }
