@@ -5,6 +5,7 @@ namespace Swapbot\Swap\Processor;
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
+use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
 use Swapbot\Commands\ProcessPendingSwapsForBot;
 use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
@@ -47,6 +48,8 @@ class BlockEventProcessor {
             $this->dispatch(new ProcessPendingSwapsForBot($bot, $xchain_notification['height']));
         }
 
+        // process any income forwarding payments that are pending
+        $this->dispatch(new ProcessIncomeForwardingForAllBots());
     }
 
 }
