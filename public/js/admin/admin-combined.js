@@ -706,7 +706,7 @@
       if (currencyPostfix == null) {
         currencyPostfix = 'BTC';
       }
-      if ((value == null) || isNaN(value) || value.length === 0) {
+      if ((value == null) || isNaN(value) || value === Infinity || value.length === 0) {
         return '';
       }
       return window.numeral(value).format('0,0.[00000000]') + (currencyPostfix.length ? ' ' + currencyPostfix : '');
@@ -716,7 +716,7 @@
       if (currencyPrefix == null) {
         currencyPrefix = '$';
       }
-      if ((value == null) || isNaN(value) || value.length === 0) {
+      if ((value == null) || isNaN(value) || value === Infinity || value.length === 0) {
         return '';
       }
       formattedCurrencyString = window.numeral(value).format('0,0.00');
