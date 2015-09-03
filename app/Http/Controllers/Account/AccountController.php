@@ -135,6 +135,7 @@ class AccountController extends Controller
                 'email'              => $email,
                 'email_is_confirmed' => $email_is_confirmed,
                 'oauth_token'        => $oauth_token,
+                'tokenly_uuid'       => $tokenly_uuid,
             ]);
             $user_to_login = $mergable_user;
 
