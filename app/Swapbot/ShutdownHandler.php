@@ -9,6 +9,7 @@ use Swapbot\Models\Bot;
 use Swapbot\Repositories\BlockRepository;
 use Swapbot\Swap\Logger\Facade\BotEventLogger;
 use Swapbot\Swap\Processor\SwapProcessor;
+use Swapbot\Swap\Processor\Util\BalanceUpdater;
 use Swapbot\Swap\Util\RequestIDGenerator;
 use Tokenly\XChainClient\Client;
 
@@ -19,10 +20,11 @@ class ShutdownHandler {
      *
      * @return void
      */
-    public function __construct(BlockRepository $block_repository, Client $xchain_client)
+    public function __construct(BlockRepository $block_repository, Client $xchain_client, BalanceUpdater $balance_updater)
     {
         $this->block_repository = $block_repository;
         $this->xchain_client    = $xchain_client;
+        $this->balance_updater  = $balance_updater;
     }
 
     /**
@@ -73,6 +75,9 @@ class ShutdownHandler {
             // Log it
             BotEventLogger::logBotShutdownSend($bot, $shutdown_address, $quantity, $asset, $txid);
 
+            // update balances
+            $this->balance_updater->syncBalances($bot);
+
             // subtract the fee and the dust size
             $btc_balance = $btc_balance - $fee - $dust_size;
         }
@@ -88,6 +93,9 @@ class ShutdownHandler {
 
             // Log it
             BotEventLogger::logBotShutdownSend($bot, $shutdown_address, $quantity, 'BTC', $txid);
+
+            // update balances
+            $this->balance_updater->syncBalances($bot);
         }
 
         return true;
