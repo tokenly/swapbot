@@ -26,6 +26,7 @@ class EventServiceProvider extends ServiceProvider {
 		'Swapbot\Handlers\Events\BotIndexHandler',
 		'Swapbot\Handlers\Events\CustomerEmailHandler',
 		'Swapbot\Handlers\Events\AdminEmailHandler',
+		'Swapbot\Handlers\Events\KeenEventsHandler',
 	];
 
 
