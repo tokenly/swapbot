@@ -137,7 +137,6 @@ return [
 		'Illuminate\View\ViewServiceProvider',
 		'Illuminate\Broadcasting\BroadcastServiceProvider',
 
-	    Swapbot\Providers\TokenlyAccounts\TokenlyAccountsServiceProvider::class,
 	    Tokenly\LaravelKeenEvents\Provider\KeenEventsServiceProvider::class,
 
 
@@ -174,6 +173,7 @@ return [
 		'GrahamCampbell\Markdown\MarkdownServiceProvider',
 		'Codesleeve\LaravelStapler\Providers\L5ServiceProvider',
 		Fideloper\Proxy\TrustedProxyServiceProvider::class,
+		Tokenly\AccountsClient\Provider\TokenlyAccountsServiceProvider::class,
 
 	],
 

@@ -15,7 +15,7 @@
 
                 <div class="spacer1"></div>
 
-                <p>You have are signed in as user <span class="username">{{$user['username']}}</span>.</p>
+                <p>You are signed in as <span class="username">{{$user['username']}}</span>.</p>
 
                 <div class="spacer1"></div>
 

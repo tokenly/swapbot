@@ -34,11 +34,5 @@ return [
         'secret' => '',
     ],
 
-    'tokenlyAccounts' => [
-        'client_id'     => env('TOKENLY_ACCOUNTS_CLIENT_ID'),
-        'client_secret' => env('TOKENLY_ACCOUNTS_CLIENT_SECRET'),
-        'redirect'      => env('SITE_HOST', 'http://swapbot.tokenly.com').'/account/authorize/callback',
-        'base_url'      => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST', 'http://accounts.tokenly.com'), '/'),
-    ],
 
 ];

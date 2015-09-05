@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "380a091f9864a74aa82f389659328fb3",
+    "hash": "bc4856cb5e10ab476c710867fff0aed1",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3127,6 +3127,52 @@
             "time": "2015-07-01 11:25:50"
         },
         {
+            "name": "tokenly/accounts-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tokenly/accounts-client.git",
+                "reference": "c4dbdb76b542ee9f25f567bd7b633c804628039a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/c4dbdb76b542ee9f25f567bd7b633c804628039a",
+                "reference": "c4dbdb76b542ee9f25f567bd7b633c804628039a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tokenly\\AccountsClient\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devon Weller",
+                    "email": "devon@tokenly.com",
+                    "homepage": "http://tokenly.com"
+                }
+            ],
+            "description": "A Laravel package for applications that wish to use Tokenly Accounts for user authentication.",
+            "keywords": [
+                "accounts",
+                "laravel",
+                "oauth",
+                "tokenly"
+            ],
+            "time": "2015-09-05 15:23:05"
+        },
+        {
             "name": "tokenly/bitcoin-currency-lib",
             "version": "dev-master",
             "source": {
@@ -5346,6 +5392,7 @@
         "laravel/socialite": 20,
         "fideloper/proxy": 20,
         "tokenly/laravel-keen-events": 20,
+        "tokenly/accounts-client": 20,
         "mockery/mockery": 20
     },
     "prefer-stable": true,
