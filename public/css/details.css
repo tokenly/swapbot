@@ -627,14 +627,14 @@ body {
   background-color: #f7f7f7;
 }
 .content-width {
-  width: 484px;
+  width: 600px;
 }
 .swapbot-container {
-  width: 484px;
+  width: 600px;
   position: absolute;
-  min-height: 242px;
+  min-height: 300px;
   left: 50%;
-  margin-left: -242px;
+  margin-left: -300px;
   margin-top: 30px;
   margin-bottom: 20px;
   background: white;
