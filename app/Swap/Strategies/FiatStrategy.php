@@ -7,7 +7,9 @@ use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Swapbot\Swap\Strategies\StrategyHelpers;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\QuotebotClient\Client as QuotebotClient;
+use Exception;
 
 class FiatStrategy implements Strategy {
 
@@ -207,7 +209,14 @@ class FiatStrategy implements Strategy {
     // Conversion
 
     protected function getFiatConversionRate($asset, $fiat, $source) {
-        $quote_entry = $this->quotebot_client->getQuote($source, [$fiat, $asset]);
+        try {
+            $quote_entry = $this->quotebot_client->loadQuote($source, [$fiat, $asset]);
+        } catch (Exception $e) {
+            EventLog::logError('loadquote.failed', $e);
+
+            // fallback to last cache
+            $quote_entry = $this->quotebot_client->getQuote($source, [$fiat, $asset]);       
+        }
 
         return $quote_entry['last'];
     }

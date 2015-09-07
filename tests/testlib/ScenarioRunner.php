@@ -1259,7 +1259,7 @@ class ScenarioRunner
         // normalize
         $normalized_expected_quotebot_client_calls = [];
         foreach($expected_quotebot_client_calls as $expected_quotebot_client_call) {
-            if (!isset($expected_quotebot_client_call['method'])) { $expected_quotebot_client_call['method'] = 'getQuote'; }
+            if (!isset($expected_quotebot_client_call['method'])) { $expected_quotebot_client_call['method'] = 'loadQuote'; }
             $normalized_expected_quotebot_client_calls[] = $expected_quotebot_client_call;
         }
 
