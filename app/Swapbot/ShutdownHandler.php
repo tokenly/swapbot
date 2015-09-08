@@ -58,12 +58,17 @@ class ShutdownHandler {
             return false;
         }
 
+        // sync the bot balances
+        $this->balance_updater->syncBalances($bot);
+
+
         // get the BTC balances
         $btc_balance = $bot['balances']['BTC'];
 
         foreach ($bot['balances'] as $asset => $quantity) {
             // save BTC to the end
             if ($asset == 'BTC') { continue; }
+            if ($quantity <= 0) { continue; }
 
             if ($btc_balance < ($fee + $dust_size)) { throw new Exception("Not enough BTC to refund token $asset", 1); }
 
