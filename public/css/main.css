@@ -693,7 +693,7 @@ body {
   float: left;
   border-radius: 56px;
   border: 2px solid black;
-  background: #fefefe;
+  background: #f9f9f9;
 }
 #details #details-avatar img,
 #details #details-logo img {
@@ -701,6 +701,11 @@ body {
   height: 90%;
   margin-left: 5%;
   margin-top: 5%;
+}
+#details #details-avatar:hover {
+  border-color: #f8e287;
+  border-color: white;
+  background: #f1f1f1;
 }
 #details #details-logo {
   float: right;
@@ -2509,6 +2514,9 @@ a.btn-action {
 }
 .keyboard-shortcut {
   text-decoration: underline;
+}
+.last-changed {
+  border-bottom: 1px dotted #ccc;
 }
 
 /*# sourceMappingURL=main.css.map */

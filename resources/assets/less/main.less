@@ -79,7 +79,7 @@ body {
 		float: left;
 		border-radius: 56px;
 		border: 2px solid black;
-		background: @panels-background-color;
+		background: darken(@panels-background-color, 2%);
 		img {
 			width: 90%;
 			height: 90%;
@@ -87,6 +87,13 @@ body {
 			margin-top: 5%;
 		}
 	}
+	#details-avatar:hover {
+		// border-color: darken(@flat-blue, 10%);
+		border-color: lighten(@flat-yellow, 25%);
+		border-color:  white;
+		// background-color: white;
+		background: darken(@panels-background-color, 5%);
+}
 
 	#details-logo {
 		float: right;

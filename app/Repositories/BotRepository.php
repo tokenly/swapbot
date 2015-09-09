@@ -12,6 +12,7 @@ use Swapbot\Models\Bot;
 use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
 use Swapbot\Repositories\BotIndexRepository;
+use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use Tokenly\RecordLock\Facade\RecordLock;
 use \Exception;
@@ -100,6 +101,9 @@ class BotRepository extends APIRepository
         // default to the unpaid state
         if (!isset($attributes['state'])) { $attributes['state'] = BotState::BRAND_NEW; }
 
+        // set last_changed_at to now
+        if (!isset($attributes['last_changed_at'])) { $attributes['last_changed_at'] = DateProvider::now(); }
+
         return $attributes;
     }
 
@@ -109,7 +113,12 @@ class BotRepository extends APIRepository
         $model_clone->fill($attributes);
 
         // assign the new hash to the attributes
-        $attributes['hash'] = $model_clone->buildHash($attributes);
+        $old_hash = $model['hash'];
+        $new_hash = $model_clone->buildHash($attributes);
+        $attributes['hash'] = $new_hash;
+
+        // set last_changed_at to now if the hash changed
+        if ($new_hash != $old_hash) { $attributes['last_changed_at'] = DateProvider::now(); }
 
         return $attributes;
     }

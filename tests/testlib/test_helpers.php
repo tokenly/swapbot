@@ -3,6 +3,7 @@
 
 function normalize_updated_date($actual_array, $expected_array) {
     if (isset($actual_array['updated_at'])) { $actual_array['updated_at'] = $expected_array['updated_at']; }
+    if (isset($actual_array['last_changed_at'])) { $actual_array['last_changed_at'] = $expected_array['last_changed_at']; }
 
     return $actual_array;
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
 class BotRepositoryTest extends TestCase {
@@ -62,20 +64,26 @@ class BotRepositoryTest extends TestCase {
         $model = $helper->testLoad();
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertEquals($model['hash'], $model->buildHash());
+        PHPUnit::assertEquals(DateProvider::now(), $model['last_changed_at']);
 
         // update a hash
+        $last_now = Carbon::now()->modify('+5 minutes');
+        DateProvider::setNow($last_now);
         $repo = app('Swapbot\Repositories\BotRepository');
         $old_hash = $model['hash'];
         $result = $repo->update($model, ['description' => 'foo2']);
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertNotEquals($old_hash, $model['hash']);
+        PHPUnit::assertEquals(DateProvider::now(), $model['last_changed_at']);
 
         // update a hash again
+        DateProvider::setNow(Carbon::now()->modify('+5 minutes'));
         $repo = app('Swapbot\Repositories\BotRepository');
         $old_hash = $model['hash'];
         $result = $repo->update($model, ['description' => 'foo2']);
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertEquals($old_hash, $model['hash']);
+        PHPUnit::assertEquals($last_now, $model['last_changed_at']);
     }
 
     public function testBotIncomeForwardingAddresses() {

@@ -128,5 +128,6 @@ elixir(function(mix) {
 
         // public
         .coffee('public/asyncLoad.coffee', 'public/js/public')
+        .coffee('public/changebot.coffee', 'public/js/public')
         ;
 });
