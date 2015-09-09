@@ -172,14 +172,36 @@ swapbot.swapUtils = do ()->
 
     # #############################################
 
+    showChangeMessagePopover = (e)->
+        e.preventDefault()
+        e.stopPropagation()
+
+        content = """
+            <p>The tokens you are purchasing have a price set in dollars.  Since the price of bitcoin constantly changes, please deposit this additional buffer to make sure you send enough to complete your purchase.</p>
+            <p>Your price in BTC is locked in the as soon as the bot sees your transaction on the bitcoin network.  Any excess is refunded and you may be refunded more than the buffer if the price of BTC goes up or less than the buffer if the BTC price goes down.</p>
+        """
+
+        el = $(e.target)
+        console.log "clicked: ",el
+        el.webuiPopover({trigger:'manual', title:'About the BTC Buffer', content: content, animation:'pop', closeable: true, })
+        el.webuiPopover('show')
+
+        return
+
     buildChangeMessage = {}
     buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
         [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
         if buffer? and buffer > 0
             assetIn = swapConfig.in
-            return "This includes a buffer of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)}."
+            return React.createElement('span',{className: "changeMessage"}, [
+                "This includes a ",
+                React.createElement('span', {className: "popover", title: "More about buffering", onClick: showChangeMessagePopover}, "buffer"),
+                " of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)}.",
+            ])
+                
 
-        return
+
+        return null
 
     # #############################################
     # exports

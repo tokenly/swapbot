@@ -4969,7 +4969,7 @@
   }
 
   swapbot.swapUtils = (function() {
-    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, validateInAmount, validateOutAmount;
+    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, showChangeMessagePopover, validateInAmount, validateOutAmount;
     exports = {};
     exports.SATOSHI = 100000000;
     SATOSHI = exports.SATOSHI;
@@ -5133,14 +5133,39 @@
       }
       return null;
     };
+    showChangeMessagePopover = function(e) {
+      var content, el;
+      e.preventDefault();
+      e.stopPropagation();
+      content = "<p>The tokens you are purchasing have a price set in dollars.  Since the price of bitcoin constantly changes, please deposit this additional buffer to make sure you send enough to complete your purchase.</p>\n<p>Your price in BTC is locked in the as soon as the bot sees your transaction on the bitcoin network.  Any excess is refunded and you may be refunded more than the buffer if the price of BTC goes up or less than the buffer if the BTC price goes down.</p>";
+      el = $(e.target);
+      console.log("clicked: ", el);
+      el.webuiPopover({
+        trigger: 'manual',
+        title: 'About the BTC Buffer',
+        content: content,
+        animation: 'pop',
+        closeable: true
+      });
+      el.webuiPopover('show');
+    };
     buildChangeMessage = {};
     buildChangeMessage.fiat = function(outAmount, swapConfig, currentRate) {
       var assetIn, buffer, inAmount, ref;
       ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = ref[0], buffer = ref[1];
       if ((buffer != null) && buffer > 0) {
         assetIn = swapConfig["in"];
-        return "This includes a buffer of " + (swapbot.formatters.formatCurrency(buffer)) + " " + assetIn + " " + (swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)) + ".";
+        return React.createElement('span', {
+          className: "changeMessage"
+        }, [
+          "This includes a ", React.createElement('span', {
+            className: "popover",
+            title: "More about buffering",
+            onClick: showChangeMessagePopover
+          }, "buffer"), " of " + (swapbot.formatters.formatCurrency(buffer)) + " " + assetIn + " " + (swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)) + "."
+        ]);
       }
+      return null;
     };
     exports.buildExchangeDescriptionsForGroup = function(swapConfigGroup) {
       var els, index, j, l, len, len1, mainDesc, otherCount, otherSwapDescriptions, otherTokenEl, otherTokenEls, swapConfig, tokenDescs;

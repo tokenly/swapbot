@@ -845,6 +845,9 @@ ul.swaps-list li p {
 #swapbot-container .helpLink {
   margin-left: 12px;
 }
+#swapbot-container .popover {
+  text-decoration: underline;
+}
 .content .x-button {
   float: right;
   margin-right: 52px;

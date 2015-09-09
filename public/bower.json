@@ -15,13 +15,14 @@
     "tests"
   ],
   "dependencies": {
-    "mithril": "~0.2.0",
-    "cryptojslib": "3.1.2",
-    "moment": "~2.10.2",
     "accounting.js": "https://github.com/openexchangerates/accounting.js.git#9b73d760f20fb5bd87a570f7b7ecf9af9cf5b76c",
-    "prettyFloat.js": "https://github.com/dperish/prettyFloat.js.git#e8337df8dcff0de2e67a80295468fc1ef9cab349",
-    "numeral": "~1.5.3",
+    "cryptojslib": "3.1.2",
     "director": "~1.2.8",
-    "eventEmitter": "~4.2.11"
+    "eventEmitter": "~4.2.11",
+    "mithril": "~0.2.0",
+    "moment": "~2.10.2",
+    "numeral": "~1.5.3",
+    "prettyFloat.js": "https://github.com/dperish/prettyFloat.js.git#e8337df8dcff0de2e67a80295468fc1ef9cab349",
+    "webui-popover": "~1.1.6"
   }
 }

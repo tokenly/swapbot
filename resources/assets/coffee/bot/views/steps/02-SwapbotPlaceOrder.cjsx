@@ -76,7 +76,7 @@ do ()->
                             if isChooseable
                                 <small>
                                     Click the arrow to choose this swap.
-                                    { if changeMessage?.length
+                                    { if changeMessage?
                                         <span className="changeMessage"> {changeMessage}</span>
                                     }
                                 </small>
