@@ -702,10 +702,20 @@ body {
   margin-left: 5%;
   margin-top: 5%;
 }
-#details #details-avatar:hover {
-  border-color: #f8e287;
-  border-color: white;
-  background: #f1f1f1;
+#details #details-avatar {
+  position: relative;
+}
+#details #details-avatar .button-question {
+  position: absolute;
+  bottom: 0;
+  right: -15px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+#details #details-avatar:hover .button-question {
+  background-color: rgba(0, 0, 0, 0.9);
 }
 #details #details-logo {
   float: right;

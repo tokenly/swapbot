@@ -41,7 +41,7 @@
         <div id="details">
             <div id="details-avatar">
                 @if ($bot['hash'])
-                <a href="{{ $bot->getPublicBotURL() }}" title="Learn more about the ChangeBot" data-popover data-title="About this ChangeBot" data-content="<p>Hi there, I'm ChangeBot! The way I look is controlled by a fingerprint created from all the rules and exchange rates that govern the swapbot that lives on this page.</p><p>If you trade here regularly, get familiar with my face and when you see me on your next visit you can know the rules and exchange rates haven't changed. If the face is unfamiliar you should check the swaps below to see what's new!</p><p>This swapbot's rules last changed <span class='last-changed' data-last-changed='{{$bot['last_changed_at']}}'>{{$bot['last_changed_at']}}</span>.</p>"><img src="{{ $bot->getRobohashURL() }}" class="center"></a>
+                <a href="{{ $bot->getPublicBotURL() }}" title="Learn more about the ChangeBot" data-popover data-title="This swapbot's rules last changed <span class='last-changed' data-last-changed='{{$bot['last_changed_at']}}'>{{$bot['last_changed_at']}}</span>." data-content="<p>Hi there, I'm ChangeBot! The way I look is controlled by a fingerprint created from all the rules and exchange rates that govern the swapbot that lives on this page.</p><p>If you trade here regularly, get familiar with my face and when you see me on your next visit you can know the rules and exchange rates haven't changed. If the face is unfamiliar you should check the swaps below to see what's new!</p>"><img src="{{ $bot->getRobohashURL() }}" class="center"><button class="button-question"></button></a>
                 @else
                 <span data-no-image></span>
                 @endif

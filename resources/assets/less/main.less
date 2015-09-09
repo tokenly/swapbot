@@ -87,13 +87,26 @@ body {
 			margin-top: 5%;
 		}
 	}
+	#details-avatar {
+		position: relative;
+
+		.button-question {
+			position: absolute;
+			bottom: 0;
+			right: -15px;
+			width: 22px;
+			height: 22px;
+			border-radius: 11px;
+			background-color: rgba(0, 0, 0, 0.6)
+		}
+	}
+
+
 	#details-avatar:hover {
-		// border-color: darken(@flat-blue, 10%);
-		border-color: lighten(@flat-yellow, 25%);
-		border-color:  white;
-		// background-color: white;
-		background: darken(@panels-background-color, 5%);
-}
+		.button-question {
+			background-color: rgba(0, 0, 0, 0.9)
+		}
+	}
 
 	#details-logo {
 		float: right;
