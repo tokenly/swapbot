@@ -21,7 +21,8 @@ swapbot.swapUtils = do ()->
         formatCurrency = swapbot.formatters.formatCurrency
 
         # This bot will send you 1000 SOUP for every 1 BTC you deposit
-        return "#{formatCurrency(outAmount)} #{swapConfig.out} for every #{formatCurrency(inAmount)} #{swapConfig.in} you deposit"
+        [normalizedOutAmount, normalizedInAmount] = normalizeInAndOutQuantities(outAmount, inAmount)
+        return "#{formatCurrency(normalizedOutAmount)} #{swapConfig.out} for every #{formatCurrency(normalizedInAmount)} #{swapConfig.in} you deposit"
 
     buildDesc.fixed = (swapConfig)->
         formatCurrency = swapbot.formatters.formatCurrency
@@ -32,7 +33,24 @@ swapbot.swapUtils = do ()->
         formatFiatCurrency = swapbot.formatters.formatArbitraryPrecisionFiatCurrency
         outAmount = 1
         cost = swapConfig.cost
-        return "#{formatCurrency(outAmount)} #{swapConfig.out} for every #{formatFiatCurrency(swapConfig.cost)} USD worth of #{swapConfig.in} you deposit"
+        [normalizedOutAmount, normalizedInAmount] = normalizeInAndOutQuantities(outAmount, swapConfig.cost)
+        return "#{formatCurrency(normalizedOutAmount)} #{swapConfig.out} for every #{formatFiatCurrency(normalizedInAmount)} USD worth of #{swapConfig.in} you deposit"
+
+
+    normalizeInAndOutQuantities = (rawOut, rawIn, minValue=1)->
+        if rawOut < minValue and rawOut > 0
+            multiplier = minValue / rawOut
+            normalizedOut = rawOut * multiplier
+            normalizedIn = rawIn * multiplier
+        else if rawIn < minValue and rawIn > 0
+            multiplier = minValue / rawIn
+            normalizedIn = rawIn * multiplier
+            normalizedOut = rawOut * multiplier
+        else
+            normalizedOut = rawOut
+            normalizedIn = rawIn
+
+        return [normalizedOut, normalizedIn]
 
     # #############################################
 
@@ -182,7 +200,7 @@ swapbot.swapUtils = do ()->
         """
 
         el = $(e.target)
-        console.log "clicked: ",el
+        # console.log "clicked: ",el
         el.webuiPopover({trigger:'manual', title:'About the BTC Buffer', content: content, animation:'pop', closeable: true, })
         el.webuiPopover('show')
 
@@ -191,7 +209,7 @@ swapbot.swapUtils = do ()->
     buildChangeMessage = {}
     buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
         [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
-        if buffer? and buffer > 0
+        if buffer? and Math.round(buffer * exports.SATOSHI) > 0
             assetIn = swapConfig.in
             return React.createElement('span',{className: "changeMessage"}, [
                 "This includes a ",

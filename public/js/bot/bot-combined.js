@@ -297,18 +297,19 @@
   }
 
   swapbot.swapUtils = (function() {
-    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, showChangeMessagePopover, validateInAmount, validateOutAmount;
+    var HARD_MINIMUM, SATOSHI, buildChangeMessage, buildDesc, buildInAmountAndBuffer, buildInAmountFromOutAmount, exports, normalizeInAndOutQuantities, showChangeMessagePopover, validateInAmount, validateOutAmount;
     exports = {};
     exports.SATOSHI = 100000000;
     SATOSHI = exports.SATOSHI;
     HARD_MINIMUM = 0.00000001;
     buildDesc = {};
     buildDesc.rate = function(swapConfig) {
-      var formatCurrency, inAmount, outAmount;
+      var formatCurrency, inAmount, normalizedInAmount, normalizedOutAmount, outAmount, _ref;
       outAmount = 1 * swapConfig.rate;
       inAmount = 1;
       formatCurrency = swapbot.formatters.formatCurrency;
-      return "" + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(inAmount)) + " " + swapConfig["in"] + " you deposit";
+      _ref = normalizeInAndOutQuantities(outAmount, inAmount), normalizedOutAmount = _ref[0], normalizedInAmount = _ref[1];
+      return "" + (formatCurrency(normalizedOutAmount)) + " " + swapConfig.out + " for every " + (formatCurrency(normalizedInAmount)) + " " + swapConfig["in"] + " you deposit";
     };
     buildDesc.fixed = function(swapConfig) {
       var formatCurrency;
@@ -316,12 +317,32 @@
       return "" + (formatCurrency(swapConfig.out_qty)) + " " + swapConfig.out + " for every " + (formatCurrency(swapConfig.in_qty)) + " " + swapConfig["in"] + " you deposit";
     };
     buildDesc.fiat = function(swapConfig) {
-      var cost, formatCurrency, formatFiatCurrency, outAmount;
+      var cost, formatCurrency, formatFiatCurrency, normalizedInAmount, normalizedOutAmount, outAmount, _ref;
       formatCurrency = swapbot.formatters.formatCurrency;
       formatFiatCurrency = swapbot.formatters.formatArbitraryPrecisionFiatCurrency;
       outAmount = 1;
       cost = swapConfig.cost;
-      return "" + (formatCurrency(outAmount)) + " " + swapConfig.out + " for every " + (formatFiatCurrency(swapConfig.cost)) + " USD worth of " + swapConfig["in"] + " you deposit";
+      _ref = normalizeInAndOutQuantities(outAmount, swapConfig.cost), normalizedOutAmount = _ref[0], normalizedInAmount = _ref[1];
+      return "" + (formatCurrency(normalizedOutAmount)) + " " + swapConfig.out + " for every " + (formatFiatCurrency(normalizedInAmount)) + " USD worth of " + swapConfig["in"] + " you deposit";
+    };
+    normalizeInAndOutQuantities = function(rawOut, rawIn, minValue) {
+      var multiplier, normalizedIn, normalizedOut;
+      if (minValue == null) {
+        minValue = 1;
+      }
+      if (rawOut < minValue && rawOut > 0) {
+        multiplier = minValue / rawOut;
+        normalizedOut = rawOut * multiplier;
+        normalizedIn = rawIn * multiplier;
+      } else if (rawIn < minValue && rawIn > 0) {
+        multiplier = minValue / rawIn;
+        normalizedIn = rawIn * multiplier;
+        normalizedOut = rawOut * multiplier;
+      } else {
+        normalizedOut = rawOut;
+        normalizedIn = rawIn;
+      }
+      return [normalizedOut, normalizedIn];
     };
     buildInAmountFromOutAmount = {};
     buildInAmountFromOutAmount.rate = function(outAmount, swapConfig) {
@@ -467,7 +488,6 @@
       e.stopPropagation();
       content = "<p>The tokens you are purchasing have a price set in dollars.  Since the price of bitcoin constantly changes, please deposit this additional buffer to make sure you send enough to complete your purchase.</p>\n<p>Your price in BTC is locked in the as soon as the bot sees your transaction on the bitcoin network.  Any excess is refunded and you may be refunded more than the buffer if the price of BTC goes up or less than the buffer if the BTC price goes down.</p>";
       el = $(e.target);
-      console.log("clicked: ", el);
       el.webuiPopover({
         trigger: 'manual',
         title: 'About the BTC Buffer',
@@ -481,7 +501,7 @@
     buildChangeMessage.fiat = function(outAmount, swapConfig, currentRate) {
       var assetIn, buffer, inAmount, _ref;
       _ref = buildInAmountAndBuffer(outAmount, swapConfig, currentRate), inAmount = _ref[0], buffer = _ref[1];
-      if ((buffer != null) && buffer > 0) {
+      if ((buffer != null) && Math.round(buffer * exports.SATOSHI) > 0) {
         assetIn = swapConfig["in"];
         return React.createElement('span', {
           className: "changeMessage"
@@ -2231,6 +2251,42 @@
     return exports;
   })(jQuery);
 
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
+    return exports;
+  })();
+
   BotstreamEventActions = (function() {
     var exports;
     exports = {};
@@ -2392,42 +2448,6 @@
         maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
       });
     };
-    return exports;
-  })();
-
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
-    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
-    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
-    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
-    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
-    return exports;
-  })();
-
-  Settings = (function() {
-    var exports;
-    exports = {};
-    exports.SWAPS_TO_SHOW = 10;
-    exports.MORE_SWAPS_TO_SHOW = 10;
     return exports;
   })();
 
