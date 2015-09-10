@@ -7,3 +7,7 @@ echo; echo "updating composer dependencies"
 
 echo; echo "updating bower dependencies"
 $(cd public && bower -q install)
+
+echo; echo "compiling assets"
+npm install
+node ./node_modules/gulp/bin/gulp.js
