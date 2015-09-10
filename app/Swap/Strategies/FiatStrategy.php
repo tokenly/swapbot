@@ -87,11 +87,14 @@ class FiatStrategy implements Strategy {
         $swap_config['type']      = isset($data['type'])      ? $data['type']      : 'buy';
         $swap_config['fiat']      = isset($data['fiat'])      ? $data['fiat']      : 'USD';
         $swap_config['source']    = isset($data['source'])    ? $data['source']    : 'bitcoinAverage';
-    }
+ 
+        $swap_config['direction'] = isset($data['direction']) ? $data['direction'] : SwapConfig::DIRECTION_SELL;
+   }
 
     public function serializeSwap(SwapConfig $swap_config) {
         return [
             'strategy'  => $swap_config['strategy'],
+            'direction' => $swap_config['direction'],
             'in'        => $swap_config['in'],
             'out'       => $swap_config['out'],
             'cost'      => $swap_config['cost'],

@@ -8,6 +8,9 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class SwapConfig extends ArrayObject implements APISerializeable {
 
+    const DIRECTION_SELL = 'sell';
+    const DIRECTION_BUY  = 'buy';
+
     protected $strategy_obj = null;
 
     function __construct($data=[]) {

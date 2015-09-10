@@ -2,109 +2,8 @@ do ()->
 
     sbAdmin.ctrl.botForm = {}
 
-    buildOnSwaptypeChange = (number, swap)->
-        return (e)->
-            value = e.srcElement.value
-            if value == 'fiat'
-                swap.in('BTC')
-            return
+    constants = sbAdmin.constants
 
-    sharedSwapTypeFormField = (number, swap)->
-        return sbAdmin.form.mFormField("Swap Type", {onchange: buildOnSwaptypeChange(number, swap), id: "swap_strategy_#{number}", type: 'select', options: sbAdmin.swaputils.allStrategyOptions()}, swap.strategy)
-
-    # ### helpers #####################################
-    swapGroupRenderers = {}
-    swapGroupRenderers.rate = (number, swap, isDuplicate)->
-        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
-            m("h4", "Swap ##{number}"),
-            m("div", { class: "row"}, [
-                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
-
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField({text: "Receives Asset", class: 'control-label receives-label'}, {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("At Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swap.rate),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Minimum", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", 'placeholder': "0.000001", }, swap.min),
-                ]),
-                m("div", {class: "col-md-1"}, [
-                    m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [
-                        m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Swap #{number}"}, ''),
-                    ]),
-                ]),
-            ]),
-            (if isDuplicate then duplicateWarning() else null),
-        ])
-
-    swapGroupRenderers.fixed = (number, swap, isDuplicate)->
-        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
-            m("h4", "Swap ##{number}"),
-            m("div", { class: "row"}, [
-                m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
-
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField({text: "Receives Asset", class: 'control-label receives-label'}, {id: "swap_in_#{number}", 'placeholder': "BTC", }, swap.in),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Receives Quantity", {type: "number", step: "any", min: "0", id: "swap_in_qty_#{number}", 'placeholder': "1", }, swap.in_qty),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "LTBCOIN", }, swap.out),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Sends Quantity", {type: "number", step: "any", min: "0", id: "swap_out_qty_#{number}", 'placeholder': "1", }, swap.out_qty),
-                ]),
-                m("div", {class: "col-md-1"}, [
-                    m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [
-                        m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Swap #{number}"}, ''),
-                    ]),
-                ]),
-            ]),
-            (if isDuplicate then duplicateWarning() else null),
-        ])
-
-    swapGroupRenderers.fiat = (number, swap, isDuplicate)->
-        return m("div", {class: "asset-group#{if isDuplicate then ' duplicate-asset-group' else ''}"}, [
-            m("h4", "Swap ##{number}"),
-            m("div", { class: "row"}, [
-                m("div", {class: "col-md-2"}, [sharedSwapTypeFormField(number, swap),]),
-
-                m("div", {class: "col-md-1"}, [
-                    sbAdmin.form.mValueDisplay({text: "Receives", class: 'control-label receives-label'}, {id: "swap_in_#{number}", }, swap.in()),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Sends Asset", {id: "swap_out_#{number}", 'placeholder': "MYPRODUCT", }, swap.out),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("At USD Price", {type: "number", step: "any", min: "0", id: "swap_cost_#{number}", 'placeholder': "1", }, swap.cost),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Minimum", {type: "number", step: "any", min: "0", id: "swap_min_out_#{number}", 'placeholder': "1", }, swap.min_out),
-                ]),
-                m("div", {class: "col-md-2"}, [
-                    sbAdmin.form.mFormField("Divisible", {type: "select", options: sbAdmin.form.yesNoOptions(), id: "swap_divisible_#{number}", }, swap.divisible),
-                ]),
-                m("div", {class: "col-md-1"}, [
-                    m("a", {class: "remove-link", href: '#remove', onclick: vm.buildRemoveSwapFn(number), style: if number == 1 then {display: 'none'} else ""}, [
-                        m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Swap #{number}"}, ''),
-                    ]),
-                ]),
-            ]),
-            (if isDuplicate then duplicateWarning() else null),
-        ])
-
-
-
-    swapGroup = (number, swapProp, isDuplicate)->
-        return swapGroupRenderers[swapProp().strategy()](number, swapProp(), isDuplicate)
-
-    duplicateWarning = ()->
-        return m("div", class: "duplicate-warning", [m('strong', {}, 'Warning:'), " This asset is received by 2 or more swaps. Multiple swaps will be triggered when this asset is received. This is not recommended."])
 
     # ################################################
 
@@ -151,36 +50,64 @@ do ()->
 
     # ################################################
 
-    buildDuplicateSwapOffsetsMap = (swaps)->
+    buildOffsetKey = (swapDirection, offset)->
+        return swapDirection+"_"+offset
+
+
+    buildDuplicateSwapOffsetsMap = (buySwaps, sellSwaps)->
         duplicateOffsetsMap = {}
         offsetByToken = {}
-        swaps().map (swap, offset)->
-            inToken = swap().in().toUpperCase()
-            if offsetByToken[inToken]?
-                duplicateOffsetsMap[offsetByToken[inToken]] = true
-                duplicateOffsetsMap[offset] = true
-            else
-                offsetByToken[inToken] = offset
+
+        buildMapFn = (swapDirection)->
+            return (swap, offset)->
+                offsetKey = buildOffsetKey(swapDirection, offset)
+                inToken = swap().in().toUpperCase()
+                if not inToken then return
+
+                if offsetByToken[inToken]?
+                    duplicateOffsetsMap[offsetByToken[inToken]] = true
+                    duplicateOffsetsMap[offsetKey] = true
+                else
+                    offsetByToken[inToken] = offsetKey
+                return
+
+        buySwaps().map(buildMapFn(constants.DIRECTION_BUY))
+        sellSwaps().map(buildMapFn(constants.DIRECTION_SELL))
 
         return duplicateOffsetsMap
 
-            
+    splitBotDataIntoBuyAndSellSwaps = (botDataSwaps)->
+        buySwapsData = []
+        sellSwapsData = []
 
+        botDataSwaps.map (swapData)->
+            if swapData.direction == constants.DIRECTION_BUY
+                buySwapsData.push(swapData)
+            else
+                sellSwapsData.push(swapData)
+            return
+
+        return [buySwapsData, sellSwapsData]
+
+
+    mergeSwaps = (buySwaps, sellSwaps)->
+        mergedSwaps = []
+
+        mapFn = (swapProp, offset)->
+            swapArray = swapProp()
+            if swapArray.in()?.length
+                mergedSwaps.push(swapArray)
+            return
+
+        buySwaps.map(mapFn)
+        sellSwaps.map(mapFn)
+
+
+        return mergedSwaps
 
     # ################################################
 
     vm = sbAdmin.ctrl.botForm.vm = do ()->
-        buildSwapsPropValue = (swaps)->
-            out = []
-            for swap in swaps
-                out.push(sbAdmin.swaputils.newSwapProp(swap))
-
-            # always have at least one
-            if not out.length
-                out.push(sbAdmin.swaputils.newSwapProp())
-
-            return out
-
 
         buildBlacklistAddressesPropValue = (addresses)->
             out = []
@@ -209,7 +136,8 @@ do ()->
             vm.returnFee = m.prop(0.0001)
             vm.confirmationsRequired = m.prop(2)
             vm.refundAfterBlocks = m.prop(3)
-            vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()])
+            vm.sellSwaps = m.prop([sbAdmin.swaputils.newSwapProp({direction: constants.DIRECTION_SELL})])
+            vm.buySwaps = m.prop([])
             
             vm.incomeRulesGroup = buildIncomeRulesGroup()
             vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
@@ -233,10 +161,14 @@ do ()->
                         vm.description(botData.description)
                         vm.hash(botData.hash)
                         vm.paymentPlan(botData.paymentPlan)
-                        vm.swaps(buildSwapsPropValue(botData.swaps))
                         vm.returnFee(botData.returnFee or "0.0001")
                         vm.confirmationsRequired(botData.confirmationsRequired or "2")
                         vm.refundAfterBlocks(botData.refundConfig?.refundAfterBlocks or "3")
+
+                        # split swaps into buy and sell
+                        [buySwapsData, sellSwapsData] = splitBotDataIntoBuyAndSellSwaps(botData.swaps)
+                        vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData))
+                        vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData))
 
                         vm.incomeRulesGroup.unserialize(botData.incomeRules)
                         vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
@@ -265,22 +197,6 @@ do ()->
             )
 
 
-            vm.addSwap = (e)->
-                e.preventDefault()
-                vm.swaps().push(sbAdmin.swaputils.newSwapProp())
-                return
-
-            vm.buildRemoveSwapFn = (number)->
-                return (e)->
-                    e.preventDefault()
-
-                    # filter newSwaps
-                    newSwaps = vm.swaps().filter (swap, index)->
-                        return (index != number - 1)
-                    vm.swaps(newSwaps)
-                    return
-
-            
 
             vm.save = (e)->
                 e.preventDefault()
@@ -290,7 +206,8 @@ do ()->
                     description: vm.description()
                     hash: vm.hash()
                     paymentPlan: vm.paymentPlan()
-                    swaps: vm.swaps()
+                    # need to combine these...
+                    swaps: sbAdmin.swaputils.normalizeSwapsForSaving(mergeSwaps(vm.sellSwaps(), vm.buySwaps()))
                     returnFee: vm.returnFee() + ""
                     incomeRules: vm.incomeRulesGroup.serialize()
                     blacklistAddresses: vm.blacklistAddressesGroup.serialize()
@@ -335,7 +252,7 @@ do ()->
         return
 
     sbAdmin.ctrl.botForm.view = ()->
-        duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.swaps)
+        duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.buySwaps, vm.sellSwaps)
 
         mEl = m("div", [
             m("div", { class: "row"}, [
@@ -357,6 +274,8 @@ do ()->
                     sbAdmin.form.mForm({errors: vm.errorMessages, status: vm.formStatus}, {onsubmit: vm.save}, [
                         sbAdmin.form.mAlerts(vm.errorMessages),
 
+                        m("h3", "Look and Feel"),
+
                         sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, }, vm.name),
                         sbAdmin.form.mFormField("Bot Description", {type: 'textarea', id: 'description', 'placeholder': "Bot Description", required: true, }, vm.description),
 
@@ -375,9 +294,37 @@ do ()->
                             ]),
                         ]),
 
+                        # -------------------------------------------------------------------------------------------------------------------------------------------
+                        m("div", {class: "spacer1"}),
                         m("hr"),
 
-                        m("h4", "Settings"),
+                        m("h3", "Sell Tokens"),
+                        sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_SELL, duplicateSwapsOffsetsMap, vm),
+
+                        m("div", {class: "spacer1"}),
+                        m("h3", "Purchase Tokens"),
+                        sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm),
+
+
+
+                        # -------------------------------------------------------------------------------------------------------------------------------------------
+
+                        m("div", {class: "spacer1"}),
+                        m("hr"),
+
+                        # overflow/income address
+                        m("h3", "Income Forwarding"),
+                        m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]),
+                        vm.incomeRulesGroup.buildInputs(),
+
+
+
+
+                        # -------------------------------------------------------------------------------------------------------------------------------------------
+                        m("div", {class: "spacer1"}),
+                        m("hr"),
+
+                        m("h3", "Other Settings"),
 
                         # return fee
                         m("div", {class: "spacer1"}),
@@ -394,44 +341,14 @@ do ()->
                         ]),
 
                         m("h5", "Blacklisted Addresses"),
-                        m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]),
+                        m("p", [m("small", "Tokens received from blacklisted addresses do not trigger swaps.  These addresses can be used to fill the SwapBot with additional inventory.")]),
                         vm.blacklistAddressesGroup.buildInputs(),
 
-                        m("hr"),
 
-                        # overflow/income address
-                        m("h4", "Income Forwarding"),
-                        m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]),
-                        vm.incomeRulesGroup.buildInputs(),
+                        # -------------------------------------------------------------------------------------------------------------------------------------------
 
 
-                        m("hr"),
-
-                        m("h4", "Payment"),
-                        # m("p", [m("small", "Choose a payment plan.")]),
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-12"}, [
-                                (if vm.isNew then sbAdmin.form.mFormField("Payment Plan", {id: "payment_plan", type: 'select', options: sbAdmin.planutils.allPlanOptions(vm.allPlansData())}, vm.paymentPlan) else null),
-                                (if not vm.isNew then sbAdmin.form.mValueDisplay("Payment Plan", {id: 'payment_plan',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())) else null),
-                            ]),
-                        ]),
-
-                        m("hr"),
-
-                        vm.swaps().map((swap, offset)->
-                            return swapGroup(offset+1, swap, duplicateSwapsOffsetsMap[offset]?)
-                        ),
-
-                        # add asset
-                        m("div", {class: "form-group"}, [
-                                m("a", {class: "", href: '#add', onclick: vm.addSwap}, [
-                                    m("span", {class: "glyphicon glyphicon-plus"}, ''),
-                                    m("span", {}, ' Add Another Swap'),
-                                ]),
-                        ]),
-
-
-                        m("div", {class: "spacer1"}),
+                        m("div", {class: "spacer3"}),
 
                         m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Return without Saving"),
                         sbAdmin.form.mSubmitBtn("Save Bot"),

@@ -6419,6 +6419,26 @@ textarea.form-control {
   border-radius: 4px;
   margin-bottom: 28px;
 }
+.label-popover-help {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 9px;
+  margin-left: 5px;
+  color: white;
+  font-size: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  font-weight: bold;
+  display: inline-block;
+  position: absolute;
+  top: 1px;
+}
+.label-popover-help:after {
+  content: "?";
+}
+.ordered-list-unstyled {
+  padding-left: 18px;
+}
 .uploader {
   width: 100%;
   height: 105px;

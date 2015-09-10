@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Swapbot | Admin</title>
 
+    <link href="/bower_components/webui-popover/dist/jquery.webui-popover.min.css" rel="stylesheet">
     <link href="/css/admin.css" rel="stylesheet">
 
     <!-- Fonts -->
@@ -48,6 +49,8 @@
     <script src="/bower_components/moment/min/moment.min.js"></script>
     {{-- <script src="/bower_components/accounting.js/accounting.min.js"></script> --}}
     <script src="/bower_components/numeral/min/numeral.min.js"></script>
+    <script src="/bower_components/webui-popover/dist/jquery.webui-popover.min.js"></script>
+
     <!-- pusher -->
     <script>window.PUSHER_URL = '{{$pusherUrl}}';</script>
     <script src="{{$pusherUrl}}/public/client.js"></script>

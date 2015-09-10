@@ -9,9 +9,13 @@ sbAdmin.form = do ()->
             for k, v of label
                 if k == 'text' then continue
                 properties[k] = v
+
+            if label.popover?
+                labelText = [labelText, m("button", class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
         else
             labelText = label
             properties = {for: id, class: 'control-label'}
+
         return m("label", properties, labelText)
 
     form.mValueDisplay = (label, attributes, value)->
@@ -44,6 +48,7 @@ sbAdmin.form = do ()->
                     return (m.withAttr("value", prop))(e)
             else
                 inputProps.onchange = m.withAttr("value", prop)
+                inputProps.onkeyup = m.withAttr("value", prop)
             inputProps.value = prop()
         
         # defaults
@@ -52,7 +57,9 @@ sbAdmin.form = do ()->
 
         # postfix
         delete inputProps.prefix
+        delete inputProps.prefixLimit
         delete inputProps.postfix
+        delete inputProps.postfixlimit
 
         switch inputProps.type
             when 'textarea'
@@ -69,12 +76,17 @@ sbAdmin.form = do ()->
 
         if attributes.prefix? or attributes.postfix?
             return m('div', {class: 'input-group'}, [
-                if attributes.prefix? then m('div', {class: 'input-group-addon'}, attributes.prefix) else null,
+                if attributes.prefix? then m('div', {class: 'input-group-addon', title: attributes.prefix}, truncate(attributes.prefix, attributes.prefixLimit)) else null,
                 inputEl,
-                if attributes.postfix? then m('div', {class: 'input-group-addon'}, attributes.postfix) else null,
+                if attributes.postfix? then m('div', {class: 'input-group-addon', title: attributes.postfix}, truncate(attributes.postfix, attributes.postfixLimit)) else null,
             ])
 
         return inputEl;
+
+    truncate = (textIn, limit)->
+        if limit? and textIn? and textIn.length > limit+1
+            return textIn.substr(0, limit)+'\u2026';
+        return textIn
 
     buildOpts = (opts)->
         return opts.map (opt)->

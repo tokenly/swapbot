@@ -5,6 +5,183 @@
     ctrl: {}
   };
 
+  sbAdmin.constants = (function() {
+    var constants;
+    constants = {};
+    constants.DIRECTION_SELL = 'sell';
+    constants.DIRECTION_BUY = 'buy';
+    return constants;
+  })();
+
+  sbAdmin.popoverLabels = (function() {
+    var popoverLabels;
+    popoverLabels = {};
+    popoverLabels.swapTypeChoice = function(number, action) {
+      return {
+        text: "Type for " + action + " Swap #" + number,
+        popover: {
+          title: "About the Swap Type",
+          content: "<p>Swapbot supports 3 types of swaps.</p>\n<ol class=\"ordered-list-unstyled\">\n    <li>\n        <strong>Swaps By Rate</strong><br/>\n        <p>This is the simplest type of swap. Rate swaps buy and sell tokens at a price. Swaps of partial tokens are allowed.</p>\n    </li>\n    <li>\n        <strong>Swaps By Fixed Amounts</strong><br/>\n        <p>Fixed amounts accept an exact amount of tokens in and return an exact amount of tokens out. A user must send exactly the amount expected or more and will receive an exact amount of tokens back.  Any excess sent by the user is not refunded.</p>\n        <p>Users may send twice or three times as much as the expected amount and receive 2 or 3 times as many tokens in return.</p>\n    </li>\n    <li>\n        <strong>Swaps By USD Amount paid in BTC</strong> (Sell Only)<br/>\n        <p>This type of swap accepts BTC only.  The tokens for sale are priced in a US dollar amount.  And the amount of tokens sent in return is dependent on the current USD value of BTC when the transaction is received.</p>\n        <p>Users are asked to send a small bit of extra BTC in order to adjust for market fluctuations.  Any excess BTC is returned to the user along with their tokens.</p>\n    </li>\n</ol>"
+        }
+      };
+    };
+    popoverLabels.rateSellTokenToSell = {
+      text: "Token to Sell",
+      popover: {
+        title: "About the Token to Sell",
+        content: "<p>This is the type of token this Swapbot will send to the user.</p>"
+      }
+    };
+    popoverLabels.rateSellAssetToReceive = {
+      text: "Asset to Receive",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Asset to Receive",
+        content: "<p>This is the type of token this Swapbot will receive from the user.</p>\n<p>This bot can receive BTC or any Counterparty asset.</p>"
+      }
+    };
+    popoverLabels.rateSellPrice = {
+      text: "Price",
+      popover: {
+        title: "About the Price",
+        content: "<p>This is the cost the user will pay for 1 token.</p>"
+      }
+    };
+    popoverLabels.rateSellMinimumSale = {
+      text: "Minimum Sale",
+      popover: {
+        title: "About the Minimum Sale",
+        content: "<p>This is the minimum amount the user is required to pay in order to complete a transaction.</p>\n<p>Deposits in BTC less than this minimum will be refunded minus a transaction fee.</p>\n<p>Deposits in other tokens less than this minimum will be refunded in their entirety.</p>"
+      }
+    };
+    popoverLabels.rateBuyTokenToBuy = {
+      text: "Token to Buy",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Token to Buy",
+        content: "<p>This is the type of token the user will send to the bot.</p>"
+      }
+    };
+    popoverLabels.rateBuyAssetToPay = {
+      text: "Asset to Pay",
+      popover: {
+        title: "About the Asset to Pay",
+        content: "<p>This is the type of asset this Swapbot will send to the user.</p>"
+      }
+    };
+    popoverLabels.rateBuyPurchasePrice = {
+      text: "Purchase Price",
+      popover: {
+        title: "About the Purchase Price",
+        content: "<p>This is the amount that this bot will return to the user for 1 token.</p>"
+      }
+    };
+    popoverLabels.rateBuyMinimumSale = {
+      text: "Minimum Purchase",
+      popover: {
+        title: "About the Minimum Purchase",
+        content: "<p>This is the minimum amount the user is required to send in order to complete a transaction.</p>\n<p>Deposits in BTC less than this minimum will be refunded minus a transaction fee.</p>\n<p>Deposits in other tokens less than this minimum will be refunded in their entirety.</p>"
+      }
+    };
+    popoverLabels.fixedSellTokenToSell = {
+      text: "Token to Sell",
+      popover: {
+        title: "About the Token to Sell",
+        content: "<p>This is the type of token this Swapbot will send to the user.</p>"
+      }
+    };
+    popoverLabels.fixedSellAmountToSell = {
+      text: "Amount to Sell",
+      popover: {
+        title: "About the Amount to Sell",
+        content: "<p>This is the amount of the token this Swapbot will send to the user.</p>\n<p>The user will receive this amount or an exact multiple of this amount if they send an exact multiple of the Amount to Receive.</p>"
+      }
+    };
+    popoverLabels.fixedSellAssetToReceive = {
+      text: "Asset to Receive",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Asset to Receive",
+        content: "<p>This is the type of token the user will send to the bot.</p>\n<p>This bot can receive BTC or any Counterparty asset.</p>"
+      }
+    };
+    popoverLabels.fixedSellAmountToReceive = {
+      text: "Amount to Receive",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Amount to Receive",
+        content: "<p>This is the amount of the token the user will send to the bot.</p>\n<p>The user should send this amount or an exact multiple of this amount.</p>"
+      }
+    };
+    popoverLabels.fixedBuyTokenToBuy = {
+      text: "Token to Buy",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Token to Buy",
+        content: "<p>This is the type of token the user will send to the bot.</p>"
+      }
+    };
+    popoverLabels.fixedBuyAmountToBuy = {
+      text: "Amount to Buy",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Amount to Buy",
+        content: "<p>This is the amount of the token the user will send to the bot.</p>\n<p>The user should send this amount or an exact multiple of this amount.</p>"
+      }
+    };
+    popoverLabels.fixedBuyAssetToPay = {
+      text: "Asset to Pay",
+      popover: {
+        title: "About the Asset to Pay",
+        content: "<p>This is the type of token this Swapbot will send to the user.</p>\n<p>This bot can send BTC or any Counterparty asset.</p>"
+      }
+    };
+    popoverLabels.fixedBuyAmountToPay = {
+      text: "Amount to Pay",
+      popover: {
+        title: "About the Amount to Pay",
+        content: "<p>This is the amount of the token this Swapbot will send to the user.</p>\n<p>The user will receive this amount or an exact multiple of this amount if they send an exact multiple of the Amount to Buy.</p>"
+      }
+    };
+    popoverLabels.fiatSellReceivesAsset = {
+      text: "Receives",
+      "class": 'control-label receives-label',
+      popover: {
+        title: "About the Asset to Receive",
+        content: "<p>This Swapbot will receive BTC and get a quote in USD at the current market rate.</p>"
+      }
+    };
+    popoverLabels.fiatSellSendsAsset = {
+      text: "Token to Sell",
+      popover: {
+        title: "About the Token to Sell",
+        content: "<p>This is the type of token this Swapbot will send to the user.</p>"
+      }
+    };
+    popoverLabels.fiatSellPrice = {
+      text: "Price",
+      popover: {
+        title: "About the Price",
+        content: "<p>This is the cost in USD that the user will pay for 1 token.</p>\n<p>When the BTC transaction is received, this Swapbot will get a quote in USD at the current market rate.</p>"
+      }
+    };
+    popoverLabels.fiatSellMinimumSale = {
+      text: "Minimum Sale",
+      popover: {
+        title: "About the Minimum Sale",
+        content: "<p>This is the minimum amount of your Token that the user must purchase to complete a swap.</p>\n<p>Deposits in BTC less than this minimum will be refunded minus a transaction fee.</p>"
+      }
+    };
+    popoverLabels.fiatSellIsDivisible = {
+      text: "Divisible",
+      popover: {
+        title: "About Token is Divisible",
+        content: "<p>If this token is marked as divisible, then an exact amount of this token will be sent to the user based on the BTC received and market rate.</p>\n<p>If the token is not divisible, then the number of tokens purchased will be rounded down to the nearest whole number and the rest of the BTC received will be sent as change.  This swapbot will ask the user to send an additional small BTC buffer to account for market fluctuations.</p>"
+      }
+    };
+    return popoverLabels;
+  })();
+
   sbAdmin.api = (function() {
     var api, buildFileHash, newNonce, signRequest, signURLParameters;
     api = {};
@@ -1153,7 +1330,7 @@
   })();
 
   sbAdmin.form = (function() {
-    var buildLabelEl, buildOpts, form;
+    var buildLabelEl, buildOpts, form, truncate;
     form = {};
     buildLabelEl = function(label, id) {
       var k, labelText, properties, v;
@@ -1169,6 +1346,14 @@
             continue;
           }
           properties[k] = v;
+        }
+        if (label.popover != null) {
+          labelText = [
+            labelText, m("button", {
+              "class": 'label-popover-help',
+              onclick: sbAdmin.popover.buildOnclick(label.popover)
+            }, "")
+          ];
         }
       } else {
         labelText = label;
@@ -1212,6 +1397,7 @@
           };
         } else {
           inputProps.onchange = m.withAttr("value", prop);
+          inputProps.onkeyup = m.withAttr("value", prop);
         }
         inputProps.value = prop();
       }
@@ -1222,7 +1408,9 @@
         inputProps.name = inputProps.id;
       }
       delete inputProps.prefix;
+      delete inputProps.prefixLimit;
       delete inputProps.postfix;
+      delete inputProps.postfixlimit;
       switch (inputProps.type) {
         case 'textarea':
           delete inputProps.type;
@@ -1247,13 +1435,21 @@
           "class": 'input-group'
         }, [
           attributes.prefix != null ? m('div', {
-            "class": 'input-group-addon'
-          }, attributes.prefix) : null, inputEl, attributes.postfix != null ? m('div', {
-            "class": 'input-group-addon'
-          }, attributes.postfix) : null
+            "class": 'input-group-addon',
+            title: attributes.prefix
+          }, truncate(attributes.prefix, attributes.prefixLimit)) : null, inputEl, attributes.postfix != null ? m('div', {
+            "class": 'input-group-addon',
+            title: attributes.postfix
+          }, truncate(attributes.postfix, attributes.postfixLimit)) : null
         ]);
       }
       return inputEl;
+    };
+    truncate = function(textIn, limit) {
+      if ((limit != null) && (textIn != null) && textIn.length > limit + 1) {
+        return textIn.substr(0, limit) + '\u2026';
+      }
+      return textIn;
     };
     buildOpts = function(opts) {
       return opts.map(function(opt) {
@@ -1511,7 +1707,7 @@
     };
     nav.buildInContainer = function(mEl) {
       return m("div", {
-        "class": "container",
+        "class": "container-fluid",
         style: {
           marginTop: "0px",
           marginBottom: "24px"
@@ -1637,6 +1833,32 @@
       tryToLoadURL();
     });
     return pocketsUtils;
+  })();
+
+  sbAdmin.popover = (function() {
+    var popover;
+    popover = {};
+    popover.buildOnclick = function(popoverConfig) {
+      return function(e) {
+        var el;
+        e.preventDefault();
+        e.stopPropagation();
+        popoverConfig.trigger = 'manual';
+        if (popoverConfig.animation == null) {
+          popoverConfig.animation = 'pop';
+        }
+        if (popoverConfig.closeable == null) {
+          popoverConfig.closeable = true;
+        }
+        if (popoverConfig.width == null) {
+          popoverConfig.width = 420;
+        }
+        el = jQuery(e.target);
+        el.webuiPopover(popoverConfig);
+        el.webuiPopover('show');
+      };
+    };
+    return popover;
   })();
 
   sbAdmin.pusherutils = (function() {
@@ -1837,39 +2059,503 @@
     return stateutils;
   })();
 
+  sbAdmin.swapgrouprenderer = (function() {
+    var buildAddSwapFn, buildOffsetKey, buildOnSwaptypeChange, buildRemoveSwapFn, constants, duplicateWarning, popoverLabels, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, swapgrouprenderer;
+    swapgrouprenderer = {};
+    constants = sbAdmin.constants;
+    popoverLabels = sbAdmin.popoverLabels;
+    buildOnSwaptypeChange = function(number, swap) {
+      return function(e) {
+        var value;
+        value = e.srcElement.value;
+        if (value === 'fiat') {
+          swap["in"]('BTC');
+        }
+      };
+    };
+    sharedSwapTypeFormField = function(number, swap) {
+      var action, offsetKey;
+      offsetKey = buildOffsetKey(swap.direction(), number - 1);
+      action = (swap.direction() === constants.DIRECTION_SELL ? 'Sell' : 'Buy');
+      return sbAdmin.form.mFormField(popoverLabels.swapTypeChoice(number, action), {
+        onchange: buildOnSwaptypeChange(number, swap),
+        id: "swap_strategy_" + offsetKey,
+        type: 'select',
+        options: sbAdmin.swaputils.allStrategyOptions(swap.direction())
+      }, swap.strategy);
+    };
+    buildAddSwapFn = function(vmProps, swapDirection) {
+      return function(e) {
+        var swapsProp;
+        e.preventDefault();
+        swapsProp = (swapDirection === constants.DIRECTION_BUY ? vmProps.buySwaps() : vmProps.sellSwaps());
+        swapsProp.push(sbAdmin.swaputils.newSwapProp({
+          direction: swapDirection
+        }));
+      };
+    };
+    buildRemoveSwapFn = function(number, swapDirection, vmProps) {
+      return function(e) {
+        var filterFn;
+        e.preventDefault();
+        filterFn = function(swap, index) {
+          return index !== number - 1;
+        };
+        if (swapDirection === constants.DIRECTION_SELL) {
+          vmProps.sellSwaps(vmProps.sellSwaps().filter(filterFn));
+        } else if (swapDirection === constants.DIRECTION_BUY) {
+          vmProps.buySwaps(vmProps.buySwaps().filter(filterFn));
+        }
+      };
+    };
+    duplicateWarning = function() {
+      return m("div", {
+        "class": "duplicate-warning"
+      }, [m('strong', {}, 'Warning:'), " This asset is received by 2 or more swaps. Multiple swaps will be triggered when this asset is received. This is not recommended."]);
+    };
+    swapGroupRenderers = {
+      rate: {},
+      fixed: {},
+      fiat: {}
+    };
+    swapGroupRenderers.rate.sell = function(number, swap, vmProps, isDuplicate, offsetKey) {
+      return {
+        leftColsWidth: 6,
+        leftCols: [
+          m("div", {
+            "class": "col-md-5"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateSellTokenToSell, {
+              id: "swap_out_" + offsetKey,
+              'placeholder': "LTBCOIN"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-4"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateSellAssetToReceive, {
+              id: "swap_in_" + offsetKey,
+              'placeholder': "BTC"
+            }, swap["in"])
+          ])
+        ],
+        rightColsWidth: 6,
+        rightCols: [
+          m("div", {
+            "class": "col-md-6"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateSellPrice, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_rate_" + offsetKey,
+              'placeholder': "0.000001",
+              postfixLimit: 7,
+              postfix: swap["in"]()
+            }, swap.price)
+          ]), m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateSellMinimumSale, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_rate_" + offsetKey,
+              'placeholder': "0.000001",
+              postfixLimit: 7,
+              postfix: swap["in"]()
+            }, swap.min)
+          ])
+        ]
+      };
+    };
+    swapGroupRenderers.rate.buy = function(number, swap, vmProps, isDuplicate, offsetKey) {
+      return {
+        leftColsWidth: 6,
+        leftCols: [
+          m("div", {
+            "class": "col-md-5"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateBuyTokenToBuy, {
+              id: "swap_in_" + offsetKey,
+              'placeholder': "LTBCOIN"
+            }, swap["in"])
+          ]), m("div", {
+            "class": "col-md-4"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateBuyAssetToPay, {
+              id: "swap_out_" + offsetKey,
+              'placeholder': "BTC"
+            }, swap.out)
+          ])
+        ],
+        rightColsWidth: 6,
+        rightCols: [
+          m("div", {
+            "class": "col-md-6"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateBuyPurchasePrice, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_rate_" + offsetKey,
+              'placeholder': "0.000001",
+              postfixLimit: 7,
+              postfix: swap.out()
+            }, swap.rate)
+          ]), m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.rateBuyMinimumSale, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_rate_" + offsetKey,
+              'placeholder': "0.000001",
+              postfixLimit: 7,
+              postfix: swap["in"]()
+            }, swap.min)
+          ])
+        ]
+      };
+    };
+    swapGroupRenderers.fixed.sell = function(number, swap, vmProps, isDuplicate, offsetKey) {
+      return {
+        leftColsWidth: 7,
+        leftCols: [
+          m("div", {
+            "class": "col-md-4"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedSellTokenToSell, {
+              id: "swap_out_" + offsetKey,
+              'placeholder': "LTBCOIN"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedSellAmountToSell, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_out_qty_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: swap.out()
+            }, swap.out_qty)
+          ])
+        ],
+        rightColsWidth: 5,
+        rightCols: [
+          m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedSellAssetToReceive, {
+              id: "swap_in_" + offsetKey,
+              'placeholder': "BTC"
+            }, swap["in"])
+          ]), m("div", {
+            "class": "col-md-6"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedSellAmountToReceive, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_in_qty_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: swap["in"]()
+            }, swap.in_qty)
+          ])
+        ]
+      };
+    };
+    swapGroupRenderers.fixed.buy = function(number, swap, vmProps, isDuplicate, offsetKey) {
+      return {
+        leftColsWidth: 7,
+        leftCols: [
+          m("div", {
+            "class": "col-md-4"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedBuyTokenToBuy, {
+              id: "swap_in_" + offsetKey,
+              'placeholder': "LTBCOIN"
+            }, swap["in"])
+          ]), m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedBuyAmountToBuy, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_in_qty_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: swap["in"]()
+            }, swap.in_qty)
+          ])
+        ],
+        rightColsWidth: 5,
+        rightCols: [
+          m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedBuyAssetToPay, {
+              id: "swap_out_" + offsetKey,
+              'placeholder': "BTC"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-6"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fixedBuyAmountToPay, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_out_qty_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: swap.out()
+            }, swap.out_qty)
+          ])
+        ]
+      };
+    };
+    swapGroupRenderers.fiat.sell = function(number, swap, vmProps, isDuplicate, offsetKey) {
+      return {
+        leftColsWidth: 6,
+        leftCols: [
+          m("div", {
+            "class": "col-md-5"
+          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
+            "class": "col-md-4"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fiatSellSendsAsset, {
+              id: "swap_out_" + offsetKey,
+              'placeholder': "MYPRODUCT"
+            }, swap.out)
+          ]), m("div", {
+            "class": "col-md-3"
+          }, [
+            sbAdmin.form.mValueDisplay(popoverLabels.fiatSellReceivesAsset, {
+              id: "swap_in_" + offsetKey
+            }, swap["in"]())
+          ])
+        ],
+        rightColsWidth: 6,
+        rightCols: [
+          m("div", {
+            "class": "col-md-4"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fiatSellPrice, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_cost_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: 'USD'
+            }, swap.cost)
+          ]), m("div", {
+            "class": "col-md-5"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fiatSellMinimumSale, {
+              type: "number",
+              step: "any",
+              min: "0",
+              id: "swap_min_out_" + offsetKey,
+              'placeholder': "1",
+              postfixLimit: 7,
+              postfix: swap.out()
+            }, swap.min_out)
+          ]), m("div", {
+            "class": "col-md-2"
+          }, [
+            sbAdmin.form.mFormField(popoverLabels.fiatSellIsDivisible, {
+              type: "select",
+              options: sbAdmin.form.yesNoOptions(),
+              id: "swap_divisible_" + offsetKey
+            }, swap.divisible)
+          ])
+        ]
+      };
+    };
+    swapGroup = function(number, swap, vmProps, isDuplicate) {
+      var offsetKey, swapDirection, swapGroupSpec;
+      swapDirection = swap().direction();
+      offsetKey = buildOffsetKey(swapDirection, number - 1);
+      swapGroupSpec = swapGroupRenderers[swap().strategy()][swapDirection](number, swap(), vmProps, isDuplicate, offsetKey);
+      if (swapGroupSpec == null) {
+        return;
+      }
+      swapGroupSpec.rightCols.push([
+        m("div", {
+          "class": "col-md-1"
+        }, [
+          m("a", {
+            "class": "remove-link pull-right",
+            href: '#remove',
+            onclick: buildRemoveSwapFn(number, swapDirection, vmProps)
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-remove-circle",
+              title: "Remove Swap " + number
+            }, '')
+          ])
+        ])
+      ]);
+      return m("div", {
+        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
+      }, [
+        m("div", {
+          "class": "row"
+        }, [
+          m("div", {
+            "class": "col-md-" + swapGroupSpec.leftColsWidth
+          }, m("div", {
+            "class": "row"
+          }, swapGroupSpec.leftCols)), m("div", {
+            "class": "col-md-" + swapGroupSpec.rightColsWidth
+          }, m("div", {
+            "class": "row"
+          }, swapGroupSpec.rightCols))
+        ]), (isDuplicate ? duplicateWarning() : null)
+      ]);
+    };
+    buildOffsetKey = function(swapDirection, offset) {
+      return swapDirection + "_" + offset;
+    };
+    swapgrouprenderer.buildSwapsSection = function(swapDirection, duplicateSwapsOffsetsMap, vm) {
+      var action, addSwapFn, swapsArray, vmProps;
+      vmProps = {
+        sellSwaps: vm.sellSwaps,
+        buySwaps: vm.buySwaps
+      };
+      if (swapDirection === constants.DIRECTION_SELL) {
+        swapsArray = vmProps.sellSwaps();
+        addSwapFn = buildAddSwapFn(vmProps, constants.DIRECTION_SELL);
+        action = "Selling";
+      } else {
+        swapsArray = vmProps.buySwaps();
+        addSwapFn = buildAddSwapFn(vmProps, constants.DIRECTION_BUY);
+        action = "Purchasing";
+      }
+      return m("div", {}, [
+        swapsArray.map(function(swap, offset) {
+          var offsetKey;
+          offsetKey = buildOffsetKey(swapDirection, offset);
+          return swapGroup(offset + 1, swap, vmProps, duplicateSwapsOffsetsMap[offsetKey] != null);
+        }), m("div", {
+          "class": "form-group"
+        }, [
+          m("a", {
+            "class": "",
+            href: '#add',
+            onclick: addSwapFn
+          }, [
+            m("span", {
+              "class": "glyphicon glyphicon-plus"
+            }, ''), m("span", {}, " Add " + (swapsArray.length > 0 ? "another" : "a") + " " + action + " Swap")
+          ])
+        ])
+      ]);
+    };
+    return swapgrouprenderer;
+  })();
+
   sbAdmin.swaputils = (function() {
-    var strategyLabelCache, swaputils;
+    var constants, strategyLabelCache, swaputils;
     swaputils = {};
+    constants = sbAdmin.constants;
     swaputils.newSwapProp = function(swap) {
+      var price;
       if (swap == null) {
         swap = {};
+      }
+      price = null;
+      if ((swap.rate != null) && swap.rate.length > 0) {
+        price = swapbot.formatters.formatCurrencyAsNumber(1 / swap.rate);
       }
       return m.prop({
         strategy: m.prop(swap.strategy || 'rate'),
         "in": m.prop(swap["in"] || ''),
         out: m.prop(swap.out || ''),
         rate: m.prop(swap.rate || ''),
+        price: m.prop(price || ''),
         in_qty: m.prop(swap.in_qty || ''),
         out_qty: m.prop(swap.out_qty || ''),
         min: m.prop(swap.min || ''),
         cost: m.prop(swap.cost || ''),
         min_out: m.prop(swap.min_out || ''),
-        divisible: m.prop(swap.divisible != null ? (swap.divisible ? '1' : '0') : '0')
+        divisible: m.prop(swap.divisible != null ? (swap.divisible ? '1' : '0') : '0'),
+        direction: m.prop(swap.direction || 'sell')
       });
     };
-    swaputils.allStrategyOptions = function() {
-      return [
-        {
-          k: "By Rate",
-          v: 'rate'
-        }, {
-          k: "By Fixed Amounts",
-          v: 'fixed'
-        }, {
-          k: "By USD Amount paid in BTC",
-          v: 'fiat'
+    swaputils.normalizeSwapsForSaving = function(swaps) {
+      var swapsOut;
+      console.log("swaps in: ", swaps);
+      swapsOut = swaps.map(function(swap) {
+        var price, rate;
+        if (swap.direction() === constants.DIRECTION_SELL) {
+          rate = '';
+          price = swap.price();
+          if ((price != null) && price.length > 0) {
+            rate = swapbot.formatters.formatCurrencyAsNumber(1 / price);
+          }
+          swap.rate(rate);
         }
-      ];
+        return swap;
+      });
+      console.log("swapsOut=", swapsOut);
+      return swapsOut;
+    };
+    swaputils.buildSwapsPropValue = function(swaps, defaultSwapDirection) {
+      var j, len, out, swap;
+      if (defaultSwapDirection == null) {
+        defaultSwapDirection = constants.DIRECTION_SELL;
+      }
+      out = [];
+      for (j = 0, len = swaps.length; j < len; j++) {
+        swap = swaps[j];
+        out.push(sbAdmin.swaputils.newSwapProp(swap));
+      }
+      if (!out.length && defaultSwapDirection === constants.DIRECTION_BUY) {
+        out.push(sbAdmin.swaputils.newSwapProp({
+          direction: defaultSwapDirection
+        }));
+      }
+      return out;
+    };
+    swaputils.allStrategyOptions = function(swapDirection) {
+      if (swapDirection === constants.DIRECTION_BUY) {
+        return [
+          {
+            k: "By Price",
+            v: 'rate'
+          }, {
+            k: "By Fixed Amounts",
+            v: 'fixed'
+          }
+        ];
+      } else {
+        return [
+          {
+            k: "By Price",
+            v: 'rate'
+          }, {
+            k: "By Fixed Amounts",
+            v: 'fixed'
+          }, {
+            k: "By USD Amount paid in BTC",
+            v: 'fiat'
+          }
+        ];
+      }
     };
     strategyLabelCache = null;
     swaputils.strategyLabelByValue = function(strategyValue) {
@@ -2271,239 +2957,9 @@
   })();
 
   (function() {
-    var buildBlacklistAddressesGroup, buildDuplicateSwapOffsetsMap, buildIncomeRulesGroup, buildOnSwaptypeChange, duplicateWarning, sharedSwapTypeFormField, swapGroup, swapGroupRenderers, vm;
+    var buildBlacklistAddressesGroup, buildDuplicateSwapOffsetsMap, buildIncomeRulesGroup, buildOffsetKey, constants, mergeSwaps, splitBotDataIntoBuyAndSellSwaps, vm;
     sbAdmin.ctrl.botForm = {};
-    buildOnSwaptypeChange = function(number, swap) {
-      return function(e) {
-        var value;
-        value = e.srcElement.value;
-        if (value === 'fiat') {
-          swap["in"]('BTC');
-        }
-      };
-    };
-    sharedSwapTypeFormField = function(number, swap) {
-      return sbAdmin.form.mFormField("Swap Type", {
-        onchange: buildOnSwaptypeChange(number, swap),
-        id: "swap_strategy_" + number,
-        type: 'select',
-        options: sbAdmin.swaputils.allStrategyOptions()
-      }, swap.strategy);
-    };
-    swapGroupRenderers = {};
-    swapGroupRenderers.rate = function(number, swap, isDuplicate) {
-      return m("div", {
-        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
-      }, [
-        m("h4", "Swap #" + number), m("div", {
-          "class": "row"
-        }, [
-          m("div", {
-            "class": "col-md-3"
-          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField({
-              text: "Receives Asset",
-              "class": 'control-label receives-label'
-            }, {
-              id: "swap_in_" + number,
-              'placeholder': "BTC"
-            }, swap["in"])
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Sends Asset", {
-              id: "swap_out_" + number,
-              'placeholder': "LTBCOIN"
-            }, swap.out)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("At Rate", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_rate_" + number,
-              'placeholder': "0.000001"
-            }, swap.rate)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Minimum", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_rate_" + number,
-              'placeholder': "0.000001"
-            }, swap.min)
-          ]), m("div", {
-            "class": "col-md-1"
-          }, [
-            m("a", {
-              "class": "remove-link",
-              href: '#remove',
-              onclick: vm.buildRemoveSwapFn(number),
-              style: number === 1 ? {
-                display: 'none'
-              } : ""
-            }, [
-              m("span", {
-                "class": "glyphicon glyphicon-remove-circle",
-                title: "Remove Swap " + number
-              }, '')
-            ])
-          ])
-        ]), (isDuplicate ? duplicateWarning() : null)
-      ]);
-    };
-    swapGroupRenderers.fixed = function(number, swap, isDuplicate) {
-      return m("div", {
-        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
-      }, [
-        m("h4", "Swap #" + number), m("div", {
-          "class": "row"
-        }, [
-          m("div", {
-            "class": "col-md-3"
-          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField({
-              text: "Receives Asset",
-              "class": 'control-label receives-label'
-            }, {
-              id: "swap_in_" + number,
-              'placeholder': "BTC"
-            }, swap["in"])
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Receives Quantity", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_in_qty_" + number,
-              'placeholder': "1"
-            }, swap.in_qty)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Sends Asset", {
-              id: "swap_out_" + number,
-              'placeholder': "LTBCOIN"
-            }, swap.out)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Sends Quantity", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_out_qty_" + number,
-              'placeholder': "1"
-            }, swap.out_qty)
-          ]), m("div", {
-            "class": "col-md-1"
-          }, [
-            m("a", {
-              "class": "remove-link",
-              href: '#remove',
-              onclick: vm.buildRemoveSwapFn(number),
-              style: number === 1 ? {
-                display: 'none'
-              } : ""
-            }, [
-              m("span", {
-                "class": "glyphicon glyphicon-remove-circle",
-                title: "Remove Swap " + number
-              }, '')
-            ])
-          ])
-        ]), (isDuplicate ? duplicateWarning() : null)
-      ]);
-    };
-    swapGroupRenderers.fiat = function(number, swap, isDuplicate) {
-      return m("div", {
-        "class": "asset-group" + (isDuplicate ? ' duplicate-asset-group' : '')
-      }, [
-        m("h4", "Swap #" + number), m("div", {
-          "class": "row"
-        }, [
-          m("div", {
-            "class": "col-md-2"
-          }, [sharedSwapTypeFormField(number, swap)]), m("div", {
-            "class": "col-md-1"
-          }, [
-            sbAdmin.form.mValueDisplay({
-              text: "Receives",
-              "class": 'control-label receives-label'
-            }, {
-              id: "swap_in_" + number
-            }, swap["in"]())
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Sends Asset", {
-              id: "swap_out_" + number,
-              'placeholder': "MYPRODUCT"
-            }, swap.out)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("At USD Price", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_cost_" + number,
-              'placeholder': "1"
-            }, swap.cost)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Minimum", {
-              type: "number",
-              step: "any",
-              min: "0",
-              id: "swap_min_out_" + number,
-              'placeholder': "1"
-            }, swap.min_out)
-          ]), m("div", {
-            "class": "col-md-2"
-          }, [
-            sbAdmin.form.mFormField("Divisible", {
-              type: "select",
-              options: sbAdmin.form.yesNoOptions(),
-              id: "swap_divisible_" + number
-            }, swap.divisible)
-          ]), m("div", {
-            "class": "col-md-1"
-          }, [
-            m("a", {
-              "class": "remove-link",
-              href: '#remove',
-              onclick: vm.buildRemoveSwapFn(number),
-              style: number === 1 ? {
-                display: 'none'
-              } : ""
-            }, [
-              m("span", {
-                "class": "glyphicon glyphicon-remove-circle",
-                title: "Remove Swap " + number
-              }, '')
-            ])
-          ])
-        ]), (isDuplicate ? duplicateWarning() : null)
-      ]);
-    };
-    swapGroup = function(number, swapProp, isDuplicate) {
-      return swapGroupRenderers[swapProp().strategy()](number, swapProp(), isDuplicate);
-    };
-    duplicateWarning = function() {
-      return m("div", {
-        "class": "duplicate-warning"
-      }, [m('strong', {}, 'Warning:'), " This asset is received by 2 or more swaps. Multiple swaps will be triggered when this asset is received. This is not recommended."]);
-    };
+    constants = sbAdmin.constants;
     buildIncomeRulesGroup = function() {
       return sbAdmin.formGroup.newGroup({
         id: 'incomerules',
@@ -2554,36 +3010,62 @@
         useCompactNumberedLayout: true
       });
     };
-    buildDuplicateSwapOffsetsMap = function(swaps) {
-      var duplicateOffsetsMap, offsetByToken;
+    buildOffsetKey = function(swapDirection, offset) {
+      return swapDirection + "_" + offset;
+    };
+    buildDuplicateSwapOffsetsMap = function(buySwaps, sellSwaps) {
+      var buildMapFn, duplicateOffsetsMap, offsetByToken;
       duplicateOffsetsMap = {};
       offsetByToken = {};
-      swaps().map(function(swap, offset) {
-        var inToken;
-        inToken = swap()["in"]().toUpperCase();
-        if (offsetByToken[inToken] != null) {
-          duplicateOffsetsMap[offsetByToken[inToken]] = true;
-          return duplicateOffsetsMap[offset] = true;
-        } else {
-          return offsetByToken[inToken] = offset;
-        }
-      });
+      buildMapFn = function(swapDirection) {
+        return function(swap, offset) {
+          var inToken, offsetKey;
+          offsetKey = buildOffsetKey(swapDirection, offset);
+          inToken = swap()["in"]().toUpperCase();
+          if (!inToken) {
+            return;
+          }
+          if (offsetByToken[inToken] != null) {
+            duplicateOffsetsMap[offsetByToken[inToken]] = true;
+            duplicateOffsetsMap[offsetKey] = true;
+          } else {
+            offsetByToken[inToken] = offsetKey;
+          }
+        };
+      };
+      buySwaps().map(buildMapFn(constants.DIRECTION_BUY));
+      sellSwaps().map(buildMapFn(constants.DIRECTION_SELL));
       return duplicateOffsetsMap;
     };
-    vm = sbAdmin.ctrl.botForm.vm = (function() {
-      var buildBlacklistAddressesPropValue, buildSwapsPropValue;
-      buildSwapsPropValue = function(swaps) {
-        var j, len, out, swap;
-        out = [];
-        for (j = 0, len = swaps.length; j < len; j++) {
-          swap = swaps[j];
-          out.push(sbAdmin.swaputils.newSwapProp(swap));
+    splitBotDataIntoBuyAndSellSwaps = function(botDataSwaps) {
+      var buySwapsData, sellSwapsData;
+      buySwapsData = [];
+      sellSwapsData = [];
+      botDataSwaps.map(function(swapData) {
+        if (swapData.direction === constants.DIRECTION_BUY) {
+          buySwapsData.push(swapData);
+        } else {
+          sellSwapsData.push(swapData);
         }
-        if (!out.length) {
-          out.push(sbAdmin.swaputils.newSwapProp());
+      });
+      return [buySwapsData, sellSwapsData];
+    };
+    mergeSwaps = function(buySwaps, sellSwaps) {
+      var mapFn, mergedSwaps;
+      mergedSwaps = [];
+      mapFn = function(swapProp, offset) {
+        var ref, swapArray;
+        swapArray = swapProp();
+        if ((ref = swapArray["in"]()) != null ? ref.length : void 0) {
+          mergedSwaps.push(swapArray);
         }
-        return out;
       };
+      buySwaps.map(mapFn);
+      sellSwaps.map(mapFn);
+      return mergedSwaps;
+    };
+    vm = sbAdmin.ctrl.botForm.vm = (function() {
+      var buildBlacklistAddressesPropValue;
       buildBlacklistAddressesPropValue = function(addresses) {
         var address, j, len, out;
         out = [];
@@ -2610,7 +3092,12 @@
         vm.returnFee = m.prop(0.0001);
         vm.confirmationsRequired = m.prop(2);
         vm.refundAfterBlocks = m.prop(3);
-        vm.swaps = m.prop([sbAdmin.swaputils.newSwapProp()]);
+        vm.sellSwaps = m.prop([
+          sbAdmin.swaputils.newSwapProp({
+            direction: constants.DIRECTION_SELL
+          })
+        ]);
+        vm.buySwaps = m.prop([]);
         vm.incomeRulesGroup = buildIncomeRulesGroup();
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup();
         vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()));
@@ -2622,23 +3109,25 @@
         vm.isNew = id === 'new';
         if (!vm.isNew) {
           sbAdmin.api.getBot(id).then(function(botData) {
-            var ref, ref1, ref2, ref3;
+            var buySwapsData, ref, ref1, ref2, ref3, ref4, sellSwapsData;
             vm.resourceId(botData.id);
             vm.name(botData.name);
             vm.description(botData.description);
             vm.hash(botData.hash);
             vm.paymentPlan(botData.paymentPlan);
-            vm.swaps(buildSwapsPropValue(botData.swaps));
             vm.returnFee(botData.returnFee || "0.0001");
             vm.confirmationsRequired(botData.confirmationsRequired || "2");
             vm.refundAfterBlocks(((ref = botData.refundConfig) != null ? ref.refundAfterBlocks : void 0) || "3");
+            ref1 = splitBotDataIntoBuyAndSellSwaps(botData.swaps), buySwapsData = ref1[0], sellSwapsData = ref1[1];
+            vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData));
+            vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData));
             vm.incomeRulesGroup.unserialize(botData.incomeRules);
             vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses);
-            vm.backgroundOverlaySettings(((ref1 = botData.backgroundOverlaySettings) != null ? ref1.start : void 0) ? window.JSON.stringify(botData.backgroundOverlaySettings) : '');
+            vm.backgroundOverlaySettings(((ref2 = botData.backgroundOverlaySettings) != null ? ref2.start : void 0) ? window.JSON.stringify(botData.backgroundOverlaySettings) : '');
             vm.backgroundImageDetails(botData.backgroundImageDetails);
-            vm.backgroundImageId((ref2 = botData.backgroundImageDetails) != null ? ref2.id : void 0);
+            vm.backgroundImageId((ref3 = botData.backgroundImageDetails) != null ? ref3.id : void 0);
             vm.logoImageDetails(botData.logoImageDetails);
-            vm.logoImageId((ref3 = botData.logoImageDetails) != null ? ref3.id : void 0);
+            vm.logoImageId((ref4 = botData.logoImageDetails) != null ? ref4.id : void 0);
           }, function(errorResponse) {
             vm.errorMessages(errorResponse.errors);
           });
@@ -2648,20 +3137,6 @@
         }, function(errorResponse) {
           vm.errorMessages(errorResponse.errors);
         });
-        vm.addSwap = function(e) {
-          e.preventDefault();
-          vm.swaps().push(sbAdmin.swaputils.newSwapProp());
-        };
-        vm.buildRemoveSwapFn = function(number) {
-          return function(e) {
-            var newSwaps;
-            e.preventDefault();
-            newSwaps = vm.swaps().filter(function(swap, index) {
-              return index !== number - 1;
-            });
-            vm.swaps(newSwaps);
-          };
-        };
         vm.save = function(e) {
           var apiArgs, apiCall, attributes;
           e.preventDefault();
@@ -2670,7 +3145,7 @@
             description: vm.description(),
             hash: vm.hash(),
             paymentPlan: vm.paymentPlan(),
-            swaps: vm.swaps(),
+            swaps: sbAdmin.swaputils.normalizeSwapsForSaving(mergeSwaps(vm.sellSwaps(), vm.buySwaps())),
             returnFee: vm.returnFee() + "",
             incomeRules: vm.incomeRulesGroup.serialize(),
             blacklistAddresses: vm.blacklistAddressesGroup.serialize(),
@@ -2708,7 +3183,7 @@
     };
     return sbAdmin.ctrl.botForm.view = function() {
       var duplicateSwapsOffsetsMap, mEl;
-      duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.swaps);
+      duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.buySwaps, vm.sellSwaps);
       mEl = m("div", [
         m("div", {
           "class": "row"
@@ -2732,7 +3207,7 @@
             }, {
               onsubmit: vm.save
             }, [
-              sbAdmin.form.mAlerts(vm.errorMessages), sbAdmin.form.mFormField("Bot Name", {
+              sbAdmin.form.mAlerts(vm.errorMessages), m("h3", "Look and Feel"), sbAdmin.form.mFormField("Bot Name", {
                 id: 'name',
                 'placeholder': "Bot Name",
                 required: true
@@ -2771,7 +3246,15 @@
                     options: sbAdmin.botutils.overlayOpts()
                   }, vm.backgroundOverlaySettings)
                 ])
-              ]), m("hr"), m("h4", "Settings"), m("div", {
+              ]), m("div", {
+                "class": "spacer1"
+              }), m("hr"), m("h3", "Sell Tokens"), sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_SELL, duplicateSwapsOffsetsMap, vm), m("div", {
+                "class": "spacer1"
+              }), m("h3", "Purchase Tokens"), sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm), m("div", {
+                "class": "spacer1"
+              }), m("hr"), m("h3", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("div", {
+                "class": "spacer1"
+              }), m("hr"), m("h3", "Other Settings"), m("div", {
                 "class": "spacer1"
               }), m("div", {
                 "class": "row"
@@ -2815,36 +3298,8 @@
                     postfix: 'blocks'
                   }, vm.refundAfterBlocks)
                 ])
-              ]), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Blacklisted addresses do not trigger swaps and can be used to load the SwapBot.")]), vm.blacklistAddressesGroup.buildInputs(), m("hr"), m("h4", "Income Forwarding"), m("p", [m("small", "When the bot fills up to a certain amount, you may forward the funds to your own destination address.")]), vm.incomeRulesGroup.buildInputs(), m("hr"), m("h4", "Payment"), m("div", {
-                "class": "row"
-              }, [
-                m("div", {
-                  "class": "col-md-12"
-                }, [
-                  (vm.isNew ? sbAdmin.form.mFormField("Payment Plan", {
-                    id: "payment_plan",
-                    type: 'select',
-                    options: sbAdmin.planutils.allPlanOptions(vm.allPlansData())
-                  }, vm.paymentPlan) : null), (!vm.isNew ? sbAdmin.form.mValueDisplay("Payment Plan", {
-                    id: 'payment_plan'
-                  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())) : null)
-                ])
-              ]), m("hr"), vm.swaps().map(function(swap, offset) {
-                return swapGroup(offset + 1, swap, duplicateSwapsOffsetsMap[offset] != null);
-              }), m("div", {
-                "class": "form-group"
-              }, [
-                m("a", {
-                  "class": "",
-                  href: '#add',
-                  onclick: vm.addSwap
-                }, [
-                  m("span", {
-                    "class": "glyphicon glyphicon-plus"
-                  }, ''), m("span", {}, ' Add Another Swap')
-                ])
-              ]), m("div", {
-                "class": "spacer1"
+              ]), m("h5", "Blacklisted Addresses"), m("p", [m("small", "Tokens received from blacklisted addresses do not trigger swaps.  These addresses can be used to fill the SwapBot with additional inventory.")]), vm.blacklistAddressesGroup.buildInputs(), m("div", {
+                "class": "spacer3"
               }), m("a[href='/admin/dashboard']", {
                 "class": "btn btn-default pull-right",
                 config: m.route
