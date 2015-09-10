@@ -50,30 +50,30 @@ do ()->
             else if swap.isComplete and swap.type == 'refund' then icon = 'refunded'
             else if swap.isComplete then icon = 'confirmed'
 
-            return <li key={"roa-"+swap.id} className={icon}>
+            return <li className={icon}>
                     <div className={"status-icon icon-#{icon}"}></div>
                     <div className="status-content">
                         <span>
-                        <div className="date">{this.state.fromNow}</div>
-                        <span>
-                            {
-                                if swap.isError or not swap.isComplete
-                                    swap.message
-                                else if swap.type == 'refund'
-                                    "Refunded #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut}"
-                                else
-                                    "Sold #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut} for #{swapbot.formatters.formatCurrency(swap.quantityIn)} #{swap.assetIn}"
+                            <div className="date">{this.state.fromNow}</div>
+                            <span>
+                                {
+                                    if swap.isError or not swap.isComplete
+                                        swap.message
+                                    else if swap.type == 'refund'
+                                        "Refunded #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut}"
+                                    else
+                                        "Sold #{swapbot.formatters.formatCurrency(swap.quantityOut)} #{swap.assetOut} for #{swapbot.formatters.formatCurrency(swap.quantityIn)} #{swap.assetIn}"
+                                }
+                                
+                                { if swap.isComplete
+                                    <a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
+                                }
+                            </span>
+                            { if not swap.isComplete
+                                <div>
+                                    <small>{swapbot.eventMessageUtils.buildSwapStatusMessageElement(swap, bot)}</small>
+                                </div>
                             }
-                            
-                            { if swap.isComplete
-                                <a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
-                            }
-                        </span>
-                        { if not swap.isComplete
-                            <div>
-                                <small>{swapbot.eventMessageUtils.buildSwapStatusMessageElement(swap, bot)}</small>
-                            </div>
-                        }
                         </span>
                     </div>
                 </li>

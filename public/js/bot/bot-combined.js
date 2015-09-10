@@ -60,9 +60,12 @@
     exports.buildTransactionLinkHref = buildTransactionLinkHref = function(txid) {
       return "https://chain.so/tx/BTC/" + txid;
     };
-    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents) {
+    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents, keyId) {
       if (linkContents == null) {
         linkContents = null;
+      }
+      if (keyId == null) {
+        keyId = null;
       }
       if (txid == null) {
         return null;
@@ -71,6 +74,7 @@
         linkContents = txid;
       }
       return React.createElement('a', {
+        key: keyId,
         href: buildTransactionLinkHref(txid),
         target: '_blank',
         className: 'externalLink'
@@ -80,11 +84,11 @@
       switch (swap.state) {
         case 'sent':
         case 'refunded':
-          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
+          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery'), "le-" + swap.id), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
         case 'outofstock':
-          return React.createElement('span', {}, ['This swap is out of stock. ', buildTransactionLinkElement(swap.txidIn, ' Receiving tokens '), " and waiting to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+          return React.createElement('span', {}, ['This swap is out of stock. ', buildTransactionLinkElement(swap.txidIn, ' Receiving tokens ', "le-" + swap.id), " and waiting to send " + swap.quantityOut + " " + swap.assetOut + "."]);
       }
-      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired), "le-" + swap.id), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
     };
     exports.fullSwapSummary = function(swap, bot) {
       return React.createElement('span', {}, ["You deposited " + (swapbot.formatters.formatCurrency(swap.quantityIn)) + " " + swap.assetIn + " and we delivered " + (swapbot.formatters.formatCurrency(swap.quantityOut)) + " " + swap.assetOut + " to " + swap.destination + "."]);
@@ -861,7 +865,6 @@
           icon = 'confirmed';
         }
         return React.createElement("li", {
-          "key": "roa-" + swap.id,
           "className": icon
         }, React.createElement("div", {
           "className": "status-icon icon-" + icon
@@ -2251,42 +2254,6 @@
     return exports;
   })(jQuery);
 
-  BotConstants = (function() {
-    var exports;
-    exports = {};
-    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
-    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
-    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
-    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
-    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
-    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
-    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
-    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
-    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
-    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
-    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
-    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
-    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
-    exports.BOT_GO_BACK = 'BOT_GO_BACK';
-    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
-    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
-    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
-    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
-    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
-    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
-    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
-    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
-    return exports;
-  })();
-
-  Settings = (function() {
-    var exports;
-    exports = {};
-    exports.SWAPS_TO_SHOW = 10;
-    exports.MORE_SWAPS_TO_SHOW = 10;
-    return exports;
-  })();
-
   BotstreamEventActions = (function() {
     var exports;
     exports = {};
@@ -2448,6 +2415,42 @@
         maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
       });
     };
+    return exports;
+  })();
+
+  BotConstants = (function() {
+    var exports;
+    exports = {};
+    exports.BOT_ADD_NEW_SWAPS = 'BOT_ADD_NEW_SWAPS';
+    exports.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS = 'BOT_HANDLE_NEW_SWAPSTREAM_EVENTS';
+    exports.BOT_HANDLE_NEW_BOTSTREAM_EVENTS = 'BOT_HANDLE_NEW_BOTSTREAM_EVENTS';
+    exports.BOT_USER_CHOOSE_OUT_ASSET = 'BOT_USER_CHOOSE_OUT_ASSET';
+    exports.BOT_USER_CHOOSE_SWAP_CONFIG = 'BOT_USER_CHOOSE_SWAP_CONFIG';
+    exports.BOT_USER_CHOOSE_SWAP = 'BOT_USER_CHOOSE_SWAP';
+    exports.BOT_USER_CONFIRM_WALLET = 'BOT_USER_CONFIRM_WALLET';
+    exports.BOT_USER_CLEAR_SWAP = 'BOT_USER_CLEAR_SWAP';
+    exports.BOT_USER_RESET_SWAP = 'BOT_USER_RESET_SWAP';
+    exports.BOT_USER_CHOOSE_OUT_AMOUNT = 'BOT_USER_CHOOSE_OUT_AMOUNT';
+    exports.BOT_UPDATE_EMAIL_VALUE = 'BOT_UPDATE_EMAIL_VALUE';
+    exports.BOT_UPDATE_EMAIL_LEVEL_VALUE = 'BOT_UPDATE_EMAIL_LEVEL_VALUE';
+    exports.BOT_USER_SUBMIT_EMAIL = 'BOT_USER_SUBMIT_EMAIL';
+    exports.BOT_GO_BACK = 'BOT_GO_BACK';
+    exports.BOT_SHOW_ALL_TRANSACTIONS = 'BOT_SHOW_ALL_TRANSACTIONS';
+    exports.BOT_IGNORE_ALL_PREVIOUS_SWAPS = 'BOT_IGNORE_ALL_PREVIOUS_SWAPS';
+    exports.BOT_ADD_NEW_QUOTE = 'BOT_ADD_NEW_QUOTE';
+    exports.UI_BEGIN_SWAPS = 'UI_BEGIN_SWAPS';
+    exports.UI_UPDATE_MAX_SWAPS_TO_SHOW = 'UI_UPDATE_MAX_SWAPS_TO_SHOW';
+    exports.UI_UPDATE_MAX_SWAPS_REQUESTED = 'UI_UPDATE_MAX_SWAPS_REQUESTED';
+    exports.UI_SWAPS_LOADING_BEGIN = 'UI_SWAPS_LOADING_BEGIN';
+    exports.UI_SWAPS_LOADING_END = 'UI_SWAPS_LOADING_END';
+    return exports;
+  })();
+
+  Settings = (function() {
+    var exports;
+    exports = {};
+    exports.SWAPS_TO_SHOW = 10;
+    exports.MORE_SWAPS_TO_SHOW = 10;
     return exports;
   })();
 

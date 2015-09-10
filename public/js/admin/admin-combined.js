@@ -4732,9 +4732,12 @@
     exports.buildTransactionLinkHref = buildTransactionLinkHref = function(txid) {
       return "https://chain.so/tx/BTC/" + txid;
     };
-    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents) {
+    exports.buildTransactionLinkElement = buildTransactionLinkElement = function(txid, linkContents, keyId) {
       if (linkContents == null) {
         linkContents = null;
+      }
+      if (keyId == null) {
+        keyId = null;
       }
       if (txid == null) {
         return null;
@@ -4743,6 +4746,7 @@
         linkContents = txid;
       }
       return React.createElement('a', {
+        key: keyId,
         href: buildTransactionLinkHref(txid),
         target: '_blank',
         className: 'externalLink'
@@ -4752,11 +4756,11 @@
       switch (swap.state) {
         case 'sent':
         case 'refunded':
-          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery')), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
+          return React.createElement('span', {}, ["Confirming  ", buildTransactionLinkElement(swap.txidOut, (swap.state === 'refunded' ? 'refund' : 'delivery'), "le-" + swap.id), " with " + (swapbot.formatters.confirmationsProse(swap.confirmationsOut)) + "."]);
         case 'outofstock':
-          return React.createElement('span', {}, ['This swap is out of stock. ', buildTransactionLinkElement(swap.txidIn, ' Receiving tokens '), " and waiting to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+          return React.createElement('span', {}, ['This swap is out of stock. ', buildTransactionLinkElement(swap.txidIn, ' Receiving tokens ', "le-" + swap.id), " and waiting to send " + swap.quantityOut + " " + swap.assetOut + "."]);
       }
-      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired)), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
+      return React.createElement('span', {}, ["Waiting for ", buildTransactionLinkElement(swap.txidIn, swapbot.formatters.confirmationsProse(bot.confirmationsRequired), "le-" + swap.id), " to send " + swap.quantityOut + " " + swap.assetOut + "."]);
     };
     exports.fullSwapSummary = function(swap, bot) {
       return React.createElement('span', {}, ["You deposited " + (swapbot.formatters.formatCurrency(swap.quantityIn)) + " " + swap.assetIn + " and we delivered " + (swapbot.formatters.formatCurrency(swap.quantityOut)) + " " + swap.assetOut + " to " + swap.destination + "."]);
