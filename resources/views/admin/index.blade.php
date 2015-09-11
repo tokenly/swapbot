@@ -7,7 +7,7 @@
     <title>Swapbot | Admin</title>
 
     <link href="/bower_components/webui-popover/dist/jquery.webui-popover.min.css" rel="stylesheet">
-    <link href="/css/admin.css" rel="stylesheet">
+    <link href="/css/{{$manifest('admin.css')}}" rel="stylesheet">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
@@ -63,7 +63,7 @@
         window.ROBOHASH_URL = '{{$robohashUrl}}';
     </script>
     @foreach ($admin_scripts as $script)
-        <script src="/js/admin/{{$script}}"></script>
+        <script src="/js/admin/{{$manifest($script)}}"></script>
     @endforeach
 </body>
 </html>

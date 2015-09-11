@@ -12,7 +12,7 @@
 @endif
     <meta name="viewport" content="width=device-width">
     <link href="/bower_components/webui-popover/dist/jquery.webui-popover.min.css" rel="stylesheet">
-    <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/{{$manifest('main.css')}}" rel="stylesheet">
     <link rel="icon" href="{{ $bot->getRobohashURL() }}">
     @if ($bugsnag['apiKey'])
     <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
@@ -98,7 +98,7 @@
     </div>
 
 {{-- Scripts --}}
-<script src="/js/public/asyncLoad.js"></script>
+<script src="/js/public/{{$manifest('asyncLoad.js')}}"></script>
 <script>
     window.asyncLoad("//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css", "css");
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");
@@ -122,12 +122,12 @@
 <script src="{{$pusherUrl}}/public/client.js"></script>
 
 {{-- app --}}
-<script src="/js/bot/bot-combined.js"></script>
+<script src="/js/bot/{{$manifest('bot-combined.js')}}"></script>
 <script>
     BotApp.init({!! json_encode($bot->serializeForAPI('public'), JSON_HEX_APOS) !!}, {url: '{!! $quotebot['url'] !!}', apiToken: '{!! $quotebot['apiToken'] !!}'}, '{!! $quotebotPusherUrl !!}')
 </script>
 {{-- Changebot popover  --}}
-<script src="/js/public/changebot.js"></script>
+<script src="/js/public/{{$manifest('changebot.js')}}"></script>
 
 
 {{-- pockets data holders --}}

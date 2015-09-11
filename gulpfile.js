@@ -1,13 +1,13 @@
-var del = require('del');
-var elixir = require('laravel-elixir');
+// var elixir = require('laravel-elixir');
 var gulp = require("gulp");
 var concat = require("gulp-concat");
 var order = require("gulp-order");
 var coffee = require("gulp-coffee");
 var cjsx = require('gulp-cjsx');
-var Notification = require('laravel-elixir/ingredients/commands/Notification');
-var es = require('event-stream');
+var notify = require("gulp-notify");
 var uglify = require('gulp-uglify');
+var less = require('gulp-less');
+var rev = require('gulp-rev');
 
 /*
  |--------------------------------------------------------------------------
@@ -20,114 +20,143 @@ var uglify = require('gulp-uglify');
  |
  */
 
-
-var onError = function(e) {
-    new Notification().error(e, 'CoffeeScript Compilation Failed!');
-
-    this.emit('end');
-};
-
-
 // combine admin
-elixir.extend("combineAdmin", function() {
-    gulp.task('combineAdmin', function() {
-        // gulp.src([
-        //     'resources/assets/coffee/admin/*.coffee',
-        //     'resources/assets/coffee/shared/*.coffee'
-        // ])
+gulp.task('combineAdmin', function() {
+    gulp.src([
+        'resources/assets/coffee/admin/*.coffee',
+        'resources/assets/coffee/shared/*.coffee'
+    ])
 
-        gulp.src([
-            'resources/assets/coffee/admin/*.coffee',
-            'resources/assets/coffee/shared/*.coffee'
-        ])
-        .pipe(order([
-            'resources/assets/coffee/admin/*.coffee',
-            'resources/assets/coffee/shared/*.coffee'
-        ]))
-        .pipe(concat('admin-combined.coffee'))
-        .pipe(coffee({}).on('error', onError))
-        .pipe(gulp.dest('public/js/admin'))
-    });
+    .pipe(order([
+        'resources/assets/coffee/admin/*.coffee',
+        'resources/assets/coffee/shared/*.coffee'
+    ]))
 
-    this.registerWatcher("combineAdmin", [
-        "resources/assets/coffee/shared/*.coffee",
-        "resources/assets/coffee/admin/**/*.coffee"
-    ]);
+    .pipe(concat('admin-combined.coffee'))
 
-    return this.queueTask("combineAdmin");
+    .pipe(
+        coffee({})
+        .on('error', notify.onError({message: 'Error: <%= error.message %>'}))
+        .on("error", function (err) { console.log("Error:", err);})
+    )
+    .pipe(rev())
+    .pipe(gulp.dest('public/js/admin'))
+
+    .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
+    .pipe(gulp.dest('public'))
 });
 
 
-// // combine popup
-// elixir.extend("combinePopup", function() {
-//     gulp.task('combinePopup', function() {
-//         es.merge(
-//             gulp.src('resources/assets/coffee/popup/*.cjsx'),
-//             gulp.src('resources/assets/coffee/popup/*.coffee'),
-//             gulp.src('resources/assets/coffee/shared/*.coffee')
-//         )
-//         .pipe(concat('popup-combined.cjsx'))
-//         .pipe(cjsx().on('error', onError))
-//         .pipe(gulp.dest('public/js/popup'))
-//     });
-
-
-//     this.registerWatcher("combinePopup", [
-//         "resources/assets/coffee/shared/*.coffee",
-//         "resources/assets/coffee/popup/**/*.coffee",
-//         "resources/assets/coffee/popup/**/*.cjsx",
-//     ]);
-
-//     return this.queueTask("combinePopup");
-// });
 
 
 // combine bot
-elixir.extend("combinePublicBotApp", function() {
-    gulp.task('combinePublicBotApp', function() {
-        gulp.src([
-            'resources/assets/coffee/shared/*.coffee',
-            'resources/assets/coffee/services/*.coffee',
-            'resources/assets/coffee/bot/**/*.cjsx',
-            'resources/assets/coffee/bot/**/*.coffee'
-        ])
-        .pipe(concat('bot-combined.cjsx'))
-        .pipe(cjsx().on('error', onError))
-        .pipe(gulp.dest('public/js/bot'))
-    });
+gulp.task('combinePublicBotApp', function() {
+    gulp.src([
+        'resources/assets/coffee/shared/*.coffee',
+        'resources/assets/coffee/services/*.coffee',
+        'resources/assets/coffee/bot/**/*.cjsx',
+        'resources/assets/coffee/bot/**/*.coffee'
+    ])
+
+    .pipe(concat('bot-combined.cjsx'))
+
+    .pipe(cjsx()
+        .on('error', notify.onError({message: 'Error: <%= error.message %>'}))
+    )
+    .pipe(rev())
+    .pipe(gulp.dest('public/js/bot'))
+
+    .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
+    .pipe(gulp.dest('public'))
+});
 
 
-    this.registerWatcher("combinePublicBotApp", [
+gulp.task('public', function() {
+    gulp.src([
+        'resources/assets/coffee/public/*.coffee',
+    ])
+
+    .pipe(
+        coffee({})
+        .on('error', notify.onError({message: 'Error: <%= error.message %>'}))
+        .on("error", function (err) { console.log("Error:", err);})
+    )
+
+    .pipe(rev())
+    .pipe(gulp.dest('public/js/public'))
+
+    .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
+    .pipe(gulp.dest('public'))
+});
+
+
+gulp.task('less', function() {
+    gulp.src([
+        'resources/assets/less/admin.less',
+        'resources/assets/less/main.less',
+        'resources/assets/less/details.less',
+        'resources/assets/less/utility.less'
+    ])
+
+    .pipe(
+        less({})
+        .on('error', notify.onError({message: 'Error: <%= error.message %>'}))
+    )
+
+    .pipe(rev())
+    .pipe(gulp.dest('public/css'))
+
+    .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
+    .pipe(gulp.dest('public'))
+});
+
+
+gulp.task('default', ['combineAdmin', 'combinePublicBotApp', 'public', 'less']);
+
+
+
+gulp.task('watch', function() {
+    gulp.watch([
+        "resources/assets/coffee/shared/*.coffee",
+        "resources/assets/coffee/admin/**/*.coffee"
+    ], ['combineAdmin']);
+
+    gulp.watch([
         "resources/assets/coffee/shared/*.coffee",
         "resources/assets/coffee/services/*.coffee",
         "resources/assets/coffee/bot/**/*.coffee",
         "resources/assets/coffee/bot/**/*.cjsx",
-    ]);
+    ], ['combinePublicBotApp']);
 
-    return this.queueTask("combinePublicBotApp");
+    gulp.watch([
+        "resources/assets/public/*.coffee",
+    ], ['public']);
+
+    gulp.watch([
+        "resources/assets/less/**/*.less",
+    ], ['less']);
 });
 
+// // 
+// elixir(function(mix) {
+//     // del('/tmp/elixir-admin-build/*', {force: true});
 
-// 
-elixir(function(mix) {
-    // del('/tmp/elixir-admin-build/*', {force: true});
+//     // less
+//     mix
+//         // less files
+//         .less(['admin.less', 'main.less', 'details.less', 'utility.less'])
 
-    // less
-    mix
-        // less files
-        .less(['admin.less', 'main.less', 'details.less', 'utility.less'])
+//         // admin
+//         .combineAdmin()
 
-        // admin
-        .combineAdmin()
+//         // // popup
+//         // .combinePopup()
 
-        // // popup
-        // .combinePopup()
+//         // bot
+//         .combinePublicBotApp()
 
-        // bot
-        .combinePublicBotApp()
-
-        // public
-        .coffee('public/asyncLoad.coffee', 'public/js/public')
-        .coffee('public/changebot.coffee', 'public/js/public')
-        ;
-});
+//         // public
+//         .coffee('public/asyncLoad.coffee', 'public/js/public')
+//         .coffee('public/changebot.coffee', 'public/js/public')
+//         ;
+// });

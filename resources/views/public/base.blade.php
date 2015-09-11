@@ -5,7 +5,7 @@
     <title>Swapbot</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link href="/css/utility.css" rel="stylesheet">
+    <link href="/css/{{$manifest('utility.css')}}" rel="stylesheet">
     @if ($bugsnag['apiKey'])
     <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
     <script>Bugsnag.releaseStage = "{{$bugsnag['releaseStage']}}";</script>
@@ -40,7 +40,7 @@
     </div>
 
 {{-- Scripts --}}
-<script src="/js/public/asyncLoad.js"></script>
+<script src="/js/public/{{$manifest('asyncLoad.js')}}"></script>
 <script>
     window.asyncLoad("//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css", "css");
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");

@@ -32,6 +32,7 @@ class HelpersViewComposer
 
             'fmt'                      => $this->formatting_helper,
             'currency'                 => function($value, $places=null) { return $this->formatting_helper->formatCurrency($value, $places); },
+            'manifest'                 => function($filename) { return $this->manifest($filename); },
 
             'tokenlyAccountsSiteUrl'   => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/',
             'tokenlyAccountsUpdateUrl' => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/auth/update',
@@ -49,7 +50,20 @@ class HelpersViewComposer
                 'releaseStage'  => env('BUGSNAG_RELEASE_STAGE', 'production'),
             ],
 
+
+            'manifest'
         ]);
+    }
+
+    public function manifest($source_filename) {
+        if (!isset($this->manifest_data)) {
+            $this->manifest_data = [];
+            $json_filepath = realpath(base_path('public/manifest/rev-manifest.json'));
+            if ($json_filepath AND file_exists($json_filepath)) {
+                $this->manifest_data = json_decode(file_get_contents($json_filepath), true);
+            }
+        }
+        return isset($this->manifest_data[$source_filename]) ? $this->manifest_data[$source_filename] : $source_filename;
     }
 
 }

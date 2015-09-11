@@ -9,7 +9,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     <title>Swapbot | {{ $bot['name'] }} Swap Details</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="/css/details.css">
+    <link rel="stylesheet" href="/css/{{$manifest('details.css')}}">
     <link rel="icon" href="{{ $bot->getRobohashURL() }}">
     @if ($bugsnag['apiKey'])
     <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" data-apikey="{{$bugsnag['apiKey']}}"></script>
@@ -124,7 +124,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
     </div>
 
 {{-- Scripts --}}
-<script src="/js/public/asyncLoad.js"></script>
+<script src="/js/public/{{$manifest('asyncLoad.js')}}"></script>
 <script>
     window.asyncLoad("//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css", "css");
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");
