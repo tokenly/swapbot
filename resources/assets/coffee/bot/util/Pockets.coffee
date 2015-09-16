@@ -1,54 +1,57 @@
-Pockets = do ()->
-    exports = {}
+# ---- begin references
+swapbot = swapbot or {}; swapbot.formatters = require '../../shared/formatters'
+# ---- end references
 
-    pocketsUrl = null
-    pocketsImage = null
+exports = {}
 
-    buildPromoLink = ()->
-        # isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
-        href = "http://pockets.tokenly.com"
-        return React.createElement('a', {href: href, target: '_blank', className: 'pocketsLink', title: "Learn More About Tokenly Pockets"}, [
-            React.createElement('img', {src: '/images/pockets/paywithpockets-blue.png', height: '32px', 'width': '87px'}),
-        ])
+pocketsUrl = null
+pocketsImage = null
 
-    exports.buildPaymentButton = (address, label, amount=null, acceptedTokens='btc')->
-        return buildPromoLink() if not pocketsUrl
+buildPromoLink = ()->
+    # isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+    href = "http://pockets.tokenly.com"
+    return React.createElement('a', {href: href, target: '_blank', className: 'pocketsLink', title: "Learn More About Tokenly Pockets"}, [
+        React.createElement('img', {src: '/images/pockets/paywithpockets-blue.png', height: '32px', 'width': '87px'}),
+    ])
 
-        encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape)
-        urlAttributes = "?address="+address+"&label="+encodedLabel+"&tokens="+acceptedTokens;
-        if amount?
-            urlAttributes += '&amount='+swapbot.formatters.formatCurrencyAsNumber(amount)
-        return React.createElement('a', {href: pocketsUrl+urlAttributes, target: '_blank', className: 'pocketsLink', title: "Pay Using Tokenly Pockets"}, [
-            # React.createElement('img', {src: pocketsImage, height: '24px', 'width': '24px'}),
-            React.createElement('img', {src: pocketsImage, height: '32px', 'width': '87px'}),
-        ])
+exports.buildPaymentButton = (address, label, amount=null, acceptedTokens='btc')->
+    return buildPromoLink() if not pocketsUrl
 
-    exports.exists = ()->
-        return pocketsUrl?
+    encodedLabel = encodeURIComponent(label).replace(/[!'()*]/g, escape)
+    urlAttributes = "?address="+address+"&label="+encodedLabel+"&tokens="+acceptedTokens;
+    if amount?
+        urlAttributes += '&amount='+swapbot.formatters.formatCurrencyAsNumber(amount)
+    return React.createElement('a', {href: pocketsUrl+urlAttributes, target: '_blank', className: 'pocketsLink', title: "Pay Using Tokenly Pockets"}, [
+        # React.createElement('img', {src: pocketsImage, height: '24px', 'width': '24px'}),
+        React.createElement('img', {src: pocketsImage, height: '32px', 'width': '87px'}),
+    ])
 
-    # init on document ready
-    jQuery ($)->
-        maxAttempts = 10
-        attempts = 0
-        tryToLoadURL = ()->
-            ++attempts
+exports.exists = ()->
+    return pocketsUrl?
 
-            pocketsUrl = $('.pockets-url').text()
-            if pocketsUrl == ''
-                pocketsUrl = null
-                if attempts > maxAttempts
-                    # console.log "Pockets not found after #{maxAttempts} attempts - giving up"
-                    return
-                timeoutRef = setTimeout(tryToLoadURL, 250)
+# init on document ready
+jQuery ($)->
+    maxAttempts = 10
+    attempts = 0
+    tryToLoadURL = ()->
+        ++attempts
+
+        pocketsUrl = $('.pockets-url').text()
+        if pocketsUrl == ''
+            pocketsUrl = null
+            if attempts > maxAttempts
+                # console.log "Pockets not found after #{maxAttempts} attempts - giving up"
                 return
+            timeoutRef = setTimeout(tryToLoadURL, 250)
+            return
 
-            pocketsImage = $('.pockets-image').text()
-
-
-        tryToLoadURL()
-
-        return
+        pocketsImage = $('.pockets-image').text()
 
 
-    # #############################################
-    return exports
+    tryToLoadURL()
+
+    return
+
+
+# #############################################
+module.exports = exports

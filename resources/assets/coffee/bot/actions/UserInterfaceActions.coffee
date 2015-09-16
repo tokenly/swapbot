@@ -1,36 +1,40 @@
-UserInterfaceActions = window.UserInterfaceActions = do ()->
-    exports = {}
+# ---- begin references
+BotConstants = require '../constants/BotConstants'
+Dispatcher = require '../dispatcher/Dispatcher'
+# ---- end references
 
-    exports.beginSwaps = ()->
-        Dispatcher.dispatch({
-            actionType: BotConstants.UI_BEGIN_SWAPS
-        })
-        return
+exports = {}
 
-    exports.updateMaxSwapsToShow = ()->
-        Dispatcher.dispatch({
-            actionType: BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
-        })
-        return
+exports.beginSwaps = ()->
+    Dispatcher.dispatch({
+        actionType: BotConstants.UI_BEGIN_SWAPS
+    })
+    return
 
-    exports.beginLoadingMoreSwaps = ()->
-        Dispatcher.dispatch({
-            actionType: BotConstants.UI_SWAPS_LOADING_BEGIN
-        })
-        return
+exports.updateMaxSwapsToShow = ()->
+    Dispatcher.dispatch({
+        actionType: BotConstants.UI_UPDATE_MAX_SWAPS_TO_SHOW
+    })
+    return
 
-    exports.endLoadingMoreSwaps = ()->
-        Dispatcher.dispatch({
-            actionType: BotConstants.UI_SWAPS_LOADING_END
-        })
-        return
+exports.beginLoadingMoreSwaps = ()->
+    Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_BEGIN
+    })
+    return
 
-    exports.updateMaxSwapsRequestedFromServer = (maxSwapsRequestedFromServer)->
-        Dispatcher.dispatch({
-            actionType: BotConstants.UI_SWAPS_LOADING_END
-            maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
-        })
-        return
+exports.endLoadingMoreSwaps = ()->
+    Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END
+    })
+    return
 
-    # #############################################
-    return exports
+exports.updateMaxSwapsRequestedFromServer = (maxSwapsRequestedFromServer)->
+    Dispatcher.dispatch({
+        actionType: BotConstants.UI_SWAPS_LOADING_END
+        maxSwapsRequestedFromServer: maxSwapsRequestedFromServer
+    })
+    return
+
+# #############################################
+module.exports = exports

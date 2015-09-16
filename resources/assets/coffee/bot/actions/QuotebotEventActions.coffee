@@ -1,14 +1,18 @@
-QuotebotEventActions = do ()->
-    exports = {}
+# ---- begin references
+BotConstants = require '../constants/BotConstants'
+Dispatcher = require '../dispatcher/Dispatcher'
+# ---- end references
 
-    exports.addNewQuote = (quote)->
-        Dispatcher.dispatch({
-            actionType: BotConstants.BOT_ADD_NEW_QUOTE
-            quote: quote
-        });
-        return
+exports = {}
 
-    
+exports.addNewQuote = (quote)->
+    Dispatcher.dispatch({
+        actionType: BotConstants.BOT_ADD_NEW_QUOTE
+        quote: quote
+    });
+    return
 
-    # #############################################
-    return exports
+
+
+# #############################################
+module.exports = exports

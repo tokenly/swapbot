@@ -1,8 +1,6 @@
-Settings = do ()->
-    exports = {}
+exports = {}
 
-    exports.SWAPS_TO_SHOW      = 10
-    exports.MORE_SWAPS_TO_SHOW = 10
+exports.SWAPS_TO_SHOW      = 10
+exports.MORE_SWAPS_TO_SHOW = 10
 
-    # #############################################
-    return exports
+module.exports = exports

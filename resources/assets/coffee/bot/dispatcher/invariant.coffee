@@ -24,3 +24,4 @@ invariant = (condition, format, a, b, c, d, e, f) ->
         throw error
     return
 
+module.exports = invariant

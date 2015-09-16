@@ -1,22 +1,21 @@
 # popover functions
-sbAdmin.popover = do ()->
-    popover = {}
+popover = {}
 
-    popover.buildOnclick = (popoverConfig)->
-        return (e)->
-            e.preventDefault()
-            e.stopPropagation()
+popover.buildOnclick = (popoverConfig)->
+    return (e)->
+        e.preventDefault()
+        e.stopPropagation()
 
-            popoverConfig.trigger = 'manual'
-            if not popoverConfig.animation? then popoverConfig.animation = 'pop'
-            if not popoverConfig.closeable? then popoverConfig.closeable = true
-            if not popoverConfig.width? then popoverConfig.width = 420
+        popoverConfig.trigger = 'manual'
+        if not popoverConfig.animation? then popoverConfig.animation = 'pop'
+        if not popoverConfig.closeable? then popoverConfig.closeable = true
+        if not popoverConfig.width? then popoverConfig.width = 420
 
-            el = jQuery(e.target)
-            el.webuiPopover(popoverConfig)
-            el.webuiPopover('show')
-            return
-
+        el = jQuery(e.target)
+        el.webuiPopover(popoverConfig)
+        el.webuiPopover('show')
+        return
 
 
-    return popover
+
+module.exports = popover

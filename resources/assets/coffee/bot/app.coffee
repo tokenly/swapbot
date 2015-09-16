@@ -1,3 +1,22 @@
+# ---- begin references
+BotAPIActionCreator = require './actionCreators/BotAPIActionCreator'
+QuotebotActionCreator = require './actionCreators/QuotebotActionCreator'
+SwapAPIActionCreator = require './actionCreators/SwapAPIActionCreator'
+UIActionListeners = require './actionCreators/UIActionListeners'
+Settings = require './constants/Settings'
+BotStore = require './stores/BotStore'
+BotstreamStore = require './stores/BotstreamStore'
+QuotebotStore = require './stores/QuotebotStore'
+SwapsStore = require './stores/SwapsStore'
+UserChoiceStore = require './stores/UserChoiceStore'
+UserInterfaceStateStore = require './stores/UserInterfaceStateStore'
+BotCopyableAddress = require './views/BotCopyableAddress'
+BotStatusComponent = require './views/BotStatusComponent'
+RecentAndActiveSwapsComponent = require './views/RecentAndActiveSwapsComponent'
+SwapPurchaseStepsComponent = require './views/steps/SwapPurchaseStepsComponent'
+UserInterfaceActions = require './actions/UserInterfaceActions'
+# ---- end references
+
 window.BotApp = 
     init: (bot, quotebotCredentials, pusherURL)->
         # init the stores
@@ -30,3 +49,7 @@ window.BotApp =
 
         # run the swap interface
         React.render <SwapPurchaseStepsComponent    botid={bot.id} />, document.getElementById('SwapPurchaseStepsComponent')
+
+    beginSwaps: ()->
+        UserInterfaceActions.beginSwaps()
+        return

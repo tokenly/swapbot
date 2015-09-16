@@ -1,164 +1,168 @@
+# ---- begin references
+sbAdmin = sbAdmin or {}; sbAdmin.popover = require './10_popover_utils'
+sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
+# ---- end references
+
 # form functions
-sbAdmin.form = do ()->
-    form = {}
+form = {}
 
-    buildLabelEl = (label, id)->
-        if typeof label == 'object'
-            labelText = label.text
-            properties = {for: id, class: 'control-label'}
-            for k, v of label
-                if k == 'text' then continue
-                properties[k] = v
+buildLabelEl = (label, id)->
+    if typeof label == 'object'
+        labelText = label.text
+        properties = {for: id, class: 'control-label'}
+        for k, v of label
+            if k == 'text' then continue
+            properties[k] = v
 
-            if label.popover?
-                labelText = [labelText, m("button", class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
+        if label.popover?
+            labelText = [labelText, m("button", class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
+    else
+        labelText = label
+        properties = {for: id, class: 'control-label'}
+
+    return m("label", properties, labelText)
+
+form.mValueDisplay = (label, attributes, value)->
+    inputProps = sbAdmin.utils.clone(attributes)
+    inputProps.class = 'form-control-static' if not inputProps.class?
+
+    id = inputProps.id or 'value'
+
+    return m("div", {class: "form-group"}, [
+        buildLabelEl(label, id)
+        inputEl = m("div", inputProps, value)
+    ])
+
+form.mFormField = (label, attributes, prop)->
+    inputEl = form.mInputEl(attributes, prop)
+
+    return m("div", {class: "form-group"}, [
+        buildLabelEl(label, attributes.id)
+        inputEl,
+    ])
+
+form.mInputEl = (attributes, prop=null)->
+    inputProps = sbAdmin.utils.clone(attributes)
+    name = inputProps.name or inputProps.id
+
+    if prop?
+        if attributes.onchange?
+            inputProps.onchange = (e)->
+                (attributes.onchange)(e)
+                return (m.withAttr("value", prop))(e)
         else
-            labelText = label
-            properties = {for: id, class: 'control-label'}
+            inputProps.onchange = m.withAttr("value", prop)
+            inputProps.onkeyup = m.withAttr("value", prop)
+        inputProps.value = prop()
+    
+    # defaults
+    inputProps.class = 'form-control' if not inputProps.class?
+    inputProps.name = inputProps.id if not inputProps.name?
 
-        return m("label", properties, labelText)
+    # postfix
+    delete inputProps.prefix
+    delete inputProps.prefixLimit
+    delete inputProps.postfix
+    delete inputProps.postfixlimit
 
-    form.mValueDisplay = (label, attributes, value)->
-        inputProps = sbAdmin.utils.clone(attributes)
-        inputProps.class = 'form-control-static' if not inputProps.class?
+    switch inputProps.type
+        when 'textarea'
+            delete inputProps.type
+            inputProps.rows = inputProps.rows or 3
+            inputEl = m("textarea", inputProps)
+        when 'select'
+            delete inputProps.type
+            options = inputProps.options or [{k:'- None -', v: ''}]
+            inputEl = m("select", inputProps, buildOpts(options))
+        else
+            inputEl = m("input", inputProps)
 
-        id = inputProps.id or 'value'
 
-        return m("div", {class: "form-group"}, [
-            buildLabelEl(label, id)
-            inputEl = m("div", inputProps, value)
-        ])
-
-    form.mFormField = (label, attributes, prop)->
-        inputEl = form.mInputEl(attributes, prop)
-
-        return m("div", {class: "form-group"}, [
-            buildLabelEl(label, attributes.id)
+    if attributes.prefix? or attributes.postfix?
+        return m('div', {class: 'input-group'}, [
+            if attributes.prefix? then m('div', {class: 'input-group-addon', title: attributes.prefix}, truncate(attributes.prefix, attributes.prefixLimit)) else null,
             inputEl,
+            if attributes.postfix? then m('div', {class: 'input-group-addon', title: attributes.postfix}, truncate(attributes.postfix, attributes.postfixLimit)) else null,
         ])
 
-    form.mInputEl = (attributes, prop=null)->
-        inputProps = sbAdmin.utils.clone(attributes)
-        name = inputProps.name or inputProps.id
+    return inputEl;
 
-        if prop?
-            if attributes.onchange?
-                inputProps.onchange = (e)->
-                    (attributes.onchange)(e)
-                    return (m.withAttr("value", prop))(e)
-            else
-                inputProps.onchange = m.withAttr("value", prop)
-                inputProps.onkeyup = m.withAttr("value", prop)
-            inputProps.value = prop()
-        
-        # defaults
-        inputProps.class = 'form-control' if not inputProps.class?
-        inputProps.name = inputProps.id if not inputProps.name?
+truncate = (textIn, limit)->
+    if limit? and textIn? and textIn.length > limit+1
+        return textIn.substr(0, limit)+'\u2026';
+    return textIn
 
-        # postfix
-        delete inputProps.prefix
-        delete inputProps.prefixLimit
-        delete inputProps.postfix
-        delete inputProps.postfixlimit
+buildOpts = (opts)->
+    return opts.map (opt)->
+        if opt.isGroup?
+            return m("optgroup", {label: opt.label}, buildOpts(opt.opts))
+        val = opt.v
+        if val? and typeof val == 'object'
+            val = window.JSON.stringify(opt.v)
+        return m("option", {value: val, label: opt.k}, opt.k)
 
-        switch inputProps.type
-            when 'textarea'
-                delete inputProps.type
-                inputProps.rows = inputProps.rows or 3
-                inputEl = m("textarea", inputProps)
-            when 'select'
-                delete inputProps.type
-                options = inputProps.options or [{k:'- None -', v: ''}]
-                inputEl = m("select", inputProps, buildOpts(options))
-            else
-                inputEl = m("input", inputProps)
-
-
-        if attributes.prefix? or attributes.postfix?
-            return m('div', {class: 'input-group'}, [
-                if attributes.prefix? then m('div', {class: 'input-group-addon', title: attributes.prefix}, truncate(attributes.prefix, attributes.prefixLimit)) else null,
-                inputEl,
-                if attributes.postfix? then m('div', {class: 'input-group-addon', title: attributes.postfix}, truncate(attributes.postfix, attributes.postfixLimit)) else null,
-            ])
-
-        return inputEl;
-
-    truncate = (textIn, limit)->
-        if limit? and textIn? and textIn.length > limit+1
-            return textIn.substr(0, limit)+'\u2026';
-        return textIn
-
-    buildOpts = (opts)->
-        return opts.map (opt)->
-            if opt.isGroup?
-                return m("optgroup", {label: opt.label}, buildOpts(opt.opts))
-            val = opt.v
-            if val? and typeof val == 'object'
-                val = window.JSON.stringify(opt.v)
-            return m("option", {value: val, label: opt.k}, opt.k)
-
-    form.mSubmitBtn = (label, className='btn btn-primary')->
-        return m("button", {type: 'submit', class: className}, label)
+form.mSubmitBtn = (label, className='btn btn-primary')->
+    return m("button", {type: 'submit', class: className}, label)
 
 
 
-    form.mAlerts = (errorsProp)->
-        return null if errorsProp().length == 0
-        return m("div", {class: "alert alert-danger", role: "alert", }, [
-            m("strong", "An error occurred."),
-            m("ul", {class: "list-unstyled"}, [
-                errorsProp().map((errorMsg)->
-                    m('li', errorMsg)
-                ),
-            ]),
-        ])
+form.mAlerts = (errorsProp)->
+    return null if errorsProp().length == 0
+    return m("div", {class: "alert alert-danger", role: "alert", }, [
+        m("strong", "An error occurred."),
+        m("ul", {class: "list-unstyled"}, [
+            errorsProp().map((errorMsg)->
+                m('li', errorMsg)
+            ),
+        ]),
+    ])
 
 
-    form.mForm = (props, elAttributes, children)->
-        # props.errors([]) if props.errors?
+form.mForm = (props, elAttributes, children)->
+    # props.errors([]) if props.errors?
 
-        formAttributes = sbAdmin.utils.clone(elAttributes)
-        
-        status = props.status() if props.status?
-        # console.log "status=#{status}"
-        if status == 'submitting'
-            formAttributes.style = {opacity: 0.25}
+    formAttributes = sbAdmin.utils.clone(elAttributes)
+    
+    status = props.status() if props.status?
+    # console.log "status=#{status}"
+    if status == 'submitting'
+        formAttributes.style = {opacity: 0.25}
 
-        return m("form", formAttributes, children)
+    return m("form", formAttributes, children)
 
-    # returns a promise
-    form.submit = (apiCallFn, apiCallArgs, errorsProp, formStatusProp)->
-        # don't submit twice
-        return if formStatusProp() == 'submitting'
+# returns a promise
+form.submit = (apiCallFn, apiCallArgs, errorsProp, formStatusProp)->
+    # don't submit twice
+    return if formStatusProp() == 'submitting'
 
-        # clear the errors
-        errorsProp([])
+    # clear the errors
+    errorsProp([])
 
-        # mark form as submitting
-        formStatusProp('submitting')
+    # mark form as submitting
+    formStatusProp('submitting')
 
-        # submit to the api
-        return apiCallFn.apply(null, apiCallArgs).then(
-            (apiResponse)->
-                # console.log "apiResponse=", apiResponse
-                # success
-                formStatusProp('submitted')
-                return apiResponse
-            , (error)->
-                # console.log "error=", error
-                # failed
-                formStatusProp('active')
-                errorsProp(error.errors)
-                # make sure to pass the errors up the chain
+    # submit to the api
+    return apiCallFn.apply(null, apiCallArgs).then(
+        (apiResponse)->
+            # console.log "apiResponse=", apiResponse
+            # success
+            formStatusProp('submitted')
+            return apiResponse
+        , (error)->
+            # console.log "error=", error
+            # failed
+            formStatusProp('active')
+            errorsProp(error.errors)
+            # make sure to pass the errors up the chain
 
-                # reject the parent
-                return m.deferred().reject(error).promise
-        )
+            # reject the parent
+            return m.deferred().reject(error).promise
+    )
 
-    form.yesNoOptions = ()->
-        return [
-            {k: "Yes", v: '1'}
-            {k: "No",  v: '0'}
-        ]
+form.yesNoOptions = ()->
+    return [
+        {k: "Yes", v: '1'}
+        {k: "No",  v: '0'}
+    ]
 
-    return form
+module.exports = form

@@ -1,9 +1,7 @@
-# api functions
-sbAdmin.constants = do ()->
-    constants = {}
+constants = {}
 
-    constants.DIRECTION_SELL = 'sell'
-    constants.DIRECTION_BUY  = 'buy'
+constants.DIRECTION_SELL = 'sell'
+constants.DIRECTION_BUY  = 'buy'
 
 
-    return constants
+module.exports = constants

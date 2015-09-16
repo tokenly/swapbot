@@ -1,28 +1,34 @@
+# ---- begin references
+UserChoiceStore = require '../../stores/UserChoiceStore'
+# ---- end references
+
 NeedHelpLink = null
 
-do ()->
 
-    getViewState = ()->
-        return { userChoices: UserChoiceStore.getUserChoices() }
+getViewState = ()->
+    return { userChoices: UserChoiceStore.getUserChoices() }
 
-    
-    # ##############################################################################################################################
-    # The place order input component
 
-    NeedHelpLink = React.createClass
-        displayName: 'NeedHelpLink'
+# ##############################################################################################################################
+# The place order input component
 
-        getInitialState: ()->
-            {}
+NeedHelpLink = React.createClass
+    displayName: 'NeedHelpLink'
 
-        render: ()->
-            subject = "Swapbot Help"
+    getInitialState: ()->
+        {}
 
-            if this.props.botName?
-                subject = "Help with #{this.props.botName}"
+    render: ()->
+        subject = "Swapbot Help"
 
-            return <span>
-                    <a href="mailto:#{encodeURIComponent('Tokenly Team <team@tokenly.co>')}?subject=#{encodeURIComponent(subject)}" className="shadow-link helpLink" target="_blank">
-                        Need Help?
-                    </a>
-                </span>
+        if this.props.botName?
+            subject = "Help with #{this.props.botName}"
+
+        return <span>
+                <a href="mailto:#{encodeURIComponent('Tokenly Team <team@tokenly.co>')}?subject=#{encodeURIComponent(subject)}" className="shadow-link helpLink" target="_blank">
+                    Need Help?
+                </a>
+            </span>
+
+# #############################################
+module.exports = NeedHelpLink

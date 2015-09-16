@@ -1,33 +1,32 @@
 robohashURLBase = null
 
 # robohashUtils functions
-sbAdmin.robohashUtils = do ()->
-    robohashUtils = {}
+robohashUtils = {}
 
 
-    
-    getRobohashURLBase = ()->
-        if not robohashURLBase?
-            robohashURLBase = window.ROBOHASH_URL
-            
-        return robohashURLBase
 
-    # ------------------------------------------------------------
+getRobohashURLBase = ()->
+    if not robohashURLBase?
+        robohashURLBase = window.ROBOHASH_URL
+        
+    return robohashURLBase
 
-    robohashUtils.img = (hash, className=null)->
-        if not hash
-            return null
+# ------------------------------------------------------------
 
-        attrs = {src: robohashUtils.robohashURL(hash)}
-        if className?
-            attrs.class = className
+robohashUtils.img = (hash, className=null)->
+    if not hash
+        return null
 
-        return m("img", attrs)
+    attrs = {src: robohashUtils.robohashURL(hash)}
+    if className?
+        attrs.class = className
 
-    robohashUtils.robohashURL = (hash)->
-        if not hash
-            return null
+    return m("img", attrs)
 
-        return "#{getRobohashURLBase()}/#{hash}.png?set=set3"
+robohashUtils.robohashURL = (hash)->
+    if not hash
+        return null
 
-    return robohashUtils
+    return "#{getRobohashURLBase()}/#{hash}.png?set=set3"
+
+module.exports = robohashUtils

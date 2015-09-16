@@ -1,92 +1,99 @@
+# ---- begin references
+UserInputActions = require '../../actions/UserInputActions'
+UserChoiceStore = require '../../stores/UserChoiceStore'
+swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
+# ---- end references
+
 PlaceOrderInput = null
 
-do ()->
 
-    getViewState = ()->
-        return { userChoices: UserChoiceStore.getUserChoices() }
+getViewState = ()->
+    return { userChoices: UserChoiceStore.getUserChoices() }
 
-    
-    # ##############################################################################################################################
-    # The place order input component
 
-    PlaceOrderInput = React.createClass
-        displayName: 'PlaceOrderInput'
+# ##############################################################################################################################
+# The place order input component
 
-        getInitialState: ()->
-            return $.extend(
-                {},
-                getViewState()
-            )
+PlaceOrderInput = React.createClass
+    displayName: 'PlaceOrderInput'
 
-        updateAmount: (e)->
-            outAmount = parseFloat($(e.target).val())
-            outAmount = 0 if outAmount < 0 or isNaN(outAmount)
-            UserInputActions.updateOutAmount(outAmount)
-            return
+    getInitialState: ()->
+        return $.extend(
+            {},
+            getViewState()
+        )
 
-        checkEnter: (e)->
-            if e.keyCode == 13
-                if this.props.onOrderInput?
-                    this.props.onOrderInput()
-            return
+    updateAmount: (e)->
+        outAmount = parseFloat($(e.target).val())
+        outAmount = 0 if outAmount < 0 or isNaN(outAmount)
+        UserInputActions.updateOutAmount(outAmount)
+        return
 
-        render: ()->
-            bot = this.props.bot
-            defaultValue = this.state.userChoices.outAmount
-            outAsset = this.state.userChoices.outAsset
-            swapConfigIsChosen = !!this.state.userChoices.swapConfig?
+    checkEnter: (e)->
+        if e.keyCode == 13
+            if this.props.onOrderInput?
+                this.props.onOrderInput()
+        return
 
-            outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
-            isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
+    render: ()->
+        bot = this.props.bot
+        defaultValue = this.state.userChoices.outAmount
+        outAsset = this.state.userChoices.outAsset
+        swapConfigIsChosen = !!this.state.userChoices.swapConfig?
 
-            return <div>
-                        {
-                            if bot.state == 'shuttingDown'
-                                <div className="warning">
-                                    <img src="/images/misc/stop.png" alt="STOP" />
-                                    <p>This bot is currently shutting down. <br/> Swaps by this bot will not be processed.</p>
-                                </div>
-                            else if bot.state != 'active'
-                                <div className="warning">
-                                    <img src="/images/misc/stop.png" alt="STOP" />
-                                    <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
-                                </div>
-                            else if not isChooseable
-                            # should not get here
-                                <div className="warning">
-                                    <img src="/images/misc/stop.png" alt="STOP" />
-                                    <p>This bot is currently empty of {outAsset}. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
-                                </div>
-                        }
+        outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
+        isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
 
-                        <table className="fieldset">
-                            <tr>
-                                <td>
-                                    <label htmlFor="token-available">{outAsset} available for purchase: </label>
-                                </td>
-                                <td><span id="token-available">{swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])} {outAsset}</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label htmlFor="token-amount">I would like to purchase: </label>
-                                </td>
-                                <td>
-                                    { if swapConfigIsChosen
-                                        # <input disabled type="text" id="token-amount" placeholder="0" defaultValue={defaultValue} />
-                                        <div className="chosenInputAmount">
-                                            {swapbot.formatters.formatCurrency(defaultValue)}
-                                            &nbsp;
-                                            {outAsset}
-                                        </div>
-                                    else
-                                        <div>
-                                            <input onChange={this.updateAmount} onKeyUp={this.checkEnter} type="text" id="token-amount" placeholder={'0'} defaultValue={defaultValue} />
-                                            &nbsp;
-                                            {outAsset}
-                                        </div>
-                                    }
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+        return <div>
+                    {
+                        if bot.state == 'shuttingDown'
+                            <div className="warning">
+                                <img src="/images/misc/stop.png" alt="STOP" />
+                                <p>This bot is currently shutting down. <br/> Swaps by this bot will not be processed.</p>
+                            </div>
+                        else if bot.state != 'active'
+                            <div className="warning">
+                                <img src="/images/misc/stop.png" alt="STOP" />
+                                <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
+                            </div>
+                        else if not isChooseable
+                        # should not get here
+                            <div className="warning">
+                                <img src="/images/misc/stop.png" alt="STOP" />
+                                <p>This bot is currently empty of {outAsset}. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
+                            </div>
+                    }
 
+                    <table className="fieldset">
+                        <tr>
+                            <td>
+                                <label htmlFor="token-available">{outAsset} available for purchase: </label>
+                            </td>
+                            <td><span id="token-available">{swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])} {outAsset}</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label htmlFor="token-amount">I would like to purchase: </label>
+                            </td>
+                            <td>
+                                { if swapConfigIsChosen
+                                    # <input disabled type="text" id="token-amount" placeholder="0" defaultValue={defaultValue} />
+                                    <div className="chosenInputAmount">
+                                        {swapbot.formatters.formatCurrency(defaultValue)}
+                                        &nbsp;
+                                        {outAsset}
+                                    </div>
+                                else
+                                    <div>
+                                        <input onChange={this.updateAmount} onKeyUp={this.checkEnter} type="text" id="token-amount" placeholder={'0'} defaultValue={defaultValue} />
+                                        &nbsp;
+                                        {outAsset}
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+# #############################################
+module.exports = PlaceOrderInput

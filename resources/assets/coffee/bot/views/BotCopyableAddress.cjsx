@@ -1,56 +1,60 @@
+# ---- begin references
+ReactZeroClipboard = require '../views/includes/ReactZeroClipboard'
+# ---- end references
+
 # pass BotCopyableAddress up
 BotCopyableAddress = null
-do ()->
-
-    getViewState = ()->
-        return {
-            addressCopied: false
-        }
 
 
-    # ############################################################
-    BotCopyableAddress = React.createClass
-        displayName: 'BotCopyableAddress'
+getViewState = ()->
+    return {
+        addressCopied: false
+    }
 
-        handleOnClick: (e)->
-            e.preventDefault()
-            return
 
-        getInitialState: ()->
-            return getViewState()
+# ############################################################
+BotCopyableAddress = React.createClass
+    displayName: 'BotCopyableAddress'
 
-        onAfterCopy: () ->
-            this.setState({addressCopied: true})
+    handleOnClick: (e)->
+        e.preventDefault()
+        return
 
-            if this.copiedTimeoutRef? then clearTimeout(this.copiedTimeoutRef)
+    getInitialState: ()->
+        return getViewState()
 
-            this.copiedTimeoutRef = setTimeout ()=>
-                this.setState({addressCopied: false})
-                this.copiedTimeoutRef = null
-            , 2500
+    onAfterCopy: () ->
+        this.setState({addressCopied: true})
 
-            return
+        if this.copiedTimeoutRef? then clearTimeout(this.copiedTimeoutRef)
 
-        render: ->
-            bot = this.props.bot
-            <ReactZeroClipboard 
-                text={bot.address}
-                onAfterCopy={this.onAfterCopy}
-            >
-                <a className={"swap-address"+(if this.state.addressCopied then ' copied' else '')} onClick={this.handleOnClick} href="#copy-address">
-                    <span> {bot.address}</span>
-                    <span className="copyToClipboard">
-                    {
-                        if this.state.addressCopied
-                            <span>Copied</span>
-                        else
-                            <span></span>
-                    }
-                    </span>
+        this.copiedTimeoutRef = setTimeout ()=>
+            this.setState({addressCopied: false})
+            this.copiedTimeoutRef = null
+        , 2500
 
-                </a>
-            </ReactZeroClipboard>
+        return
 
-    # ############################################################
-    return
+    render: ->
+        bot = this.props.bot
+        <ReactZeroClipboard 
+            text={bot.address}
+            onAfterCopy={this.onAfterCopy}
+        >
+            <a className={"swap-address"+(if this.state.addressCopied then ' copied' else '')} onClick={this.handleOnClick} href="#copy-address">
+                <span> {bot.address}</span>
+                <span className="copyToClipboard">
+                {
+                    if this.state.addressCopied
+                        <span>Copied</span>
+                    else
+                        <span></span>
+                }
+                </span>
+
+            </a>
+        </ReactZeroClipboard>
+
+# #############################################
+module.exports = BotCopyableAddress
 

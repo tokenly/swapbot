@@ -1,25 +1,20 @@
 # csvutils functions
 
-# csvString = sbAdmin.csvutils.dataToCSVString(rows)
-# window.location = sbAdmin.csvutils.CSVDownloadHref(csvString)
+csvutils = {}
 
+# clone an object
+csvutils.dataToCSVString = (rows)->
+    csv = ''
+    for row in rows
+        rowText = '"'+row.map((text, i)->
+            console.log "text=",text
+            return text.replace(/"/g, '""')
+        ).join('","')+'"'
+        csv += rowText + "\n"
+    return csv
 
-sbAdmin.csvutils = do ()->
-    csvutils = {}
+csvutils.CSVDownloadHref = (csvString)->
+    return "data:application/csv;charset=utf-8," + encodeURIComponent(csvString);
 
-    # clone an object
-    csvutils.dataToCSVString = (rows)->
-        csv = ''
-        for row in rows
-            rowText = '"'+row.map((text, i)->
-                console.log "text=",text
-                return text.replace(/"/g, '""')
-            ).join('","')+'"'
-            csv += rowText + "\n"
-        return csv
-
-    csvutils.CSVDownloadHref = (csvString)->
-        return "data:application/csv;charset=utf-8," + encodeURIComponent(csvString);
-
-    return csvutils
+module.exports = csvutils
 
