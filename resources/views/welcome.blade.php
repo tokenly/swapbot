@@ -42,9 +42,8 @@
 
 
 
-                    <p>Swapbots allow you to offer your own tokens for exchange to users who want them. Create a
-                        <a href="{{$tokenlyAccountsSiteUrl}}">Tokenly Account</a> and set up your
-                        <a href="/account/login">own Swapbot</a>.</p>
+                    <p>Swapbots allow you to offer your own tokens for exchange to users who want them. <a href="/account/login">Log in or register with Tokenly Accounts to set up your
+                        own Swapbot</a>.</p>
                     <div class="spacer2"></div>
 
                     <p>

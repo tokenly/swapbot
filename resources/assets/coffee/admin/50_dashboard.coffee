@@ -83,7 +83,7 @@ ctrl.dashboard.view = ()->
         ]
 
     mEl = m("div", [
-        m("h2", "Welcome, #{vm.user().name}"),
+        m("h2", "Welcome to Swapbot, #{vm.user().name}"),
 
         m("div", {class: "spacer1"}),
 
