@@ -70,14 +70,10 @@ gulp.task('combinePublicBotApp', function() {
 });
 
 gulp.task('watchPublicBotApp', function() {
-    // run the watchify bundler
-    var b = watchify(browserify(assign({}, opts, {entries: ['./resources/assets/coffee/bot/app.coffee']}))); 
-
-    // add transformations
-    b.transform(coffee_reactify);
-
-    // browserify
-    browserifyBundle(b, 'bot-combined.js', 'public/js/bot');
+    gulp.watch([
+        "resources/assets/coffee/bot/**/*.coffee",
+        "resources/assets/coffee/bot/**/*.cjsx",
+    ], ['combinePublicBotApp']);
 });
 
 // ---------------------------------------------------------------
@@ -92,6 +88,12 @@ gulp.task('combineAdmin', function() {
 
     // browserify
     browserifyBundle(b, 'admin-combined.js', 'public/js/admin');
+});
+
+gulp.task('watchAdmin', function() {
+    gulp.watch([
+        "resources/assets/coffee/admin/**/*.coffee",
+    ], ['combineAdmin']);
 });
 
 // ---------------------------------------------------------------
@@ -112,6 +114,12 @@ gulp.task('public', function() {
 
     .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
     .pipe(gulp.dest('public'))
+});
+
+gulp.task('watchPublic', function() {
+    gulp.watch([
+        "resources/assets/coffee/public/**/*.coffee",
+    ], ['public']);
 });
 
 // ---------------------------------------------------------------
@@ -160,6 +168,8 @@ gulp.task('default', ['combineAdmin', 'combinePublicBotApp', 'public', 'less']);
 gulp.task('watch', function() {
 
     gulp.start('watchPublicBotApp');
+    gulp.start('watchAdmin');
+    gulp.start('watchPublic');
 
     // Watch .less files
     gulp.watch([
