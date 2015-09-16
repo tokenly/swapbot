@@ -166,7 +166,13 @@ gulp.task('default', ['combineAdmin', 'combinePublicBotApp', 'public', 'less']);
 
 
 gulp.task('watch', function() {
+    // compile all files once to start
+    gulp.start('combinePublicBotApp');
+    gulp.start('combineAdmin');
+    gulp.start('public');
+    gulp.start('less');
 
+    // watch js files
     gulp.start('watchPublicBotApp');
     gulp.start('watchAdmin');
     gulp.start('watchPublic');
