@@ -9,8 +9,8 @@ swapbot = swapbot or {}; swapbot.swapUtils = require '../../shared/swapUtils'
 
 exports = {}
 
-exports.MATCH_AUTO     = MATCH_AUTO     = 'AUTO'
-exports.MATCH_SHOW_ALL = MATCH_SHOW_ALL = 'SHOW_ALL'
+MATCH_AUTO     = BotConstants.USERCHOICE_MATCH_AUTO
+MATCH_SHOW_ALL = BotConstants.USERCHOICE_MATCH_SHOW_ALL
 
 userChoices = {
     step                : 'choose'
@@ -165,7 +165,7 @@ updateEmailValue = (email)->
 updateEmailLevel = (level)->
     if level != userChoices.email.level
         userChoices.email.level = level
-        console.log "userChoices.email.level=",userChoices.email.level
+        # console.log "userChoices.email.level=",userChoices.email.level
         emitChange()
     return
 

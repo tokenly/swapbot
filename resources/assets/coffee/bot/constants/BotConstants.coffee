@@ -29,5 +29,11 @@ exports.UI_SWAPS_LOADING_BEGIN           = 'UI_SWAPS_LOADING_BEGIN'
 exports.UI_SWAPS_LOADING_END             = 'UI_SWAPS_LOADING_END'
 
 
+
+
+exports.USERCHOICE_MATCH_AUTO            = 'AUTO'
+exports.USERCHOICE_MATCH_SHOW_ALL        = 'SHOW_ALL'
+
+
 # #############################################
 module.exports = exports

@@ -1,10 +1,9 @@
 # ---- begin references
-UserChoiceStore = require '../stores/UserChoiceStore'
 swapbot = swapbot or {}; swapbot.formatters = require '../../shared/formatters'
+BotConstants = require '../constants/BotConstants'
 # ---- end references
 
 exports = {}
-
 
 swapIsMatched = (swap, userChoices)->
     # never match completed swaps
@@ -12,7 +11,7 @@ swapIsMatched = (swap, userChoices)->
         return false
 
     # always match when mode is MATCH_SHOW_ALL
-    if userChoices.swapMatchMode == UserChoiceStore.MATCH_SHOW_ALL
+    if userChoices.swapMatchMode == BotConstants.USERCHOICE_MATCH_SHOW_ALL
         return true
 
     if swap.assetIn == userChoices.inAsset and swapbot.formatters.formatCurrency(swap.quantityIn) == swapbot.formatters.formatCurrency(userChoices.inAmount)
