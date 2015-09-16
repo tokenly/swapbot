@@ -8,7 +8,7 @@ NeedHelpLink = require '../../views/includes/NeedHelpLink'
 PlaceOrderInput = require '../../views/includes/PlaceOrderInput'
 ReactZeroClipboard = require '../../views/includes/ReactZeroClipboard'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
-swapbot = swapbot or {}; swapbot.quoteUtils = require '../../../shared/quoteUtils'
+swapbot = swapbot or {}; swapbot.quoteUtils = require '../../util/quoteUtils'
 # ---- end references
 
 SwapbotReceivingTransaction = null

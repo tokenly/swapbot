@@ -1,6 +1,7 @@
-# swapUtils functions
+# quoteUtils functions
 
-swapbot = swapbot or {}; swapbot.formatters = require './formatters'
+QuotebotStore = require '../stores/QuotebotStore'
+swapbot = swapbot or {}; swapbot.formatters = require '../../shared/formatters'
 
 
 exports = {}

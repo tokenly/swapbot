@@ -5,7 +5,7 @@ UserChoiceStore = require '../../stores/UserChoiceStore'
 NeedHelpLink = require '../../views/includes/NeedHelpLink'
 PlaceOrderInput = require '../../views/includes/PlaceOrderInput'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
-swapbot = swapbot or {}; swapbot.quoteUtils = require '../../../shared/quoteUtils'
+swapbot = swapbot or {}; swapbot.quoteUtils = require '../../util/quoteUtils'
 swapbot = swapbot or {}; swapbot.swapUtils = require '../../../shared/swapUtils'
 # ---- end references
 
