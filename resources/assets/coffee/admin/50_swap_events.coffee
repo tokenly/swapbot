@@ -135,7 +135,7 @@ ctrl.swapEvents.view = ()->
                 m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
                 m("h3", "Events"),
                 if vm.swapEvents().length == 0 then m("div", {class:"no-events", }, "No Events Yet") else null,
-                m("ul", {class: "list-unstyled striped-list bot-list event-list"}, [
+                m("ul", {class: "list-unstyled striped-list bot-list event-list event-list-standalone"}, [
                     vm.swapEvents().map (botEventObj)->
                         if not vm.showDebug and botEventObj.level <= 100
                             return
