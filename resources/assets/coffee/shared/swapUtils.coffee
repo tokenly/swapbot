@@ -211,10 +211,11 @@ buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
     [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
     if buffer? and Math.round(buffer * exports.SATOSHI) > 0
         assetIn = swapConfig.in
+        fiatSuffix = ' ('+swapbot.formatters.formatFiatCurrency(buffer * currentRate)+')'
         return React.createElement('span',{className: "changeMessage"}, [
             "This includes a ",
             React.createElement('span', {className: "popover", title: "More about buffering", onClick: showChangeMessagePopover}, "buffer"),
-            " of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, buffer, assetIn)}.",
+            " of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{fiatSuffix}.",
         ])
             
 
