@@ -1,4 +1,5 @@
 # ---- begin references
+sbAdmin = sbAdmin or {}; sbAdmin.constants = require './05_constants'
 sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.botPaymentUtils = require './10_bot_payment_utils'
@@ -14,6 +15,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.stateutils = require './10_state_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
+sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 # ---- end references
 
@@ -21,85 +23,10 @@ ctrl = {}
 
 ctrl.botView = {}
 
+constants = sbAdmin.constants
+
+
 # ### helpers #####################################
-swapGroupRenderers = {}
-
-sharedSwapTypeFormField = (number, swap)->
-    return sbAdmin.form.mValueDisplay("Swap Type", {id: "swap_strategy_#{number}",}, sbAdmin.swaputils.strategyLabelByValue(swap.strategy()))
-
-swapGroupRenderers.rate = (number, swap)->
-    return m("div", {class: "asset-group"}, [
-        m("h4", "Swap ##{number}"),
-        m("div", { class: "row"}, [
-            m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
-
-            m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
-            ]),
-            m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
-            ]),
-            m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mValueDisplay("Rate", {type: "number", step: "any", min: "0", id: "swap_rate_#{number}", }, swap.rate()),
-            ]),
-        ]),
-    ])
-
-swapGroupRenderers.fixed = (number, swap)->
-    return m("div", {class: "asset-group"}, [
-        m("h4", "Swap ##{number}"),
-        m("div", { class: "row"}, [
-            m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
-
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Receives Asset", {id: "swap_in_#{number}", }, swap.in()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Receives Quantity", {id: "swap_in_qty_#{number}", }, swap.in_qty()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Sends Quantity", {id: "swap_out_qty_#{number}", }, swap.out_qty()),
-            ]),
-        ]),
-    ])
-
-swapGroupRenderers.fiat = (number, swap)->
-    return m("div", {class: "asset-group"}, [
-        m("h4", "Swap ##{number}"),
-        m("div", { class: "row"}, [
-            m("div", {class: "col-md-3"}, [sharedSwapTypeFormField(number, swap),]),
-
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Receives", {id: "swap_in_#{number}", }, swap.in()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Sends Asset", {id: "swap_out_#{number}", }, swap.out()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("At USD Price", {id: "swap_cost_#{number}", }, '$'+swap.cost()),
-            ]),
-            m("div", {class: "col-md-1"}, [
-                sbAdmin.form.mValueDisplay("Minimum", {id: "swap_min_out_#{number}", }, swap.min_out()),
-            ]),
-            m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mValueDisplay("Divisible", {id: "swap_divisible_#{number}", }, if swap.divisible() == '1' then 'YES' else 'NO'),
-            ]),
-        ]),
-    ])
-
-
-swapGroup = (number, swapProp)->
-    return swapGroupRenderers[swapProp().strategy()](number, swapProp())
-
-serializeSwaps = (swap)->
-    out = []
-    out.push(swap)
-    return out
-
-# ################################################
 
 buildIncomeRulesGroup = ()->
     return sbAdmin.formGroup.newGroup({
@@ -110,6 +37,13 @@ buildIncomeRulesGroup = ()->
             {name: 'paymentAmount', }
             {name: 'address', }
         ]
+        buildAllItemRows: (items)->
+            if not items or (items.length == 1 and not items[0].asset())
+                return [
+                    m("h4", "Income Forwarding Rules"),
+                    m("span", {class: 'empty'}, "No income forwarding rules are defined."),
+                ]
+            return null
         buildItemRow: (builder, number, item)->
             return [
                 builder.header("Income Forwarding Rule ##{number}"),
@@ -132,6 +66,11 @@ buildBlacklistAddressesGroup = ()->
             {name: 'address', }
         ]
         buildAllItemRows: (items)->
+            if not items or (items.length == 1 and not items[0].address())
+                return [
+                    m("span", {class: 'empty'}, "No blacklisted addresses are defined."),
+                ]
+
             addressList = ""
             for item, offset in items
                 addressList += (if offset > 0 then ", " else "")+item.address()
@@ -495,25 +434,35 @@ ctrl.botView.view = ()->
                 ]),
 
 
-                m("hr"),
-
-                vm.swaps().map (swap, offset)->
-                    return swapGroup(offset+1, swap)
-
-                m("hr"),
-
-                m("h4", "Blacklisted Addresses"),
-                vm.blacklistAddressesGroup.buildValues(),
+                # -------------------------------------------------------------------------------------------------------------------------------------------
                 m("div", {class: "spacer1"}),
+                m("hr"),
+
+                m("h3", "Swaps Selling Tokens"),
+                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_SELL, vm.swaps()),
+                m("div", {class: "spacer1"}),
+                m("h3", "Swaps Purchasing Tokens"),
+                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_BUY, vm.swaps()),
 
 
+                # -------------------------------------------------------------------------------------------------------------------------------------------
+                m("div", {class: "spacer1"}),
                 m("hr"),
 
                 # overflow/income address
                 vm.incomeRulesGroup.buildValues(),
 
-                m("hr"),
 
+                # -------------------------------------------------------------------------------------------------------------------------------------------
+                m("div", {class: "spacer1"}),
+                m("hr"),
+                m("h4", "Blacklisted Addresses"),
+                vm.blacklistAddressesGroup.buildValues(),
+
+
+                # -------------------------------------------------------------------------------------------------------------------------------------------
+                m("div", {class: "spacer1"}),
+                m("hr"),
 
                 m("div", {class: "bot-payments"}, [
                     m("h3", "Payment"),
@@ -567,7 +516,7 @@ ctrl.botView.view = ()->
                 m("div", {class: "bot-events"}, [
                     m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
                     m("h3", "Events"),
-                    if vm.botEvents().length == 0 then m("div", {class:"no-events", }, "No Events Yet") else null,
+                    if vm.botEvents().length == 0 then m("div", {class:"empty no-events", }, "No Events Yet") else null,
                     m("ul", {class: "list-unstyled striped-list bot-list event-list"+(if vm.showDebug then ' event-list-debug' else '')}, [
                         vm.botEvents().map (botEventObj)->
                             if not vm.showDebug and botEventObj.level <= 100

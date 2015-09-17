@@ -312,11 +312,11 @@ ctrl.botForm.view = ()->
                     m("div", {class: "spacer1"}),
                     m("hr"),
 
-                    m("h3", "Sell Tokens"),
+                    m("h3", "Swaps Selling Tokens"),
                     sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_SELL, duplicateSwapsOffsetsMap, vm),
 
                     m("div", {class: "spacer1"}),
-                    m("h3", "Purchase Tokens"),
+                    m("h3", "Swaps Purchasing Tokens"),
                     sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm),
 
 

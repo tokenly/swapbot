@@ -4,6 +4,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.popoverLabels = require './05_popover_labels'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.popover = require './10_popover_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
+swapbot = swapbot or {}; swapbot.swapUtils = require '../shared/swapUtils'
 # ---- end references
 
 # swapgrouprenderer functions
@@ -21,9 +22,11 @@ buildOnSwaptypeChange = (number, swap)->
 
 
 sharedSwapTypeFormField = (number, swap)->
+    formFieldFn = sbAdmin.form.mFormField
+
     offsetKey = buildOffsetKey(swap.direction(), number-1)
     action = (if swap.direction() == constants.DIRECTION_SELL then 'Sell' else 'Buy')
-    return sbAdmin.form.mFormField(popoverLabels.swapTypeChoice(number, action), {
+    return formFieldFn(popoverLabels.swapTypeChoice(number, action), {
             onchange: buildOnSwaptypeChange(number, swap),
             id: "swap_strategy_#{offsetKey}",
             type: 'select',
@@ -65,76 +68,83 @@ duplicateWarning = ()->
 swapGroupRenderers = {rate: {}, fixed: {}, fiat: {}}
 
 # ------------------------------------------------------------------------------------------------------------------------
-swapGroupRenderers.rate.sell = (number, swap, vmProps, isDuplicate, offsetKey)->
+swapGroupRenderers.rate.sell = (number, swap, vmProps, offsetKey)->
+    formFieldFn = sbAdmin.form.mFormField
+
     return {
         leftColsWidth: 6
         leftCols: [
             m("div", {class: "col-md-5"}, [sharedSwapTypeFormField(number, swap),]),
 
             m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateSellTokenToSell, {id: "swap_out_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.out),
+                formFieldFn(popoverLabels.rateSellTokenToSell, {id: "swap_out_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.out),
             ]),
             m("div", {class: "col-md-4"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateSellAssetToReceive, {id: "swap_in_#{offsetKey}", 'placeholder': "BTC", }, swap.in),
+                formFieldFn(popoverLabels.rateSellAssetToReceive, {id: "swap_in_#{offsetKey}", 'placeholder': "BTC", }, swap.in),
             ]),
         ],
         rightColsWidth: 6,
         rightCols: [
             m("div", {class: "col-md-6"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateSellPrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in(), }, swap.price),
+                formFieldFn(popoverLabels.rateSellPrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in(), }, swap.price),
             ]),
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
+                formFieldFn(popoverLabels.rateSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
             ]),
         ]
     }
 
-swapGroupRenderers.rate.buy = (number, swap, vmProps, isDuplicate, offsetKey)->
+
+swapGroupRenderers.rate.buy = (number, swap, vmProps, offsetKey)->
+    formFieldFn = sbAdmin.form.mFormField
+
     return {
         leftColsWidth: 6
         leftCols: [
             m("div", {class: "col-md-5"}, [sharedSwapTypeFormField(number, swap),]),
 
             m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateBuyTokenToBuy, {id: "swap_in_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.in),
+                formFieldFn(popoverLabels.rateBuyTokenToBuy, {id: "swap_in_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.in),
             ]),
             m("div", {class: "col-md-4"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateBuyAssetToPay, {id: "swap_out_#{offsetKey}", 'placeholder': "BTC", }, swap.out),
+                formFieldFn(popoverLabels.rateBuyAssetToPay, {id: "swap_out_#{offsetKey}", 'placeholder': "BTC", }, swap.out),
             ]),
         ],
         rightColsWidth: 6,
         rightCols: [
             m("div", {class: "col-md-6"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateBuyPurchasePrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.out(), }, swap.rate),
+                formFieldFn(popoverLabels.rateBuyPurchasePrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.out(), }, swap.rate),
             ]),
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.rateBuyMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
+                formFieldFn(popoverLabels.rateBuyMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
             ]),
         ]
     }
 
 # ------------------------------------------------------------------------------------------------------------------------
-swapGroupRenderers.fixed.sell = (number, swap, vmProps, isDuplicate, offsetKey)->
+swapGroupRenderers.fixed.sell = (number, swap, vmProps, offsetKey)->
+    formFieldFn = sbAdmin.form.mFormField
+
     return {
         leftColsWidth: 7
         leftCols: [
             m("div", {class: "col-md-4"}, [sharedSwapTypeFormField(number, swap),]),
 
             m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedSellTokenToSell, {id: "swap_out_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.out),
+                formFieldFn(popoverLabels.fixedSellTokenToSell, {id: "swap_out_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.out),
             ]),
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedSellAmountToSell, {type: "number", step: "any", min: "0", id: "swap_out_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(), }, swap.out_qty),
+                formFieldFn(popoverLabels.fixedSellAmountToSell, {type: "number", step: "any", min: "0", id: "swap_out_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(), }, swap.out_qty),
             ]),
 
         ],
         rightColsWidth: 5,
         rightCols: [
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedSellAssetToReceive, {id: "swap_in_#{offsetKey}", 'placeholder': "BTC", }, swap.in),
+                formFieldFn(popoverLabels.fixedSellAssetToReceive, {id: "swap_in_#{offsetKey}", 'placeholder': "BTC", }, swap.in),
             ]),
             m("div", {class: "col-md-6"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedSellAmountToReceive, {type: "number", step: "any", min: "0", id: "swap_in_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.in(), }, swap.in_qty),
+                formFieldFn(popoverLabels.fixedSellAmountToReceive, {type: "number", step: "any", min: "0", id: "swap_in_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.in(), }, swap.in_qty),
             ]),
         ]
     }
@@ -142,41 +152,45 @@ swapGroupRenderers.fixed.sell = (number, swap, vmProps, isDuplicate, offsetKey)-
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-swapGroupRenderers.fixed.buy = (number, swap, vmProps, isDuplicate, offsetKey)->
+swapGroupRenderers.fixed.buy = (number, swap, vmProps, offsetKey)->
+    formFieldFn = sbAdmin.form.mFormField
+
     return {
         leftColsWidth: 7
         leftCols: [
             m("div", {class: "col-md-4"}, [sharedSwapTypeFormField(number, swap),]),
 
             m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedBuyTokenToBuy, {id: "swap_in_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.in),
+                formFieldFn(popoverLabels.fixedBuyTokenToBuy, {id: "swap_in_#{offsetKey}", 'placeholder': "LTBCOIN", }, swap.in),
             ]),
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedBuyAmountToBuy, {type: "number", step: "any", min: "0", id: "swap_in_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.in(), }, swap.in_qty),
+                formFieldFn(popoverLabels.fixedBuyAmountToBuy, {type: "number", step: "any", min: "0", id: "swap_in_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.in(), }, swap.in_qty),
             ]),
 
         ],
         rightColsWidth: 5,
         rightCols: [
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedBuyAssetToPay, {id: "swap_out_#{offsetKey}", 'placeholder': "BTC", }, swap.out),
+                formFieldFn(popoverLabels.fixedBuyAssetToPay, {id: "swap_out_#{offsetKey}", 'placeholder': "BTC", }, swap.out),
             ]),
             m("div", {class: "col-md-6"}, [
-                sbAdmin.form.mFormField(popoverLabels.fixedBuyAmountToPay, {type: "number", step: "any", min: "0", id: "swap_out_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(), }, swap.out_qty),
+                formFieldFn(popoverLabels.fixedBuyAmountToPay, {type: "number", step: "any", min: "0", id: "swap_out_qty_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(), }, swap.out_qty),
             ]),
         ]
     }
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-swapGroupRenderers.fiat.sell = (number, swap, vmProps, isDuplicate, offsetKey)->
+swapGroupRenderers.fiat.sell = (number, swap, vmProps, offsetKey)->
+    formFieldFn = sbAdmin.form.mFormField
+
     return {
         leftColsWidth: 6
         leftCols: [
             m("div", {class: "col-md-5"}, [sharedSwapTypeFormField(number, swap),]),
 
             m("div", {class: "col-md-4"}, [
-                sbAdmin.form.mFormField(popoverLabels.fiatSellSendsAsset, {id: "swap_out_#{offsetKey}", 'placeholder': "MYPRODUCT", }, swap.out),
+                formFieldFn(popoverLabels.fiatSellSendsAsset, {id: "swap_out_#{offsetKey}", 'placeholder': "MYPRODUCT", }, swap.out),
             ]),
             m("div", {class: "col-md-3"}, [
                 sbAdmin.form.mValueDisplay(popoverLabels.fiatSellReceivesAsset, {id: "swap_in_#{offsetKey}", }, swap.in()),
@@ -186,13 +200,13 @@ swapGroupRenderers.fiat.sell = (number, swap, vmProps, isDuplicate, offsetKey)->
         rightColsWidth: 6,
         rightCols: [
             m("div", {class: "col-md-4"}, [
-                sbAdmin.form.mFormField(popoverLabels.fiatSellPrice, {type: "number", step: "any", min: "0", id: "swap_cost_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: 'USD'}, swap.cost),
+                formFieldFn(popoverLabels.fiatSellPrice, {type: "number", step: "any", min: "0", id: "swap_cost_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: 'USD'}, swap.cost),
             ]),
             m("div", {class: "col-md-5"}, [
-                sbAdmin.form.mFormField(popoverLabels.fiatSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_min_out_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(),}, swap.min_out),
+                formFieldFn(popoverLabels.fiatSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_min_out_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(),}, swap.min_out),
             ]),
             m("div", {class: "col-md-2"}, [
-                sbAdmin.form.mFormField(popoverLabels.fiatSellIsDivisible, {type: "select", options: sbAdmin.form.yesNoOptions(), id: "swap_divisible_#{offsetKey}", }, swap.divisible),
+                formFieldFn(popoverLabels.fiatSellIsDivisible, {type: "select", options: sbAdmin.form.yesNoOptions(), id: "swap_divisible_#{offsetKey}", }, swap.divisible),
             ]),
         ]
     }
@@ -203,7 +217,7 @@ swapGroupRenderers.fiat.sell = (number, swap, vmProps, isDuplicate, offsetKey)->
 swapGroup = (number, swap, vmProps, isDuplicate)->
     swapDirection = swap().direction()
     offsetKey = buildOffsetKey(swapDirection, number-1)
-    swapGroupSpec = swapGroupRenderers[swap().strategy()][swapDirection](number, swap(), vmProps, isDuplicate, offsetKey)
+    swapGroupSpec = swapGroupRenderers[swap().strategy()][swapDirection](number, swap(), vmProps, offsetKey)
     return if not swapGroupSpec?
 
 
@@ -231,8 +245,18 @@ swapGroup = (number, swap, vmProps, isDuplicate)->
         (if isDuplicate then duplicateWarning() else null),
     ])
 
+swapGroupForDisplayProse = (swap)->
+    flatSwapConfig = {}
+    for k, v of swap()
+        flatSwapConfig[k] = v()
+    return swapbot.swapUtils.swapDetailsProse(flatSwapConfig)
+
+
 buildOffsetKey = (swapDirection, offset)->
     return swapDirection+"_"+offset
+
+
+
 
 
 # ################################################
@@ -269,6 +293,28 @@ swapgrouprenderer.buildSwapsSection = (swapDirection, duplicateSwapsOffsetsMap, 
         ]),
 
     ])
+
+swapgrouprenderer.buildSwapsSectionForDisplay = (swapDirection, swapsArray)->
+    swapsForDirectionCount = 0
+    return m("div", {class: "swap-groups"}, [
+        swapsArray.map((swap, offset)->
+            if swap().direction() == swapDirection
+                ++swapsForDirectionCount
+                return m("div", {class: "swap-group"}, [
+                    m("span", {class: 'number'}, "Swap ##{offset+1} "),
+                    swapGroupForDisplayProse(swap),
+                ])
+            ),
+
+        (
+            if swapsForDirectionCount == 0
+                m("div", {class: "no-swap-groups"}, [
+                    "There are no swaps to #{if swapDirection == constants.DIRECTION_SELL then 'sell' else 'purchase'} tokens."
+                ])
+        ),
+    ])
+
+    # return m("div", {}, "swaps here...")
 
 module.exports = swapgrouprenderer
 

@@ -133,13 +133,15 @@ groupBuilder.newGroup = (config)->
         return inputs
 
     formGroup.buildValues = ()->
+        values = null
         if config.buildAllItemRows?
-            return config.buildAllItemRows(formGroup.prop())
+            values = config.buildAllItemRows(formGroup.prop())
 
-        values = formGroup.prop().map (item, offset)->
-            number = offset + 1
-            row = config.buildItemRow(newRowBuilder(number, item), number, item)
-            return row
+        if not values?
+            values = formGroup.prop().map (item, offset)->
+                number = offset + 1
+                row = config.buildItemRow(newRowBuilder(number, item), number, item)
+                return row
             
         return values
 

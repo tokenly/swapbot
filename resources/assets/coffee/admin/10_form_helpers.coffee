@@ -22,7 +22,13 @@ buildLabelEl = (label, id)->
 
     return m("label", properties, labelText)
 
-form.mValueDisplay = (label, attributes, value)->
+form.mValueDisplay = (label, attributes, valueOrProp)->
+    if typeof valueOrProp == 'function'
+        # assume a prop
+        value = valueOrProp()
+    else
+        value = valueOrProp
+
     inputProps = sbAdmin.utils.clone(attributes)
     inputProps.class = 'form-control-static' if not inputProps.class?
 
@@ -32,6 +38,11 @@ form.mValueDisplay = (label, attributes, value)->
         buildLabelEl(label, id)
         inputEl = m("div", inputProps, value)
     ])
+
+form.mReadOnlyFormField = (label, attributes, prop)->
+    attributes.readonly = "readonly"
+    attributes.disabled = "disabled"
+    return form.mFormField(label, attributes, prop)
 
 form.mFormField = (label, attributes, prop)->
     inputEl = form.mInputEl(attributes, prop)
