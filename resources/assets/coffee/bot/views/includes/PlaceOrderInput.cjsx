@@ -1,7 +1,9 @@
 # ---- begin references
 UserInputActions = require '../../actions/UserInputActions'
 UserChoiceStore = require '../../stores/UserChoiceStore'
+BotConstants = require '../../constants/BotConstants'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
+swapbot = swapbot or {}; swapbot.swapUtils = require '../../../shared/swapUtils'
 # ---- end references
 
 PlaceOrderInput = null
@@ -24,9 +26,15 @@ PlaceOrderInput = React.createClass
         )
 
     updateAmount: (e)->
-        outAmount = parseFloat($(e.target).val())
-        outAmount = 0 if outAmount < 0 or isNaN(outAmount)
-        UserInputActions.updateOutAmount(outAmount)
+        newAmount = parseFloat($(e.target).val())
+        newAmount = 0 if newAmount < 0 or isNaN(newAmount)
+
+        direction = this.state.userChoices.direction
+        if direction == BotConstants.DIRECTION_SELL
+            UserInputActions.updateSwapAmount(newAmount, 'out')
+        else
+            UserInputActions.updateSwapAmount(newAmount, 'in')
+
         return
 
     checkEnter: (e)->
@@ -37,8 +45,19 @@ PlaceOrderInput = React.createClass
 
     render: ()->
         bot = this.props.bot
-        defaultValue = this.state.userChoices.outAmount
         outAsset = this.state.userChoices.outAsset
+        inAsset = this.state.userChoices.inAsset
+        direction = this.state.userChoices.direction
+        isSell = (direction == BotConstants.DIRECTION_SELL)
+        isBuy = not isSell
+        sellingOrBuyingAsset = (if isSell then outAsset else inAsset)
+        if isBuy
+            swapConfigGroups = swapbot.swapUtils.getBuySwapConfigsByInAsset(bot.swaps, inAsset)
+            maxBuyableAmount = swapbot.formatters.formatCurrencyWithForcedZero(swapbot.swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroups))
+            sellingOrBuyingAmount = this.state.userChoices.inAmount
+        else
+            sellingOrBuyingAmount = this.state.userChoices.outAmount
+
         swapConfigIsChosen = !!this.state.userChoices.swapConfig?
 
         outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
@@ -56,7 +75,7 @@ PlaceOrderInput = React.createClass
                                 <img src="/images/misc/stop.png" alt="STOP" />
                                 <p>This bot is currently inactive and needs attention by its operator. <br/> Swaps by this bot may be delayed or refunded until this is corrected.</p>
                             </div>
-                        else if not isChooseable
+                        else if isSell and not isChooseable
                         # should not get here
                             <div className="warning">
                                 <img src="/images/misc/stop.png" alt="STOP" />
@@ -65,29 +84,42 @@ PlaceOrderInput = React.createClass
                     }
 
                     <table className="fieldset">
+                        { if isSell
+                            <tr>
+                                <td>
+                                    <label htmlFor="token-available">{outAsset} available for purchase: </label>
+                                </td>
+                                <td><span id="token-available">{swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])} {outAsset}</span></td>
+                            </tr>
+                          else
+                            <tr>
+                                <td>
+                                    <label htmlFor="token-available">{inAsset} available to buy: </label>
+                                </td>
+                                <td><span id="token-available">{maxBuyableAmount} {inAsset}</span></td>
+                            </tr>
+                        }
                         <tr>
                             <td>
-                                <label htmlFor="token-available">{outAsset} available for purchase: </label>
-                            </td>
-                            <td><span id="token-available">{swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])} {outAsset}</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="token-amount">I would like to purchase: </label>
+                                { 
+                                    if isSell
+                                        <label htmlFor="token-amount">I would like to purchase: </label>
+                                    else
+                                        <label htmlFor="token-amount">I would like to sell: </label>
+                                }
                             </td>
                             <td>
                                 { if swapConfigIsChosen
-                                    # <input disabled type="text" id="token-amount" placeholder="0" defaultValue={defaultValue} />
                                     <div className="chosenInputAmount">
-                                        {swapbot.formatters.formatCurrency(defaultValue)}
+                                        {swapbot.formatters.formatCurrency(sellingOrBuyingAmount)}
                                         &nbsp;
-                                        {outAsset}
+                                        {sellingOrBuyingAsset}
                                     </div>
                                 else
                                     <div>
-                                        <input onChange={this.updateAmount} onKeyUp={this.checkEnter} type="text" id="token-amount" placeholder={'0'} defaultValue={defaultValue} />
+                                        <input onChange={this.updateAmount} onKeyUp={this.checkEnter} type="text" id="token-amount" placeholder="0" defaultValue={sellingOrBuyingAmount} />
                                         &nbsp;
-                                        {outAsset}
+                                        {sellingOrBuyingAsset}
                                     </div>
                                 }
                             </td>

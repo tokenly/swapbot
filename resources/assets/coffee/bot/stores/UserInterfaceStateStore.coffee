@@ -13,7 +13,7 @@ uiState = {
     animatingSwapButtons: [false,false,false,false,false,false,]
     swaps:
         maxSwapsToShow: Settings.SWAPS_TO_SHOW
-        maxSwapsRequestedFromServer: 0
+        maxSwapsRequestedFromServer: Settings.SWAPS_TO_SHOW
         numberOfSwapsLoaded: 0
         loading: false
 }
@@ -117,6 +117,10 @@ exports.getUIState = ()->
 
 exports.getSwapsUIState = ()->
     return uiState.swaps
+
+exports.updateMaxSwapsRequestedFromServer = (newMaxSwapsRequestedFromServer)->
+    uiState.swaps.maxSwapsRequestedFromServer = Math.max(uiState.swaps.maxSwapsRequestedFromServer, newMaxSwapsRequestedFromServer)
+    return
 
 # #############################################
 module.exports = exports

@@ -46,6 +46,7 @@ resetUserChoices = ()->
     userChoices.inAsset              = null
     userChoices.outAmount            = null
     userChoices.outAsset             = null
+    userChoices.direction            = null
     userChoices.lockedInRate         = null
     userChoices.swap                 = null
     userChoices.swapMatchMode        = MATCH_AUTO
@@ -69,14 +70,22 @@ resetEmailChoices = ()->
     return
 
 
-updateChosenOutAsset = (newChosenOutAsset)->
-    if userChoices.outAsset != newChosenOutAsset
+updateChosenAssetAndDirection = (asset, isSell)->
+    direction = (if isSell then BotConstants.DIRECTION_SELL else BotConstants.DIRECTION_BUY)
+    userChoices.direction = direction
 
-        # set the new swapConfig
-        userChoices.outAsset = newChosenOutAsset
+    # set the new swapConfig
+    if direction == BotConstants.DIRECTION_SELL
+        userChoices.outAsset = asset
+        userChoices.inAsset = null
+    else
+        userChoices.outAsset = null
+        userChoices.inAsset = asset
 
-        # move on to step place
-        routeToStepOrEmitChange('place')
+
+
+    # move on to step place
+    routeToStepOrEmitChange('place')
 
     return
 
@@ -100,12 +109,19 @@ updateChosenSwapConfig = (newChosenSwapConfig, currentRate)->
 
     return
 
-updateOutAmount = (newOutAmount)->
-    if newOutAmount == userChoices.outAmount
-        return
+updateSwapAmount = (newAmount, amountType)->
+    if amountType == 'in'
+        if newAmount == userChoices.inAmount then return
+    else
+        if newAmount == userChoices.outAmount then return
 
-    # set the new outAmount
-    userChoices.outAmount = newOutAmount
+
+    if amountType == 'in'
+        # set the new inAmount
+        userChoices.inAmount = newAmount
+    else
+        # set the new outAmount
+        userChoices.outAmount = newAmount
 
     # calculate the new inAmount based on the outAmount
     _recalculateSwapConfigArtifacts()
@@ -315,9 +331,15 @@ emitChange = ()->
     return
 
 _recalculateSwapConfigArtifacts = ()->
-    # calculate the new inAmount based on the outAmount
-    if userChoices.outAmount? and userChoices.swapConfig?
-        userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig, userChoices.lockedInRate)
+    if userChoices.direction == BotConstants.DIRECTION_SELL
+        # calculate the new inAmount based on the outAmount
+        if userChoices.outAmount? and userChoices.swapConfig?
+            userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig, userChoices.lockedInRate)
+    else
+        # calculate the new outAmount based on the inAmount
+        if userChoices.inAmount? and userChoices.swapConfig?
+            userChoices.outAmount = swapbot.swapUtils.outAmountFromInAmount(userChoices.inAmount, userChoices.swapConfig)
+    # console.log "_recalculateSwapConfigArtifacts userChoices.direction=#{userChoices.direction} userChoices.inAmount=#{userChoices.inAmount} userChoices.outAmount=#{userChoices.outAmount}"
 
     if userChoices.swapConfig
         userChoices.outAsset = userChoices.swapConfig.out
@@ -337,7 +359,7 @@ onRouteUpdate = (rawNewStep)->
             valid = true
             
         when 'place', 'confirmwallet', 'receive', 'wait', 'complete'
-            if userChoices.outAsset == null
+            if userChoices.direction == null
                 # no out amount was chosen - go back
                 valid = false
         else
@@ -429,8 +451,8 @@ exports.init = ()->
     Dispatcher.register (action)->
         switch action.actionType
 
-            when BotConstants.BOT_USER_CHOOSE_OUT_ASSET
-                updateChosenOutAsset(action.outAsset)
+            when BotConstants.BOT_USER_CHOOSE_ASSET
+                updateChosenAssetAndDirection(action.asset, action.isSell)
 
             when BotConstants.BOT_USER_CHOOSE_SWAP_CONFIG
                 updateChosenSwapConfig(action.swapConfig, action.currentRate)
@@ -454,8 +476,8 @@ exports.init = ()->
             when BotConstants.BOT_USER_RESET_SWAP
                 resetSwap()
 
-            when BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT
-                updateOutAmount(action.outAmount)
+            when BotConstants.BOT_USER_ENTERED_SWAP_AMOUNT
+                updateSwapAmount(action.amount, action.amountType)
 
 
             when BotConstants.BOT_UPDATE_EMAIL_VALUE

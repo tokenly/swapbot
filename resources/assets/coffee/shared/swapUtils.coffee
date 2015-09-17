@@ -113,6 +113,33 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
 
 # #############################################
 
+buildOutAmountFromInAmount = {}
+buildOutAmountFromInAmount.rate = (inAmount, swapConfig)->
+    if not inAmount? or isNaN(inAmount)
+        return 0
+
+    outAmount = Math.floor(swapConfig.rate * inAmount * SATOSHI) / SATOSHI
+
+    return outAmount
+
+buildOutAmountFromInAmount.fixed = (inAmount, swapConfig)->
+    if not inAmount? or isNaN(inAmount)
+        return 0
+
+    multipler = Math.floor(Math.round(inAmount * SATOSHI) / (swapConfig.in_qty * SATOSHI))
+    outAmount = multipler * swapConfig.out_qty
+
+    return outAmount
+
+buildOutAmountFromInAmount.fiat = (inAmount, swapConfig, currentRate)->
+    # not implemented
+    return 0
+
+
+
+
+# #############################################
+
 validateOutAmount = {}
 validateOutAmount.shared = (outAmount, swapConfig, botBalance)->
     if (""+outAmount).length == 0 then return null
@@ -120,7 +147,7 @@ validateOutAmount.shared = (outAmount, swapConfig, botBalance)->
         return 'The amount to purchase does not look like a number.'
 
     if not botBalance? or outAmount > botBalance
-        return "There is not enough #{swapConfig.out} available to make this purchase."
+        return "There is not enough #{swapConfig.out} in stock to complete this swap."
 
     return null
 
@@ -133,10 +160,11 @@ validateOutAmount.fixed = (outAmount, swapConfig, botBalance)->
     errorMsg = validateOutAmount.shared(outAmount, swapConfig, botBalance) 
     if errorMsg? then return errorMsg
 
+    formatCurrencyFn = swapbot.formatters.formatCurrency
+
     ratio = outAmount / swapConfig.out_qty
     if ratio != Math.floor(ratio)
-        formatCurrency = swapbot.formatters.formatCurrency
-        return "This swap must be purchased at a rate of exactly #{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in}."
+        return "This swap must be purchased at a rate of exactly #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}."
 
     return null
 
@@ -175,10 +203,15 @@ validateInAmount.fixed = (inAmount, swapConfig)->
     errorMsg = validateInAmount.shared(inAmount, swapConfig) 
     if errorMsg? then return errorMsg
 
-    # ratio = inAmount / swapConfig.out_qty
-    # if ratio != Math.floor(ratio)
-    #     formatCurrency = swapbot.formatters.formatCurrency
-    #     return "This swap must be purchased at a rate of exactly #{formatCurrency(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrency(swapConfig.in_qty)} #{swapConfig.in}."
+    formatCurrencyFn = swapbot.formatters.formatCurrency
+
+    if inAmount < swapConfig.in_qty
+        return "You must send at least #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in} to use this swap."
+
+
+    ratio = inAmount / swapConfig.in_qty
+    if ratio != Math.floor(ratio)
+        return "You must sell a multiple of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}. You will receive #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}."
 
     return null
 
@@ -270,6 +303,11 @@ exports.inAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
     inAmount = 0 if inAmount == NaN
     return inAmount
 
+exports.outAmountFromInAmount = (inAmount, swapConfig)->
+    outAmount = buildOutAmountFromInAmount[swapConfig.strategy](inAmount, swapConfig)
+    outAmount = 0 if outAmount == NaN
+    return outAmount
+
 exports.validateOutAmount = (outAmount, swapConfig, botBalance)->
     errorMsg = validateOutAmount[swapConfig.strategy](outAmount, swapConfig, botBalance)
     if errorMsg? then return errorMsg
@@ -287,17 +325,50 @@ exports.validateInAmount = (inAmount, swapConfig)->
 exports.buildChangeMessage = (outAmount, swapConfig, currentRate)->
     return buildChangeMessage[swapConfig.strategy]?(outAmount, swapConfig, currentRate)
 
+# groups by asset out and 
 exports.groupSwapConfigs = (allSwapConfigs)->
-    swapConfigGroupsByAssetOut = {}
+    groups = {
+        sell: []
+        buy: []
+    }
+
+    sellingConfigsByAssetOut = {}
+    buyingConfigsByAssetIn = {}
+
     for swapConfig, index in allSwapConfigs
-        if not swapConfigGroupsByAssetOut[swapConfig.out]?
-            swapConfigGroupsByAssetOut[swapConfig.out] = []
-        swapConfigGroupsByAssetOut[swapConfig.out].push(swapConfig)
-    
-    swapConfigGroups = []
-    for k, v of swapConfigGroupsByAssetOut
-        swapConfigGroups.push(v)
-    return swapConfigGroups
+        if swapConfig.direction == 'sell'
+            if not sellingConfigsByAssetOut[swapConfig.out]? then sellingConfigsByAssetOut[swapConfig.out] = []
+            sellingConfigsByAssetOut[swapConfig.out].push(swapConfig)
+
+        else if swapConfig.direction == 'buy'
+            if not buyingConfigsByAssetIn[swapConfig.in]? then buyingConfigsByAssetIn[swapConfig.in] = []
+            buyingConfigsByAssetIn[swapConfig.in].push(swapConfig)
+
+
+    for _k, configs of sellingConfigsByAssetOut
+        groups.sell.push(configs)
+    for _k, configs of buyingConfigsByAssetIn
+        groups.buy.push(configs)
+
+    return groups
+
+exports.getBuySwapConfigsByInAsset = (allSwapConfigs, inAsset)->
+    swapConfigsOut = []
+    for swapConfig, index in allSwapConfigs
+        if swapConfig.direction == 'buy' and swapConfig.in == inAsset
+            swapConfigsOut.push(swapConfig)
+
+    return swapConfigsOut
+
+
+exports.calculateMaxBuyableAmount = (botBalances, swapConfigs)->
+    maxBuyableAmount = 0
+    for swapConfig in swapConfigs
+        inAmount = exports.inAmountFromOutAmount(botBalances[swapConfig.out], swapConfig, null)
+        maxBuyableAmount = inAmount if inAmount > maxBuyableAmount
+
+    return maxBuyableAmount
+
 
 
 module.exports = exports

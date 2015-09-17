@@ -158,7 +158,7 @@ popoverLabels.fixedSellAssetToReceive = {
 
 popoverLabels.fixedSellAmountToReceive = {
     text: "Amount to Receive"
-    class: 'control-label receives-label'
+    class: 'control-label'
     popover: {
         title: "About the Amount to Receive"
         content: """
@@ -184,7 +184,7 @@ popoverLabels.fixedBuyTokenToBuy = {
 
 popoverLabels.fixedBuyAmountToBuy = {
     text: "Amount to Buy"
-    class: 'control-label receives-label'
+    class: 'control-label'
     popover: {
         title: "About the Amount to Buy"
         content: """

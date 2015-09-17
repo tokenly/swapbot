@@ -253,13 +253,15 @@ swapgrouprenderer.buildSwapsSection = (swapDirection, duplicateSwapsOffsetsMap, 
 
     return m("div", {}, [
 
-        swapsArray.map((swap, offset)->
-            offsetKey = buildOffsetKey(swapDirection, offset)
-            return swapGroup(offset+1, swap, vmProps, duplicateSwapsOffsetsMap[offsetKey]?)
+        m("div", {class: "swap-groups"},
+            swapsArray.map((swap, offset)->
+                offsetKey = buildOffsetKey(swapDirection, offset)
+                return swapGroup(offset+1, swap, vmProps, duplicateSwapsOffsetsMap[offsetKey]?)
+            ),
         ),
 
         # add asset
-        m("div", {class: "form-group"}, [
+        m("div", {class: "form-group add-swap-group"}, [
                 m("a", {class: "", href: '#add', onclick: addSwapFn}, [
                     m("span", {class: "glyphicon glyphicon-plus"}, ''),
                     m("span", {}, " Add #{if swapsArray.length > 0 then "another" else "a"} #{action} Swap"),

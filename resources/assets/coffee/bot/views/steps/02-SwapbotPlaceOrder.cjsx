@@ -1,4 +1,5 @@
 # ---- begin references
+BotConstants = require '../../constants/BotConstants'
 UserInputActions = require '../../actions/UserInputActions'
 QuotebotStore = require '../../stores/QuotebotStore'
 UserChoiceStore = require '../../stores/UserChoiceStore'
@@ -25,60 +26,85 @@ SwapbotSendItem = React.createClass
     displayName: 'SwapbotSendItem'
 
     getInAmount: ()->
-        inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+        if this.props.direction == BotConstants.DIRECTION_SELL
+            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+            console.log "after inAmountFromOutAmount:  outAmount=#{this.props.outAmount} inAmount=#{inAmount}"
+        else
+            inAmount = this.props.inAmount
+
         return inAmount
 
-    isChooseable: ()->
-        if this.getErrorMessage()?
+    getOutAmount: ()->
+        if this.props.direction == BotConstants.DIRECTION_SELL
+            outAmount = this.props.outAmount
+        else
+            outAmount = swapbot.swapUtils.outAmountFromInAmount(this.props.inAmount, this.props.swapConfig)
+
+        
+        return outAmount
+
+    isChooseable: (inAmount, outAmount)->
+        if inAmount <= 0
             return false
 
-        if this.getInAmount() <= 0
-            return false
-
-        if this.props.outAmount > this.props.bot.balances[this.props.swapConfig.out]
+        if outAmount > this.props.bot.balances[this.props.swapConfig.out]
             return false
 
         return true
 
-    getErrorMessage: ()->
-        errors = swapbot.swapUtils.validateOutAmount(this.props.outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out])
+    validateInAndOutAmounts: (inAmount, outAmount)->
+        errors = swapbot.swapUtils.validateOutAmount(outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out])
         return errors if errors?
 
-        errors = swapbot.swapUtils.validateInAmount(this.getInAmount(), this.props.swapConfig)
+        errors = swapbot.swapUtils.validateInAmount(inAmount, this.props.swapConfig)
         return errors if errors?
 
         return null
 
 
 
-    chooseSwap: (e)->
-        e.preventDefault()
-        return if not this.isChooseable()
+    buildChooseSwap: (inAmount, outAmount, isChooseable)->
+        return (e)=>
+            e.preventDefault()
+            if not isChooseable then return
 
-        UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentBTCPrice)
+            UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentBTCPrice)
 
-        return
+            return
 
     render: ()->
         swapConfig = this.props.swapConfig
+
         inAmount = this.getInAmount()
-        isChooseable = this.isChooseable()
-        errorMsg = this.getErrorMessage()
+        outAmount = this.getOutAmount()
+        # console.log "inAmount=#{inAmount} #{this.props.swapConfig.in} outAmount=#{outAmount} #{this.props.swapConfig.out}"
+
+        errorMsg = this.validateInAndOutAmounts(inAmount, outAmount)
+        if errorMsg
+            isChooseable = false
+        else 
+            isChooseable = this.isChooseable(inAmount, outAmount)
+
         fiatSuffix = 
             <span className="fiatSuffix">
                 { swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
             </span>
-        changeMessage = swapbot.swapUtils.buildChangeMessage(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+        changeMessage = swapbot.swapUtils.buildChangeMessage(outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+
+        if this.props.direction == BotConstants.DIRECTION_SELL
+            transactionHeaderText = <span>Purchase {swapbot.formatters.formatCurrency(outAmount)} {swapConfig.out} for {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}{fiatSuffix}</span>
+        else
+            transactionHeaderText = <span>Sell {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in} for {swapbot.formatters.formatCurrency(outAmount)} {swapConfig.out}</span>
 
         <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
-            <a className="choose-swap" onClick={this.chooseSwap} href="#next-step">
+            <a className="choose-swap" onClick={this.buildChooseSwap(inAmount, outAmount, isChooseable)} href="#next-step">
                 { if errorMsg
                     <div className="item-content error">
                         {errorMsg}
                     </div>
                 }
                 <div className="item-header">
-                    To purchase {swapbot.formatters.formatCurrency(this.props.outAmount)} {swapConfig.out}, send {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}{fiatSuffix}
+                    { transactionHeaderText }
                 </div>
                 <p>
                     { 
@@ -127,21 +153,36 @@ SwapbotPlaceOrder = React.createClass
         return
 
 
-    getMatchingSwapConfigsForOutputAsset: ()->
-        filteredSwapConfigs = []
+    getMatchingSwapConfigsForOrder: ()->
         swapConfigs = this.props.bot?.swaps
-        chosenOutAsset = this.state.userChoices.outAsset
+        if not swapConfigs then return []
 
-        if swapConfigs
-            for otherSwapConfig, offset in swapConfigs
-                if otherSwapConfig.out == chosenOutAsset
-                    filteredSwapConfigs.push(otherSwapConfig)
+        direction = this.state.userChoices.direction
+        if direction == BotConstants.DIRECTION_SELL
+            return this.getMatchingSwapConfigsForSellOrder(swapConfigs)
+        else
+            return this.getMatchingSwapConfigsForBuyOrder(swapConfigs)
+
+    getMatchingSwapConfigsForSellOrder: (swapConfigs)->
+        filteredSwapConfigs = []
+        chosenOutAsset = this.state.userChoices.outAsset
+        for otherSwapConfig, offset in swapConfigs
+            if otherSwapConfig.out == chosenOutAsset and otherSwapConfig.direction == BotConstants.DIRECTION_SELL
+                filteredSwapConfigs.push(otherSwapConfig)
+        return filteredSwapConfigs
+
+    getMatchingSwapConfigsForBuyOrder: (swapConfigs)->
+        filteredSwapConfigs = []
+        chosenInAsset = this.state.userChoices.inAsset
+        for otherSwapConfig, offset in swapConfigs
+            if otherSwapConfig.in == chosenInAsset and otherSwapConfig.direction == BotConstants.DIRECTION_BUY
+                filteredSwapConfigs.push(otherSwapConfig)
         return filteredSwapConfigs
 
 
     onOrderInput: ()->
         # select first swap
-        matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset()
+        matchingSwapConfigs = this.getMatchingSwapConfigsForOrder()
         return if not matchingSwapConfigs
 
         if matchingSwapConfigs.length == 1
@@ -150,10 +191,22 @@ SwapbotPlaceOrder = React.createClass
         return
 
     render: ()->
-        defaultValue = this.state.userChoices.outAmount
         bot = this.props.bot
-        matchingSwapConfigs = this.getMatchingSwapConfigsForOutputAsset()
         outAsset = this.state.userChoices.outAsset
+        outAmount = this.state.userChoices.outAmount
+        inAsset = this.state.userChoices.inAsset
+        inAmount = this.state.userChoices.inAmount
+        
+        showMatchingSwaps = false
+        matchingSwapConfigs = this.getMatchingSwapConfigsForOrder()
+        if matchingSwapConfigs?.length > 0
+            if this.state.userChoices.direction == BotConstants.DIRECTION_SELL
+                if outAmount? and outAmount > 0 then showMatchingSwaps = true
+            if this.state.userChoices.direction == BotConstants.DIRECTION_BUY
+                if inAmount? and inAmount > 0 then showMatchingSwaps = true
+
+
+        # if this.state.userChoices.outAmount? and this.state.userChoices.outAmount > 0
 
         return <div id="swapbot-container" className="section grid-100">
             <div id="swap-step-2" className="content">
@@ -175,13 +228,13 @@ SwapbotPlaceOrder = React.createClass
                     <NeedHelpLink botName={bot.name} />
                 </div>
                 
-                { if this.state.userChoices.outAmount? and this.state.userChoices.outAmount > 0
+                { if showMatchingSwaps
                     <div>
                         <ul id="transaction-select-list" className="wide-list">
                             { 
                                 if matchingSwapConfigs
                                     for matchedSwapConfig, offset in matchingSwapConfigs
-                                            <SwapbotSendItem key={'swap' + offset} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
+                                            <SwapbotSendItem key={'swap' + offset} direction={this.state.userChoices.direction} inAmount={this.state.userChoices.inAmount} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
                             }
                         </ul>
                         <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>

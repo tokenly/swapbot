@@ -73,6 +73,7 @@ gulp.task('watchPublicBotApp', function() {
     gulp.watch([
         "resources/assets/coffee/bot/**/*.coffee",
         "resources/assets/coffee/bot/**/*.cjsx",
+        "resources/assets/coffee/shared/**/*.coffee",
     ], ['combinePublicBotApp']);
 });
 
@@ -93,6 +94,7 @@ gulp.task('combineAdmin', function() {
 gulp.task('watchAdmin', function() {
     gulp.watch([
         "resources/assets/coffee/admin/**/*.coffee",
+        "resources/assets/coffee/shared/**/*.coffee",
     ], ['combineAdmin']);
 });
 

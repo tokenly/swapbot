@@ -27,6 +27,9 @@ loadSwapsFromAPI = (botId)->
 loadSwapstreamEventsFromAPI = (botId, limit)->
     loading = true
 
+    # update requested amount immediately
+    UserInterfaceStateStore.updateMaxSwapsRequestedFromServer(limit)
+
     setTimeout ()->
         # console.log "beginLoadingMoreSwaps"
         UserInterfaceActions.beginLoadingMoreSwaps()
@@ -36,8 +39,6 @@ loadSwapstreamEventsFromAPI = (botId, limit)->
     $.get "/api/v1/public/swapevents/#{botId}?latestperswap=1&limit=#{limit}&sort=serial desc", (swapstreamEvents)=>
         handleSwapstreamEvents(swapstreamEvents)
 
-        newMaxSwapsRequestedFromServer = Math.max(UserInterfaceStateStore.getSwapsUIState().maxSwapsRequestedFromServer, limit)
-        UserInterfaceActions.updateMaxSwapsRequestedFromServer(newMaxSwapsRequestedFromServer)
         UserInterfaceActions.endLoadingMoreSwaps()
 
         loading = false

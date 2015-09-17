@@ -36,11 +36,11 @@ SwapbotChoose = React.createClass
         return
 
 
-    buildChooseOutAsset: (outAsset, isChooseable)->
+    buildChooseAsset: (asset, isSell, isChooseable)->
         return (e)=>
             e.preventDefault()
             if isChooseable
-                UserInputActions.chooseOutAsset(outAsset)
+                UserInputActions.chooseAsset(asset, isSell)
             return
 
 
@@ -56,24 +56,66 @@ SwapbotChoose = React.createClass
                 <div className="description" dangerouslySetInnerHTML={{__html: this.props.bot.descriptionHtml}}></div>
             </div>
             <div className="section grid-50">
-                <h3>I want</h3>
+                {
+                    if swapConfigGroups.sell.length == 0 and swapConfigGroups.buy.length == 0
+                        <div>
+                            <h3>No Available Swaps</h3>
+                            <div id="SwapsListComponent">
+                                <p className="description">There are no swaps available at this time.</p>
+                            </div>
+                        </div>
+                    else 
+                        <div>
+                            { if swapConfigGroups.sell.length > 0
+                                this.renderAvailableSwaps(swapConfigGroups.sell, bot, true)
+                            }
+                            { if swapConfigGroups.sell.length > 0 and swapConfigGroups.buy.length > 0
+                                <div className="buy-sell-separator"></div>
+                            }
+                            { if swapConfigGroups.buy.length > 0
+                                this.renderAvailableSwaps(swapConfigGroups.buy, bot, false, swapConfigGroups.sell.length)
+                            }
+                        </div>
+
+                }
+
+
+            </div>
+        </div>
+
+    renderAvailableSwaps: (swapConfigGroups, bot, isSell, startingOffset=0)->
+        isBuy = not isSell
+        return <div>
+                <h3>{ if isSell then 'Tokens for Sale' else 'Offers to Buy Tokens' }</h3>
                 <div id="SwapsListComponent">
                     {
                         if bot.swaps
                             <ul id="swaps-list" className="wide-list">
                             {
                                 for swapConfigGroup, index in swapConfigGroups
+                                    btnIndex = index + startingOffset
+                                    inAsset = swapConfigGroup[0].in
+
                                     outAsset = swapConfigGroup[0].out
-                                    outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
+
+                                    if isBuy
+                                        inAmount = this.calculateBuyableAmount(bot, swapConfigGroup)
+                                        inAmount = swapbot.formatters.formatCurrencyWithForcedZero(inAmount)
+                                        availableMsg = "(Sell up to #{inAmount})"
+                                    else
+                                        outAmount = swapbot.formatters.formatCurrencyWithForcedZero(bot.balances[outAsset])
+                                        availableMsg = "(#{outAmount} available)"
+
+
                                     isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
                                     [firstSwapDescription, otherSwapDescriptions] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup)
 
                                     <li key={"swapGroup#{index}"} className={"chooseable swap"+(" unchooseable" if not isChooseable) }>
-                                        <a href="#choose-swap" onClick={this.buildChooseOutAsset(outAsset, isChooseable)}>
+                                        <a href="#choose-swap" onClick={this.buildChooseAsset((if isSell then outAsset else inAsset), isSell, isChooseable)}>
                                             <div>
-                                                <div className="item-header">{ outAsset } 
+                                                <div className="item-header">{ if isSell then "Buy #{outAsset}" else "Sell #{inAsset}" } 
                                                     {   if isChooseable
-                                                            <small> ({ outAmount } available)</small>
+                                                            <small> {availableMsg}</small>
                                                         else
                                                             <small className="error"> OUT OF STOCK</small>
                                                     }
@@ -84,7 +126,7 @@ SwapbotChoose = React.createClass
                                                         <span className="line-two"><br/>{ otherSwapDescriptions }.</span>
                                                     }
                                                 </p>
-                                                <div className="icon-next" style={transform: if isChooseable and this.state.ui.animatingSwapButtons[if index < 6 then index else 5] then "scale(1.4)" else "scale(1)"}></div>
+                                                <div className="icon-next" style={transform: if isChooseable and this.state.ui.animatingSwapButtons[if btnIndex < 6 then btnIndex else 5] then "scale(1.4)" else "scale(1)"}></div>
                                             </div>
                                         </a>
                                     </li>
@@ -95,8 +137,9 @@ SwapbotChoose = React.createClass
                     }
                 </div>
             </div>
-        </div>
 
+    calculateBuyableAmount: (bot, swapConfigGroup)->
+        return swapbot.swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroup)
 
 # #############################################
 module.exports = SwapbotChoose

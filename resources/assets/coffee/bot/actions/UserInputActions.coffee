@@ -5,10 +5,11 @@ Dispatcher = require '../dispatcher/Dispatcher'
 
 exports = {}
 
-exports.chooseOutAsset = (chosenOutAsset)->
+exports.chooseAsset = (asset, isSell)->
     Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_OUT_ASSET
-        outAsset: chosenOutAsset
+        actionType: BotConstants.BOT_USER_CHOOSE_ASSET
+        asset     : asset
+        isSell    : isSell
     })
     return
 
@@ -20,10 +21,11 @@ exports.chooseSwapConfigAtRate = (chosenSwapConfig, currentRate)->
     })
     return
 
-exports.updateOutAmount = (newOutAmount)->
+exports.updateSwapAmount = (newAmount, amountType)->
     Dispatcher.dispatch({
-        actionType: BotConstants.BOT_USER_CHOOSE_OUT_AMOUNT
-        outAmount: newOutAmount
+        actionType: BotConstants.BOT_USER_ENTERED_SWAP_AMOUNT
+        amount: newAmount
+        amountType: amountType
     })
     return
 
