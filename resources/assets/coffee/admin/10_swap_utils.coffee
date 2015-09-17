@@ -34,7 +34,7 @@ swaputils.newSwapProp = (swap={})->
     })
 
 swaputils.normalizeSwapsForSaving = (swaps)->
-    console.log "swaps in: ",swaps
+    # console.log "swaps in: ",swaps
     swapsOut = swaps.map (swap)->
         # convert price back to rate for each sell swap
         if swap.direction() == constants.DIRECTION_SELL
@@ -44,7 +44,7 @@ swaputils.normalizeSwapsForSaving = (swaps)->
                 rate = swapbot.formatters.formatCurrencyAsNumber(1 / price)
             swap.rate(rate)
         return swap
-    console.log "swapsOut=",swapsOut
+    # console.log "swapsOut=",swapsOut
     return swapsOut
 
 swaputils.buildSwapsPropValue = (swaps, defaultSwapDirection=constants.DIRECTION_SELL)->

@@ -7,7 +7,7 @@ csvutils.dataToCSVString = (rows)->
     csv = ''
     for row in rows
         rowText = '"'+row.map((text, i)->
-            console.log "text=",text
+            # console.log "text=",text
             return text.replace(/"/g, '""')
         ).join('","')+'"'
         csv += rowText + "\n"

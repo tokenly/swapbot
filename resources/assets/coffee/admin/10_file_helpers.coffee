@@ -53,15 +53,15 @@ dragdrop = (element, options) ->
 
 fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetailsProp, imageStyle)->
     onChange = (files)->
-        console.log "onChange!  files=",files
+        # console.log "onChange!  files=",files
         imageDetailsProp({'uploading': true})
 
         sbAdmin.api.uploadImage(files).then (apiResponse)->
-            console.log "apiResponse=",apiResponse
+            # console.log "apiResponse=",apiResponse
             imageIdProp(apiResponse.id)
             imageDetailsProp(apiResponse.imageDetails)
         , (apiError)->
-            console.log "error: ",apiError
+            console.error "error: ",apiError
             imageDetailsProp({'error': "Unable to upload this file. Please check the filesize."})
             return
 
@@ -88,10 +88,10 @@ fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetail
         delete attributes.sizeDesc
 
     onFileChange = (e)->
-        console.log "onFileChange fileUploadDomEl=",fileUploadDomEl
+        # console.log "onFileChange fileUploadDomEl=",fileUploadDomEl
         if fileUploadDomEl?
             files = fileUploadDomEl.files
-            console.log "files=",files
+            # console.log "files=",files
             onChange(files)
             e.stopPropagation()
         return

@@ -27,7 +27,7 @@ buildMLevel = (levelNumber)->
     return m('span', {class: "label label-danger danger"}, "Code #{levelNumber}")
 
 handleBotEventMessage = (data)->
-    console.log "handleBotEventMessage data=",data
+    # console.log "handleBotEventMessage data=",data
     if appendBotEventMessage(data)
         m.redraw(true)
     return

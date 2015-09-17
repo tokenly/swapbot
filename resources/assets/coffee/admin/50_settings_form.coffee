@@ -38,11 +38,11 @@ vm = ctrl.settingsForm.vm = do ()->
                     vm.name(settingsData.name)
 
                     v = settingsData.value
-                    console.log "typeof v=",typeof v
+                    # console.log "typeof v=",typeof v
                     if v? and typeof v == 'object'
-                        console.log "stringify"
+                        # console.log "stringify"
                         v = window.JSON.stringify(v, null, 2)
-                    console.log "v=",v
+                    # console.log "v=",v
                     vm.value(v)
 
                     return
