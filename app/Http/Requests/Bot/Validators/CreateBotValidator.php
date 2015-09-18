@@ -10,6 +10,7 @@ class CreateBotValidator extends BotValidator {
     protected $rules = [
         'uuid'                        => '',
         'name'                        => 'required',
+        'url_slug'                    => 'required|min:8|max:80',
         'description'                 => 'required',
         'user_id'                     => 'numeric',
         'return_fee'                  => 'required|numeric|min:0.00001|max:0.001',
@@ -28,3 +29,4 @@ class CreateBotValidator extends BotValidator {
     }
 
 }
+

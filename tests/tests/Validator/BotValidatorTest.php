@@ -149,6 +149,20 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['refund_config' => ['refundAfterBlocks' => '73']]),
                 'error' => 'no more than 72 confirmations',
             ],
+
+            // slug
+            [
+                'vars' => array_replace_recursive($sample_vars, ['url_slug' => '2short']),
+                'error' => 'url slug must be at least 8 characters',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['url_slug' => '2longxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx']),
+                'error' => 'not be greater than 80 characters',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['url_slug' => 'my-slug-###']),
+                'error' => 'not a valid URL slug',
+            ],
         ];
 
         // fixed
