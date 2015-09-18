@@ -209,7 +209,7 @@ class BotValidator {
                 return;
             }
 
-            if ($image['user_id'] != $user['id']) {
+            if ($image['user_id'] != $user['id'] AND !$user->hasPermission('editBots')) {
                 $validator->errors()->add('image_'.$image_type, "This {$image_type} image could not be associated with this bot.");
                 return;
 

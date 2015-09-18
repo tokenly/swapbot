@@ -59,6 +59,16 @@ class UpdateBotHandler {
             if ($old_image) { $this->image_repository->delete($old_image); }
         }
 
+        // associate image ids with the user of the bot
+        $logo_image = $bot->getLogoImage();
+        if ($logo_image AND $logo_image['user_id'] != $bot['user_id']) {
+            $this->image_repository->update($logo_image, ['user_id' => $bot['user_id']]);
+        }
+        $background_image = $bot->getBackgroundImage();
+        if ($background_image AND $background_image['user_id'] != $bot['user_id']) {
+            $this->image_repository->update($background_image, ['user_id' => $bot['user_id']]);
+        }
+
         return null;
     }
 
