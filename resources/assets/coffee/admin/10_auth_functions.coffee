@@ -1,5 +1,6 @@
 # ---- begin references
 sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
+credentialsStore = require './10_credentials_store'
 # ---- end references
 
 # auth functions
@@ -12,7 +13,7 @@ auth.redirectIfNotLoggedIn = ()->
     return
 
 auth.isLoggedIn = ()->
-    credentials = auth.getCredentials()
+    credentials = credentialsStore.getCredentials()
     if credentials.apiToken?.length > 0 and credentials.apiSecretKey?.length > 0
         return true
     return false
@@ -33,8 +34,7 @@ auth.hasPermssion = (requiredPermission)->
 
 # returns a promise
 auth.login = (apiToken, apiSecretKey)->
-    window.localStorage.setItem("apiToken", apiToken)
-    window.localStorage.setItem("apiSecretKey", apiSecretKey)
+    credentialsStore.save(apiToken, apiSecretKey)
 
     return sbAdmin.api.getSelf().then (user)->
         # console.log "logged in user: ", user
@@ -43,15 +43,8 @@ auth.login = (apiToken, apiSecretKey)->
 
 
 auth.logout = ()->
-    window.localStorage.removeItem("apiToken")
-    window.localStorage.removeItem("apiSecretKey")
+    credentialsStore.clear()
     window.localStorage.removeItem("user")
     return
-
-auth.getCredentials = ()->
-    return {
-        apiToken: localStorage.getItem("apiToken")
-        apiSecretKey: localStorage.getItem("apiSecretKey")
-    }
 
 module.exports = auth

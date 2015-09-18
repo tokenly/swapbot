@@ -1,5 +1,5 @@
 # ---- begin references
-sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
+credentialsStore = require './10_credentials_store'
 # ---- end references
 
 # api functions
@@ -24,7 +24,7 @@ buildFileHash = (file, callbackFn)->
     return
 
 signRequest = (xhr, xhrOptions)->
-    credentials = sbAdmin.auth.getCredentials()
+    credentials = credentialsStore.getCredentials()
     return if not credentials.apiToken?.length
 
     nonce = newNonce()
