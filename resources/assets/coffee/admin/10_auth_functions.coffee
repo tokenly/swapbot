@@ -22,6 +22,15 @@ auth.getUser = ()->
     if not user then return {}
     return user
 
+auth.hasPermssion = (requiredPermission)->
+    user = auth.getUser()
+    if not user.privileges? then return false
+
+    if user.privileges[requiredPermission]
+        return true
+
+    return false
+
 # returns a promise
 auth.login = (apiToken, apiSecretKey)->
     window.localStorage.setItem("apiToken", apiToken)
