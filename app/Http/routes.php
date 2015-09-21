@@ -11,8 +11,13 @@ $router->get('/', 'WelcomeController@index');
 $router->get('/admin/{param1?}/{param2?}/{param3?}/{param4?}/{param5?}', 'AdminController@index');
 
 // Public Bot Pages
-$router->get('/public/{username}/{botid}', 'PublicBotController@showBot');
-$router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@showSwap');
+$router->get('/bot/{username}/{botid}', 'PublicBotController@showBot');
+$router->get('/swap/{username}/{swapid}', 'PublicSwapController@showSwap');
+
+// redirect old pages
+$router->get('/public/{username}/{botid}', 'PublicBotController@redirectToCanonicalBotURL');
+$router->get('/public/{username}/swap/{swapid}', 'PublicSwapController@redirectToCanonicalSwapURL');
+
 
 // Unsubscribe Pages
 $router->get('/public/unsubscribe/{customerid}/{token}', 'PublicEmailSubscriptionController@unsubscribe');

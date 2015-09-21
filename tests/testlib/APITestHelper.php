@@ -83,7 +83,7 @@ class APITestHelper  {
         // call the API
         $url = $this->extendURL($this->url_base, null);
         $response = $this->callAPIWithAuthentication('POST', $url, $create_vars);
-        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()."\n\nfor POST ".$url);
+        PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()."\n\nfor POST ".$url."\n".(($actual_response_from_api = json_decode($response->getContent(), true)) ? json_encode($actual_response_from_api, 192) : null));
         $actual_response_from_api = json_decode($response->getContent(), true);
         PHPUnit::assertNotEmpty($actual_response_from_api);
 
@@ -214,7 +214,7 @@ class APITestHelper  {
         // call the API
         $url = $this->extendURL($this->url_base, '/'.$created_model['uuid']);
         $response = $this->callAPIWithAuthentication('PUT', $url, $update_attributes);
-        PHPUnit::assertEquals(204, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()." for GET ".$url);
+        PHPUnit::assertEquals(204, $response->getStatusCode(), "Unexpected response code of ".$response->getStatusCode()." for GET ".$url."\n".(($actual_response_from_api = json_decode($response->getContent(), true)) ? json_encode($actual_response_from_api, 192) : null));
 
         // load the model and make sure it was updated
         $reloaded_model = $this->repository->findByUuid($created_model['uuid']);

@@ -32,6 +32,10 @@ class PublicSwapController extends Controller {
         ]);
     }
 
+    public function redirectToCanonicalSwapURL($username, $swapid, SwapRepository $swap_repository, FormattingHelper $formatting_helper) {
+        list($user, $bot, $swap) = $this->requireUserAndSwap($username, $swapid);
+        return redirect($swap->getPublicSwapURL($user['username']), 301);
+    }
 
     protected function requireUserAndSwap($username, $swapid) {
 

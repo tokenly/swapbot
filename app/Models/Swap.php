@@ -2,6 +2,7 @@
 
 namespace Swapbot\Models;
 
+use Illuminate\Support\Facades\Config;
 use Swapbot\Models\Base\APIModel;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
@@ -56,6 +57,12 @@ class Swap extends APIModel {
     public function getBotUsernameAttribute() {
         if (array_key_exists('bot_username', $this->attributes)) { return $this->attributes['bot_username']; }
         return $this->bot['username'];
+    }
+
+
+    public function getPublicSwapURL($username=null) {
+        if ($username === null) { $username = $this->bot['username']; }
+        return Config::get('swapbot.site_host')."/swap/{$username}/{$this['uuid']}";
     }
 
 

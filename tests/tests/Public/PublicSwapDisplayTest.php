@@ -22,6 +22,7 @@ class PublicSwapDisplayTest extends TestCase {
         $request = Request::create($url, 'GET', []);
         $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
         PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        PHPUnit::assertContains("Sample Bot One Swap Details", $response->getContent(), "Content not found in GET ".$url);
     }
 
 

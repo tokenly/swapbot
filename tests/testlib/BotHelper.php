@@ -26,6 +26,7 @@ class BotHelper  {
     public function sampleBotVars() {
         return [
             'name'                        => 'Sample Bot One',
+            'url_slug'                    => 'sample-bot-one',
             'description'                 => 'The bot description goes here.',
             'active'                      => false,
             'hash'                        => '',

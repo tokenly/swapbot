@@ -14,6 +14,7 @@ use Swapbot\Models\User;
 use Swapbot\Repositories\ImageRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Strategies\StrategyHelpers;
+use Swapbot\Util\Slug\Slugifier;
 
 
 class BotValidator {
@@ -47,6 +48,9 @@ class BotValidator {
     protected function buildValidator($posted_data, User $user) {
         $validator = $this->validator_factory->make($posted_data, $this->rules, $messages=[], $customAttributes=[]);
         $validator->after(function ($validator) use ($posted_data, $user) {
+            // validate url slug
+            $this->validateURLSlug(isset($posted_data['url_slug']) ? $posted_data['url_slug'] : null, $validator);
+
             // validate swaps
             $this->validateSwaps(isset($posted_data['swaps']) ? $posted_data['swaps'] : null, $validator);
 
@@ -264,6 +268,14 @@ class BotValidator {
             }
         }
 
+    }
+
+    protected function validateURLSlug($url_slug, $validator) {
+        if (strlen($url_slug) AND !Slugifier::isValidSlug($url_slug)) {
+            $validator->errors()->add('url_slug', "This is not a valid URL slug.");
+        }
+
+        return;
     }
     
 
