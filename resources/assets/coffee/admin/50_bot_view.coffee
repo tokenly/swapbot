@@ -88,7 +88,7 @@ buildBlacklistAddressesGroup = ()->
 # ################################################
 
 botPublicAddress = (vm)->
-    return swapbot.addressUtils.publicBotAddress(vm.username(), vm.resourceId(), window.location)
+    return swapbot.addressUtils.publicBotHref(vm.username(), vm.urlSlug(), vm.resourceId(), window.location)
 
 # ################################################
 
@@ -213,6 +213,7 @@ vm = ctrl.botView.vm = do ()->
         vm.description = m.prop('')
         vm.hash = m.prop('')
         vm.username = m.prop('')
+        vm.urlSlug = m.prop('')
         vm.address = m.prop('')
         vm.paymentAddress = m.prop('')
         vm.paymentPlan = m.prop('')
@@ -254,6 +255,7 @@ vm = ctrl.botView.vm = do ()->
                 vm.description(botData.descriptionHtml)
                 vm.hash(botData.hash)
                 vm.username(botData.username)
+                vm.urlSlug(botData.urlSlug)
                 vm.swaps(buildSwapsPropValue(botData.swaps))
                 vm.balances(buildBalancesPropValue(botData.balances))
                 vm.confirmationsRequired(botData.confirmationsRequired)

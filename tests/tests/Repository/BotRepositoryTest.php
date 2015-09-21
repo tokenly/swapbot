@@ -38,7 +38,7 @@ class BotRepositoryTest extends TestCase {
     public function testFindBotByUserIDAndUUID() {
         $bot_helper = app('BotHelper');
         $user = app('UserHelper')->newSampleUser();
-        $expected_bot = $bot_helper->newSampleBot($user);
+        $expected_bot = $bot_helper->newSampleBotWithUniqueSlug($user);
 
         $repo = app('Swapbot\Repositories\BotRepository');
 
@@ -87,10 +87,10 @@ class BotRepositoryTest extends TestCase {
     }
 
     public function testBotIncomeForwardingAddresses() {
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
         PHPUnit::assertEquals(['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'], $bot->getAllIncomeForwardingAddresses());
 
-        $bot = app('BotHelper')->newSampleBot(null, [
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug(null, [
             'income_rules'               => [
                 [
                     'asset'         => 'BTC',
@@ -119,7 +119,7 @@ class BotRepositoryTest extends TestCase {
 
     protected function createRepositoryTestHelper() {
         $create_model_fn = function() {
-            return $this->app->make('BotHelper')->newSampleBot();
+            return $this->app->make('BotHelper')->newSampleBotWithUniqueSlug();
         };
         $helper = new RepositoryTestHelper($create_model_fn, $this->app->make('Swapbot\Repositories\BotRepository'));
         return $helper;

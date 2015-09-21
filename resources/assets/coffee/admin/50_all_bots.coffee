@@ -80,7 +80,7 @@ ctrl.allbots.view = ()->
                         ]),
                     ]),
                     vm.bots().map((bot)->
-                        address = swapbot.addressUtils.publicBotAddress(bot.username, bot.id, window.location)
+                        address = swapbot.addressUtils.publicBotHrefFromBot(bot, window.location)
                         return m("tr", {}, [
                             m("td", {}, [
                                 if bot.hash.length then m("a[href='#{address}']", {target: "_blank"}, [sbAdmin.robohashUtils.img(bot.hash, 'tinyRoboHead')]) else m('div', {class: 'emptyRoboHead'}, ''),

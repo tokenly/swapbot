@@ -26,7 +26,7 @@ class SwapAPITest extends TestCase {
         $tester = $this->setupAPITester();
 
         $user_1 = app('UserHelper')->newRandomUser();
-        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+        $bot_1 = app('BotHelper')->newSampleBotWithUniqueSlug($user_1);
         $new_swap_1 = app('SwapHelper')->newSampleSwap($bot_1);
 
         // test get swap as admin
@@ -43,10 +43,10 @@ class SwapAPITest extends TestCase {
         $tester = $this->setupAPITester();
 
         $user_1 = app('UserHelper')->newRandomUser();
-        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+        $bot_1 = app('BotHelper')->newSampleBotWithUniqueSlug($user_1);
 
         $user_2 = app('UserHelper')->newRandomUser();
-        $bot_2 = app('BotHelper')->newSampleBot($user_2);
+        $bot_2 = app('BotHelper')->newSampleBotWithUniqueSlug($user_2);
 
         $admin_user = app('UserHelper')->newRandomUser(['privileges' => ['viewSwaps' => true]]);
 
@@ -71,10 +71,10 @@ class SwapAPITest extends TestCase {
 
     public function testGetSwapsWithFilters() {
         $user_1 = app('UserHelper')->newRandomUser();
-        $bot_1 = app('BotHelper')->newSampleBot($user_1);
+        $bot_1 = app('BotHelper')->newSampleBotWithUniqueSlug($user_1);
 
         $user_2 = app('UserHelper')->newRandomUser();
-        $bot_2 = app('BotHelper')->newSampleBot($user_2);
+        $bot_2 = app('BotHelper')->newSampleBotWithUniqueSlug($user_2);
 
         $admin_user = app('UserHelper')->newRandomUser(['privileges' => ['viewSwaps' => true]]);
 

@@ -20,7 +20,7 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
         $helper->cleanup();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
@@ -37,7 +37,7 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
         $helper->cleanup();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
@@ -57,7 +57,7 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
         $helper->cleanup();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
@@ -76,7 +76,7 @@ class BotLeaseEntryRepositoryTest extends TestCase {
         $helper = $this->createRepositoryTestHelper();
         $helper->cleanup();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // add lease
         $repo = app('Swapbot\Repositories\BotLeaseEntryRepository');

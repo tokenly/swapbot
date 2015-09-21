@@ -15,7 +15,7 @@ buildLabelEl = (label, id)->
             properties[k] = v
 
         if label.popover?
-            labelText = [labelText, m("button", class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
+            labelText = [labelText, m("button", type: 'button', class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
     else
         labelText = label
         properties = {for: id, class: 'control-label'}
@@ -63,7 +63,15 @@ form.mInputEl = (attributes, prop=null)->
                 return (m.withAttr("value", prop))(e)
         else
             inputProps.onchange = m.withAttr("value", prop)
+
+        if attributes.onkeyup?
+            inputProps.onkeyup = (e)->
+                (attributes.onkeyup)(e)
+                return (m.withAttr("value", prop))(e)
+        else
             inputProps.onkeyup = m.withAttr("value", prop)
+
+        
         inputProps.value = prop()
     
     # defaults

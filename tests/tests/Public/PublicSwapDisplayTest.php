@@ -18,11 +18,19 @@ class PublicSwapDisplayTest extends TestCase {
         $username = $swap->bot['username'];
         $swap_uuid = $swap['uuid'];
 
-        $url = "/public/{$username}/swap/{$swap_uuid}";
+        $url = "/swap/{$username}/{$swap_uuid}";
         $request = Request::create($url, 'GET', []);
         $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
         PHPUnit::assertEquals(200, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
         PHPUnit::assertContains("Sample Bot One Swap Details", $response->getContent(), "Content not found in GET ".$url);
+
+
+        // redirect old UUID
+        $url = "/public/{$username}/swap/{$swap_uuid}";
+        $request = Request::create($url, 'GET', []);
+        $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
+        PHPUnit::assertEquals(301, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
+        PHPUnit::assertContains("/swap/{$username}/{$swap_uuid}", $response->headers->get('location'), "location not matched");
     }
 
 
@@ -32,19 +40,19 @@ class PublicSwapDisplayTest extends TestCase {
         $username = $swap->bot['username'];
         $swap_uuid = $swap['uuid'];
 
-        $url = "/public/badusername/swap/{$swap_uuid}";
+        $url = "/swap/badusername/{$swap_uuid}";
         $request = Request::create($url, 'GET', []);
         $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
         PHPUnit::assertEquals(404, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
 
-        $url = "/public/{$username}/swap/unknownuuid";
+        $url = "/swap/{$username}/unknownuuid";
         $request = Request::create($url, 'GET', []);
         $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
         PHPUnit::assertEquals(404, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);
 
         $user_2 = app('UserHelper')->getSampleUser('sample2@tokenly.co');
         $username_2 = $user_2['username'];
-        $url = "/public/{$username_2}/swap/{$swap_uuid}";
+        $url = "/swap/{$username_2}/{$swap_uuid}";
         $request = Request::create($url, 'GET', []);
         $response = app('Illuminate\Contracts\Http\Kernel')->handle($request);
         PHPUnit::assertEquals(404, $response->getStatusCode(), "Unexpected response code of ".$response->getContent()."\n\nfor GET ".$url);

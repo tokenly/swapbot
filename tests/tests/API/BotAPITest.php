@@ -124,12 +124,12 @@ class BotAPITest extends TestCase {
         $tester = $this->setupAPITester();
 
         // create a sample bot with the standard user
-        $new_bot_1 = app('BotHelper')->newSampleBot();
-        $new_bot_2 = app('BotHelper')->newSampleBot();
+        $new_bot_1 = app('BotHelper')->newSampleBotWithUniqueSlug();
+        $new_bot_2 = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // now create a separate user
         $another_user = app('UserHelper')->newRandomUser(['privileges' => ['viewBots' => true]]);
-        $new_bot_3 = app('BotHelper')->newSampleBot($another_user);
+        $new_bot_3 = app('BotHelper')->newSampleBotWithUniqueSlug($another_user);
 
         // first user is unauthorized
         $loaded_bots = $tester->callAPIAndValidateResponse('GET', '/api/v1/bots', ['allusers' => null], 403);
@@ -152,7 +152,7 @@ class BotAPITest extends TestCase {
             ->useUserHelper(app('UserHelper'))
             ->useRepository(app('Swapbot\Repositories\BotRepository'))
             ->createModelWith(function($user) use ($bot_helper) {
-                return $bot_helper->newSampleBot($user);
+                return $bot_helper->newSampleBotWithUniqueSlug($user);
             });
 
         return $tester;

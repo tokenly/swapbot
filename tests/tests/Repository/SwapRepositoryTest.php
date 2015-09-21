@@ -22,11 +22,11 @@ class SwapRepositoryTest extends TestCase {
     {
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
         $swap1 = app('SwapHelper')->newSampleSwap($bot);
         $swap2 = app('SwapHelper')->newSampleSwap($bot);
 
-        $bot2 = app('BotHelper')->newSampleBot();
+        $bot2 = app('BotHelper')->newSampleBotWithUniqueSlug();
         $swap3 = app('SwapHelper')->newSampleSwap($bot2);
 
         $loaded_models = array_values(iterator_to_array(app('Swapbot\Repositories\SwapRepository')->findByBot($bot)));
@@ -41,8 +41,8 @@ class SwapRepositoryTest extends TestCase {
     {
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
-        $bot2 = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
+        $bot2 = app('BotHelper')->newSampleBotWithUniqueSlug();
         $transaction = app('TransactionHelper')->newSampleTransaction($bot);
 
         $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction);
@@ -67,7 +67,7 @@ class SwapRepositoryTest extends TestCase {
     {
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
         $transaction = app('TransactionHelper')->newSampleTransaction($bot);
 
         $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
@@ -86,8 +86,8 @@ class SwapRepositoryTest extends TestCase {
     {
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
-        $bot2 = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
+        $bot2 = app('BotHelper')->newSampleBotWithUniqueSlug();
         $transaction = app('TransactionHelper')->newSampleTransaction($bot);
 
         $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
@@ -110,8 +110,8 @@ class SwapRepositoryTest extends TestCase {
     {
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
-        $bot2 = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
+        $bot2 = app('BotHelper')->newSampleBotWithUniqueSlug();
         $transaction = app('TransactionHelper')->newSampleTransaction($bot);
         $transaction2 = app('TransactionHelper')->newSampleTransaction($bot2);
 
@@ -136,7 +136,7 @@ class SwapRepositoryTest extends TestCase {
 
         $helper = $this->createRepositoryTestHelper();
 
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
         $transaction = app('TransactionHelper')->newSampleTransaction($bot);
         $swap1 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['name' => 'BTC:LTBCOIN']);
         $swap2 = app('SwapHelper')->newSampleSwap($bot, $transaction, ['state' => 'foobar', 'name' => 'BTC:SOUP']);

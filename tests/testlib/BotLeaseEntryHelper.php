@@ -25,7 +25,7 @@ class BotLeaseEntryHelper  {
     //   directly in the repository (no validation)
     public function newSampleBotLeaseEntry($bot=null, $lease_entry_vars=[]) {
         $attributes = array_replace_recursive($this->sampleBotLeaseEntryVars(), $lease_entry_vars);
-        if ($bot == null) { $bot = app('BotHelper')->newSampleBot(); }
+        if ($bot == null) { $bot = app('BotHelper')->newSampleBotWithUniqueSlug(); }
 
         if (!isset($attributes['bot_id'])) { $attributes['bot_id'] = $bot['id']; }
         if (!isset($attributes['user_id'])) { $attributes['user_id'] = $bot['user_id']; }

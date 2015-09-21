@@ -5,6 +5,7 @@ SwapsStore = require '../stores/SwapsStore'
 UserInterfaceStateStore = require '../stores/UserInterfaceStateStore'
 swapbot = swapbot or {}; swapbot.eventMessageUtils = require '../../shared/eventMessageUtils'
 swapbot = swapbot or {}; swapbot.formatters = require '../../shared/formatters'
+swapbot = swapbot or {}; swapbot.addressUtils = require '../../shared/addressUtils'
 # ---- end references
 
 RecentAndActiveSwapsComponent = null
@@ -74,7 +75,7 @@ RecentOrActiveSwapComponent = React.createClass
                             }
                             
                             { if swap.isComplete
-                                <a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
+                                <a href={swapbot.addressUtils.publicSwapHref(swap, bot.username)} className="details-link" target="_blank"><i className="fa fa-arrow-circle-right"></i></a>
                             }
                         </span>
                         { if not swap.isComplete

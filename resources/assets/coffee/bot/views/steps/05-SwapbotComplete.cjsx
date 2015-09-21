@@ -83,7 +83,7 @@ SwapbotComplete = React.createClass
                     <br/>
                     <a id="not-my-transaction" onClick={this.notMyTransactionClicked} href="#" className="shadow-link">Not your transaction?</a>
                 </p>
-                <p><a href={"/public/#{bot.username}/swap/#{swap.id}"} className="details-link" target="_blank">Transaction details <i className="fa fa-arrow-circle-right"></i></a></p>
+                <p><a href={swapbot.addressUtils.publicSwapHref(swap, bot.username)} className="details-link" target="_blank">Transaction details <i className="fa fa-arrow-circle-right"></i></a></p>
             </div>
         </div>
 

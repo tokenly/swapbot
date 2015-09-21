@@ -113,8 +113,7 @@ ctrl.allswaps.view = ()->
 
     if vm.swaps().length
         tableRows = vm.swaps().map((swap)->
-            # address = swapbot.addressUtils.publicBotAddress(swap.username, swap.id, window.location)
-            botAaddress = swapbot.addressUtils.publicBotAddress(swap.botUsername, swap.botUuid, window.location)
+            botAaddress = swapbot.addressUtils.publicBotHrefFromSwap(swap, window.location)
 
             return m("tr", {}, [
                 m("td", {}, "#{swap.receipt.quantityIn} #{swap.receipt.assetIn}"),
@@ -122,7 +121,7 @@ ctrl.allswaps.view = ()->
                 m("td", {}, swap.state),
                 m("td", {}, window.moment(swap.updatedAt).format('MMM D h:mm a')),
                 m("td", {}, [
-                    m("a[href='/public/#{swap.botUsername}/swap/#{swap.id}']", {target: "_blank", class: "",}, 'Details'),
+                    m("a[href='#{swapbot.addressUtils.publicSwapHref(swap)}']", {target: "_blank", class: "",}, 'Details'),
                 ]),
                 m("td", {}, [
                     m("a[href='/admin/swapevents/#{swap.id}']", {target: "_blank", class: "", config: m.route}, "Events"),

@@ -12,7 +12,7 @@ class BotIndexRepositoryTest extends TestCase {
     {
         $index = app('Swapbot\Repositories\BotIndexRepository');
         $helper = app('BotHelper');
-        $bot = $helper->newSampleBot();
+        $bot = $helper->newSampleBotWithUniqueSlug();
         $index->clearIndex($bot); // clear the index field created when the bot is created
 
         $index->addToIndex($bot, BotIndexRepository::FIELD_NAME, 'My Bot');
@@ -27,7 +27,7 @@ class BotIndexRepositoryTest extends TestCase {
     {
         $index = app('Swapbot\Repositories\BotIndexRepository');
         $helper = app('BotHelper');
-        $bot = $helper->newSampleBot();
+        $bot = $helper->newSampleBotWithUniqueSlug();
         $index->clearIndex($bot); // clear the index field created when the bot is created
 
         $index->addMultipleValuesToIndex($bot, [
@@ -44,7 +44,7 @@ class BotIndexRepositoryTest extends TestCase {
     {
         $index = app('Swapbot\Repositories\BotIndexRepository');
         $helper = app('BotHelper');
-        $bot = $helper->newSampleBot();
+        $bot = $helper->newSampleBotWithUniqueSlug();
         $index->clearIndex($bot); // clear the index field created when the bot is created
 
         $index->addToIndex($bot, BotIndexRepository::FIELD_NAME, 'My Bot');
@@ -63,9 +63,9 @@ class BotIndexRepositoryTest extends TestCase {
         $index = app('Swapbot\Repositories\BotIndexRepository');
         $helper = app('BotHelper');
         $test_helper = app('APITestHelper');
-        $bot_1 = $helper->newSampleBot();
+        $bot_1 = $helper->newSampleBotWithUniqueSlug();
         $index->clearIndex($bot_1); // clear the index field created when the bot is created
-        $bot_2 = $helper->newSampleBot();
+        $bot_2 = $helper->newSampleBotWithUniqueSlug();
         $index->clearIndex($bot_2); // clear the index field created when the bot is created
 
         $index->addMultipleValuesToIndex($bot_1, [
@@ -112,7 +112,7 @@ class BotIndexRepositoryTest extends TestCase {
             'description' => 'We grow \'em so you don\'t have to',
         ]);
 
-        $bot_2 = $helper->newSampleBot();
+        $bot_2 = $helper->newSampleBotWithUniqueSlug();
 
         PHPUnit::assertEquals('Watermelon Bot', $index->indexedValue($bot, BotIndexRepository::FIELD_NAME));
         PHPUnit::assertEquals('farmerjoe', $index->indexedValue($bot, BotIndexRepository::FIELD_USERNAME));

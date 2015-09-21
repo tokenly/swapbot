@@ -12,8 +12,11 @@ use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Util\Slug\Slugifier;
 
 class BotHelper  {
+
+    static $UNIQUE_SLUG_ID = 1;
 
     use DispatchesCommands;
 
@@ -119,11 +122,18 @@ class BotHelper  {
         $bots = $this->bot_repository->findByUser($user)->toArray();
         $bot = $bots ? $bots[0] : null;
         if (!$bot) {
-            $bot = $this->newSampleBot($user);
+            $bot = $this->newSampleBotWithUniqueSlug($user);
         }
         return $bot;
     }
 
+    public function newSampleBotWithUniqueSlug($user=null, $bot_vars=[]) {
+        if (!isset($bot_vars['url_slug'])) {
+            $bot_vars['url_slug'] = 'sample-bot-'.sprintf('%03d', self::$UNIQUE_SLUG_ID++);
+        }
+
+        return $this->newSampleBot($user, $bot_vars);
+    }
 
     // creates a bot
     //   directly in the repository (no validation)
@@ -133,6 +143,14 @@ class BotHelper  {
             $user = app()->make('UserHelper')->getSampleUser();
         }
         $attributes['user_id'] = $user['id'];
+
+        // create a slug
+        if (!isset($bot_vars['url_slug']) AND isset($bot_vars['name'])) {
+            $new_slug = Slugifier::slugify($bot_vars['name']);
+            if (strlen($new_slug)) {
+                $attributes['url_slug'] = $new_slug;
+            }
+        }
 
         try {
             if (!isset($attributes['uuid'])) {

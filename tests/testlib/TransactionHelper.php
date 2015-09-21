@@ -26,7 +26,7 @@ class TransactionHelper  {
         $attributes = array_replace_recursive($this->sampleTransactionVars(), ['txid' => $this->randomTXID()],
          $vars);
         if ($bot == null) {
-            $bot = app()->make('BotHelper')->newSampleBot();
+            $bot = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
         }
         $attributes['bot_id'] = $bot['id'];
 

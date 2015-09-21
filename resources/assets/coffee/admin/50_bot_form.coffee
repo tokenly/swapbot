@@ -10,6 +10,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
+swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 # ---- end references
 
 ctrl = {}
@@ -119,6 +120,41 @@ mergeSwaps = (buySwaps, sellSwaps)->
 
     return mergedSwaps
 
+
+
+# ------------------------------------
+# url slug
+
+botURLSlugChanged = (e)->
+    newSlug = e.target.value
+    cleanedSlug = nameToSlug(newSlug.length)
+    if cleanedSlug?.length > 0
+        vm.urlSlugIsDefined(true)
+    else
+        vm.urlSlugIsDefined(false)
+
+    return
+
+botNameChanged = (e)->
+    if vm.urlSlugIsDefined()
+        return
+
+    newBotName = e.target.value
+    slugifiedName = nameToSlug(newBotName)
+    vm.urlSlug(slugifiedName)
+    return
+
+nameToSlug = (name)->
+    slug = name.toString().toLowerCase()
+      .replace(/\s+/g, '-')           # Replace spaces with -
+      .replace(/[^\w\-]+/g, '')       # Remove all non-word chars
+      .replace(/\-\-+/g, '-')         # Replace multiple - with single -
+      .replace(/^-+/, '')             # Trim - from start of text
+      .replace(/-+$/, '')             # Trim - from end of text
+
+    return slug
+
+
 # ################################################
 
 vm = ctrl.botForm.vm = do ()->
@@ -144,6 +180,7 @@ vm = ctrl.botForm.vm = do ()->
 
         # fields
         vm.name = m.prop('')
+        vm.urlSlug = m.prop('')
         vm.description = m.prop('')
         vm.hash = m.prop('')
         vm.paymentPlan = m.prop('monthly001')
@@ -162,6 +199,7 @@ vm = ctrl.botForm.vm = do ()->
         vm.backgroundImageId      = m.prop('')
         vm.logoImageDetails       = m.prop('')
         vm.logoImageId            = m.prop('')
+        vm.urlSlugIsDefined       = m.prop(false)
         # if there is an id, then load it from the api
         id = m.route.param('id')
         vm.isNew = (id == 'new')
@@ -173,6 +211,7 @@ vm = ctrl.botForm.vm = do ()->
 
                     vm.name(botData.name)
                     vm.description(botData.description)
+                    vm.urlSlug(botData.urlSlug)
                     vm.hash(botData.hash)
                     vm.paymentPlan(botData.paymentPlan)
                     vm.returnFee(botData.returnFee or "0.0001")
@@ -193,6 +232,12 @@ vm = ctrl.botForm.vm = do ()->
 
                     vm.logoImageDetails(botData.logoImageDetails)
                     vm.logoImageId(botData.logoImageDetails?.id)
+
+                    # set default slug if needed
+                    if vm.urlSlug()?.length > 0
+                        vm.urlSlugIsDefined(true)
+                    else
+                        vm.urlSlug(nameToSlug(vm.name()))
 
                     return
                 , (errorResponse)->
@@ -218,6 +263,7 @@ vm = ctrl.botForm.vm = do ()->
             attributes = {
                 name: vm.name()
                 description: vm.description()
+                urlSlug: vm.urlSlug()
                 hash: vm.hash()
                 paymentPlan: vm.paymentPlan()
                 # need to combine these...
@@ -290,7 +336,16 @@ ctrl.botForm.view = ()->
 
                     m("h3", "Look and Feel"),
 
-                    sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, }, vm.name),
+                    m("div", { class: "row"}, [
+                        m("div", {class: "col-md-5"}, [
+                            sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, onkeyup: botNameChanged }, vm.name),
+                        ]),
+                        m("div", {class: "col-md-7"}, [
+                            sbAdmin.form.mFormField("Bot URL", {id: 'urlSlug', 'placeholder': "my-great-bot", required: true, onkeyup: botURLSlugChanged, prefix: swapbot.addressUtils.publicBotHrefPrefix(window.location)+"/" }, vm.urlSlug),
+                        ]),
+                    ]),
+
+
                     sbAdmin.form.mFormField("Bot Description", {type: 'textarea', id: 'description', 'placeholder': "Bot Description", required: true, }, vm.description),
 
                     m("div", { class: "row"}, [

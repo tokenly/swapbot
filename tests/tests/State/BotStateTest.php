@@ -20,7 +20,7 @@ class BotStateTest extends TestCase {
         app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
 
         // make a sample bot
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // build a statemachine
         $state_machine = app('Swapbot\Statemachines\BotStateMachineFactory')->buildStateMachineFromBot($bot);
@@ -98,7 +98,7 @@ class BotStateTest extends TestCase {
         app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
 
         // make a sample bot
-        $bot = app('BotHelper')->newSampleBot();
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug();
 
         // build a statemachine
         $state_machine = app('Swapbot\Statemachines\BotStateMachineFactory')->buildStateMachineFromBot($bot);

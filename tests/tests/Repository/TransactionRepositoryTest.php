@@ -22,8 +22,8 @@ class TransactionRepositoryTest extends TestCase {
 
     public function testFindTransactionByTXIDAndBotID()
     {
-        $bot1 = app()->make('BotHelper')->newSampleBot();
-        $bot2 = app()->make('BotHelper')->newSampleBot();
+        $bot1 = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
+        $bot2 = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
 
         $tx_helper = $this->app->make('TransactionHelper');
         $tx1 = $tx_helper->newSampleTransaction($bot1, ['txid' => 'tx001']);
@@ -44,8 +44,8 @@ class TransactionRepositoryTest extends TestCase {
 
     public function testFindTransactionByBotID()
     {
-        $bot1 = app()->make('BotHelper')->newSampleBot();
-        $bot2 = app()->make('BotHelper')->newSampleBot();
+        $bot1 = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
+        $bot2 = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
 
         $tx_helper = $this->app->make('TransactionHelper');
         $tx1 = $tx_helper->newSampleTransaction($bot1, ['txid' => 'tx001']);

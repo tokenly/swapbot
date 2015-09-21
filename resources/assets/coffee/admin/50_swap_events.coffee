@@ -121,7 +121,7 @@ ctrl.swapEvents.view = ()->
             sbAdmin.form.mAlerts(vm.errorMessages),
         ])
     else
-        botAaddress = swapbot.addressUtils.publicBotAddress(swap.botUsername, swap.botUuid, window.location)
+        botAaddress = swapbot.addressUtils.publicBotHrefFromSwap(swap, window.location)
                     
         mEl = m("div", [
             m("h4", "Swap Events for swap #{swap.id}"),

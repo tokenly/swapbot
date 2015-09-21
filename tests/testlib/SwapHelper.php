@@ -37,7 +37,7 @@ class SwapHelper  {
     //   directly in the repository (no validation)
     public function newSampleSwap($bot=null, $transaction=null, $swap_vars=[]) {
         $attributes = array_replace_recursive($this->sampleSwapVars(), $swap_vars);
-        if ($bot == null) { $bot = app('BotHelper')->newSampleBot(); }
+        if ($bot == null) { $bot = app('BotHelper')->newSampleBotWithUniqueSlug(); }
         if ($transaction == null) { $transaction = app('TransactionHelper')->newSampleTransaction($bot); }
 
         if (!isset($attributes['bot_id'])) { $attributes['bot_id'] = $bot['id']; }

@@ -10,7 +10,7 @@ use Swapbot\Models\Data\SwapState;
 class Swap extends APIModel {
 
     protected $api_attributes = ['id', 'txid', 'state', 'receipt', 'created_at', 'updated_at', 'completed_at', ];
-    protected $api_attributes_with_bot = ['id', 'txid', 'state', 'receipt', 'created_at', 'updated_at', 'completed_at', 'bot_uuid', 'bot_name', 'bot_username', ];
+    protected $api_attributes_with_bot = ['id', 'txid', 'state', 'receipt', 'created_at', 'updated_at', 'completed_at', 'bot_uuid', 'bot_name', 'bot_username', 'bot_url_slug', ];
 
 
     protected $state_machine        = null;
@@ -57,6 +57,11 @@ class Swap extends APIModel {
     public function getBotUsernameAttribute() {
         if (array_key_exists('bot_username', $this->attributes)) { return $this->attributes['bot_username']; }
         return $this->bot['username'];
+    }
+
+    public function getBotUrlSlugAttribute() {
+        if (array_key_exists('bot_url_slug', $this->attributes)) { return $this->attributes['bot_url_slug']; }
+        return $this->bot['url_slug'];
     }
 
 

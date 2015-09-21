@@ -26,7 +26,7 @@ class BotLedgerEntryHelper  {
     //   directly in the repository (no validation)
     public function newSampleBotLedgerEntry($bot=null, $ledger_entry_vars=[]) {
         $attributes = array_replace_recursive($this->sampleBotLedgerEntryVars(), $ledger_entry_vars);
-        if ($bot == null) { $bot = app('BotHelper')->newSampleBot(); }
+        if ($bot == null) { $bot = app('BotHelper')->newSampleBotWithUniqueSlug(); }
 
         if (!isset($attributes['bot_id'])) { $attributes['bot_id'] = $bot['id']; }
         if (!isset($attributes['user_id'])) { $attributes['user_id'] = $bot['user_id']; }
