@@ -273,4 +273,18 @@ popoverLabels.fiatSellIsDivisible = {
 
 
 # ---------------------------------------------------------------------------------
+popoverLabels.urlSlug = {
+    text: "Bot URL Slug"
+    popover: {
+        title: "About The Bot URL Slug"
+        content: """
+            <p>The bot URL slug can contain only lowercase letters, numbers and dashes.  It should be at least 8 characters long and not more than 80 characters long.</p>
+        """
+    }
+}
+
+
+
+
+# ---------------------------------------------------------------------------------
 module.exports = popoverLabels

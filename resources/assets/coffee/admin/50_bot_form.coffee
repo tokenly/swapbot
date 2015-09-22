@@ -11,6 +11,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
+popoverLabels = require './05_popover_labels'
 # ---- end references
 
 ctrl = {}
@@ -125,14 +126,28 @@ mergeSwaps = (buySwaps, sellSwaps)->
 # ------------------------------------
 # url slug
 
+correctSlugTimeout = null
 botURLSlugChanged = (e)->
+    if correctSlugTimeout?
+        clearTimeout(correctSlugTimeout)
+        correctSlugTimeout = null
+
     newSlug = e.target.value
     cleanedSlug = nameToSlug(newSlug.length)
     if cleanedSlug?.length > 0
         vm.urlSlugIsDefined(true)
+        correctSlugTimeout = setTimeout(correctSlug, 1000)
     else
         vm.urlSlugIsDefined(false)
 
+    return
+
+correctSlug = ()->
+    if vm.urlSlugIsDefined()
+        properSlug = nameToSlug(vm.urlSlug())
+        if vm.urlSlug() != properSlug
+            vm.urlSlug(properSlug)
+            m.redraw()
     return
 
 botNameChanged = (e)->
@@ -341,7 +356,7 @@ ctrl.botForm.view = ()->
                             sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, onkeyup: botNameChanged }, vm.name),
                         ]),
                         m("div", {class: "col-md-7"}, [
-                            sbAdmin.form.mFormField("Bot URL", {id: 'urlSlug', 'placeholder': "my-great-bot", required: true, onkeyup: botURLSlugChanged, prefix: swapbot.addressUtils.publicBotHrefPrefix(window.location)+"/" }, vm.urlSlug),
+                            sbAdmin.form.mFormField(popoverLabels.urlSlug, {id: 'urlSlug', 'placeholder': "my-great-bot", required: true, onkeyup: botURLSlugChanged, prefix: swapbot.addressUtils.publicBotHrefPrefix(window.location)+"/" }, vm.urlSlug),
                         ]),
                     ]),
 
