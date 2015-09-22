@@ -55,6 +55,48 @@ class BotAPITest extends TestCase {
         PHPUnit::assertEquals(403, $response->getStatusCode());
     }
 
+    public function testCreateWithDuplicateBotSlug() {
+        // mock xchain client so we don't try to make real calls
+        $mock = app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
+
+        // setup the API tester
+        $tester = $this->setupAPITester();
+        $bot_helper = app('BotHelper');
+
+        // create a sample bot with the standard user
+        $new_bot = app('BotHelper')->newSampleBot(null, ['url_slug' => 'duplicate-slug-001']);
+
+        // call the API and get duplicate error
+        $create_vars = array_merge($bot_helper->sampleBotVarsForAPI(), ['urlSlug' => 'duplicate-slug-001']);
+        $response_json = $tester->callAPIAndValidateResponse('POST', '/api/v1/bots', $create_vars, 422);
+
+        // test error
+        PHPUnit::assertContains('Bot URL has already been used', $response_json['message']);
+    }
+
+    public function testUpdateWithDuplicateBotSlug() {
+        // mock xchain client so we don't try to make real calls
+        $mock = app('Tokenly\XChainClient\Mock\MockBuilder')->installXChainMockClient($this);
+
+        // setup the API tester
+        $tester = $this->setupAPITester();
+        $bot_helper = app('BotHelper');
+
+        // create a sample bot with the standard user
+        $new_bot = app('BotHelper')->newSampleBot(null, ['url_slug' => 'duplicate-slug-001']);
+
+        $new_bot_2 = app('BotHelper')->newSampleBot();
+
+        // call the API and get duplicate error
+        $bot_update_vars = ['urlSlug' => 'duplicate-slug-001'];
+        $response_json = $tester->callAPIAndValidateResponse('PUT', '/api/v1/bots/'.$new_bot_2['uuid'], $bot_update_vars, 422);
+        // echo "\$response_json: ".json_encode($response_json, 192)."\n";
+
+        // test error
+        PHPUnit::assertContains('Bot URL has already been used', $response_json['message']);
+    }
+
+
     public function testBotPlansAPI() {
         // mock quotebot
         app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();

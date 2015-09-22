@@ -11,6 +11,7 @@ use Sabberworm\CSS\Parser as CSSParser;
 use Sabberworm\CSS\Settings as CSSSettings;
 use Sabberworm\CSS\Value\Color as CSSColor;
 use Swapbot\Models\User;
+use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\ImageRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Strategies\StrategyHelpers;
@@ -22,15 +23,20 @@ class BotValidator {
     protected $swaps_required = true;
     protected $income_rules_required = false;
 
-    function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory, ImageRepository $image_repository) {
+    function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory, ImageRepository $image_repository, BotRepository $bot_repository) {
         $this->validator_factory     = $validator_factory;
         $this->swap_strategy_factory = $swap_strategy_factory;
         $this->image_repository      = $image_repository;
+        $this->bot_repository        = $bot_repository;
 
         $this->initValidatorRules();
     }
 
     protected $rules = [];
+
+    protected $messages = [
+        'url_slug.unique' => 'This Bot URL has already been used.  Please choose another.',
+    ];
 
 
     public function getRules() {
@@ -46,7 +52,7 @@ class BotValidator {
     }
 
     protected function buildValidator($posted_data, User $user) {
-        $validator = $this->validator_factory->make($posted_data, $this->rules, $messages=[], $customAttributes=[]);
+        $validator = $this->validator_factory->make($posted_data, $this->rules, $this->messages, $customAttributes=[]);
         $validator->after(function ($validator) use ($posted_data, $user) {
             // validate url slug
             $this->validateURLSlug(isset($posted_data['url_slug']) ? $posted_data['url_slug'] : null, $validator);

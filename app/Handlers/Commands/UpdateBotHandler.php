@@ -35,12 +35,12 @@ class UpdateBotHandler {
         $user        = $command->user;
 
         // transform
-        Log::debug("\$command->attributes=".json_encode($command->attributes, 192));
+        // Log::debug("\$command->attributes=".json_encode($command->attributes, 192));
         $update_vars = $this->transformer->santizeAttributes($update_vars, $this->validator->getRules());
         Log::debug("\$update_vars=".json_encode($update_vars, 192));
 
         // validate
-        $this->validator->validate($update_vars, $user);
+        $this->validator->validateWithBot($update_vars, $user, $bot);
 
         // find old images
         $old_bg_image_id   = $bot['background_image_id'];

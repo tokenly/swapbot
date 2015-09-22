@@ -45,6 +45,12 @@ class BotRepository extends APIRepository
             ->first();
     }
 
+    public function findBySlug($url_slug) {
+        return $this->prototype_model
+            ->where('url_slug', $url_slug)
+            ->first();
+    }
+
 
 
     public function findByUserID($user_id) {
