@@ -356,7 +356,7 @@ ctrl.botForm.view = ()->
                             sbAdmin.form.mFormField("Bot Name", {id: 'name', 'placeholder': "Bot Name", required: true, onkeyup: botNameChanged }, vm.name),
                         ]),
                         m("div", {class: "col-md-7"}, [
-                            sbAdmin.form.mFormField(popoverLabels.urlSlug, {id: 'urlSlug', 'placeholder': "my-great-bot", required: true, onkeyup: botURLSlugChanged, prefix: swapbot.addressUtils.publicBotHrefPrefix(window.location)+"/" }, vm.urlSlug),
+                            sbAdmin.form.mFormField(popoverLabels.urlSlug, {id: 'urlSlug', 'placeholder': "my-great-bot", required: true, onkeyup: botURLSlugChanged, prefix: swapbot.addressUtils.publicBotHrefPrefix(sbAdmin.auth.getUser().username, window.location)+"/" }, vm.urlSlug),
                         ]),
                     ]),
 

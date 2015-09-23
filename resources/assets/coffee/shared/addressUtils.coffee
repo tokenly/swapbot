@@ -11,14 +11,13 @@ exports.publicBotHrefFromSwap = (swap, location=null)->
 
 exports.publicBotHref = (username, botUrlSlug, botId, location=null)->
     if botUrlSlug? and botUrlSlug.length > 0
-        return "#{exports.publicBotHrefPrefix(location)}/#{username}/#{botUrlSlug}"
+        return "#{exports.publicBotHrefPrefix(username, location)}/#{botUrlSlug}"
 
-    return "#{exports.publicBotHrefPrefix(location)}/#{username}/#{botId}"
+    return "#{exports.publicBotHrefPrefix(username, location)}/#{botId}"
 
-exports.publicBotHrefPrefix = (location=null)->
+exports.publicBotHrefPrefix = (username, location=null)->
     location = window.location if not location?
-    return "#{location.protocol}//#{location.host}/bot"
-
+    return "#{location.protocol}//#{location.host}/bot/#{username}"
 
 
 exports.publicSwapHref = (swap, botUsername=null, location=null)->
