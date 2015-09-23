@@ -247,11 +247,13 @@ validateInAmount.fixed = (inAmount, swapConfig)->
 
     formatCurrencyFn = swapbot.formatters.formatCurrency
 
-    if inAmount < swapConfig.in_qty
+    inAmountSatoshis = Math.round(inAmount * SATOSHI)
+    inQtySatoshis = Math.round(swapConfig.in_qty * SATOSHI)
+    if inAmountSatoshis < inQtySatoshis
         return "You must send at least #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in} to use this swap."
 
 
-    ratio = inAmount / swapConfig.in_qty
+    ratio = inAmountSatoshis / inQtySatoshis
     if ratio != Math.floor(ratio)
         return "You must sell a multiple of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}. You will receive #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}."
 
