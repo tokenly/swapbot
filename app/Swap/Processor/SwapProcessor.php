@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\DispatchesCommands;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileSwapState;
 use Swapbot\Models\Bot;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Models\Data\SwapState;
@@ -90,7 +91,7 @@ class SwapProcessor {
             // start by checking the status of the bot
             //   if the bot is not active, don't process anything else
             $bot = $swap->bot;
-            if (!$this->botIsActive($bot)) { return $swap; }
+            if (!$this->botCanProcessSwap($bot, $swap)) { return $swap; }
 
             // start by reconciling the swap state
             $this->dispatch(new ReconcileSwapState($swap, $block_height));
@@ -194,9 +195,14 @@ class SwapProcessor {
         }
     }
 
-    protected function botIsActive($bot) {
-        return  $bot->statemachine()->getCurrentState()->isActive();
-        // $this->bot_event_logger->logBotNotReadyForSwap($swap_process['bot'], $swap_process['swap'], $bot_state->getName());
+    protected function botCanProcessSwap($bot, $swap) {
+        // treat a low fuel state as active
+        if ($bot['state'] == BotState::LOW_FUEL) {
+            // delegate this to the swap level
+            return true;
+        }
+
+        return $bot->statemachine()->getCurrentState()->isActive();
     }
 
     protected function handleUnconfirmedTX($swap_process) {

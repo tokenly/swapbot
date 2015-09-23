@@ -46,6 +46,12 @@ class AccountHandler {
     // returns false if the stock was not allocated
     //   transfers all or nothing for what the swap wants
     public function allocateStock(Swap $swap) {
+        $transfer_results = [
+            'all_succeeded'     => true,
+            'stock_transferred' => null,
+            'btc_transferred'   => null,
+        ];
+
         $account_name = $this->swapAccountName($swap);
         $bot = $swap->bot;
 
@@ -84,11 +90,30 @@ class AccountHandler {
                     }
                 }
 
-                if ($transferred_successfully === false) { $all_succeeded = false; }
+
+                if ($transferred_successfully == true) {
+                    if ($asset == 'BTC') {
+                        if ($transfer_results['btc_transferred'] === null) { $transfer_results['btc_transferred'] = true; }
+                    } else {
+                        $transfer_results['stock_transferred'] = true;
+                    }
+                } else {
+                    $transfer_results['all_succeeded'] = false;
+                    if ($asset == 'BTC') {
+                        $transfer_results['btc_transferred'] = false;
+                    } else {
+                        $transfer_results['stock_transferred'] = false;
+                    }
+                }
             }
         }
 
-        return $all_succeeded;
+        if ($transfer_results['stock_transferred'] === null) {
+            $transfer_results['stock_transferred'] = $transfer_results['btc_transferred'];
+        }
+
+
+        return $transfer_results;
     }
 
 

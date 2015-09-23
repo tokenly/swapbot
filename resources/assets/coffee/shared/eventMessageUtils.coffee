@@ -34,6 +34,12 @@ exports.buildSwapStatusMessageElement = (swap, bot)->
                 buildTransactionLinkElement(swap.txidIn, ' Receiving tokens ', "le-#{swap.id}"),
                 " and waiting to send #{swap.quantityOut} #{swap.assetOut}."
             ]);
+        when 'outoffuel'
+            return React.createElement('span', {}, [
+                'This swap is out of fuel. '
+                buildTransactionLinkElement(swap.txidIn, ' Receiving tokens ', "le-#{swap.id}"),
+                " and waiting to send #{swap.quantityOut} #{swap.assetOut}."
+            ]);
     
     return React.createElement('span', {}, [
         "Waiting for ",

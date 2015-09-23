@@ -7,6 +7,8 @@ class SwapStateEvent {
 
     const STOCK_CHECKED  = 'stockChecked';
     const STOCK_DEPLETED = 'stockDepleted';
+    const FUEL_CHECKED   = 'fuelChecked';
+    const FUEL_DEPLETED  = 'fuelDepleted';
     const SWAP_ERRORED   = 'swapErrored';
     const SWAP_SENT      = 'swapSent';
     const SWAP_REFUND    = 'swapRefund';

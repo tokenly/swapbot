@@ -123,6 +123,7 @@ class Bot extends APIModel {
                 return true;
         }
 
+        // low fuel, etc.
         return false;
 
     }

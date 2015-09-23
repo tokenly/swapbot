@@ -88,6 +88,37 @@ class SwapStateTest extends TestCase {
         $state_machine->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
         $this->checkState($swap, SwapState::OUT_OF_STOCK);
 
+        ////////////////////////////////////////////////////////////////////////
+        // BRAND_NEW -> OUT_OF_FUEL
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // go to out of fuel
+        $state_machine->triggerEvent(SwapStateEvent::FUEL_DEPLETED);
+        $this->checkState($swap, SwapState::OUT_OF_FUEL);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // READY -> OUT_OF_FUEL -> READY
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // go to out of fuel
+        $state_machine->triggerEvent(SwapStateEvent::FUEL_DEPLETED);
+        $this->checkState($swap, SwapState::OUT_OF_FUEL);
+
+        // transition with fuel checked
+        $state_machine->triggerEvent(SwapStateEvent::FUEL_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
 
         ////////////////////////////////////////////////////////////////////////
         // READY -> CONFIRMING -> CONFIRMING -> READY

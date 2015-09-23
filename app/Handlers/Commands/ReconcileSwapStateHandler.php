@@ -44,24 +44,36 @@ class ReconcileSwapStateHandler {
                             AccountHandler::moveIncomingReceivedFunds($locked_swap);
 
                             // move the stock
-                            $stock_allocated = AccountHandler::allocateStock($locked_swap);
+                            $transfer_results = AccountHandler::allocateStock($locked_swap);
 
-                            if ($stock_allocated) {
+                            if ($transfer_results['all_succeeded']) {
                                 // stock has been allocated to complete this swap
                                 $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
-                            } else {
+                            } else if (!$transfer_results['stock_transferred']) {
                                 // not enough stock
                                 $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+                            } else {
+                                // not enough fuel
+                                $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::FUEL_DEPLETED);
                             }
                         }
                         break;
 
                     case SwapState::OUT_OF_STOCK:
-                        $stock_allocated = AccountHandler::allocateStock($locked_swap);
+                        $transfer_results = AccountHandler::allocateStock($locked_swap);
 
-                        if ($stock_allocated) {
+                        if ($transfer_results['all_succeeded']) {
                             // stock has been allocated to complete this swap
                             $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+                        }
+                        break;
+
+                    case SwapState::OUT_OF_FUEL:
+                        $transfer_results = AccountHandler::allocateStock($locked_swap);
+
+                        if ($transfer_results['all_succeeded']) {
+                            // stock has been allocated to complete this swap
+                            $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::FUEL_CHECKED);
                         }
                         break;
                 }

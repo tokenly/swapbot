@@ -92,6 +92,9 @@ class Swap extends APIModel {
     public function isOutOfStock() {
         return ($this['state'] == SwapState::OUT_OF_STOCK);
     }
+    public function isOutOfFuel() {
+        return ($this['state'] == SwapState::OUT_OF_FUEL);
+    }
     public function isComplete($state=null) {
         return (($state === null ? $this['state'] : $state) == SwapState::COMPLETE);
     }
@@ -100,6 +103,7 @@ class Swap extends APIModel {
         switch ($state) {
             case SwapState::ERROR:
             case SwapState::OUT_OF_STOCK:
+            case SwapState::OUT_OF_FUEL:
                 return true;
         }
 

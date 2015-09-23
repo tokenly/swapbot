@@ -101,6 +101,7 @@ ctrl.allswaps.view = ()->
         {k: 'All Swaps', v: ''},
         {k: 'Brand New', v: 'brandnew'},
         {k: 'Out of Stock', v: 'outofstock'},
+        {k: 'Out of Fuel', v: 'outoffuel'},
         {k: 'Ready', v: 'ready'},
         {k: 'Confirming', v: 'confirming'},
         {k: 'Sent', v: 'sent'},

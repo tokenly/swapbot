@@ -1,0 +1,69 @@
+# bot has just enough fuel for a swap, but goes low on fuel when swap is reserved
+#   the swap should complete even though the bot is out of fuel
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    blacklist_addresses: [RESTOCKING_SENDER01]
+    balances:
+      LTBCOIN: 1000000
+      BTC: 0.0001543
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  # try to swap a when out of fuel
+  - meta: { baseFilename: mempool_BTC_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+
+expectedBotEvents:
+  - #### LOWFUEL
+    meta: { baseFilename: bot.stateChange-lowfuel.yml }
+
+  - # first transaction ignored due to lowfuel state
+    meta: { baseFilename: bot.lowfuel.yml }
+    msg: 'Transaction 00000000000000000000000000000000000000000000000000000BTCtx222222 received while bot is low on BTC fuel.'
+    txid: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+
+
+
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_RECEIVE.yml }
+
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-BTC_LTBCOIN_unconfirmed.yml }
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+    state: 'lowfuel'
+    isActive: false
+
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN.yml }
+    confirmations: 2
+    msg: Received 0.001 BTC from SENDER01 with 2 confirmations. Will vend 1000 LTBCOIN to SENDER01.
+
+
+  - #### swap sent
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN.yml }
+    confirmations: 2
+
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+
+
+

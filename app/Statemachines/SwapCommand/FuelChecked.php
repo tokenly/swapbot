@@ -12,7 +12,7 @@ use Swapbot\Statemachines\SwapCommand\SwapCommand;
 /*
 * SwapCommand
 */
-class StockChecked extends SwapCommand {
+class FuelChecked extends SwapCommand {
 
     /**
      */
@@ -28,7 +28,7 @@ class StockChecked extends SwapCommand {
      */
     public function __toString()
     {
-        return 'Stock Checked';
+        return 'Fuel Checked';
     }
 
 

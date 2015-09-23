@@ -8,7 +8,7 @@ bots:
     blacklist_addresses: [RESTOCKING_SENDER01]
     balances:
       LTBCOIN: 1000000
-      BTC: 0.0000543
+      BTC: 0
 
 
 ############################
@@ -54,12 +54,24 @@ expectedBotEvents:
     quantityIn: 0.0001
     quantityOut: 100
 
+  - #### OUT_OF_FUEL
+    meta: { baseFilename: swap.stateChange-outoffuel.yml }
+
+  - #### notReady because out of fuel
+    meta: { baseFilename: swap.notReady-outoffuel.yml }
+    quantityIn: 0.0001
+    quantityOut: 100
+
   - #### transaction handled previously
     meta: { baseFilename: tx.previous-BTC-2.yml }
     confirmations: 8
     state: 'lowfuel'
     isActive: false
 
+  - #### notReady because out of fuel
+    meta: { baseFilename: swap.notReady-outoffuel.yml }
+    quantityIn: 0.0001
+    quantityOut: 100
 
   - #### blacklist
     meta: { baseFilename: swap.ignored.blacklist.yml }

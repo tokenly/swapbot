@@ -12,14 +12,14 @@ use Swapbot\Statemachines\SwapCommand\SwapCommand;
 /*
 * SwapCommand
 */
-class StockChecked extends SwapCommand {
+class FuelDepleted extends SwapCommand {
 
     /**
      */
     public function __invoke(Swap $swap)
     {
         // update the bot state in the database
-        $this->updateSwapState($swap, SwapState::READY);
+        $this->updateSwapState($swap, SwapState::OUT_OF_FUEL);
     }
 
     /**
@@ -28,7 +28,7 @@ class StockChecked extends SwapCommand {
      */
     public function __toString()
     {
-        return 'Stock Checked';
+        return 'Fuel Depleted';
     }
 
 

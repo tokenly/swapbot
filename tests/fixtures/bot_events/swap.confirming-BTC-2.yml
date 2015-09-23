@@ -1,0 +1,12 @@
+name: swap.confirming
+# msg: Received a transaction of 500...tions.
+confirmations: '2'
+destination: 'SENDER01'
+quantityIn: 0.001
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 1000
+assetOut: 'LTBCOIN'
+state: 'confirming'
+isComplete: false
+isError: false

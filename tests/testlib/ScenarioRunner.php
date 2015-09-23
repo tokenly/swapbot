@@ -1232,7 +1232,9 @@ class ScenarioRunner
                     'text'    => $plain_text_content,
                 ];
                 $mailer_recorder->emails[] = $email;
-                app('Illuminate\Mail\Transport\LogTransport')->send($msg);
+
+                // log to mail log
+                // app('Illuminate\Mail\Transport\LogTransport')->send($msg);
             });
 
         return $mailer_recorder;
