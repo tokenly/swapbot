@@ -65,7 +65,7 @@ class SlackEventsHandler {
         $title_data = [
             'title'      => $title,
             'title_link' => $swap->getPublicSwapURL(),
-            'thumb_url'  => $bot->getLogoImage(),
+            'thumb_url'  => $bot['logo_image'],
         ];
 
         if ($fields) {
