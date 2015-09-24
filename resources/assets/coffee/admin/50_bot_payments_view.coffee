@@ -194,19 +194,19 @@ ctrl.botPaymentsView.view = ()->
     
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-3"}, [
-                                botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)
+                                sbAdmin.botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)
                             ]),
                             m("div", {class: "col-md-3"}, [
-                                botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)
+                                sbAdmin.botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)
                             ]),
                             m("div", {class: "col-md-6"}, [
-                                botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)
+                                sbAdmin.botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)
                             ]),
                         ]),
 
                         m("div", { class: "row"}, [
                             m("div", {class: "col-md-12"}, [
-                                botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)
+                                sbAdmin.botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)
                             ]),
                         ]),
                     ]),
