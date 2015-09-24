@@ -592,7 +592,7 @@ class BotEventLogger {
         if ($extra_event_vars !== null) { $swap_details_for_event_log = array_merge($swap_details_for_event_log, $extra_event_vars); }
 
         // log the bot event
-        if ($write_to_application_log) {
+        if ($write_to_application_log AND $this->globalWriteToApplicationLog()) {
             $application_log_vars = $swap_details_for_event_log;
             $application_log_vars['botId'] = $bot['uuid'];
             $application_log_vars['botName'] = $bot['name'];
@@ -709,7 +709,7 @@ class BotEventLogger {
         $bot_event_model = $this->saveBotEventToRepository($event_name, $bot, null, $event_vars);
 
         // log the bot event
-        if ($write_to_application_log) { EventLog::log($event_name, array_merge(['msg' => BotEventOutputTransformer::buildMessage($bot_event_model)], $event_vars)); }
+        if ($write_to_application_log AND $this->globalWriteToApplicationLog()) { EventLog::log($event_name, array_merge(['msg' => BotEventOutputTransformer::buildMessage($bot_event_model)], $event_vars)); }
 
 
         $serialized_bot_event_model = $bot_event_model->serializeForAPI();
@@ -772,7 +772,7 @@ class BotEventLogger {
 
     public function createLegacyBotEvent($bot, $swap, $event_name, $level, $event_data, $write_to_application_log=true) {
         // log the bot event
-        if ($write_to_application_log) { EventLog::log($event_name, $event_data); }
+        if ($write_to_application_log AND $this->globalWriteToApplicationLog()) { EventLog::log($event_name, $event_data); }
 
         $event_data['name'] = $event_name;
 
@@ -798,5 +798,10 @@ class BotEventLogger {
     }
     
     
-
+    protected function globalWriteToApplicationLog() {
+        if (!isset($this->global_write_to_application_log)) {
+            $this->global_write_to_application_log = !!env('WRITE_BOT_EVENTS_TO_APPLICATION_LOG', true);
+        }
+        return $this->global_write_to_application_log;
+    }
 }
