@@ -22,7 +22,7 @@ class SlackEventsHandler {
     }
 
     public function swapEventCreated(Event $laravel_event) {
-        if (!KeenEvents::isActive()) { return; }
+        if (!KeenEvents::slackIsActive()) { return; }
 
         try {
             $bot   = $laravel_event->bot;

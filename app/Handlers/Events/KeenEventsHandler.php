@@ -24,7 +24,7 @@ class KeenEventsHandler {
     }
 
     public function swapEventCreated(Event $event) {
-        if (!KeenEvents::isActive()) { return; }
+        if (!KeenEvents::keenIsActive()) { return; }
 
         $bot   = $event->bot;
         $swap  = $event->swap;
