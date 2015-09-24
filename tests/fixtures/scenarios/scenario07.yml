@@ -79,7 +79,7 @@ expectedBotEvents:
     outAsset: SOUP
 
   - 
-    meta: { baseFilename: swap.failed.yml }
+    meta: { baseFilename: swap.failed-BTC.yml }
   - #### ERROR
     meta: { baseFilename: swap.stateChange-error.yml }
 
@@ -100,7 +100,7 @@ expectedBotEvents:
   #   outAsset: LTBCOIN
 
   - #### retry
-    meta: { baseFilename: swap.retry.yml }
+    meta: { baseFilename: swap.retry-BTC.yml }
   - #### READY
     meta: { baseFilename: swap.stateChange-ready.yml }
   - #### swap found

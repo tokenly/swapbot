@@ -31,6 +31,7 @@ class SwapProcessor {
     use DispatchesCommands;
 
     const DEFAULT_REGULAR_DUST_SIZE = 0.00005430;
+    const PERMANENTLY_FAIL_AFTER_CONFIRMATIONS = 6;
 
     /**
      * Create the command handler.
@@ -167,6 +168,10 @@ class SwapProcessor {
                 }
             }
         }
+
+
+        // see if a swap failed permanently
+        $this->checkForPermanentlyFailedSwap($swap_process);
 
         // if a state change was triggered, then update the swap state
         //   this can happen even if there was an error
@@ -547,6 +552,21 @@ class SwapProcessor {
         }
 
         return [$out_quantity, $out_asset, $fee, $dust_size];
+    }
+
+    protected function checkForPermanentlyFailedSwap($swap_process) {
+        Log::debug("checkForPermanentlyFailedSwap \$swap_process['state_trigger']={$swap_process['state_trigger']}");
+        if ($swap_process['state_trigger'] == SwapStateEvent::SWAP_ERRORED OR (!$swap_process['state_trigger'] AND $swap_process['swap']['state'] == SwapState::ERROR)) {
+            if ($swap_process['confirmations'] >= self::PERMANENTLY_FAIL_AFTER_CONFIRMATIONS) {
+                $bot = (isset($swap_process['bot'])) ? $swap_process['bot'] : null;
+                $swap = (isset($swap_process['swap'])) ? $swap_process['swap'] : null;
+                $receipt = (isset($swap_process['swap_update_vars']['receipt'])) ? $swap_process['swap_update_vars']['receipt'] : null;
+                $this->bot_event_logger->logSwapPermanentlyFailed($bot, $swap, $receipt);
+
+                // trigger permanent error
+                $swap_process['state_trigger'] = SwapStateEvent::SWAP_PERMANENTLY_ERRORED;
+            }
+        }
     }
 
     protected function handleUpdateSwapModel($swap_process) {

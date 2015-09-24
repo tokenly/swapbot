@@ -1,20 +1,17 @@
-name: swap.failed
+name: swap.failed.permanent
 # msg: Failed to swap asset.
 
-error: Test Exception Triggered
 
 destination: 'SENDER01'
 quantityIn: 500
 assetIn: 'LTBCOIN'
 txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
-confirmations: '2'
+confirmations: '6'
 quantityOut: 0.0005
 assetOut: 'BTC'
 confirmationsOut: 0
 
-
-
-state: 'error'
+state: 'permanenterror'
 isComplete: false
 isError: true
 

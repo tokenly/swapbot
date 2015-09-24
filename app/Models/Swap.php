@@ -102,6 +102,7 @@ class Swap extends APIModel {
         $state = ($state === null ? $this['state'] : $state);
         switch ($state) {
             case SwapState::ERROR:
+            case SwapState::PERMANENT_ERROR:
             case SwapState::OUT_OF_STOCK:
             case SwapState::OUT_OF_FUEL:
                 return true;

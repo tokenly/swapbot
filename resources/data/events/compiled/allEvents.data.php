@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-09-03 15:28:20
+// compiled on 2015-09-24 20:53:31
 
 return array (
   'swap.new' => 
@@ -131,6 +131,18 @@ return array (
     'msg' => 'This swap send attempt failed.',
     'msgVars' => 
     array (
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.failed.permanent' => 
+  array (
+    'name' => 'swap.failed.permanent',
+    'label' => 'Swap Permanently Failed',
+    'level' => 'WARNING',
+    'msg' => 'This swap send attempt failed after <?php echo e($confirmations); ?> confirmations.',
+    'msgVars' => 
+    array (
+      0 => 'confirmations',
     ),
     'swapEventStream' => true,
   ),

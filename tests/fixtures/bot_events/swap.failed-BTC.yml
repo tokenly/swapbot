@@ -4,15 +4,13 @@ name: swap.failed
 error: Test Exception Triggered
 
 destination: 'SENDER01'
-quantityIn: 500
-assetIn: 'LTBCOIN'
-txidIn: '00000000000000000000000000000000000000000000000000000xcptx111111'
-confirmations: '2'
-quantityOut: 0.0005
-assetOut: 'BTC'
+quantityIn: 0.001
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+confirmations: '1'
+quantityOut: 5000
+assetOut: 'SOUP'
 confirmationsOut: 0
-
-
 
 state: 'error'
 isComplete: false

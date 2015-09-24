@@ -117,7 +117,7 @@ RecentAndActiveSwapsComponent = React.createClass
         recentSwaps = []
 
         for swap, index in this.state.swaps
-            if swap.isComplete
+            if swap.isComplete or swap.state == 'permanenterror'
                 recentSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.state.bot} swap={swap} />)
             else
                 activeSwaps.push(<RecentOrActiveSwapComponent key={"ra-"+swap.id} bot={this.state.bot} swap={swap} />)

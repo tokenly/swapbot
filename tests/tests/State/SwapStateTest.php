@@ -224,6 +224,28 @@ class SwapStateTest extends TestCase {
         // go to refunded
         $state_machine->triggerEvent(SwapStateEvent::SWAP_REFUND);
         $this->checkState($swap, SwapState::REFUNDED);
+
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // READY -> PERMANENT_ERROR -> READY
+
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition to ready
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to error
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_PERMANENTLY_ERRORED);
+        $this->checkState($swap, SwapState::PERMANENT_ERROR);
+        
+        // transition back to ready
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_RETRY);
+        $this->checkState($swap, SwapState::READY);
+        
+
     }
 
 

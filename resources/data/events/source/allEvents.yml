@@ -78,6 +78,15 @@ events:
     swapEventStream: true
 
   -
+    name: swap.failed.permanent
+    label: Swap Permanently Failed
+    level: WARNING
+    msg: |
+        This swap send attempt failed after {{ $confirmations }} confirmations.
+    msgVars: [confirmations]
+    swapEventStream: true
+
+  -
     name: swap.notReady
     label: Swap Not Ready
     level: WARNING

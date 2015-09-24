@@ -34,6 +34,16 @@ exports.buildSwapStatusMessageElement = (swap, bot)->
                 buildTransactionLinkElement(swap.txidIn, ' Receiving tokens ', "le-#{swap.id}"),
                 " and waiting to send #{swap.quantityOut} #{swap.assetOut}."
             ]);
+        when 'error'
+            return React.createElement('span', {}, [
+                "There was an error completing this swap. Continuing attempts to send #{swap.quantityOut} #{swap.assetOut}."
+            ]);
+        when 'permanenterror'
+            return React.createElement('span', {}, [
+                "This ",
+                buildTransactionLinkElement(swap.txidIn, 'swap', "le-#{swap.id}")
+                " could not be completed. Failed to send #{swap.quantityOut} #{swap.assetOut}."
+            ]);
         when 'outoffuel'
             return React.createElement('span', {}, [
                 'This swap is out of fuel. '

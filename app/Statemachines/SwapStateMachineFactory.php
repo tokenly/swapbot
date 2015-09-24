@@ -18,6 +18,7 @@ use Swapbot\Statemachines\SwapCommand\SwapCompleted;
 use Swapbot\Statemachines\SwapCommand\SwapConfirmed;
 use Swapbot\Statemachines\SwapCommand\SwapConfirming;
 use Swapbot\Statemachines\SwapCommand\SwapErrored;
+use Swapbot\Statemachines\SwapCommand\SwapPermanentlyErrored;
 use Swapbot\Statemachines\SwapCommand\SwapRefund;
 use Swapbot\Statemachines\SwapCommand\SwapReset;
 use Swapbot\Statemachines\SwapCommand\SwapRetry;
@@ -39,15 +40,16 @@ class SwapStateMachineFactory extends StateMachineFactory {
     public function buildStates() {
         // build states
         return [
-            SwapState::BRAND_NEW    => new SwapState(SwapState::BRAND_NEW),
-            SwapState::READY        => new SwapState(SwapState::READY),
-            SwapState::CONFIRMING   => new SwapState(SwapState::CONFIRMING),
-            SwapState::OUT_OF_STOCK => new SwapState(SwapState::OUT_OF_STOCK),
-            SwapState::OUT_OF_FUEL  => new SwapState(SwapState::OUT_OF_FUEL),
-            SwapState::SENT         => new SwapState(SwapState::SENT),
-            SwapState::REFUNDED     => new SwapState(SwapState::REFUNDED),
-            SwapState::COMPLETE     => new SwapState(SwapState::COMPLETE),
-            SwapState::ERROR        => new SwapState(SwapState::ERROR),
+            SwapState::BRAND_NEW       => new SwapState(SwapState::BRAND_NEW),
+            SwapState::READY           => new SwapState(SwapState::READY),
+            SwapState::CONFIRMING      => new SwapState(SwapState::CONFIRMING),
+            SwapState::OUT_OF_STOCK    => new SwapState(SwapState::OUT_OF_STOCK),
+            SwapState::OUT_OF_FUEL     => new SwapState(SwapState::OUT_OF_FUEL),
+            SwapState::SENT            => new SwapState(SwapState::SENT),
+            SwapState::REFUNDED        => new SwapState(SwapState::REFUNDED),
+            SwapState::COMPLETE        => new SwapState(SwapState::COMPLETE),
+            SwapState::ERROR           => new SwapState(SwapState::ERROR),
+            SwapState::PERMANENT_ERROR => new SwapState(SwapState::PERMANENT_ERROR),
         ];
 
     }
@@ -119,6 +121,13 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::OUT_OF_STOCK => SwapState::REFUNDED with SwapStateEvent::SWAP_REFUND via SwapRefund
         $this->addTransitionToStates($states, SwapState::OUT_OF_STOCK, SwapState::REFUNDED, SwapStateEvent::SWAP_REFUND, new SwapRefund());
+
+
+        // SwapState::READY => SwapState::PERMANENT_ERROR with SwapStateEvent::SWAP_PERMANENTLY_ERRORED via SwapPermanentlyErrored
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::PERMANENT_ERROR, SwapStateEvent::SWAP_PERMANENTLY_ERRORED, new SwapPermanentlyErrored());
+
+        // SwapState::PERMANENT_ERROR => SwapState::READY with SwapStateEvent::SWAP_RETRY via SwapRetry
+        $this->addTransitionToStates($states, SwapState::PERMANENT_ERROR, SwapState::READY, SwapStateEvent::SWAP_RETRY, new SwapRetry());
 
 
         return $states;

@@ -1,0 +1,78 @@
+# An errored swapbot eventually gives up
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta:
+      baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml
+  - meta: 
+      baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml
+      xchainFailAfterRequests: 0
+    confirmations: 2
+  - meta: 
+      baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml
+      xchainFailAfterRequests: 0
+    confirmations: 6
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
+
+  - #### transaction handled previously (1 confirmation)
+    meta: { baseFilename: tx.previous-1.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-LTBCOIN.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-2.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-LTBCOIN.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-2confirmations.yml }
+  - #### swap failed
+    meta: { baseFilename: swap.failed.yml }
+  - #### ERROR
+    meta: { baseFilename: swap.stateChange-error.yml }
+
+
+  - #### transaction handled previously (6 confirmations)
+    meta: { baseFilename: tx.previous.yml }
+    confirmations: 6
+  - #### retry
+    meta: { baseFilename: swap.retry.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-6confirmations.yml }
+  - #### swap failed
+    meta: { baseFilename: swap.failed.yml }
+    confirmations: 6
+  # - #### ERROR
+  #   meta: { baseFilename: swap.stateChange-error.yml }
+  - #### permanent failure
+    meta: { baseFilename: swap.failed.permanent.yml }
+  - #### ERROR
+    meta: { baseFilename: swap.stateChange-permanenterror.yml }
+

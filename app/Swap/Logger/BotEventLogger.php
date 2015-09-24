@@ -14,6 +14,7 @@ use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
 use Swapbot\Models\BotLeaseEntry;
 use Swapbot\Models\Data\BotState;
+use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Swap;
 use Swapbot\Models\Transaction;
 use Swapbot\Repositories\BotEventRepository;
@@ -367,7 +368,11 @@ class BotEventLogger {
 
 
     public function logSwapFailed(Bot $bot, Swap $swap, Exception $e, $receipt_update_vars) {
-        $this->logSwapEvent('swap.failed', $bot, $swap, $receipt_update_vars, null, ['error' => $e->getMessage()]);
+        $this->logSwapEvent('swap.failed', $bot, $swap, $receipt_update_vars, ['state' => SwapState::ERROR], ['error' => $e->getMessage()]);
+    }
+
+    public function logSwapPermanentlyFailed(Bot $bot, Swap $swap, $receipt_update_vars) {
+        $this->logSwapEvent('swap.failed.permanent', $bot, $swap, $receipt_update_vars, ['state' => SwapState::PERMANENT_ERROR]);
     }
 
     public function logSwapRetry(Bot $bot, Swap $swap) {

@@ -1,0 +1,5 @@
+name: swap.stateChange
+# msg: Swap entered state permanenterror
+state: permanenterror
+isComplete: false
+isError: true

@@ -108,6 +108,7 @@ ctrl.allswaps.view = ()->
         {k: 'Refunded', v: 'refunded'},
         {k: 'Complete', v: 'complete'},
         {k: 'Error', v: 'error'},
+        {k: 'Permanent Error', v: 'permanenterror'},
     ]
 
     filterSelectEl = sbAdmin.form.mInputEl({type: "select", options: filterOptions, id: "filter", onchange: vm.changeFilterFn }, vm.swapFilterState)
