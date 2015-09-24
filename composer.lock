@@ -5,6 +5,7 @@
         "This file is @generated automatically"
     ],
     "hash": "bc4856cb5e10ab476c710867fff0aed1",
+    "content-hash": "b90acca038b04a103e7b4cb3dda6ea8f",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -133,7 +134,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/4a41d6b4710ad1609a3f53da664d0ee010d240d7",
+                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/79d644b495754c955f652fee8a6ca799f923bec6",
                 "reference": "4a41d6b4710ad1609a3f53da664d0ee010d240d7",
                 "shasum": ""
             },
@@ -3304,7 +3305,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/4f38ada567aa7e02f8d7ba11ac12e35be1f64067",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/2bea4f2b0711bc730fe0a994a4cf0d2088597f4e",
                 "reference": "4f38ada567aa7e02f8d7ba11ac12e35be1f64067",
                 "shasum": ""
             },
@@ -3424,12 +3425,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-keen-events.git",
-                "reference": "4ab7452ca3a6020d5c63969640b72c67bef9d53c"
+                "reference": "bc0d9908d9840cc82be25ec075203c851c6b32dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-keen-events/zipball/4ab7452ca3a6020d5c63969640b72c67bef9d53c",
-                "reference": "4ab7452ca3a6020d5c63969640b72c67bef9d53c",
+                "url": "https://api.github.com/repos/tokenly/laravel-keen-events/zipball/bc0d9908d9840cc82be25ec075203c851c6b32dd",
+                "reference": "bc0d9908d9840cc82be25ec075203c851c6b32dd",
                 "shasum": ""
             },
             "require": {
@@ -3456,7 +3457,7 @@
                 }
             ],
             "description": "A Laravel component for queueing events for background uploading to keen.io",
-            "time": "2015-09-03 20:42:27"
+            "time": "2015-09-24 01:25:14"
         },
         {
             "name": "tokenly/laravel-record-lock",
@@ -3468,7 +3469,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-record-lock/zipball/a408f6d820faf355fe681d9483beb3dec16ef741",
+                "url": "https://api.github.com/repos/tokenly/laravel-record-lock/zipball/8963ccc90674d705d4553c56e82c2c505da38d5f",
                 "reference": "a408f6d820faf355fe681d9483beb3dec16ef741",
                 "shasum": ""
             },
