@@ -45,6 +45,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\TestRenderBotEventCommand',
 		'Swapbot\Console\Commands\Development\IndexBotsCommand',
 		'Swapbot\Console\Commands\Development\SendKeenTestEventCommand',
+		'Swapbot\Console\Commands\Development\SendSlackTestEventCommand',
 		'Swapbot\Console\Commands\Development\SendKeenSwapbotEvents',
 		'Swapbot\Console\Commands\Development\CreateMissingURLSlugsCommand',
 

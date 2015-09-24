@@ -20,6 +20,8 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="DATABASE_DRIVER" value="testing"/>
         <env name="MAIL_DRIVER" value="log"/>
+        <env name="QUEUE_DRIVER" value="sync"/>
+        <env name="KEEN_QUEUE_CONNECTION" value="sync"/>
         <!-- <env name="DB_DATABASE" value="swapbot_test"/> -->
     </php>
 </phpunit>

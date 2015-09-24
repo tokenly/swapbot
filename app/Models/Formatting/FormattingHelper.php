@@ -125,6 +125,20 @@ class FormattingHelper {
         return CurrencyUtil::valueToFormattedString($value, $places);
     }
 
+    // public function swapReceiptSummary(Swap $swap) {
+    //     $strategy = $swap->getSwapConfigStrategy();
+    //     $receipt = $swap['receipt'];
+
+    //     if (isset($receipt['assetIn']) AND isset($receipt['assetOut'])) {
+    //         return
+    //             $this->formatCurrency($receipt['quantityIn'])." {$receipt['assetIn']}".$this->fiatSuffix($strategy, $receipt['quantityIn'], $receipt['assetIn'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null)
+    //             ." => "
+    //             .$this->formatCurrency($receipt['quantityOut'])." {$receipt['assetOut']}".$this->fiatSuffix($strategy, $receipt['quantityOut'], $receipt['assetOut'], isset($receipt['conversionRate']) ? $receipt['conversionRate'] : null);
+    //     } else {
+    //         return "none";
+    //     }
+    // }
+
     public function implodeWithConjunction($list, $article='and') {
         if (count($list) == 0) {
             return '';

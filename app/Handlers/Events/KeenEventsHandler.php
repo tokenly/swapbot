@@ -24,6 +24,8 @@ class KeenEventsHandler {
     }
 
     public function swapEventCreated(Event $event) {
+        if (!KeenEvents::isActive()) { return; }
+
         $bot   = $event->bot;
         $swap  = $event->swap;
         $bot_event = $event->event;
@@ -89,7 +91,7 @@ class KeenEventsHandler {
 
     protected function sendEvent($collection, $event) {
         // Log::debug("sendEvent to $collection:\n".json_encode($event, 192));
-        KeenEvents::send($this->collection_prefix.$collection, $event);
+        KeenEvents::sendKeenEvent($this->collection_prefix.$collection, $event);
     }
 
 

@@ -11,7 +11,7 @@ use Swapbot\Swap\Logger\BotEventLogger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class SendKeenTestEventCommand extends Command {
+class SendSlackTestEventCommand extends Command {
 
     use DispatchesCommands;
 
@@ -20,14 +20,14 @@ class SendKeenTestEventCommand extends Command {
      *
      * @var string
      */
-    protected $name = 'swapbotdev:send-keen-test-event';
+    protected $name = 'swapbotdev:send-slack-test-event';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sends a test event';
+    protected $description = 'Sends a test event to slack';
 
     /**
      * Create a new command instance.
@@ -47,14 +47,9 @@ class SendKeenTestEventCommand extends Command {
     public function fire()
     {
         try {
-            $collection = $this->argument('collection');
-            $event = json_decode($this->argument('event'), true);
-            KeenEvents::sendKeenEvent($collection, $event);
-
-            // send a second event
-            $event['value'] = rand(1, 999);
-            KeenEvents::sendKeenEvent($collection, $event);
-
+            $title = $this->argument('title');
+            $text = $this->argument('text');
+            KeenEvents::sendSlackEvent($title, $text);
         } catch (Exception $e) {
             $this->error('Error: '.$e->getMessage());
             throw $e;
@@ -72,8 +67,8 @@ class SendKeenTestEventCommand extends Command {
     {
         $number = rand(1, 999);
         return [
-            ['collection', InputArgument::OPTIONAL, 'Collection Name', 'testCollection'],
-            ['event', InputArgument::OPTIONAL, 'Event JSON', '{"foo": "bar", "value": '.$number.'}'],
+            ['title', InputArgument::OPTIONAL, 'Title', 'Test Swapbot Event'],
+            ['text', InputArgument::OPTIONAL, 'Text', 'This is the text'],
         ];
     }
 
