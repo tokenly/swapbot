@@ -25,7 +25,7 @@
 		"graham-campbell/markdown": "~3.2",
 		"codesleeve/laravel-stapler": "dev-master",
 		"aws/aws-sdk-php": "^2.0.0",
-		"sabberworm/php-css-parser": "^6.0.0",
+		"sabberworm/php-css-parser": "^7.0.0",
 		"laravel/socialite": "^3.0@dev",
         "illuminate/html": "5.0.*",
 		"fideloper/proxy": "^3.0@dev",
