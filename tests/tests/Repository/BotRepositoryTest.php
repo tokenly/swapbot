@@ -61,6 +61,9 @@ class BotRepositoryTest extends TestCase {
     public function testBotHashUpdates() {
         $helper = $this->createRepositoryTestHelper();
 
+        // lock in a date
+        DateProvider::setNow(Carbon::now());
+
         $model = $helper->testLoad();
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertEquals($model['hash'], $model->buildHash());
