@@ -31,7 +31,7 @@ class RateStrategy implements Strategy {
 
 
     public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $quantity_out = $quantity_in * $swap_config['rate'];
+        $quantity_out = round($quantity_in * $swap_config['rate'], 8);
 
         return [
             'quantityIn'  => $quantity_in,
@@ -74,7 +74,7 @@ class RateStrategy implements Strategy {
         $in_value        = isset($swap_config['in'])        ? $swap_config['in']        : null;
         $out_value       = isset($swap_config['out'])       ? $swap_config['out']       : null;
         $rate_value      = isset($swap_config['rate'])      ? $swap_config['rate']      : null;
-        $price_value     = isset($swap_config['price'])     ? $swap_config['price']     : null;
+        $price_value     = isset($swap_config['price'])     ? $swap_config['price']     : (($rate_value AND $rate_value > 0) ? (1 / $rate_value) : null);
         $min_value       = isset($swap_config['min'])       ? $swap_config['min']       : null;
         $direction_value = isset($swap_config['direction']) ? $swap_config['direction'] : SwapConfig::DIRECTION_SELL;
 
@@ -100,13 +100,13 @@ class RateStrategy implements Strategy {
                 $errors->add('rate', "Please specify a valid rate for swap #{$swap_number}");
             }
 
-            // rate
-            if (strlen($rate_value)) {
-                if (!StrategyHelpers::isValidRate($rate_value)) {
-                    $errors->add('rate', "The rate for swap #{$swap_number} was not valid.");
+            // price
+            if (strlen($price_value)) {
+                if (!StrategyHelpers::isValidPrice($price_value)) {
+                    $errors->add('price', "The price for swap #{$swap_number} was not valid.");
                 }
             } else {
-                $errors->add('rate', "Please specify a valid rate for swap #{$swap_number}");
+                $errors->add('price', "Please specify a valid price for swap #{$swap_number}");
             }
 
             // min
