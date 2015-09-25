@@ -51,7 +51,7 @@ class FixedStrategy implements Strategy {
     public function serializeSwap(SwapConfig $swap_config) {
         return [
             'strategy'  => $swap_config['strategy'],
-            'direction' => $swap_config['direction'],
+            'direction' => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
             'in'        => $swap_config['in'],
             'out'       => $swap_config['out'],
             'in_qty'    => $swap_config['in_qty'],
@@ -66,10 +66,16 @@ class FixedStrategy implements Strategy {
         $in_qty_value  = isset($swap_config['in_qty'])  ? $swap_config['in_qty']  : null;
         $out_qty_value = isset($swap_config['out_qty']) ? $swap_config['out_qty'] : null;
         // $min_value     = isset($swap_config['min'])     ? $swap_config['min']     : null;
+        $direction_value = isset($swap_config['direction']) ? $swap_config['direction'] : SwapConfig::DIRECTION_SELL;
 
         $exists = (strlen($in_value) OR strlen($out_value) OR strlen($in_qty_value) OR strlen($out_qty_value));
         if ($exists) {
             $assets_are_valid = true;
+
+            // direction
+            if ($direction_value != SwapConfig::DIRECTION_SELL AND $direction_value != SwapConfig::DIRECTION_BUY) {
+                $errors->add('direction', "Please specify a valid direction for swap #{$swap_number}");
+            }
 
             // in and out assets
             if (!StrategyHelpers::validateAssetName($in_value, 'receive', $swap_number, 'in', $errors)) { $assets_are_valid = false; }

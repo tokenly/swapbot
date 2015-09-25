@@ -78,6 +78,10 @@ class BotValidatorTest extends TestCase {
                 'error' => 'Please specify a valid rate for swap #2',
             ],
             [
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['direction' => 'up','strategy' => 'rate',]]]),
+                'error' => 'Please specify a valid direction for swap #1',
+            ],
+            [
                 'vars' => array_replace_recursive($sample_vars, ['blacklist_addresses' => ['abadaddress1']]),
                 'error' => 'not a valid bitcoin address.',
             ],

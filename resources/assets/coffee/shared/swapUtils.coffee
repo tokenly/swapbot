@@ -6,7 +6,7 @@ exports = {}
 
 exports.SATOSHI = 100000000
 SATOSHI = exports.SATOSHI
-
+DIRECTION_SELL = 'sell'
 
 HARD_MINIMUM = 0.00000001
 
@@ -102,7 +102,12 @@ buildInAmountFromOutAmount.rate = (outAmount, swapConfig)->
         return 0
 
     # console.log "raw inAmount: ",outAmount / swapConfig.rate
-    inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI
+    if swapConfig.direction == DIRECTION_SELL and swapConfig.price?
+        inAmount = Math.ceil(SATOSHI * outAmount * swapConfig.price) / SATOSHI
+    else
+        inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI
+
+
     # console.log "rounded inAmount: ",inAmount
 
     return inAmount

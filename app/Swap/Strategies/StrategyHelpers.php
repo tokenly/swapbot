@@ -63,6 +63,10 @@ class StrategyHelpers {
         return true;
     }
 
+    public static function isValidPrice($price) {
+        return self::isValidRate($price);
+    }
+
     public static function isValidCost($rate) {
         $rate = floatval($rate);
 

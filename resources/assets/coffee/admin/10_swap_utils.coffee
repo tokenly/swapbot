@@ -12,8 +12,13 @@ constants = sbAdmin.constants
 swaputils.newSwapProp = (swap={})->
     # calculate price (1 / rate)
     price = null
-    if swap.rate? and swap.rate.length > 0
+
+    if swap.direction == constants.DIRECTION_SELL and swap.price? and ((typeof swap.price == 'string' and swap.price.length > 0) or (typeof swap.price == 'number' and swap.price > 0))
+        price = swapbot.formatters.formatCurrencyAsNumber(swap.price)
+
+    else if swap.rate? and ((typeof swap.rate == 'string' and swap.rate.length > 0) or (typeof swap.rate == 'number' and swap.rate > 0))
         price = swapbot.formatters.formatCurrencyAsNumber(1 / swap.rate)
+
 
     # all possible properties
     return m.prop({
@@ -41,7 +46,9 @@ swaputils.normalizeSwapsForSaving = (swaps)->
             rate = ''
             price = swap.price()
             if price? and price.length > 0
-                rate = swapbot.formatters.formatCurrencyAsNumber(1 / price)
+                # rate = swapbot.formatters.formatCurrencyAsNumber(1 / price)
+                rate = 1 / price
+
             swap.rate(rate)
         return swap
     # console.log "swapsOut=",swapsOut

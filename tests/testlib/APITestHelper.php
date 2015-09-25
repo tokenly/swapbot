@@ -326,6 +326,10 @@ class APITestHelper  {
     }
 
     protected function normalizeExpectedAPIResponse($expected_api_response, $actual_response_from_api) {
+        if (isset($expected_api_response['lastChangedAt']) AND isset($actual_response_from_api['lastChangedAt'])) {
+            $expected_api_response['lastChangedAt'] = $actual_response_from_api['lastChangedAt'];
+        }
+
         return $expected_api_response;
     }
 
