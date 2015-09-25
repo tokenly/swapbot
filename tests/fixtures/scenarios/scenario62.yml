@@ -6,6 +6,9 @@ bots:
   - meta: { baseFilename: bot01.yml }
     confirmations_required: 2
 
+Customers:
+  - meta: { baseFilename: customer01.yml }
+
 ############################
 # receive notifications from xchain
 xchainNotifications:
@@ -21,6 +24,10 @@ xchainNotifications:
       xchainFailAfterRequests: 0
     confirmations: 6
 
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
+  - {type: xchainNotification, startOffset: 1}
 
 ############################
 # validate the expected results
@@ -75,4 +82,9 @@ expectedBotEvents:
     meta: { baseFilename: swap.failed.permanent.yml }
   - #### ERROR
     meta: { baseFilename: swap.stateChange-permanenterror.yml }
+
+expectedEmails:
+  - meta: { baseFilename: 01-welcome.yml }
+  - meta: { baseFilename: 02-received.yml }
+  - meta: { baseFilename: 04-error.yml }
 

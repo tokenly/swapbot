@@ -99,7 +99,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     </p>
                 </li>
                 <li>
-                    <div class="item-header">Incoming TXID</div>
+                    <div class="item-header">Incoming Transaction ID</div>
                     <p>
                         @if (isset($receipt['txidIn']))
                             <a href="{{ $fmt->formatBlockchainHref($receipt['txidIn'], $receipt['assetIn']) }}" target="_blank">{{ $receipt['txidIn'] }}</a>
@@ -109,7 +109,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
                     </p>
                 </li>
                 <li>
-                    <div class="item-header">Outgoing TXID</div>
+                    <div class="item-header">Outgoing Transaction ID</div>
                     <p>
                         @if (isset($receipt['txidOut']))
                             <a href="{{ $fmt->formatBlockchainHref($receipt['txidOut'], $receipt['assetOut']) }}" target="_blank">{{ $receipt['txidOut'] }}</a>

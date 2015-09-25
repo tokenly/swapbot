@@ -1,0 +1,4 @@
+subject: Your Swap Had a Problem
+body: an unexpected problem
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

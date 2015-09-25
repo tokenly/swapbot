@@ -4,6 +4,8 @@ namespace Swapbot\Statemachines\SwapCommand;
 
 use Exception;
 use Illuminate\Foundation\Bus\DispatchesCommands;
+use Illuminate\Support\Facades\Event;
+use Swapbot\Events\SwapWasPermanentlyErrored;
 use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Swap;
 use Swapbot\Statemachines\SwapCommand\SwapCommand;
@@ -20,6 +22,9 @@ class SwapPermanentlyErrored extends SwapCommand {
     {
         // update the bot state in the database
         $this->updateSwapState($swap, SwapState::PERMANENT_ERROR);
+
+        // fire an event
+        Event::fire(new SwapWasPermanentlyErrored($swap));
     }
 
     /**

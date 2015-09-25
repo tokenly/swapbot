@@ -10,6 +10,7 @@ use Swapbot\Events\CustomerAddedToSwap;
 use Swapbot\Events\Event;
 use Swapbot\Events\SwapWasCompleted;
 use Swapbot\Events\SwapWasConfirmed;
+use Swapbot\Events\SwapWasPermanentlyErrored;
 use Swapbot\Models\Customer;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Formatting\FormattingHelper;
@@ -91,6 +92,24 @@ class CustomerEmailHandler {
         }
     }
 
+    // when a swap has been received and confirmed
+    public function swapWasPermanentlyErrored(SwapWasPermanentlyErrored $event) {
+        $swap = $event->swap;
+
+        // find all customers for this swap
+        $customers = $this->customer_repository->findBySwap($swap);
+        foreach($customers as $customer) {
+            if (!$customer->isActive()) { continue; }
+
+            // build variables
+            $email_vars = $this->buildEmailVariables($swap, $customer);
+
+            // send an email
+            $send_email = new SendEmail('emails.notifications.error', $email_vars, "Your Swap Had a Problem", $customer['email'], null);
+            $this->dispatch($send_email);
+        }
+    }
+
     /**
      * Register the listeners for the subscriber.
      *
@@ -102,6 +121,7 @@ class CustomerEmailHandler {
         $events->listen('Swapbot\Events\CustomerAddedToSwap', 'Swapbot\Handlers\Events\CustomerEmailHandler@customerAddedToSwap');
         $events->listen('Swapbot\Events\SwapWasConfirmed', 'Swapbot\Handlers\Events\CustomerEmailHandler@swapWasConfirmed');
         $events->listen('Swapbot\Events\SwapWasCompleted', 'Swapbot\Handlers\Events\CustomerEmailHandler@swapWasCompleted');
+        $events->listen('Swapbot\Events\SwapWasPermanentlyErrored', 'Swapbot\Handlers\Events\CustomerEmailHandler@swapWasPermanentlyErrored');
     }
 
     protected function buildEmailVariables($swap, $customer) {

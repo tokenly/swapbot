@@ -53,14 +53,14 @@ Recipient's address
 Swapbot's address
   {{ $bot['address'] }}
 
-Incoming TXID
+Incoming Transaction ID
 @if (isset($receipt['txidIn']))
   {{ $receipt['txidIn'] }}
 @else
   none
 @endif
 
-Outgoing TXID
+Outgoing Transaction ID
 @if (isset($receipt['txidOut']))
   {{ $receipt['txidOut'] }}
 @else

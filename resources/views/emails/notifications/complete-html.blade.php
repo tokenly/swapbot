@@ -48,6 +48,7 @@
 @else
     <span class="none">none</span>
 @endif
+</p>
 
 @if (isset($receipt['changeOut']) AND $receipt['changeOut'] > 0)
 <p><strong>Change</strong></p>
@@ -70,7 +71,7 @@
     <a href="{{ $fmt->formatAddressHref($bot['address']) }}" target="_blank">{{ $bot['address'] }}</a>
 </p>
 
-<p><strong>Incoming TXID</strong></p>
+<p><strong>Incoming Transaction ID</strong></p>
 <p>
     @if (isset($receipt['txidIn']))
         <a href="{{ $fmt->formatBlockchainHref($receipt['txidIn'], $receipt['assetIn']) }}" target="_blank">{{ $receipt['txidIn'] }}</a>
@@ -79,7 +80,7 @@
     @endif
 </p>
 
-<p><strong>Outgoing TXID</strong></p>
+<p><strong>Outgoing Transaction ID</strong></p>
 <p>
     @if (isset($receipt['txidOut']))
         <a href="{{ $fmt->formatBlockchainHref($receipt['txidOut'], $receipt['assetOut']) }}" target="_blank">{{ $receipt['txidOut'] }}</a>
