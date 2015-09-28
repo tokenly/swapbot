@@ -5,6 +5,7 @@ namespace Swapbot\Http\Controllers\API\Swap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Http\Controllers\API\Base\APIController;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapIndexRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
@@ -38,6 +39,9 @@ class PublicAvailableSwapsController extends APIController {
         // format for API
         $available_swaps_output = [];
         foreach($available_swaps as $available_swap) {
+            // ignore shutdown bots
+            if ($available_swap['bot']['state'] == BotState::SHUTDOWN) { continue; }
+
             $swap_config = $available_swap['swap'];
             $swap_details_for_api = $swap_strategy_factory->getStrategy($swap_config['strategy'])->buildSwapDetailsForAPI($swap_config, $request->input('inToken'));
 
