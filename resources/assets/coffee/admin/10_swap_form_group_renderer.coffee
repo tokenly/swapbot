@@ -221,14 +221,14 @@ renderSwapRules = (number, swap, vmProps, swapDirection)->
 
 
     # vmProps.swapRules()
-    if not swap.swapRules then swap.swapRules = m.prop([])
+    if not swap().swapRules then swap().swapRules = m.prop([])
 
     hasMultipleRules = (vmProps.swapRules()?.length > 1)
     allowAdd = false
     if vmProps.swapRules()?.length > 1
-        if vmProps.swapRules()?.length > swap.swapRules()?.length
+        if vmProps.swapRules()?.length > swap().swapRules()?.length
             allowAdd = true
-    if swap.swapRules()?.length < 1 then allowAdd = true
+    if swap().swapRules()?.length < 1 then allowAdd = true
 
     return m("div", class: "choose-swap-rules row", [
         m("div", { class: "col-md-3 advanced-swap-rules-label"}, [
@@ -258,7 +258,7 @@ renderSwapRules = (number, swap, vmProps, swapDirection)->
 
 renderAppliedSwapRules = (swap, vmProps, swapDirection)->
     hasMultipleRules = (vmProps.swapRules()?.length > 1)
-    return swap.swapRules().map (advancedSwapRule, index)->
+    return swap().swapRules().map (advancedSwapRule, index)->
         return m("span", class: "applied-rule", [
             if hasMultipleRules then m("a", {class: "prev-swap-rule-link", href: '#previous', onclick: buildPrevSwapRuleFn(swap, advancedSwapRule, index, vmProps, swapDirection), }, [
                 m("span", {class: "glyphicon glyphicon-triangle-left", title: "Previous Advanced Swap Rule"}),
@@ -276,8 +276,10 @@ buildAddSwapRuleFn = (swap, vmProps)->
     return (e)->
         e.preventDefault()
 
-        if not swap.swapRules() then swap.swapRules = m.prop([])
-        swap.swapRules().push(buildAdvancedSwapRule(swap, vmProps))
+        if not swap().swapRules then swap().swapRules = m.prop([])
+        newSwapRulesArray = swap().swapRules()
+        newSwapRulesArray.push(buildAdvancedSwapRule(swap, vmProps))
+        swap().swapRules(newSwapRulesArray)
 
         updateSwap(swap, vmProps)
 
@@ -306,7 +308,9 @@ buildChangeSwapRuleFn = (swap, currentAdvancedSwapRule, currentIndex, vmProps, s
         if nextOffset < 0
             nextOffset = maxOffset
 
-        swap.swapRules()[currentIndex] = allAdvancedSwapRules[nextOffset]
+        updatedSwapRulesArray = swap().swapRules()
+        updatedSwapRulesArray[currentIndex] = allAdvancedSwapRules[nextOffset]
+        swap().swapRules(updatedSwapRulesArray)
 
         updateSwap(swap, vmProps)
 
@@ -318,7 +322,7 @@ buildRemoveSwapRuleFn = (indexToRemove, swap, vmProps, swapDirection)->
 
         filterFn = (swapRule, index)->
             return (index != indexToRemove)
-        swap.swapRules(swap.swapRules().filter(filterFn))
+        swap().swapRules(swap().swapRules().filter(filterFn))
 
         updateSwap(swap, vmProps)
 
@@ -335,8 +339,6 @@ swapGroup = (number, swap, vmProps, swapDirection, isDuplicate)->
     offsetKey = buildOffsetKey(swapDirection, number-1)
     swapGroupSpec = swapGroupRenderers[swap().strategy()][swapDirection](number, swap(), vmProps, offsetKey)
     return if not swapGroupSpec?
-
-    console.log "swapGroup swapDirection=#{swapDirection} swap.offset()=#{swap().offset()} swap.swapRules()=", (if swap.swapRules then swap.swapRules() else null)
 
 
     swapGroupSpec.rightCols.push([
@@ -381,11 +383,9 @@ buildOffsetKey = (swapDirection, offset)->
 
 updateSwap = (swap, vmProps)->
     targetOffset = swap().offset()
-    console.log "updateSwap swapDirection=#{swapDirection} swap.swapRules()=", (if swap.swapRules then swap.swapRules() else null)
 
     updateFn = (swapsIn)->
         return swapsIn.map (oldSwap, offset)->
-            console.log "targetOffset=#{targetOffset} offset=#{offset}"
             if offset == targetOffset then return swap
             return oldSwap
 

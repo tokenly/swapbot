@@ -110,17 +110,9 @@ splitBotDataIntoBuyAndSellSwaps = (botDataSwaps)->
 
 
 mergeSwaps = (sellSwaps, buySwaps, swapRules)->
-    console.log "mergeSwaps sellSwaps=", sellSwaps
-    console.log "mergeSwaps sellSwaps[0]=", sellSwaps[0]
-    console.log "mergeSwaps sellSwaps[0].offset=", sellSwaps[0]?.offset
-
     mergedSwaps = []
 
     mapFn = (swapProp, offset)->
-        # swap = swapProp()
-        # if swap.in()?.length
-        #     mergedSwaps.push(swap)
-        console.log "swapProp()=",swapProp()
         if swapProp().in()?.length
             mergedSwaps.push(swapProp())
         return
@@ -128,8 +120,6 @@ mergeSwaps = (sellSwaps, buySwaps, swapRules)->
     sellSwaps.map(mapFn)
     buySwaps.map(mapFn)
 
-    console.log "mergeSwaps mergedSwaps=", mergedSwaps
-    console.log "mergeSwaps mergedSwaps[0].offset=", mergedSwaps[0]?.offset
 
     return mergedSwaps
 
@@ -288,8 +278,6 @@ vm = ctrl.botForm.vm = do ()->
 
         vm.save = (e)->
             e.preventDefault()
-            console.log "vm.save vm.sellSwaps()[0].offset=", vm.sellSwaps()[0].offset
-
             attributes = {
                 name: vm.name()
                 description: vm.description()
@@ -318,7 +306,7 @@ vm = ctrl.botForm.vm = do ()->
                 apiCall = sbAdmin.api.newBot
                 apiArgs = [attributes]
 
-            console.log "TEMPORARILY NOT SAVING"
+            console.log "TEMPORARILY NOT SAVING attributes: ",attributes
             return
             sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then((apiResponse)->
                 # console.log "submit complete - routing to dashboard"
@@ -349,8 +337,6 @@ ctrl.botForm.controller = ()->
 
 ctrl.botForm.view = ()->
     duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.buySwaps, vm.sellSwaps)
-
-    console.log "rendering bot_form view vm.sellSwaps()[0].offset=", vm.sellSwaps()[0].offset
 
     mEl = m("div", [
         m("div", { class: "row"}, [
