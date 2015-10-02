@@ -85,15 +85,6 @@ class FixedStrategy implements Strategy {
             StrategyHelpers::validateQuantity($in_qty_value, 'receive', $swap_number, 'in_qty', $errors);
             StrategyHelpers::validateQuantity($out_qty_value, 'send', $swap_number, 'out_qty', $errors);
 
-            // // min
-            // if (strlen($min_value)) {
-            //     if (!StrategyHelpers::isValidQuantityOrZero($min_value)) {
-            //         $errors->add('min', "The minimum value for swap #{$swap_number} was not valid.");
-            //     }
-            // } else {
-            //     $errors->add('min', "Please specify a valid minimum value for swap #{$swap_number}");
-            // }
-
             // make sure assets aren't the same
             if ($assets_are_valid AND $in_value == $out_value) {
                 $errors->add('rate', "The assets to receive and send for swap #{$swap_number} should not be the same.");

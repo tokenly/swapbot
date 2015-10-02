@@ -323,6 +323,142 @@ class BotValidatorTest extends TestCase {
     }
 
 
+    public function testBotSwapRulesValidation()
+    {
+        // sample bot
+        $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
+
+        $sample_swap_rule = [
+            'name' => 'My Rule One',
+            'ruleType' => 'bulkDiscount',
+            'uuid' => 'id0001',
+            'discounts' => [[
+                'moq' => '10',
+                'pct' => '0.1',
+            ],],
+        ];
+
+        $test_specs = [
+            [
+                // blank swap rules are ok 
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => []]),
+                'error' => null,
+            ],
+            [
+                // name required
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'name' => '',
+                ])]]),
+                'error' => 'Please specify a name for Swap Rule #1',
+            ],
+            [
+                // ruleType required
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'ruleType' => '',
+                ])]]),
+                'error' => 'Please specify a type for Swap Rule #1',
+            ],
+            [
+                // uuid required
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'uuid' => '',
+                ])]]),
+                'error' => 'Please specify a UUID for Swap Rule #1',
+            ],
+            [
+                // discounts required
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace($sample_swap_rule, [
+                    'discounts' => []
+                ])]]),
+                'error' => 'Please specify discounts for Swap Rule #1',
+            ],
+            [
+                // empty moq
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'moq' => '',
+                    ]],
+                ])]]),
+                'error' => 'Please specify a minimum order for Discount 1 of Swap Rule #1',
+            ],
+            [
+                // bad moq
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'moq' => -1,
+                    ]],
+                ])]]),
+                'error' => 'The minimum order for Discount 1 of Swap Rule #1 was invalid',
+            ],
+            [
+                // empty pct
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'pct' => '',
+                    ]],
+                ])]]),
+                'error' => 'Please specify a percentage for Discount 1 of Swap Rule #1',
+            ],
+            [
+                // bad pct
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'pct' => 0,
+                    ]],
+                ])]]),
+                'error' => 'The percentage for Discount 1 of Swap Rule #1 was invalid',
+            ],
+            [
+                // bad pct
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'pct' => -1,
+                    ]],
+                ])]]),
+                'error' => 'The percentage for Discount 1 of Swap Rule #1 was invalid',
+            ],
+            [
+                // bad pct
+                'vars' => array_replace_recursive($sample_vars, ['swap_rules' => [array_replace_recursive($sample_swap_rule, [
+                    'discounts' => [0 => [
+                        'pct' => 1.01,
+                    ]],
+                ])]]),
+                'error' => 'The percentage for Discount 1 of Swap Rule #1 was invalid',
+            ],
+
+        ];
+
+        $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
+
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
+    }
+/*
+
+    "swapRules": [
+        {
+            "discounts": [
+                {
+                    "moq": "10",
+                    "pct": 0.1
+                },
+                {
+                    "moq": "20",
+                    "pct": 0.12
+                },
+                {
+                    "moq": "30",
+                    "pct": 0.13
+                }
+            ],
+            "name": "Devon Rule One",
+            "ruleType": "bulkDiscount",
+            "uuid": "d3a11a3a-5b25-4f1d-0589-eca2fb212f47"
+        }
+    ],
+
+
+ */
     public function testBotUpdateValidator() {
         $test_specs = [
             [

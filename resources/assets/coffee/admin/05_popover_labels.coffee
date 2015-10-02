@@ -283,6 +283,39 @@ popoverLabels.urlSlug = {
     }
 }
 
+# ---------------------------------------------------------------------------------
+popoverLabels.buildAdvancedSwapRuleType = (offset)->
+    return {
+        text: "Type for Rule #{offset+1}"
+        popover: {
+            title: "About The Rule Type"
+            content: """
+                <p>Swaps can have different types of advanced rules.  Choose that type here.</p>
+            """
+        }
+    }
+
+popoverLabels.swapRuleName = {
+        text: "Rule Name"
+        popover: {
+            title: "About The Rule Name"
+            content: """
+                <p>Give this advanced swap rule a name so you can assign it to one or more swaps.</p>
+                <p>This name is just for your use. Customers of this bot will not see it.</p>
+            """
+        }
+    }
+
+popoverLabels.advancedSwapBulkDiscounts = {
+        text: "Bulk Discounts"
+        popover: {
+            title: "About The Bulk Discounts"
+            content: """
+                <p>Define your bulk discounts below.</p>
+            """
+        }
+    }
+
 
 
 

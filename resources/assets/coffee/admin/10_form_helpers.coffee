@@ -22,6 +22,7 @@ buildLabelEl = (label, id)->
 
     return m("label", properties, labelText)
 
+
 form.mValueDisplay = (label, attributes, valueOrProp)->
     if typeof valueOrProp == 'function'
         # assume a prop
@@ -45,12 +46,14 @@ form.mReadOnlyFormField = (label, attributes, prop)->
     return form.mFormField(label, attributes, prop)
 
 form.mFormField = (label, attributes, prop)->
+    labelEl = form.mLabelEl(label, attributes.id)
     inputEl = form.mInputEl(attributes, prop)
+    return form.composeFormField(labelEl, inputEl)
 
-    return m("div", {class: "form-group"}, [
-        buildLabelEl(label, attributes.id)
-        inputEl,
-    ])
+form.mLabelEl = (labelDef, id=null)->
+    if not id? then id = ""
+    return buildLabelEl(labelDef, id)
+
 
 form.mInputEl = (attributes, prop=null)->
     inputProps = sbAdmin.utils.clone(attributes)
@@ -106,19 +109,11 @@ form.mInputEl = (attributes, prop=null)->
 
     return inputEl;
 
-truncate = (textIn, limit)->
-    if limit? and textIn? and textIn.length > limit+1
-        return textIn.substr(0, limit)+'\u2026';
-    return textIn
-
-buildOpts = (opts)->
-    return opts.map (opt)->
-        if opt.isGroup?
-            return m("optgroup", {label: opt.label}, buildOpts(opt.opts))
-        val = opt.v
-        if val? and typeof val == 'object'
-            val = window.JSON.stringify(opt.v)
-        return m("option", {value: val, label: opt.k}, opt.k)
+form.composeFormField = (labelEl, inputEl)->
+    return m("div", {class: "form-group"}, [
+        labelEl,
+        inputEl,
+    ])
 
 form.mSubmitBtn = (label, className='btn btn-primary')->
     return m("button", {type: 'submit', class: className}, label)
@@ -183,5 +178,22 @@ form.yesNoOptions = ()->
         {k: "Yes", v: '1'}
         {k: "No",  v: '0'}
     ]
+# ------------------------------------------------------------------------------------------------
+
+truncate = (textIn, limit)->
+    if limit? and textIn? and textIn.length > limit+1
+        return textIn.substr(0, limit)+'\u2026';
+    return textIn
+
+buildOpts = (opts)->
+    return opts.map (opt)->
+        if opt.isGroup?
+            return m("optgroup", {label: opt.label}, buildOpts(opt.opts))
+        val = opt.v
+        if val? and typeof val == 'object'
+            val = window.JSON.stringify(opt.v)
+        return m("option", {value: val, label: opt.k}, opt.k)
+
+
 
 module.exports = form

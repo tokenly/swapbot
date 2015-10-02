@@ -2,14 +2,15 @@
 
 namespace Swapbot\Swap\Strategies;
 
+use Exception;
 use Illuminate\Support\MessageBag;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Swapbot\Swap\Strategies\StrategyHelpers;
+use Swapbot\Util\Validator\ValidatorHelper;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\QuotebotClient\Client as QuotebotClient;
-use Exception;
 
 class FiatStrategy implements Strategy {
 
@@ -139,7 +140,7 @@ class FiatStrategy implements Strategy {
 
             // min_out
             if (strlen($min_out_value)) {
-                if (!StrategyHelpers::isValidQuantityOrZero($min_out_value)) {
+                if (!ValidatorHelper::isValidQuantityOrZero($min_out_value)) {
                     $errors->add('min_out', "The minimum output value for swap #{$swap_config_number} was not valid.");
                 }
             } else {

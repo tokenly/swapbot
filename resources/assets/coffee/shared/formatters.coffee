@@ -37,6 +37,13 @@ exports.isNotZero = (value)-> return not isZero(value)
 exports.formatCurrencyWithForcedZero = (value, currencyPostfix='') ->
     return exports.formatCurrency((if isZero(value) then 0 else value), currencyPostfix)
 
+exports.formatPercentage = (value) ->
+    if not value? or isNaN(value) then return ''
+
+    decimalText = window.numeral(value).format('0.[00000000]')
+    return decimalText
+
+
 exports.formatCurrency = (value, currencyPostfix='') ->
     if not value? or isNaN(value) then return ''
 

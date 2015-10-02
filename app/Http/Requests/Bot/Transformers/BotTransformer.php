@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Data\IncomeRuleConfig;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
+use Swapbot\Models\Data\SwapRuleConfig;
 use Swapbot\Repositories\ImageRepository;
 
 class BotTransformer {
@@ -61,6 +62,12 @@ class BotTransformer {
         // sanitize background_overlay_settings
         if (isset($attributes['backgroundOverlaySettings'])) {
             $out['background_overlay_settings'] = $this->sanitizeOverlaySettings($attributes['backgroundOverlaySettings']);
+        }
+
+
+        // santize swapRules
+        if (isset($attributes['swapRules'])) {
+            $out['swap_rules'] = $this->sanitizeSwapRules($attributes['swapRules']);
         }
 
         return $out;
@@ -165,6 +172,31 @@ class BotTransformer {
         }
 
         return $out;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Swap Rules
+
+    protected function sanitizeSwapRules($swap_rules) {
+        $swap_rules_out = [];
+
+        if ($swap_rules) {
+            foreach(array_values($swap_rules) as $offset => $swap_rule_vars) {
+                $swap_rule = $this->sanitizeSwapRule($swap_rule_vars);
+                
+                if ($swap_rule) {
+                    $swap_rules_out[] = $swap_rule;
+                }
+            }
+        }
+
+        return $swap_rules_out;
+    }
+
+    protected function sanitizeSwapRule($swap_rule) {
+        $config = SwapRuleConfig::createFromSerialized($swap_rule);
+        if ($config->isEmpty()) { return null; }
+        return $config;
     }
 
 

@@ -16,6 +16,7 @@ use Swapbot\Repositories\ImageRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Strategies\StrategyHelpers;
 use Swapbot\Util\Slug\Slugifier;
+use Swapbot\Util\Validator\ValidatorHelper;
 
 
 class BotValidator {
@@ -75,6 +76,10 @@ class BotValidator {
 
             // validate overlay gradient settings
             $this->validateOverlaySettings(isset($posted_data['background_overlay_settings']) ? $posted_data['background_overlay_settings'] : null, $validator);
+
+            // validate swap rules
+            $this->validateSwapRules(isset($posted_data['swap_rules']) ? $posted_data['swap_rules'] : null, $validator);
+
         });
         return $validator;
     }
@@ -162,7 +167,7 @@ class BotValidator {
         // asset
         if (!strlen($income_rule['asset'])) {
             $validator->errors()->add('asset_'.$income_rule_number, "Please specify an asset for Income Rule #{$income_rule_number}");
-        } else  if (!StrategyHelpers::isValidAssetName($income_rule['asset'])) {
+        } else  if (!ValidatorHelper::isValidAssetName($income_rule['asset'])) {
             $validator->errors()->add('asset_'.$income_rule_number, "The asset name for Income Rule #{$income_rule_number} was not valid");
         }
 
@@ -283,7 +288,74 @@ class BotValidator {
 
         return;
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // swap rules
     
+    protected function validateSwapRules($swap_rules, $validator) {
+        if ($swap_rules AND is_array($swap_rules)) {
+            foreach(array_values($swap_rules) as $offset => $swap_rule) {
+                $this->validateSwapRule($offset, $swap_rule, $validator);
+            }
+        }
+    }
+
+    protected function validateSwapRule($offset, $swap_rule, $validator) {
+        Log::debug("\$swap_rule=".json_encode($swap_rule, 192));
+        $swap_rule_number = $offset + 1;
+
+        // name required
+        if (!strlen($swap_rule['name'])) {
+            $validator->errors()->add('name_'.$swap_rule_number, "Please specify a name for Swap Rule #{$swap_rule_number}");
+        }
+        // ruleType required
+        if (!strlen($swap_rule['ruleType'])) {
+            $validator->errors()->add('ruleType_'.$swap_rule_number, "Please specify a type for Swap Rule #{$swap_rule_number}");
+        }
+        // uuid required
+        if (!strlen($swap_rule['uuid'])) {
+            $validator->errors()->add('uuid_'.$swap_rule_number, "Please specify a UUID for Swap Rule #{$swap_rule_number}");
+        }
+
+        // discounts
+        if ($swap_rule['ruleType'] == 'bulkDiscount') {
+            if ($swap_rule['discounts']) {
+                // validate each discount
+                foreach ($swap_rule['discounts'] as $discount_offset => $discount) {
+                    // validate each discount
+                    $this->validateDiscount($discount, $discount_offset, $swap_rule_number, $validator);
+                }
+            } else {
+                $validator->errors()->add('discounts_'.$swap_rule_number, "Please specify discounts for Swap Rule #{$swap_rule_number}");
+            }
+        }
+    }
+
+    protected function validateDiscount($discount, $discount_offset, $swap_rule_number, $validator) {
+        $discount_number = $discount_offset + 1;
+        $identifier = $swap_rule_number.'_'.$discount_number;
+        $text_identifier = "Discount {$discount_number} of Swap Rule #{$swap_rule_number}";
+        if (strlen($discount['moq'])) {
+            if (!ValidatorHelper::isValidQuantityOrZero($discount['moq'])) {
+                $validator->errors()->add('moq_'.$identifier, "The minimum order for {$text_identifier} was invalid");
+            }
+        } else {
+            $validator->errors()->add('moq_'.$identifier, "Please specify a minimum order for {$text_identifier}");
+        }
+
+        if (strlen($discount['pct'])) {
+            if (!ValidatorHelper::isValidPercentage($discount['pct'])) {
+                $validator->errors()->add('pct_'.$identifier, "The percentage for {$text_identifier} was invalid");
+            }
+        } else {
+            $validator->errors()->add('pct_'.$identifier, "Please specify a percentage for {$text_identifier}");
+        }
+
+    }
+
+    // 'moq' => '10',
+    // 'pct' => '0.1',
+
 
     protected function initValidatorRules() {
         // abstract method

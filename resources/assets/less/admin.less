@@ -1,5 +1,4 @@
-@import "bootstrap/bootstrap";
-
+@import "admin-bootstrap-include.less";
 @import "imports/spinners";
 
 @btn-font-weight: 300;
@@ -184,7 +183,7 @@ ul.event-list-standalone {
 
 
 // bot form
-.remove-link {
+.remove-link, .remove-link-one-line {
     margin-top: 29px;
     display: block;
     font-size: 2.4rem;
@@ -195,7 +194,12 @@ ul.event-list-standalone {
     }
 }
 
+.remove-link-one-line {
+    margin-top: 4px;
+}
+
 .remove-link-compact {
+    font-size: 1.6rem;
     margin-top: 4px;
 }
 
@@ -244,15 +248,72 @@ textarea.form-control {
     padding-left: 18px;
 }
 
-.asset-group, .add-swap-group {
+.item-group, .add-item-group {
     padding: 10px 12px 0;
 }
-.asset-group {
+.item-group {
     border-bottom: 1px dashed #E2E0E0;
 }
 
-.asset-group:last-child {
+.item-group:last-child {
     border-bottom: none;
+}
+
+.choose-swap-rules {
+    margin-bottom: 10px;
+
+    background-color: #F3F3F3;
+    margin-left: 0;
+    margin-right: 3.55%;
+    border-radius: 2px;
+}
+
+.add-swap-rule-link {
+    font-size: 1.2rem;
+    line-height: 28px;
+}
+
+.applied-rules {
+    .applied-rule {
+        display: inline-block;
+        padding: 3px 6px;
+        margin: 0 8px;
+        background-color: @brand-primary;
+        color: white;
+        border: 1px solid darken(@brand-primary, 3%);
+        border-radius: 3px;
+
+        a.prev-swap-rule-link {
+            margin-right: 6px;
+        }
+
+        a.next-swap-rule-link {
+            margin-left: 6px;
+        }
+
+        a.delete-swap-rule-link {
+            margin-left: 6px;
+        }
+
+        a.delete-swap-rule-link, a.prev-swap-rule-link, a.next-swap-rule-link,  {
+            font-size: 1.2rem;
+            // color: white;
+            color: #B7D3EB;
+        }
+    }
+    .applied-rule:first-child {
+        margin-left: 0px;
+    }
+}
+
+.advanced-swap-rules-label {
+    color: #333;
+    font-weight: bold;
+    line-height: 28px;
+}
+.no-applied-rules {
+    color: #adadad;
+    line-height: 28px;
 }
 
 
@@ -339,6 +400,27 @@ textarea.form-control {
     padding: 0;
     text-align: center;
 }
+
+
+.inactive-rule {
+    color: #999;
+}
+
+.inactive-rule-value {
+    padding: 8px 0;
+}
+
+.discount-number {
+    font-weight: bold;
+    padding: 8px 0;
+}
+
+
+a.remove-link-discount {
+    padding: 5px 0;
+}
+
+
 
 // show
 

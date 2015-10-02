@@ -1,6 +1,6 @@
 <?php
 
-use Swapbot\Swap\Strategies\StrategyHelpers;
+use Swapbot\Util\Validator\ValidatorHelper;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
 class StrategyHelpersTest extends TestCase {
@@ -18,7 +18,7 @@ class StrategyHelpersTest extends TestCase {
         $this->assertInvalidAsset('A95428956661682199');
         $this->assertInvalidAsset('A95428956661682200');
         $this->assertValidAsset(  'A95428956661682201');
-        $this->assertValidAsset('A18446744073709600000');
+        $this->assertValidAsset(  'A18446744073709600000');
         $this->assertInvalidAsset('A18446744073709600001');
     }
 
@@ -26,11 +26,11 @@ class StrategyHelpersTest extends TestCase {
     
     
     protected function assertValidAsset($name) {
-        PHPUnit::assertTrue(StrategyHelpers::isValidAssetName($name), "The name $name was not valid and it should have been");
+        PHPUnit::assertTrue(ValidatorHelper::isValidAssetName($name), "The name $name was not valid and it should have been");
     }
 
     protected function assertInvalidAsset($name) {
-        PHPUnit::assertFalse(StrategyHelpers::isValidAssetName($name), "The name $name was valid and it should not have been");
+        PHPUnit::assertFalse(ValidatorHelper::isValidAssetName($name), "The name $name was valid and it should not have been");
     }
 
 

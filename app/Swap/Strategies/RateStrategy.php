@@ -7,6 +7,7 @@ use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Swapbot\Swap\Strategies\StrategyHelpers;
+use Swapbot\Util\Validator\ValidatorHelper;
 
 class RateStrategy implements Strategy {
 
@@ -111,7 +112,7 @@ class RateStrategy implements Strategy {
 
             // min
             if (strlen($min_value)) {
-                if (!StrategyHelpers::isValidQuantityOrZero($min_value)) {
+                if (!ValidatorHelper::isValidQuantityOrZero($min_value)) {
                     $errors->add('min', "The minimum value for swap #{$swap_number} was not valid.");
                 }
             } else {

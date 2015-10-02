@@ -12,7 +12,10 @@ sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_gro
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 popoverLabels = require './05_popover_labels'
+swapRulesRenderer = require './10_swap_rules_renderer'
 # ---- end references
+
+$ = window.jQuery
 
 ctrl = {}
 
@@ -106,18 +109,27 @@ splitBotDataIntoBuyAndSellSwaps = (botDataSwaps)->
     return [buySwapsData, sellSwapsData]
 
 
-mergeSwaps = (buySwaps, sellSwaps)->
+mergeSwaps = (sellSwaps, buySwaps, swapRules)->
+    console.log "mergeSwaps sellSwaps=", sellSwaps
+    console.log "mergeSwaps sellSwaps[0]=", sellSwaps[0]
+    console.log "mergeSwaps sellSwaps[0].offset=", sellSwaps[0]?.offset
+
     mergedSwaps = []
 
     mapFn = (swapProp, offset)->
-        swapArray = swapProp()
-        if swapArray.in()?.length
-            mergedSwaps.push(swapArray)
+        # swap = swapProp()
+        # if swap.in()?.length
+        #     mergedSwaps.push(swap)
+        console.log "swapProp()=",swapProp()
+        if swapProp().in()?.length
+            mergedSwaps.push(swapProp())
         return
 
-    buySwaps.map(mapFn)
     sellSwaps.map(mapFn)
+    buySwaps.map(mapFn)
 
+    console.log "mergeSwaps mergedSwaps=", mergedSwaps
+    console.log "mergeSwaps mergedSwaps[0].offset=", mergedSwaps[0]?.offset
 
     return mergedSwaps
 
@@ -204,6 +216,7 @@ vm = ctrl.botForm.vm = do ()->
         vm.refundAfterBlocks = m.prop(3)
         vm.sellSwaps = m.prop([sbAdmin.swaputils.newSwapProp({direction: constants.DIRECTION_SELL})])
         vm.buySwaps = m.prop([])
+        vm.swapRules = m.prop([])
         
         vm.incomeRulesGroup = buildIncomeRulesGroup()
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
@@ -237,6 +250,7 @@ vm = ctrl.botForm.vm = do ()->
                     [buySwapsData, sellSwapsData] = splitBotDataIntoBuyAndSellSwaps(botData.swaps)
                     vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData))
                     vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData))
+                    vm.swapRules = m.prop(swapRulesRenderer.unserialize(botData.swapRules))
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
@@ -274,6 +288,7 @@ vm = ctrl.botForm.vm = do ()->
 
         vm.save = (e)->
             e.preventDefault()
+            console.log "vm.save vm.sellSwaps()[0].offset=", vm.sellSwaps()[0].offset
 
             attributes = {
                 name: vm.name()
@@ -281,8 +296,7 @@ vm = ctrl.botForm.vm = do ()->
                 urlSlug: vm.urlSlug()
                 hash: vm.hash()
                 paymentPlan: vm.paymentPlan()
-                # need to combine these...
-                swaps: sbAdmin.swaputils.normalizeSwapsForSaving(mergeSwaps(vm.sellSwaps(), vm.buySwaps()))
+                swaps: sbAdmin.swaputils.normalizeSwapsForSaving(mergeSwaps(vm.sellSwaps(), vm.buySwaps(), vm.swapRules()))
                 returnFee: vm.returnFee() + ""
                 incomeRules: vm.incomeRulesGroup.serialize()
                 blacklistAddresses: vm.blacklistAddressesGroup.serialize()
@@ -291,6 +305,8 @@ vm = ctrl.botForm.vm = do ()->
                 backgroundImageId: vm.backgroundImageId() or ''
                 backgroundOverlaySettings: if vm.backgroundOverlaySettings() then window.JSON.parse(vm.backgroundOverlaySettings()) else ''
                 logoImageId: vm.logoImageId() or ''
+
+                swapRules: swapRulesRenderer.serialize(vm.swapRules),
             }
 
             if vm.resourceId().length > 0
@@ -302,6 +318,8 @@ vm = ctrl.botForm.vm = do ()->
                 apiCall = sbAdmin.api.newBot
                 apiArgs = [attributes]
 
+            console.log "TEMPORARILY NOT SAVING"
+            return
             sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then((apiResponse)->
                 # console.log "submit complete - routing to dashboard"
                 # go to bot display
@@ -314,6 +332,9 @@ vm = ctrl.botForm.vm = do ()->
 
                 m.route("/admin/view/bot/#{botId}")
                 return
+            , (error)->
+                # scroll to the top
+                $('html, body').animate({scrollTop: 0}, 750)
             )
 
         return
@@ -328,6 +349,8 @@ ctrl.botForm.controller = ()->
 
 ctrl.botForm.view = ()->
     duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.buySwaps, vm.sellSwaps)
+
+    console.log "rendering bot_form view vm.sellSwaps()[0].offset=", vm.sellSwaps()[0].offset
 
     mEl = m("div", [
         m("div", { class: "row"}, [
@@ -389,6 +412,14 @@ ctrl.botForm.view = ()->
                     m("h3", "Swaps Purchasing Tokens"),
                     sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm),
 
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    m("h3", "Advanced Swap Rules"),
+                    swapRulesRenderer.buildRulesSection(vm.swapRules),
 
 
                     # -------------------------------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 namespace Swapbot\Swap\Strategies;
 
 use Illuminate\Support\MessageBag;
+use Swapbot\Util\Validator\ValidatorHelper;
 
 
 class StrategyHelpers {
@@ -10,7 +11,7 @@ class StrategyHelpers {
     public static function validateAssetName($asset, $asset_description_type, $swap_number, $error_key, MessageBag $errors) {
         $assets_are_valid = true;
         if (strlen($asset)) {
-            if (!self::isValidAssetName($asset)) {
+            if (!ValidatorHelper::isValidAssetName($asset)) {
                 $assets_are_valid = false;
                 $errors->add($error_key, "The {$asset_description_type} asset name for swap #{$swap_number} was not valid.");
             }
@@ -23,7 +24,7 @@ class StrategyHelpers {
 
     public static function validateQuantity($quantity, $quantity_description_type, $swap_number, $error_key, MessageBag $errors) {
         if (strlen($quantity)) {
-            if (!self::isValidQuantity($quantity)) {
+            if (!ValidatorHelper::isValidQuantity($quantity)) {
                 $errors->add($error_key, "The {$quantity_description_type} quantity for swap #{$swap_number} was not valid.");
             }
         } else {
@@ -31,30 +32,6 @@ class StrategyHelpers {
         }
     }
 
-    public static function isValidAssetName($name) {
-        if ($name === 'BTC') { return true; }
-        if ($name === 'XCP') { return true; }
-
-        // check free asset names
-        if (substr($name, 0, 1) == 'A') { return self::isValidFreeAssetName($name); }
-
-        if (!preg_match('!^[A-Z]+$!', $name)) { return false; }
-        if (strlen($name) < 4) { return false; }
-
-        return true;
-    }
-
-    // allow integers between 26^12 + 1 and 256^8 (inclusive), prefixed with 'A'
-    public static function isValidFreeAssetName($name) {
-        if (substr($name, 0, 1) != 'A') { return false; }
-
-        $number_string = substr($name, 1);
-        if (!preg_match('!^\\d+$!', $number_string)) { return false; }
-        if (bccomp($number_string, "95428956661682201") < 0) { return false; }
-        if (bccomp($number_string, "18446744073709600000") > 0) { return false; }
-
-        return true;
-    }
 
     public static function isValidRate($rate) {
         $rate = floatval($rate);
@@ -72,21 +49,6 @@ class StrategyHelpers {
 
         // minimum USD pricing
         if ($rate < 0.00000001) { return false; }
-
-        return true;
-    }
-
-    public static function isValidQuantityOrZero($quantity) {
-        return self::isValidQuantity($quantity, true);
-    }
-
-    public static function isValidQuantity($quantity, $allow_zero=false) {
-        $quantity = floatval($quantity);
-        if ($allow_zero) {
-            if ($quantity < 0) { return false; }
-        } else {
-            if ($quantity <= 0) { return false; }
-        }
 
         return true;
     }
