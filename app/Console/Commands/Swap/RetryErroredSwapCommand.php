@@ -4,16 +4,15 @@ namespace Swapbot\Console\Commands\Swap;
 
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Repositories\SwapRepository;
-use Swapbot\Swap\Logger\BotEventLogger;
+use Swapbot\Swap\Logger\Facade\BotEventLogger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-use Illuminate\Console\ConfirmableTrait;
-
-class ResetSwapCommand extends Command {
+class RetryErroredSwapCommand extends Command {
 
     use DispatchesCommands;
     use ConfirmableTrait;
@@ -90,7 +89,7 @@ class ResetSwapCommand extends Command {
 
             $swap_repository->executeWithLockedSwap($swap, function($locked_swap) {
                 $this->comment('Process state '.$locked_swap['state']);
-                $this->bot_event_logger->logSwapRetry($locked_swap->bot, $locked_swap);
+                BotEventLogger::logSwapRetry($locked_swap->bot, $locked_swap);
                 $locked_swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_RETRY);
             });
 

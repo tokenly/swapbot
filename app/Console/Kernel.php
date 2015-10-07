@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel {
 
 		'Swapbot\Console\Commands\Swap\DeleteSwapCommand',
 		'Swapbot\Console\Commands\Swap\ResetSwapCommand',
+		'Swapbot\Console\Commands\Swap\RetryErroredSwapCommand',
 		'Swapbot\Console\Commands\Swap\ReconcileSwapStatesCommand',
 		
 		'Swapbot\Console\Commands\Compile\CompileEventsCommand',
