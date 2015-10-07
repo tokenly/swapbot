@@ -433,6 +433,56 @@ class BotValidatorTest extends TestCase {
 
         $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
     }
+
+
+    public function testApplliedBotSwapRulesValidation()
+    {
+        $sample_swap_rule = [
+            'name' => 'My Rule One',
+            'ruleType' => 'bulkDiscount',
+            'uuid' => 'id0001',
+            'discounts' => [[
+                'moq' => '10',
+                'pct' => '0.1',
+            ],],
+        ];
+
+        // sample bot
+        $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
+        $sample_vars = array_replace_recursive($sample_vars, ['swap_rules' => [$sample_swap_rule]]);
+
+        $fixed_sample_vars = array_replace_recursive($sample_vars, ['swaps' => [0 => ['strategy' => 'fixed', 'in' => 'EARLY', 'in_qty' => 1, 'out' => 'LTCOIN', 'out_qty' => 10000]]]);
+
+        $test_specs = [
+            [
+                // good uuid
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [
+                    0 => ['swap_rule_ids' => ['id0001']],
+                ]]),
+                'error' => null,
+            ],
+            [
+                // uuid required
+                'vars' => array_replace_recursive($sample_vars, ['swaps' => [
+                    0 => ['swap_rule_ids' => ['baduuid']],
+                ]]),
+                'error' => 'Please specify a valid id for this swap.',
+            ],
+
+            [
+                // fixed doesn't allow advanced swap rules required
+                'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [
+                    0 => ['swap_rule_ids' => [$sample_swap_rule['uuid']]],
+                ]]),
+                'error' => 'Advanced swap rules for fixed swaps are not allowed',
+            ],
+
+        ];
+
+        $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
+
+        $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
+    }
 /*
 
     "swapRules": [

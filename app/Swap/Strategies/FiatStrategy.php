@@ -163,6 +163,10 @@ class FiatStrategy implements Strategy {
         }
     }
 
+    public function validateSwapRuleConfig($swap_rule, MessageBag $errors) {
+        $errors->add('swap_rules', "Advanced swap rules for fiat swaps are not allowed.");
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Index
 

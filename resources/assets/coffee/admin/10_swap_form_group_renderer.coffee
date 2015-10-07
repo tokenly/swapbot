@@ -215,26 +215,34 @@ swapGroupRenderers.fiat.sell = (number, swap, vmProps, offsetKey)->
 # ------------------------------------------------------------------------------------------------------------------------
 
 renderSwapRules = (number, swap, vmProps, swapDirection)->
-    swapRuleCanBeApplied = false
-    if vmProps.swapRules()?.length > 0
-        swapRuleCanBeApplied = true
 
 
     # vmProps.swapRules()
     if not swap().swapRules then swap().swapRules = m.prop([])
 
-    hasMultipleRules = (vmProps.swapRules()?.length > 1)
+    numberOfAvailableRules = vmProps.swapRules()?.length
+    numberOfAppliedRules = swap().swapRules()?.length
+
+    hasAnyAppliedRules = (numberOfAppliedRules > 0)
+
+    # if no rules can be applied, then don't show anything
+    swapRuleCanBeApplied = false
+    if numberOfAvailableRules > 0
+        swapRuleCanBeApplied = true
+    if not swapRuleCanBeApplied then return null
+
     allowAdd = false
-    if vmProps.swapRules()?.length > 1
-        if vmProps.swapRules()?.length > swap().swapRules()?.length
+    if numberOfAvailableRules > 1 and numberOfAvailableRules > numberOfAppliedRules
             allowAdd = true
     if swap().swapRules()?.length < 1 then allowAdd = true
 
     return m("div", class: "choose-swap-rules row", [
-        m("div", { class: "col-md-3 advanced-swap-rules-label"}, [
-            "Advanced Rules for Swap #{number}"
-        ]),
-        m("div", { class: "col-md-9"}, 
+        if hasAnyAppliedRules then (
+            m("div", { class: "col-md-3 advanced-swap-rules-label"}, [
+                "Advanced Rules for Swap #{number}"
+            ])
+        ),
+        m("div", { class: "col-md-#{if hasAnyAppliedRules then '9' else '12'}"}, 
             (
                 if swapRuleCanBeApplied then (
                     [
@@ -257,14 +265,14 @@ renderSwapRules = (number, swap, vmProps, swapDirection)->
     return
 
 renderAppliedSwapRules = (swap, vmProps, swapDirection)->
-    hasMultipleRules = (vmProps.swapRules()?.length > 1)
+    hasMultipleAvailableRules = (vmProps.swapRules()?.length > 1)
     return swap().swapRules().map (advancedSwapRule, index)->
         return m("span", class: "applied-rule", [
-            if hasMultipleRules then m("a", {class: "prev-swap-rule-link", href: '#previous', onclick: buildPrevSwapRuleFn(swap, advancedSwapRule, index, vmProps, swapDirection), }, [
+            if hasMultipleAvailableRules then m("a", {class: "prev-swap-rule-link", href: '#previous', onclick: buildPrevSwapRuleFn(swap, advancedSwapRule, index, vmProps, swapDirection), }, [
                 m("span", {class: "glyphicon glyphicon-triangle-left", title: "Previous Advanced Swap Rule"}),
             ]),
             "#{advancedSwapRule.name()}",
-            if hasMultipleRules then m("a", {class: "next-swap-rule-link", href: '#next', onclick: buildNextSwapRuleFn(swap, advancedSwapRule, index, vmProps, swapDirection), }, [
+            if hasMultipleAvailableRules then m("a", {class: "next-swap-rule-link", href: '#next', onclick: buildNextSwapRuleFn(swap, advancedSwapRule, index, vmProps, swapDirection), }, [
                 m("span", {class: "glyphicon glyphicon-triangle-right", title: "Next Advanced Swap Rule"}),
             ]),
             m("a", {class: "delete-swap-rule-link", href: '#remove', onclick: buildRemoveSwapRuleFn(index, swap, vmProps, swapDirection), }, [
@@ -278,10 +286,10 @@ buildAddSwapRuleFn = (swap, vmProps)->
 
         if not swap().swapRules then swap().swapRules = m.prop([])
         newSwapRulesArray = swap().swapRules()
-        newSwapRulesArray.push(buildAdvancedSwapRule(swap, vmProps))
+        newSwapRulesArray.push(buildNewAdvancedSwapRuleToAdd(swap, vmProps))
         swap().swapRules(newSwapRulesArray)
 
-        updateSwap(swap, vmProps)
+        # updateSwap(swap, vmProps)
 
         return
 
@@ -312,7 +320,7 @@ buildChangeSwapRuleFn = (swap, currentAdvancedSwapRule, currentIndex, vmProps, s
         updatedSwapRulesArray[currentIndex] = allAdvancedSwapRules[nextOffset]
         swap().swapRules(updatedSwapRulesArray)
 
-        updateSwap(swap, vmProps)
+        # updateSwap(swap, vmProps)
 
         return
 
@@ -324,12 +332,12 @@ buildRemoveSwapRuleFn = (indexToRemove, swap, vmProps, swapDirection)->
             return (index != indexToRemove)
         swap().swapRules(swap().swapRules().filter(filterFn))
 
-        updateSwap(swap, vmProps)
+        # updateSwap(swap, vmProps)
 
         return
 
 
-buildAdvancedSwapRule = (swap, vmProps)->
+buildNewAdvancedSwapRuleToAdd = (swap, vmProps)->
     return vmProps.swapRules()[0]
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -368,11 +376,29 @@ swapGroup = (number, swap, vmProps, swapDirection, isDuplicate)->
         (if isDuplicate then duplicateWarning() else null),
     ])
 
-swapGroupForDisplayProse = (swap)->
-    flatSwapConfig = {}
-    for k, v of swap()
-        flatSwapConfig[k] = v()
-    return swapbot.swapUtils.swapDetailsProse(flatSwapConfig)
+swapGroupForDisplayProse = (swap, swapRulesProp)->
+    flatSwapConfig = JSON.parse(JSON.stringify(swap))
+    swapProse = swapbot.swapUtils.swapDetailsProse(flatSwapConfig)
+
+    ruleDescriptions = swap().swapRules().map (swapRule, index)->
+        # console.log "swapRule=", swapRule
+        typeDesc = ''
+        if swapRule.ruleType() == 'bulkDiscount' then typeDesc = 'bulk discount'
+        return m("span", { class: 'applied-rule-desc'}, [
+            m("span", {class: "glyphicon glyphicon-transfer"}, ''),
+            " This swap uses then #{typeDesc} rule named ",
+            m("span", { class: 'rule-name'}, [
+                swapRule.name()
+            ]),
+            "."
+        ])
+
+    return [
+        swapProse, 
+        if ruleDescriptions.length > 0 then (
+            m("span", {class: 'applied-rule-descriptions'}, ruleDescriptions))
+        else null
+    ]
 
 
 buildOffsetKey = (swapDirection, offset)->
@@ -381,21 +407,22 @@ buildOffsetKey = (swapDirection, offset)->
 
 
 
-updateSwap = (swap, vmProps)->
-    targetOffset = swap().offset()
+# updateSwap = (swap, vmProps)->
+#     console.log "ignoring updateSwap"
+#     targetOffset = swap().offset()
 
-    updateFn = (swapsIn)->
-        return swapsIn.map (oldSwap, offset)->
-            if offset == targetOffset then return swap
-            return oldSwap
+#     updateFn = (swapsIn)->
+#         return swapsIn.map (oldSwap, offset)->
+#             if offset == targetOffset then return swap
+#             return oldSwap
 
-    swapDirection = swap().direction()
-    if swapDirection == constants.DIRECTION_SELL
-        vmProps.sellSwaps(updateFn(vmProps.sellSwaps()))
-    else
-        vmProps.buySwaps(updateFn(vmProps.buySwaps()))
+#     swapDirection = swap().direction()
+#     if swapDirection == constants.DIRECTION_SELL
+#         vmProps.sellSwaps(updateFn(vmProps.sellSwaps()))
+#     else
+#         vmProps.buySwaps(updateFn(vmProps.buySwaps()))
 
-    return
+#     return
 
 
 # ################################################
@@ -437,7 +464,7 @@ swapgrouprenderer.buildSwapsSection = (swapDirection, duplicateSwapsOffsetsMap, 
 
     ])
 
-swapgrouprenderer.buildSwapsSectionForDisplay = (swapDirection, swapsArray)->
+swapgrouprenderer.buildSwapsSectionForDisplay = (swapDirection, swapsArray, swapRulesProp)->
     swapsForDirectionCount = 0
     return m("div", {class: "swap-groups"}, [
         swapsArray.map((swap, offset)->
@@ -446,8 +473,7 @@ swapgrouprenderer.buildSwapsSectionForDisplay = (swapDirection, swapsArray)->
                 return m("div", {class: "swap-group"}, [
                     m("div", {class: "swap-group"}, [
                         m("span", {class: 'number'}, "Swap ##{offset+1} "),
-                        swapGroupForDisplayProse(swap),
-                        # swapRulesRenderer.buildRulesForDisplay()
+                        swapGroupForDisplayProse(swap, swapRulesProp),
                     ])
                 ])
             ),

@@ -8,10 +8,10 @@ sbAdmin = sbAdmin or {}; sbAdmin.formGroup = require './10_form_group'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
-sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 popoverLabels = require './05_popover_labels'
+swapGroupRenderer = require './10_swap_form_group_renderer'
 swapRulesRenderer = require './10_swap_rules_renderer'
 # ---- end references
 
@@ -238,9 +238,9 @@ vm = ctrl.botForm.vm = do ()->
 
                     # split swaps into buy and sell
                     [buySwapsData, sellSwapsData] = splitBotDataIntoBuyAndSellSwaps(botData.swaps)
-                    vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData))
-                    vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData))
                     vm.swapRules = m.prop(swapRulesRenderer.unserialize(botData.swapRules))
+                    vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData, vm.swapRules))
+                    vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData, vm.swapRules))
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
@@ -306,8 +306,8 @@ vm = ctrl.botForm.vm = do ()->
                 apiCall = sbAdmin.api.newBot
                 apiArgs = [attributes]
 
-            console.log "TEMPORARILY NOT SAVING attributes: ",attributes
-            return
+            # console.log "TEMPORARILY NOT SAVING attributes: ",(JSON.parse(JSON.stringify(attributes))); return
+            
             sbAdmin.form.submit(apiCall, apiArgs, vm.errorMessages, vm.formStatus).then((apiResponse)->
                 # console.log "submit complete - routing to dashboard"
                 # go to bot display
@@ -392,11 +392,11 @@ ctrl.botForm.view = ()->
                     m("hr"),
 
                     m("h3", "Swaps Selling Tokens"),
-                    sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_SELL, duplicateSwapsOffsetsMap, vm),
+                    swapGroupRenderer.buildSwapsSection(constants.DIRECTION_SELL, duplicateSwapsOffsetsMap, vm),
 
                     m("div", {class: "spacer1"}),
                     m("h3", "Swaps Purchasing Tokens"),
-                    sbAdmin.swapgrouprenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm),
+                    swapGroupRenderer.buildSwapsSection(constants.DIRECTION_BUY, duplicateSwapsOffsetsMap, vm),
 
 
 

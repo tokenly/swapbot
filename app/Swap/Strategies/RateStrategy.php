@@ -46,11 +46,12 @@ class RateStrategy implements Strategy {
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {
         // strategy is already set
 
-        $swap_config['in']        = isset($data['in'])        ? $data['in']        : null;
-        $swap_config['out']       = isset($data['out'])       ? $data['out']       : null;
-        $swap_config['rate']      = isset($data['rate'])      ? $data['rate']      : null;
-        $swap_config['min']       = isset($data['min'])       ? $data['min']       : 0;
-        $swap_config['direction'] = isset($data['direction']) ? $data['direction'] : SwapConfig::DIRECTION_SELL;
+        $swap_config['in']            = isset($data['in'])            ? $data['in']            : null;
+        $swap_config['out']           = isset($data['out'])           ? $data['out']           : null;
+        $swap_config['rate']          = isset($data['rate'])          ? $data['rate']          : null;
+        $swap_config['min']           = isset($data['min'])           ? $data['min']           : 0;
+        $swap_config['direction']     = isset($data['direction'])     ? $data['direction']     : SwapConfig::DIRECTION_SELL;
+        $swap_config['swap_rule_ids'] = isset($data['swap_rule_ids']) ? $data['swap_rule_ids'] : null;
 
         if ($swap_config['direction'] == SwapConfig::DIRECTION_SELL) {
             $swap_config['price'] = isset($data['price']) ? $data['price'] : null;
@@ -61,13 +62,14 @@ class RateStrategy implements Strategy {
 
     public function serializeSwap(SwapConfig $swap_config) {
         return [
-            'strategy'  => $swap_config['strategy'],
-            'direction' => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
-            'in'        => $swap_config['in'],
-            'out'       => $swap_config['out'],
-            'rate'      => $swap_config['rate'],
-            'price'     => ($swap_config['direction'] == SwapConfig::DIRECTION_SELL ? $swap_config['price'] : null),
-            'min'       => $swap_config['min'],
+            'strategy'      => $swap_config['strategy'],
+            'direction'     => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
+            'in'            => $swap_config['in'],
+            'out'           => $swap_config['out'],
+            'rate'          => $swap_config['rate'],
+            'price'         => ($swap_config['direction'] == SwapConfig::DIRECTION_SELL ? $swap_config['price'] : null),
+            'min'           => $swap_config['min'],
+            'swap_rule_ids' => $swap_config['swap_rule_ids'],
         ];
     }
 
@@ -127,6 +129,10 @@ class RateStrategy implements Strategy {
         } else {
             $errors->add('swaps', "The values specified for swap #{$swap_number} were not valid.");
         }
+    }
+
+    public function validateSwapRuleConfig($swap_rule, MessageBag $errors) {
+
     }
 
     ////////////////////////////////////////////////////////////////////////

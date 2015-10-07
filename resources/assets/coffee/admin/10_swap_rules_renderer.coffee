@@ -83,6 +83,9 @@ ruleBuilders.bulkDiscount = (rule)->
 
 
 
+
+
+
 # ------------------------------------------------------------------------
 
 buildAddRuleFn = (rulesProp)->
@@ -137,6 +140,22 @@ createNewRuleFromData = (ruleData)->
 
 # ################################################
 
+renderRuleForDisplay = (rule, offset)->
+    ruleType = rule.ruleType()
+    if ruleRenderers[ruleType]?
+        return ruleRenderers[ruleType](rule, offset)
+    return "unknown rule type #{ruleType}"
+
+ruleRenderers = {}
+
+ruleRenderers.bulkDiscount = (rule, offset)->
+    return m("div", {class: "swap-rule"}, [
+        bulkDiscountRenderer.renderBulkDiscountForDisplay(rule)
+    ])
+
+
+# ################################################
+
 exports.buildRulesSection = (rulesProp)->
     rulesArray = rulesProp()
 
@@ -158,37 +177,26 @@ exports.buildRulesSection = (rulesProp)->
 
     ])
 
-# exports.buildRulesForDisplay = (rulesProp)->
-#     rulesArray = rulesProp()
+exports.buildRulesForDisplay = (rulesProp)->
+    rulesArray = rulesProp()
 
-#     rulesForDirectionCount = 0
-#     return m("div", {class: "item-group"}, [
-#         rulesArray.map((rule, offset)->
-#             if rule().direction() == ruleDirection
-#                 ++rulesForDirectionCount
-#                 return m("div", {class: "rules-group"}, [
-#                     m("span", {class: 'number'}, "Rule ##{offset+1} "),
-#                     renderRuleGroupForDisplayProse(rule),
-#                 ])
-#             ),
+    if rulesArray.length <= 0
+        return m("div", {class: "swap-rules-group no-rules"}, "This bot has no advanced swap rules")
 
-#         (
-#             if rulesForDirectionCount == 0
-#                 m("div", {class: "no-item-group"}, [
-#                     "There are no rules to #{if ruleDirection == constants.DIRECTION_SELL then 'sell' else 'purchase'} tokens."
-#                 ])
-#         ),
-#     ])
+    return m("div", {class: "swap-rules-group"}, [
+        rulesArray.map (rule, offset)->
+            renderRuleForDisplay(rule, offset)
+    ])
 
 exports.serialize = (rulesProp)->
-    out = rulesProp().map (rule, index)->
-        if rule.ruleType() == 'bulkDiscount'
-            rule.discounts(rule.discounts().map (discount, index)->
-                pct = discount.pct()
+    rules = JSON.parse(JSON.stringify(rulesProp()))
+    out = rules.map (rule, index)->
+        if rule.ruleType == 'bulkDiscount'
+            rule.discounts = rule.discounts.map (discount, index)->
+                pct = discount.pct
                 if pct and not isNaN(pct)
-                    discount.pct(pct / 100)
+                    discount.pct = pct / 100
                 return discount
-            )
 
         return rule
     return out

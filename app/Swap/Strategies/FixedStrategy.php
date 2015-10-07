@@ -94,6 +94,10 @@ class FixedStrategy implements Strategy {
         }
     }
 
+    public function validateSwapRuleConfig($swap_rule, MessageBag $errors) {
+        $errors->add('swap_rules', "Advanced swap rules for fixed swaps are not allowed.");
+    }
+
     ////////////////////////////////////////////////////////////////////////
     // Index
 

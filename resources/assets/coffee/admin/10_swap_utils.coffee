@@ -9,7 +9,7 @@ swaputils = {}
 constants = sbAdmin.constants
 
 # clone an object
-swaputils.newSwapProp = (swap={})->
+swaputils.newSwapProp = (swap={}, swapRulesProp=null)->
     # calculate price (1 / rate)
     price = null
 
@@ -19,6 +19,13 @@ swaputils.newSwapProp = (swap={})->
     else if swap.rate? and ((typeof swap.rate == 'string' and swap.rate.length > 0) or (typeof swap.rate == 'number' and swap.rate > 0))
         price = swapbot.formatters.formatCurrencyAsNumber(1 / swap.rate)
 
+    # build swapRules from swap_rule_ids
+    swapRules = []
+    if swapRulesProp? and swap.swap_rule_ids?
+        swapRules = swapRulesProp().filter (swapRule)->
+            for swap_rule_id in swap.swap_rule_ids
+                if swapRule.uuid() == swap_rule_id then return true
+            return false
 
     # all possible properties
     return m.prop({
@@ -36,6 +43,8 @@ swaputils.newSwapProp = (swap={})->
         divisible: m.prop(if swap.divisible? then (if swap.divisible then '1' else '0') else '0')
 
         direction: m.prop(swap.direction or 'sell')
+
+        swapRules: m.prop(swapRules)
     })
 
 swaputils.normalizeSwapsForSaving = (swaps)->
@@ -52,17 +61,28 @@ swaputils.normalizeSwapsForSaving = (swaps)->
                 rate = 1 / price
 
             swap.rate(rate)
-        return swap
+
+        # clone and serialize
+        swapOut = JSON.parse(JSON.stringify(swap))
+
+        # extract just the ids from the swapRules
+        if swapOut.swapRules?
+            swapOut.swap_rule_ids = swapOut.swapRules.map (swapRule)->
+                return swapRule.uuid
+        delete swapOut.swapRules
+
+        return swapOut
+
     console.log "swapsOut=",swapsOut
     return swapsOut
 
-swaputils.buildSwapsPropValue = (swaps, defaultSwapDirection=constants.DIRECTION_SELL)->
+swaputils.buildSwapsPropValue = (swaps, swapRulesProp, defaultSwapDirection=constants.DIRECTION_SELL)->
     out = []
     for swap in swaps
-        out.push(swaputils.newSwapProp(swap))
+        out.push(swaputils.newSwapProp(swap, swapRulesProp))
 
     # always have at least one
-    if not out.length and defaultSwapDirection == constants.DIRECTION_BUY
+    if not out.length and defaultSwapDirection == constants.DIRECTION_SELL
         out.push(swaputils.newSwapProp({direction: defaultSwapDirection}))
 
     return out

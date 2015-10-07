@@ -17,6 +17,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
+swapRulesRenderer = require './10_swap_rules_renderer'
 # ---- end references
 
 ctrl = {}
@@ -166,10 +167,10 @@ buildMLevel = (levelNumber)->
 # ################################################
 
 vm = ctrl.botView.vm = do ()->
-    buildSwapsPropValue = (swaps)->
+    buildSwapsPropValue = (swaps, swapRulesProp=null)->
         out = []
         for swap in swaps
-            out.push(sbAdmin.swaputils.newSwapProp(swap))
+            out.push(sbAdmin.swaputils.newSwapProp(swap, swapRulesProp))
         return out
 
 
@@ -219,6 +220,7 @@ vm = ctrl.botView.vm = do ()->
         vm.paymentPlan = m.prop('')
         vm.state = m.prop('')
         vm.swaps = m.prop(buildSwapsPropValue([]))
+        vm.swapRules = m.prop([])
         vm.balances = m.prop(buildBalancesPropValue([]))
         vm.confirmationsRequired = m.prop('')
         vm.returnFee = m.prop('')
@@ -256,7 +258,8 @@ vm = ctrl.botView.vm = do ()->
                 vm.hash(botData.hash)
                 vm.username(botData.username)
                 vm.urlSlug(botData.urlSlug)
-                vm.swaps(buildSwapsPropValue(botData.swaps))
+                vm.swapRules(swapRulesRenderer.unserialize(botData.swapRules))
+                vm.swaps(buildSwapsPropValue(botData.swaps, vm.swapRules))
                 vm.balances(buildBalancesPropValue(botData.balances))
                 vm.confirmationsRequired(botData.confirmationsRequired)
                 vm.returnFee(botData.returnFee)
@@ -441,10 +444,19 @@ ctrl.botView.view = ()->
                 m("hr"),
 
                 m("h3", "Swaps Selling Tokens"),
-                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_SELL, vm.swaps()),
+                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_SELL, vm.swaps(), vm.swapRules()),
                 m("div", {class: "spacer1"}),
                 m("h3", "Swaps Purchasing Tokens"),
-                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_BUY, vm.swaps()),
+                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_BUY, vm.swaps(), vm.swapRules()),
+
+
+                # -------------------------------------------------------------------------------------------------------------------------------------------
+                m("div", {class: "spacer1"}),
+                m("hr"),
+
+                # swap rules
+                m("h3", "Advanced Swap Rules"),
+                swapRulesRenderer.buildRulesForDisplay(vm.swapRules),
 
 
                 # -------------------------------------------------------------------------------------------------------------------------------------------

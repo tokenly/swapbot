@@ -55,11 +55,16 @@ class BotValidator {
     protected function buildValidator($posted_data, User $user) {
         $validator = $this->validator_factory->make($posted_data, $this->rules, $this->messages, $customAttributes=[]);
         $validator->after(function ($validator) use ($posted_data, $user) {
+            $swap_rules = isset($posted_data['swap_rules']) ? $posted_data['swap_rules'] : [];
+
+            $swap_rules_by_id = [];
+            foreach($swap_rules as $swap_rule) { $swap_rules_by_id[$swap_rule['uuid']] = true; }
+
             // validate url slug
             $this->validateURLSlug(isset($posted_data['url_slug']) ? $posted_data['url_slug'] : null, $validator);
 
             // validate swaps
-            $this->validateSwaps(isset($posted_data['swaps']) ? $posted_data['swaps'] : null, $validator);
+            $this->validateSwaps(isset($posted_data['swaps']) ? $posted_data['swaps'] : null, $swap_rules_by_id, $validator);
 
             // validate blacklist addresses
             $this->validateBlacklistAddresses(isset($posted_data['blacklist_addresses']) ? $posted_data['blacklist_addresses'] : null, $validator);
@@ -78,7 +83,7 @@ class BotValidator {
             $this->validateOverlaySettings(isset($posted_data['background_overlay_settings']) ? $posted_data['background_overlay_settings'] : null, $validator);
 
             // validate swap rules
-            $this->validateSwapRules(isset($posted_data['swap_rules']) ? $posted_data['swap_rules'] : null, $validator);
+            $this->validateSwapRules($swap_rules, $validator);
 
         });
         return $validator;
@@ -87,7 +92,7 @@ class BotValidator {
     ////////////////////////////////////////////////////////////////////////
     // Swaps
 
-    protected function validateSwaps($swaps, $validator) {
+    protected function validateSwaps($swaps, $swap_rules_by_id, $validator) {
         if ($swaps === null) {
             if ($this->swaps_required) {
                 $validator->errors()->add('swaps', "Please specify at least one swap.");
@@ -97,7 +102,7 @@ class BotValidator {
 
         if ($swaps) {
             foreach(array_values($swaps) as $offset => $swap) {
-                $this->validateSwap($offset, $swap, $validator);
+                $this->validateSwap($offset, $swap, $swap_rules_by_id, $validator);
             }
         } else {
             // swaps were set but were empty
@@ -105,14 +110,22 @@ class BotValidator {
         }
     }
 
-    protected function validateSwap($offset, $swap, $validator) {
+    protected function validateSwap($offset, $swap, $swap_rules_by_id, $validator) {
         $strategy_name = isset($swap['strategy']) ? $swap['strategy'] : null;
         $swap_number = $offset + 1;
 
         // strategy
         if (strlen($strategy_name)) {
             if ($this->isValidStrategyType($strategy_name)) {
-                $this->swap_strategy_factory->newStrategy($strategy_name)->validateSwap($swap_number, $swap, $validator->errors());
+                $strategy = $this->swap_strategy_factory->newStrategy($strategy_name);
+                $strategy->validateSwap($swap_number, $swap, $validator->errors());
+
+                Log::debug("\$swap['swap_rule_ids']=".json_encode(isset($swap['swap_rule_ids']) ? $swap['swap_rule_ids'] : null, 192));
+
+                // validate any attatched swap rules
+                if (isset($swap['swap_rule_ids']) AND is_array($swap['swap_rule_ids'])) {
+                    $this->validateAppliedSwapRuleIDs($swap['swap_rule_ids'], $swap_rules_by_id, $strategy, $validator);
+                }
             } else {
                 $validator->errors()->add('strategy', "The strategy for swap #{$swap_number} was not valid.");
             }
@@ -291,6 +304,18 @@ class BotValidator {
 
     ////////////////////////////////////////////////////////////////////////
     // swap rules
+
+    protected function validateAppliedSwapRuleIDs($applied_swap_rule_ids, $swap_rules_by_id, $strategy, $validator) {
+        foreach($applied_swap_rule_ids as $applied_swap_rule_id) {
+            if (!isset($swap_rules_by_id[$applied_swap_rule_id])) {
+                Log::debug("\$applied_swap_rule_id={$applied_swap_rule_id} \$swap_rules_by_id=".json_encode($swap_rules_by_id, 192));
+                $validator->errors()->add('applied_swap_rule_id', "Please specify a valid id for this swap.");
+                continue;
+            }
+
+            $strategy->validateSwapRuleConfig($swap_rules_by_id[$applied_swap_rule_id], $validator->errors());
+        }
+    }
     
     protected function validateSwapRules($swap_rules, $validator) {
         if ($swap_rules AND is_array($swap_rules)) {

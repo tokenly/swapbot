@@ -169,12 +169,62 @@ ul.event-list-standalone {
             color: #474747;
             margin-right: 3px;
         }
+
+        .applied-rule-descriptions {
+            display: block;
+            margin-left: 64px;
+            margin-top: 10px;
+
+            .glyphicon {
+                font-size: 1.1rem;
+            }
+
+
+            .applied-rule-desc {
+                display: block;
+                color: #555;
+                margin: 2px 0;
+
+
+                .rule-name {
+                    font-weight: 800;
+
+                    // display: inline-block;
+                    // padding: 2px 6px;
+                    // background-color: @brand-primary;
+                    // color: white;
+                    // border: 1px solid darken(@brand-primary, 3%);
+                    // border-radius: 3px;
+                }
+            }
+        }
     }
+
+    .swap-rules-group {
+        .swap-rule {
+            padding: 20px 4px 0px;
+            font-size: 1.5rem;
+        }
+
+        .swap-rule {
+            border-bottom: 1px dashed #E2E0E0;
+        }
+
+        .swap-rule:last-child {
+            border-bottom: none;
+        }
+    }
+
 
     .no-swap-groups {
         padding: 10px 4px 10px;
         color: #adadad;
     }
+
+    .rule-name {
+        font-weight: 800;
+    }
+
 }
 
 .empty {
@@ -410,9 +460,11 @@ textarea.form-control {
     padding: 8px 0;
 }
 
-.discount-number {
-    font-weight: bold;
-    padding: 8px 0;
+.form-group {
+    .discount-number {
+        font-weight: bold;
+        padding: 8px 0;
+    }
 }
 
 

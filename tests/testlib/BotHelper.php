@@ -88,6 +88,8 @@ class BotHelper  {
                 ],
             ],
 
+            'swap_rules'                  => null,
+
         ];
     }
 

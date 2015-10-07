@@ -75,6 +75,21 @@ buildRemoveRowFn = (discountsProp, offsetToRemove)->
 #     out = out.trim()
 #     return out
 
+# ------------------------------------------------------------------------
+
+buildBulkDiscountRowsForDisplay = (discountsProp)->
+    discountsArray = discountsProp()
+
+    return discountsArray.map (discount, offset)->
+        trEl = m("tr", {}, [
+            m("td", {}, m("div", {class: "discount-number"}, offset+1)),
+
+            m("td", {}, discount.moq()),
+            m("td", {}, discount.pct()+"%"),
+        ])
+        return trEl
+
+
 # ################################################
 
 exports.buildNewBulkDiscountRow = ()->
@@ -102,6 +117,28 @@ exports.renderBulkDiscountForm = (discountsProp)->
                 form.mLabelEl(popoverLabels.advancedSwapBulkDiscounts),
                 bulkDiscountsTable
             ),
+        ]),
+    ])
+
+exports.renderBulkDiscountForDisplay = (rule)->
+    discountsProp = rule.discounts
+    bulkDiscountsTableForDisplay = m("table", {class: "table"}, [
+        m("thead", {}, [
+            m("tr", {}, [
+                m("th", {width: '10%',}, "#"),
+                m("th", {width: '40%',}, "Minimum Order"),
+                m("th", {width: '45%',}, "Percent Discount"),
+            ]),
+        ]),
+        m("tbody", {}, buildBulkDiscountRowsForDisplay(discountsProp)),
+    ])
+
+    return m("div", {class: 'advanced-swap-rule'}, [
+        m("span", {class: 'number'}, ["Bulk Discount Rule ", m("span", class: 'rule-name', rule.name())]),
+        m("div", { class: "row"}, [
+            m("div", {class: "col-md-6"}, [
+                bulkDiscountsTableForDisplay
+            ]),
         ]),
     ])
 

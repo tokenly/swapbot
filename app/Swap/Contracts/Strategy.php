@@ -16,6 +16,7 @@ interface Strategy {
     public function serializeSwap(SwapConfig $swap);
 
     public function validateSwap($swap_number, $swap, MessageBag $errors);
+    public function validateSwapRuleConfig($swap_rule, MessageBag $errors);
 
     public function buildIndexEntries(SwapConfig $swap_config);
     public function buildSwapDetailsForAPI(SwapConfig $swap_config, $in=null);

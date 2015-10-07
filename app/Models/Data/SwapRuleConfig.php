@@ -19,6 +19,7 @@ class SwapRuleConfig extends ArrayObject implements APISerializeable {
         return $swap;
     }
 
+
     // receives from the API and unserializes to memory
     public function unserialize($data) {
         $this['uuid']     = isset($data['uuid'])     ? $data['uuid']     : null;

@@ -13,7 +13,7 @@ class AddSwapRulesToBots extends Migration
     public function up()
     {
         Schema::table('bots', function (Blueprint $table) {
-            $table->string('swap_rules')->nullable()->unique();
+            $table->longText('swap_rules')->nullable();
         });
     }
 
