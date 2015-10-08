@@ -22,14 +22,14 @@ class RetryErroredSwapCommand extends Command {
      *
      * @var string
      */
-    protected $name = 'swapbot:retry-swap';
+    protected $name = 'swapbot:retry-errored-swap';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Resets a Swap to a ready state.  This will try to continue processing the swap.';
+    protected $description = 'Resets an errored swap to a ready state.  This will try to continue processing the swap.';
 
     /**
      * Create a new command instance.
@@ -50,7 +50,7 @@ class RetryErroredSwapCommand extends Command {
     protected function getArguments()
     {
         return [
-            ['swap-id', InputArgument::REQUIRED, 'A swap ID to reset.'],
+            ['swap-id', InputArgument::REQUIRED, 'A swap ID to retry.'],
         ];
     }
 
