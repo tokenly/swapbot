@@ -290,7 +290,7 @@ popoverLabels.buildAdvancedSwapRuleType = (offset)->
         popover: {
             title: "About The Rule Type"
             content: """
-                <p>Swaps can have different types of advanced rules.  Choose that type here.</p>
+                <p>Swaps may have different types of advanced rules in the future.  Right now the only type of advanced rule available is the Bulk Discount rule.</p>
             """
         }
     }
@@ -309,9 +309,11 @@ popoverLabels.swapRuleName = {
 popoverLabels.advancedSwapBulkDiscounts = {
         text: "Bulk Discounts"
         popover: {
-            title: "About The Bulk Discounts"
+            title: "About Bulk Discounts"
             content: """
-                <p>Define your bulk discounts below.</p>
+                <p>The <strong>Minimum Order</strong> is the amount the user needs to purchase to qualify for a discount.  The <strong>Percent Discount</strong> is expressed as decimal number between 0 and 100.</p>
+                <p>When multiple discounts are available, only the single best discount is applied to a swap.</p>
+                <p>Bulk discounts may only be applied to selling swaps.</p>
             """
         }
     }
