@@ -30,6 +30,22 @@ class BulkDiscountSwapRuleHandler {
         return round(bcdiv($quantity_out, 1 - $discount['pct'], 8), 8);
     }
 
+    public function aggregateSwapConfigs($swap_rule_configs) {
+        $aggregated_discounts = [];
+        foreach($swap_rule_configs as $swap_rule_config) {
+            $aggregated_discounts = array_merge($aggregated_discounts, $swap_rule_config['discounts']);
+        }
+
+        $aggregated_swap_rule_config = new SwapRuleConfig([
+            'name'      => 'Aggregated Swap Config',
+            'uuid'      => 'aggregated',
+            'ruleType'  => $swap_rule_configs[0]['ruleType'],
+            'discounts' => $aggregated_discounts,
+        ]);
+
+        return $aggregated_swap_rule_config;
+    }
+
     protected function findBestDiscount($swap_rule_config, $quantity_out) {
         if (!isset($swap_rule_config['discounts'])) { return null; }
         $highest_matched_pct = null;

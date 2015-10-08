@@ -24,7 +24,8 @@ class SwapRuleHandler {
         $working_quantity_out = $quantity_out;
 
         if ($swap_rule_configs) {
-            foreach($swap_rule_configs as $swap_rule_config) {
+            $aggregated_swap_rules = $this->aggregateSwapRuleConfigsByRuleType($swap_rule_configs);
+            foreach($aggregated_swap_rules as $swap_rule_config) {
                 $rule_handler = $this->swap_rule_handler_factory->newRuleHandler($swap_rule_config);
 
                 // apply the rule
@@ -39,4 +40,22 @@ class SwapRuleHandler {
         return $final_quantity_out;
     }
 
+
+    protected function aggregateSwapRuleConfigsByRuleType($swap_rule_configs) {
+        $swap_rule_configs_by_type = [];
+        foreach($swap_rule_configs as $swap_rule_config) {
+            if (!isset($swap_rule_configs_by_type[$swap_rule_config['ruleType']])) { $swap_rule_configs_by_type[$swap_rule_config['ruleType']] = []; }
+            $swap_rule_configs_by_type[$swap_rule_config['ruleType']][] = $swap_rule_config;
+        }
+
+        $aggregated_swap_rules = [];
+        foreach($swap_rule_configs_by_type as $type => $swap_rule_configs_for_type) {
+            $first_swap_rule_config = $swap_rule_configs_for_type[0];
+            $rule_handler = $this->swap_rule_handler_factory->newRuleHandler($first_swap_rule_config);
+            $aggregated_swap_rule_config = $rule_handler->aggregateSwapConfigs($swap_rule_configs_for_type);
+            $aggregated_swap_rules[] = $aggregated_swap_rule_config;
+        }
+
+        return $aggregated_swap_rules;
+    }
 }
