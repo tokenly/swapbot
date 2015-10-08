@@ -50,8 +50,8 @@ swaputils.newSwapProp = (swap={}, swapRulesProp=null)->
 swaputils.normalizeSwapsForSaving = (swaps)->
     # console.log "swaps in: ",swaps
     swapsOut = swaps.map (swap)->
-        console.log "normalizeSwapsForSaving swap.offset()=", (if swap.offset then swap.offset() else null)
-        console.log "normalizeSwapsForSaving swap.swapRules()=", (if swap.swapRules then swap.swapRules() else null)
+        # console.log "normalizeSwapsForSaving swap.offset()=", (if swap.offset then swap.offset() else null)
+        # console.log "normalizeSwapsForSaving swap.swapRules()=", (if swap.swapRules then swap.swapRules() else null)
         # convert price back to rate for each sell swap
         if swap.direction() == constants.DIRECTION_SELL
             rate = ''
