@@ -1,13 +1,14 @@
 # ---- begin references
-BotConstants = require '../../constants/BotConstants'
+BotConstants     = require '../../constants/BotConstants'
+formatters       = require '../../../shared/formatters'
+NeedHelpLink     = require '../../views/includes/NeedHelpLink'
+PlaceOrderInput  = require '../../views/includes/PlaceOrderInput'
+QuotebotStore    = require '../../stores/QuotebotStore'
+quoteUtils       = require '../../util/quoteUtils'
+swapRuleUtils    = require '../../../shared/swapRuleUtils'
+swapUtils        = require '../../../shared/swapUtils'
+UserChoiceStore  = require '../../stores/UserChoiceStore'
 UserInputActions = require '../../actions/UserInputActions'
-QuotebotStore = require '../../stores/QuotebotStore'
-UserChoiceStore = require '../../stores/UserChoiceStore'
-NeedHelpLink = require '../../views/includes/NeedHelpLink'
-PlaceOrderInput = require '../../views/includes/PlaceOrderInput'
-swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
-swapbot = swapbot or {}; swapbot.quoteUtils = require '../../util/quoteUtils'
-swapbot = swapbot or {}; swapbot.swapUtils = require '../../../shared/swapUtils'
 # ---- end references
 
 SwapbotPlaceOrder = null
@@ -25,9 +26,15 @@ getViewState = ()->
 SwapbotSendItem = React.createClass
     displayName: 'SwapbotSendItem'
 
+    getRawInAmount: ()->
+        if this.props.direction == BotConstants.DIRECTION_SELL
+            return swapUtils.rawInAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+
+        return getInAmount()
+
     getInAmount: ()->
         if this.props.direction == BotConstants.DIRECTION_SELL
-            inAmount = swapbot.swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+            inAmount = swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
         else
             inAmount = this.props.inAmount
 
@@ -37,7 +44,7 @@ SwapbotSendItem = React.createClass
         if this.props.direction == BotConstants.DIRECTION_SELL
             outAmount = this.props.outAmount
         else
-            outAmount = swapbot.swapUtils.outAmountFromInAmount(this.props.inAmount, this.props.swapConfig)
+            outAmount = swapUtils.outAmountFromInAmount(this.props.inAmount, this.props.swapConfig)
 
         
         return outAmount
@@ -52,10 +59,10 @@ SwapbotSendItem = React.createClass
         return true
 
     validateInAndOutAmounts: (inAmount, outAmount)->
-        errors = swapbot.swapUtils.validateOutAmount(outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out])
+        errors = swapUtils.validateOutAmount(outAmount, this.props.swapConfig, this.props.bot.balances[this.props.swapConfig.out])
         return errors if errors?
 
-        errors = swapbot.swapUtils.validateInAmount(inAmount, this.props.swapConfig)
+        errors = swapUtils.validateInAmount(inAmount, this.props.swapConfig)
         return errors if errors?
 
         return null
@@ -74,26 +81,38 @@ SwapbotSendItem = React.createClass
     render: ()->
         swapConfig = this.props.swapConfig
 
+        rawInAmount = this.getRawInAmount()
         inAmount = this.getInAmount()
         outAmount = this.getOutAmount()
-        # console.log "inAmount=#{inAmount} #{this.props.swapConfig.in} outAmount=#{outAmount} #{this.props.swapConfig.out}"
+        # console.log "rawInAmount=#{rawInAmount} inAmount=#{inAmount} #{this.props.swapConfig.in} outAmount=#{outAmount} #{this.props.swapConfig.out}"
 
-        errorMsg = this.validateInAndOutAmounts(inAmount, outAmount)
+        errorMsg = this.validateInAndOutAmounts(rawInAmount, outAmount)
         if errorMsg
             isChooseable = false
         else 
-            isChooseable = this.isChooseable(inAmount, outAmount)
+            isChooseable = this.isChooseable(rawInAmount, outAmount)
 
         fiatSuffix = 
             <span className="fiatSuffix">
-                { swapbot.quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
+                { quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
             </span>
-        changeMessage = swapbot.swapUtils.buildChangeMessage(outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+        changeMessage = swapUtils.buildChangeMessage(outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+
+        appliedDiscountMessage = ''
+        appliedDiscount = swapRuleUtils.getAppliedDiscount(outAmount, this.props.swapConfig)
+        if appliedDiscount
+            appliedDiscountMessage = 
+                <span className="appliedDiscountMessage">
+                    ({formatters.formatPercentage(appliedDiscount.pct * 100)}% off)
+                </span>
+
 
         if this.props.direction == BotConstants.DIRECTION_SELL
-            transactionHeaderText = <span>Purchase {swapbot.formatters.formatCurrency(outAmount)} {swapConfig.out} for {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in}{fiatSuffix}</span>
+            transactionHeaderText = <span>Purchase {formatters.formatCurrency(outAmount)} {swapConfig.out} for {formatters.formatCurrency(inAmount)} {swapConfig.in}{fiatSuffix}{appliedDiscountMessage}</span>
         else
-            transactionHeaderText = <span>Sell {swapbot.formatters.formatCurrency(inAmount)} {swapConfig.in} for {swapbot.formatters.formatCurrency(outAmount)} {swapConfig.out}</span>
+            transactionHeaderText = <span>Sell {formatters.formatCurrency(inAmount)} {swapConfig.in} for {formatters.formatCurrency(outAmount)} {swapConfig.out}</span>
+
+        discountMessageText = swapRuleUtils.buildDiscountMessageTextForPlaceOrder(swapConfig)
 
         <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
             <a className="choose-swap" onClick={this.buildChooseSwap(inAmount, outAmount, isChooseable)} href="#next-step">
@@ -108,12 +127,21 @@ SwapbotSendItem = React.createClass
                 <p>
                     { 
                         if isChooseable
-                            <small>
-                                Click the arrow to choose this swap.
-                                { if changeMessage?
-                                    <span className="changeMessage"> {changeMessage}</span>
+                            <span className="choose-message">
+                                { if discountMessageText
+                                    <span className="discountMessage">
+                                        {discountMessageText}
+                                        <br />
+                                    </span>
                                 }
-                            </small>
+                                <small>
+                                    Click the arrow to choose this swap.
+                                    { if changeMessage?
+                                        <span className="changeMessage"> {changeMessage}</span>
+                                    }
+                                </small>
+
+                            </span>
 
                         else
                             <small>Enter an amount above</small>
@@ -229,14 +257,14 @@ SwapbotPlaceOrder = React.createClass
                 
                 { if showMatchingSwaps
                     <div>
-                        <ul id="transaction-select-list" className="wide-list">
+                        <ul id="transaction-select-list" className="wide-list wide-list-with-icon">
                             { 
                                 if matchingSwapConfigs
                                     for matchedSwapConfig, offset in matchingSwapConfigs
                                             <SwapbotSendItem key={'swap' + offset} direction={this.state.userChoices.direction} inAmount={this.state.userChoices.inAmount} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
                             }
                         </ul>
-                        <p className="description">After receiving one of those token types, this bot will wait for <b>{swapbot.formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>
+                        <p className="description">After receiving one of those token types, this bot will wait for <b>{formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>
                     </div>
                 }
 

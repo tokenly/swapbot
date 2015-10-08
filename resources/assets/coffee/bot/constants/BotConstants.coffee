@@ -37,6 +37,8 @@ exports.USERCHOICE_MATCH_SHOW_ALL        = 'SHOW_ALL'
 exports.DIRECTION_SELL                   = 'sell'
 exports.DIRECTION_BUY                    = 'buy'
 
+exports.RULE_TYPE_BULK_DISCOUNT          = 'bulkDiscount'
+
 
 # #############################################
 module.exports = exports

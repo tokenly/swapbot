@@ -100,33 +100,37 @@ class FiatStrategy implements Strategy {
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {
         // strategy is already set
 
-        $swap_config['in']        = isset($data['in'])        ? $data['in']        : null;
-        $swap_config['out']       = isset($data['out'])       ? $data['out']       : null;
-        $swap_config['cost']      = isset($data['cost'])      ? $data['cost']      : null;
+        $swap_config['in']            = isset($data['in'])            ? $data['in']            : null;
+        $swap_config['out']           = isset($data['out'])           ? $data['out']           : null;
+        $swap_config['cost']          = isset($data['cost'])          ? $data['cost']          : null;
 
-        $swap_config['min_out']   = isset($data['min_out'])   ? $data['min_out']   : 0;
-        $swap_config['divisible'] = isset($data['divisible']) ? !!$data['divisible'] : false;
+        $swap_config['min_out']       = isset($data['min_out'])       ? $data['min_out']       : 0;
+        $swap_config['divisible']     = isset($data['divisible'])     ? !!$data['divisible']   : false;
 
-        $swap_config['type']      = isset($data['type'])      ? $data['type']      : 'buy';
-        $swap_config['fiat']      = isset($data['fiat'])      ? $data['fiat']      : 'USD';
-        $swap_config['source']    = isset($data['source'])    ? $data['source']    : 'bitcoinAverage';
+        $swap_config['type']          = isset($data['type'])          ? $data['type']          : 'buy';
+        $swap_config['fiat']          = isset($data['fiat'])          ? $data['fiat']          : 'USD';
+        $swap_config['source']        = isset($data['source'])        ? $data['source']        : 'bitcoinAverage';
  
-        $swap_config['direction'] = isset($data['direction']) ? $data['direction'] : SwapConfig::DIRECTION_SELL;
+        $swap_config['direction']     = isset($data['direction'])     ? $data['direction']     : SwapConfig::DIRECTION_SELL;
+
+        $swap_config['swap_rule_ids'] = isset($data['swap_rule_ids']) ? $data['swap_rule_ids'] : null;
    }
 
     public function serializeSwap(SwapConfig $swap_config) {
         return [
-            'strategy'  => $swap_config['strategy'],
-            'direction' => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
-            'in'        => $swap_config['in'],
-            'out'       => $swap_config['out'],
-            'cost'      => $swap_config['cost'],
-            'divisible' => $swap_config['divisible'],
-            'min_out'   => $swap_config['min_out'],
+            'strategy'      => $swap_config['strategy'],
+            'direction'     => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
+            'in'            => $swap_config['in'],
+            'out'           => $swap_config['out'],
+            'cost'          => $swap_config['cost'],
+            'divisible'     => $swap_config['divisible'],
+            'min_out'       => $swap_config['min_out'],
 
-            'type'      => $swap_config['type'],
-            'fiat'      => $swap_config['fiat'],
-            'source'    => $swap_config['source'],
+            'type'          => $swap_config['type'],
+            'fiat'          => $swap_config['fiat'],
+            'source'        => $swap_config['source'],
+
+            'swap_rule_ids' => $swap_config['swap_rule_ids'],
         ];
     }
 
@@ -186,7 +190,6 @@ class FiatStrategy implements Strategy {
     }
 
     public function validateSwapRuleConfig($swap_rule, MessageBag $errors) {
-        $errors->add('swap_rules', "Advanced swap rules for fiat swaps are not allowed.");
     }
 
     ////////////////////////////////////////////////////////////////////////

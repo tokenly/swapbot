@@ -1,6 +1,7 @@
 # swapUtils functions
 
 swapbot = swapbot or {}; swapbot.formatters = require './formatters'
+swapRuleUtils = require './swapRuleUtils'
 
 exports = {}
 
@@ -106,20 +107,30 @@ buildInAmountFromOutAmount.rate = (outAmount, swapConfig)->
         inAmount = Math.ceil(SATOSHI * outAmount * swapConfig.price) / SATOSHI
     else
         inAmount = Math.ceil(SATOSHI * outAmount / swapConfig.rate) / SATOSHI
+    rawInAmount = inAmount
 
+    # apply discount
+    modifiedInAmount = swapRuleUtils.modifyInitialQuantityIn(outAmount, inAmount, swapConfig)
+    if modifiedInAmount?
+        inAmount = modifiedInAmount
 
     # console.log "rounded inAmount: ",inAmount
 
-    return inAmount
+    return [inAmount, rawInAmount]
 
-# this needs to be refined further
 buildInAmountFromOutAmount.fixed = (outAmount, swapConfig)->
     if not outAmount? or isNaN(outAmount)
         return 0
 
     inAmount = outAmount / (swapConfig.out_qty / swapConfig.in_qty)
+    rawInAmount = inAmount
 
-    return inAmount
+    # apply discount
+    modifiedInAmount = swapRuleUtils.modifyInitialQuantityIn(outAmount, inAmount, swapConfig)
+    if modifiedInAmount?
+        inAmount = modifiedInAmount
+
+    return [inAmount, rawInAmount]
 
 buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentRate)->
     if not outAmount? or isNaN(outAmount)
@@ -128,8 +139,8 @@ buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentRate)->
     if currentRate == 0
         return 0
 
-    [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
-    return inAmount + buffer
+    [inAmount, buffer, rawInAmount, rawBuffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
+    return [inAmount + buffer, rawInAmount + rawBuffer]
 
 
 buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
@@ -139,7 +150,9 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
     if currentRate == 0
         return 0
 
-    cost = swapConfig.cost
+    btcCost = swapConfig.cost / currentRate
+
+
 
     if swapConfig.divisible
         marketBuffer = 0
@@ -147,16 +160,26 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
         marketBuffer = 0.02
 
         # if marketBuffer is more 40% of the cost of a single token, then adjust it
-        maxMarketBufferValue = cost * 0.40
+        maxMarketBufferValue = btcCost * 0.40
         maxMarketBuffer = maxMarketBufferValue / outAmount
         if marketBuffer > maxMarketBuffer
             marketBuffer = maxMarketBuffer
 
-    inAmount = outAmount * cost / currentRate
+    console.log "btcCost=#{btcCost} marketBuffer=#{marketBuffer}"
+
+    inAmount = outAmount * btcCost
     buffer = inAmount * marketBuffer
+    rawInAmount = inAmount
+    rawBuffer = buffer
 
-    return [inAmount, buffer]
+    # apply discount
+    modifiedInAmount = swapRuleUtils.modifyInitialQuantityIn(outAmount, inAmount, swapConfig)
+    if modifiedInAmount?
+        inAmount = modifiedInAmount
+        buffer = inAmount * marketBuffer
 
+
+    return [inAmount, buffer, rawInAmount, rawBuffer]
 
 # #############################################
 
@@ -260,7 +283,7 @@ validateInAmount.fixed = (inAmount, swapConfig)->
 
     ratio = inAmountSatoshis / inQtySatoshis
     if ratio != Math.floor(ratio)
-        return "You must sell a multiple of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}. You will receive #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}."
+        return "You must send a multiple of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}. You will receive #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for every #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in}."
 
     return null
 
@@ -323,8 +346,14 @@ exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
         if index >= 1
             otherTokenEls.push(React.createElement('span',{key: 'token'+index, className: 'tokenType'}, swapConfig.in))
 
+    # swap rule descriptions
+    swapRulesSummary = null
+    swapRulesSummaryProse = swapRuleUtils.buildSwapRuleGroupSummaryProse(swapConfigGroup)
+    # console.log "swapRulesSummaryProse=", swapRulesSummaryProse
+    if swapRulesSummaryProse then swapRulesSummary = React.createElement('span', null, swapRulesSummaryProse)
+
     if otherTokenEls.length == 0
-        return [mainDesc, otherSwapDescriptions]
+        return [mainDesc, otherSwapDescriptions, swapRulesSummary]
 
     tokenDescs = []
     otherCount = otherTokenEls.length
@@ -348,13 +377,18 @@ exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
         
         otherSwapDescriptions = React.createElement('span', null, [els, ' are also accepted'])
 
-    return [mainDesc, otherSwapDescriptions]
+    return [mainDesc, otherSwapDescriptions, swapRulesSummary]
     
 
 exports.inAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
-    inAmount = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
+    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
     inAmount = 0 if inAmount == NaN
     return inAmount
+
+exports.rawInAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
+    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
+    rawInAmount = 0 if rawInAmount == NaN
+    return rawInAmount
 
 exports.outAmountFromInAmount = (inAmount, swapConfig)->
     outAmount = buildOutAmountFromInAmount[swapConfig.strategy](inAmount, swapConfig)

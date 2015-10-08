@@ -227,7 +227,7 @@ renderSwapRules = (number, swap, vmProps, swapDirection)->
 
     # if no rules can be applied, then don't show anything
     swapRuleCanBeApplied = false
-    if numberOfAvailableRules > 0
+    if swapDirection == constants.DIRECTION_SELL and numberOfAvailableRules > 0
         swapRuleCanBeApplied = true
     if not swapRuleCanBeApplied then return null
 
@@ -251,8 +251,8 @@ renderSwapRules = (number, swap, vmProps, swapDirection)->
                         ),
 
                         if allowAdd then m("a", {class: "add-swap-rule-link", href: '#add', onclick: buildAddSwapRuleFn(swap, vmProps, swapDirection), }, [
-                            m("span", {class: "glyphicon glyphicon-plus", title: "Add an Advanced Swap Rule"}),
-                            [" Apply an Advanced Swap Rule"]
+                            m("span", {class: "glyphicon glyphicon-plus", title: "Apply an Advanced Swap Rule to Swap ##{number}"}),
+                            [" Apply an Advanced Rule to Swap ##{number}"]
                         ]),
                     ]
                 ) else m("span", class: "no-applied-rules",

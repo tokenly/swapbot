@@ -63,11 +63,12 @@ class FixedStrategy implements Strategy {
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {
         // strategy is already set
 
-        $swap_config['in']        = isset($data['in'])        ? $data['in']        : null;
-        $swap_config['out']       = isset($data['out'])       ? $data['out']       : null;
-        $swap_config['in_qty']    = isset($data['in_qty'])    ? $data['in_qty']    : null;
-        $swap_config['out_qty']   = isset($data['out_qty'])   ? $data['out_qty']   : null;
-        $swap_config['direction'] = isset($data['direction']) ? $data['direction'] : SwapConfig::DIRECTION_SELL;
+        $swap_config['in']            = isset($data['in'])            ? $data['in']            : null;
+        $swap_config['out']           = isset($data['out'])           ? $data['out']           : null;
+        $swap_config['in_qty']        = isset($data['in_qty'])        ? $data['in_qty']        : null;
+        $swap_config['out_qty']       = isset($data['out_qty'])       ? $data['out_qty']       : null;
+        $swap_config['direction']     = isset($data['direction'])     ? $data['direction']     : SwapConfig::DIRECTION_SELL;
+        $swap_config['swap_rule_ids'] = isset($data['swap_rule_ids']) ? $data['swap_rule_ids'] : null;
 
         // // minimum purchase
         // $swap_config['min']     = isset($data['min']) ? $data['min'] : 0;
@@ -75,13 +76,14 @@ class FixedStrategy implements Strategy {
 
     public function serializeSwap(SwapConfig $swap_config) {
         return [
-            'strategy'  => $swap_config['strategy'],
-            'direction' => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
-            'in'        => $swap_config['in'],
-            'out'       => $swap_config['out'],
-            'in_qty'    => $swap_config['in_qty'],
-            'out_qty'   => $swap_config['out_qty'],
-            // 'min'    => $swap_config['min'],
+            'strategy'      => $swap_config['strategy'],
+            'direction'     => ($swap_config['direction'] == SwapConfig::DIRECTION_BUY) ? SwapConfig::DIRECTION_BUY : SwapConfig::DIRECTION_SELL,
+            'in'            => $swap_config['in'],
+            'out'           => $swap_config['out'],
+            'in_qty'        => $swap_config['in_qty'],
+            'out_qty'       => $swap_config['out_qty'],
+            // 'min'        => $swap_config['min'],
+            'swap_rule_ids' => $swap_config['swap_rule_ids'],
         ];
     }
 
@@ -120,7 +122,6 @@ class FixedStrategy implements Strategy {
     }
 
     public function validateSwapRuleConfig($swap_rule, MessageBag $errors) {
-        $errors->add('swap_rules', "Advanced swap rules for fixed swaps are not allowed.");
     }
 
     ////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,15 @@ SATOSHI = 100000000
 # #############################################
 # local
 
+strRepeat = (string, times) ->
+    result = ''
+    while times > 0
+        if times & 1
+            result += string
+        times >>= 1
+        string += string
+    return result
+
 # #############################################
 # exports
 
@@ -37,10 +46,15 @@ exports.isNotZero = (value)-> return not isZero(value)
 exports.formatCurrencyWithForcedZero = (value, currencyPostfix='') ->
     return exports.formatCurrency((if isZero(value) then 0 else value), currencyPostfix)
 
-exports.formatPercentage = (value) ->
+exports.formatPercentage = (value, places=8) ->
     if not value? or isNaN(value) then return ''
 
-    decimalText = window.numeral(value).format('0.[00000000]')
+    if places > 0
+        trailingZeros = strRepeat('0', places)
+        decimalText = window.numeral(value).format('0.['+trailingZeros+']')
+    else
+        decimalText = window.numeral(value).format('0')
+
     return decimalText
 
 

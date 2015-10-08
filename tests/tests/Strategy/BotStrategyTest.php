@@ -112,6 +112,68 @@ class BotStrategyTest extends TestCase {
         // 34000 LTBCOIN => 0.040 BTC (discount 15%)
         $this->runStrategyTest($bot, $m($base_swap, []), 34000, $m($base_receipt, ['quantityIn' => 34000, 'quantityOut' => 0.040000, 'originalQuantityOut' => 0.034000]), false);
 
+
+
+    }
+
+    public function testMultipleSwapBulkDiscountStrategies()
+    {
+        $m = function($a, $b) { return array_merge($a, $b); };
+
+        $base_swap = [
+            'in'            => 'LTBCOIN',
+            'out'           => 'BTC',
+            'strategy'      => 'rate',
+            'rate'          => 0.00000100,
+            'min'           => 0,
+            'direction'     => SwapConfig::DIRECTION_SELL,
+            'swap_rule_ids' => ['rule0001','rule0002',],
+        ];
+        $base_receipt = [
+            'quantityIn'  => 5000,
+            'assetIn'     => 'LTBCOIN',
+            'quantityOut' => 0.0050,
+            'assetOut'    => 'BTC',
+        ];
+        $swap_rules = [
+            [
+                'uuid'      => 'rule0001',
+                'name'      => 'My Bulk Discount',
+                'ruleType'  => 'bulkDiscount',
+                'discounts' => [
+                    [
+                        'moq' => 0.01000000,
+                        'pct' => 0.10
+                    ],
+                ]
+            ],
+            [
+                'uuid'      => 'rule0002',
+                'name'      => 'My Bulk Discount Two',
+                'ruleType'  => 'bulkDiscount',
+                'discounts' => [
+                    [
+                        'moq' => 0.02000000,
+                        'pct' => 0.15
+                    ],
+                ]
+            ],
+        ];
+
+        $bot = app('BotHelper')->newSampleBotWithUniqueSlug(null, ['swap_rules' => $swap_rules]);
+
+        // 5000 LTBCOIN => 0.005 BTC (no discount)
+        $this->runStrategyTest($bot, $m($base_swap, []), 5000, $m($base_receipt, []), false);
+
+        // 9000 LTBCOIN => 0.010 BTC (discount 10%)
+        $this->runStrategyTest($bot, $m($base_swap, []), 9000, $m($base_receipt, ['quantityIn' => 9000, 'quantityOut' => 0.010000, 'originalQuantityOut' => 0.009000]), false);
+
+        // 17000 LTBCOIN => 0.020 BTC (discount 15%)
+        $this->runStrategyTest($bot, $m($base_swap, []), 17000, $m($base_receipt, ['quantityIn' => 17000, 'quantityOut' => 0.020000, 'originalQuantityOut' => 0.017000]), false);
+
+        // 34000 LTBCOIN => 0.040 BTC (discount 15%)
+        $this->runStrategyTest($bot, $m($base_swap, []), 34000, $m($base_receipt, ['quantityIn' => 34000, 'quantityOut' => 0.040000, 'originalQuantityOut' => 0.034000]), false);
+
     }
 
     public function testAllFixedBulkDiscountStrategies()

@@ -14,9 +14,27 @@ emitChange = ()->
 
 
 updateBot = (newBot)->
-    storedBots[newBot.id] = newBot
+    storedBots[newBot.id] = normalizeBot(newBot)
     emitChange()
     return
+
+normalizeBot = (bot)->
+    # apply swap rules
+    swapRulesById = {}
+    bot.swapRules?.map (swapRule)->
+        swapRulesById[swapRule.uuid] = swapRule
+        return
+
+    bot.swaps = bot.swaps.map (swap)->
+        if swap.swap_rule_ids? then swap.swap_rule_ids.map (swapRuleId)->
+            swapRule = swapRulesById[swapRuleId]
+            if swapRule
+                if not swap.swapRules? then swap.swapRules = []
+                swap.swapRules.push(swapRule)
+            return
+        return swap
+
+    return bot
 
 # #############################################
 
@@ -24,11 +42,7 @@ exports.init = (bot)->
     # init emitter
     eventEmitter = new window.EventEmitter()
 
-    # # register with the app dispatcher
-    # Dispatcher.register (action)->
-    #     return
-
-    storedBots[bot.id] = bot
+    storedBots[bot.id] = normalizeBot(bot)
 
     return
 

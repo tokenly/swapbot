@@ -108,7 +108,7 @@ SwapbotChoose = React.createClass
 
 
                                     isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
-                                    [firstSwapDescription, otherSwapDescriptions] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup)
+                                    [firstSwapDescription, otherSwapDescriptions, swapRulesSummary] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(swapConfigGroup)
 
                                     <li key={"swapGroup#{index}"} className={"chooseable swap"+(" unchooseable" if not isChooseable) }>
                                         <a href="#choose-swap" onClick={this.buildChooseAsset((if isSell then outAsset else inAsset), isSell, isChooseable)}>
@@ -124,6 +124,9 @@ SwapbotChoose = React.createClass
                                                     This bot will send you { firstSwapDescription }.
                                                     { if otherSwapDescriptions?
                                                         <span className="line-two"><br/>{ otherSwapDescriptions }.</span>
+                                                    }
+                                                    { if swapRulesSummary?
+                                                        <span className="line-swap-rules"><br/>{ swapRulesSummary }.</span>
                                                     }
                                                 </p>
                                                 <div className="icon-next" style={transform: if isChooseable and this.state.ui.animatingSwapButtons[if btnIndex < 6 then btnIndex else 5] then "scale(1.4)" else "scale(1)"}></div>

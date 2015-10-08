@@ -301,7 +301,7 @@ popoverLabels.swapRuleName = {
             title: "About The Rule Name"
             content: """
                 <p>Give this advanced swap rule a name so you can assign it to one or more swaps.</p>
-                <p>This name is just for your use. Customers of this bot will not see it.</p>
+                <p>This name is for your use. Customers of the bot using the web interface will not see it.</p>
             """
         }
     }
