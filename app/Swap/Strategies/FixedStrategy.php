@@ -2,16 +2,22 @@
 
 namespace Swapbot\Swap\Strategies;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
+use Swapbot\Swap\Rules\SwapRuleHandler;
 use Swapbot\Swap\Strategies\StrategyHelpers;
 
 class FixedStrategy implements Strategy {
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
-        $swap_vars = $this->caculateInitialReceiptValues($swap_config, $quantity_in);
+    function __construct(SwapRuleHandler $swap_rule_handler) {
+        $this->swap_rule_handler = $swap_rule_handler;
+    }
+
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+        $swap_vars = $this->calculateInitialReceiptValues($swap_config, $quantity_in, $swap_rules);
 
         // never try to send 0 of an asset
         if ($swap_vars['quantityOut'] <= 0) { return true; }
@@ -23,16 +29,35 @@ class FixedStrategy implements Strategy {
         return RefundConfig::REASON_BELOW_MINIMUM;
     }
 
-    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $quantity_out = floor(bcdiv($quantity_in, $swap_config['in_qty'])) * $swap_config['out_qty'];
-
-        return [
+    public function calculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+        // build trial receipt
+        $receipt_values = [
             'quantityIn'  => $quantity_in,
             'assetIn'     => $swap_config['in'],
 
-            'quantityOut' => $quantity_out,
+            'quantityOut' => 0,
             'assetOut'    => $swap_config['out'],
         ];
+
+        // build the standard quantity out (with no rules)
+        $quantity_out = floor(bcdiv($quantity_in, $swap_config['in_qty'])) * $swap_config['out_qty'];
+        $receipt_values['quantityOut'] = round($quantity_out, 8);
+
+        // build a quantity_out without rounding down in order to calculate the discount
+        $unfloored_quantity_out = $quantity_in / $swap_config['in_qty'] * $swap_config['out_qty'];
+
+        // execute the rule engine
+        $modified_quantity_out = $this->swap_rule_handler->modifyInitialQuantityOut($unfloored_quantity_out, $swap_rules, $quantity_in, $swap_config);
+        if ($modified_quantity_out !== null) {
+            $receipt_values['originalQuantityOut'] = $unfloored_quantity_out;
+
+            // round down to the exact multiple again
+            //  and use that to recalculate the multiplier
+            $multiplier = floor(bcdiv($modified_quantity_out, $swap_config['out_qty']));
+            $receipt_values['quantityOut'] = round($multiplier * $swap_config['out_qty'], 8);
+        }
+
+        return $receipt_values;
     }
     
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {

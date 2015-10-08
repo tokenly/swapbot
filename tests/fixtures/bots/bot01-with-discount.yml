@@ -1,0 +1,64 @@
+name: Sample Bot One
+description: Just a Sample Bot
+active: true
+state: active
+payment_plan: monthly001
+confirmations_required: 2
+
+address: botaddress000000000000000000000001
+public_address_id: PUBLIC_ADDRESS_ID_01
+public_receive_monitor_id: PUBLIC_RECEIVE_MONITOR_ID_01
+public_send_monitor_id: PUBLIC_SEND_MONITOR_ID_01
+
+payment_address: paymentaddress00000000000000000001
+payment_address_id: PAYMENT_ADDRESS_ID_01
+payment_receive_monitor_id: PAYMENT_RECEIVE_MONITOR_ID_01
+payment_send_monitor_id: PAYMENT_SEND_MONITOR_ID_01
+
+return_fee: 0.0001
+
+balances:
+    LTBCOIN: 1000000
+    BTC: 1
+
+swaps:
+  -
+    in: BTC
+    out: LTBCOIN
+    strategy: rate
+    rate: 1000000
+    min: 0
+    swap_rule_ids: ["rule0001"]
+  -
+    in: LTBCOIN
+    out: BTC
+    strategy: rate
+    rate: 0.00000100
+    min: 0
+
+income_rules:
+  -
+    asset: BTC
+    minThreshold: 10
+    paymentAmount: 2
+    address: INCOME_FORWARDING_ADDRESS_0000001
+
+swap_rules:
+  - uuid: rule0001
+    name: My Bulk Discount
+    ruleType: bulkDiscount
+    discounts:
+      - moq: 800
+        pct: 0.01
+      - moq: 900
+        pct: 0.05
+      - moq: 1000
+        pct: 0.10
+      - moq: 2000
+        pct: 0.20
+
+payments:
+  - {credit: true, amount: 1.0, asset: 'SWAPBOTMONTH'}
+
+leases:
+  - {start_date: '2015-06-01', length: 1}

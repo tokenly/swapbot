@@ -1,0 +1,15 @@
+name: swap.sent
+# msg: Received 0.0009 BTC from SENDER01 with 1 confirmation. Sent 1000 LTBCOIN to SENDER01 with transaction ID 0000000000000000000000000000001111.
+destination: SENDER01
+confirmations: '1'
+quantityIn: 0.0009
+assetIn: 'BTC'
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+quantityOut: 1000
+assetOut: 'LTBCOIN'
+txidOut: '0000000000000000000000000000001111'
+confirmationsOut: 0
+state: 'sent'
+type: 'swap'
+isComplete: false
+isError: false

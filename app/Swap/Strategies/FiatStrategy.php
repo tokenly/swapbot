@@ -3,10 +3,12 @@
 namespace Swapbot\Swap\Strategies;
 
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
+use Swapbot\Swap\Rules\SwapRuleHandler;
 use Swapbot\Swap\Strategies\StrategyHelpers;
 use Swapbot\Util\Validator\ValidatorHelper;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -14,12 +16,14 @@ use Tokenly\QuotebotClient\Client as QuotebotClient;
 
 class FiatStrategy implements Strategy {
 
-    function __construct(QuotebotClient $quotebot_client) {
+
+    function __construct(QuotebotClient $quotebot_client, SwapRuleHandler $swap_rule_handler) {
         $this->quotebot_client = $quotebot_client;
+        $this->swap_rule_handler = $swap_rule_handler;
     }
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
-        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in);
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in, $swap_rules);
 
         // if this input would not purchase any outAsset or is below the minimum
         //   then it should be refunded
@@ -34,44 +38,62 @@ class FiatStrategy implements Strategy {
         return RefundConfig::REASON_BELOW_MINIMUM;
     }
 
-    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in);
+    public function calculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in, $swap_rules);
         $asset_out = $swap_config['out'];
 
         return [
-            'quantityIn'     => $quantity_in,
-            'assetIn'        => $swap_config['in'],
+            'quantityIn'          => $quantity_in,
+            'assetIn'             => $swap_config['in'],
 
-            'quantityOut'    => $value_data['quantityOut'],
-            'assetOut'       => $swap_config['out'],
+            'quantityOut'         => $value_data['quantityOut'],
+            'assetOut'            => $swap_config['out'],
 
-            'changeOut'      => $value_data['changeOut'],
+            'changeOut'           => $value_data['changeOut'],
 
-            'conversionRate' => $value_data['conversionRate'],
+            'conversionRate'      => $value_data['conversionRate'],
+
+            'originalQuantityOut' => $value_data['originalQuantityOut'],
         ];
     }
 
-    protected function buildQuantityConversionData(SwapConfig $swap_config, $quantity_in) {
+    protected function buildQuantityConversionData(SwapConfig $swap_config, $quantity_in, $swap_rules) {
+
         $cost = $swap_config['cost'];
         $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
-        $quantity_out = $quantity_in * $conversion_rate / $cost;
+
+        $raw_quantity_out = $quantity_in * $conversion_rate / $cost;
+        $quantity_out = round($raw_quantity_out, 8);
+
+        // execute the rule engine
+        $original_quantity_out = null;
+        $adjusted_quantity_in = $quantity_in;
+        $modified_quantity_out = $this->swap_rule_handler->modifyInitialQuantityOut($raw_quantity_out, $swap_rules, $quantity_in, $swap_config);
+        if ($modified_quantity_out !== null) {
+            $original_quantity_out = $quantity_out;
+            $quantity_out = $modified_quantity_out;
+        }
+
 
         $change_quantity_out = 0;
         if (!$swap_config['divisible']) {
             // round down and calculate change
-            $raw_quantity_out = $quantity_out;
+            $unrounded_quantity_out = $quantity_out;
             $quantity_out = floor($quantity_out);
-            if ($raw_quantity_out > $quantity_out) {
-                $needed_quantity_in = $quantity_out * $cost / $conversion_rate;
-                $change_quantity_out = $quantity_in - $needed_quantity_in;
+            if ($unrounded_quantity_out > $quantity_out) {
+                $needed_quantity_in = round($quantity_out * $cost / $conversion_rate, 8);
+                $change_quantity_out = round($quantity_in - $needed_quantity_in, 8);
             }
         }
 
-        return [
-            'quantityOut'    => $quantity_out,
-            'changeOut'      => $change_quantity_out,
-            'conversionRate' => $conversion_rate,
+        $conversion_data = [
+            'quantityOut'         => $quantity_out,
+            'changeOut'           => $change_quantity_out,
+            'conversionRate'      => $conversion_rate,
+            'originalQuantityOut' => $original_quantity_out,
         ];
+
+        return $conversion_data;
 
     }
 

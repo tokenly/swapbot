@@ -1,0 +1,47 @@
+# Test a bulk discount
+# receive BTC and vend LTBCOIN
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01-with-discount.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_90mBTC.yml }
+    confirmations: 2
+
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_RECEIVE-rate-discount.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_LTBCOIN-rate-discount.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-BTC_LTBCOIN-rate-discount.yml }
+    confirmations: 2
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      LTBCOIN: 999000 # stock allocated
+      BTC: 1.000 # +0.0001 BTC income, -0.0001 BTC fee
+

@@ -3,6 +3,8 @@
 namespace Swapbot\Models\Data;
 
 use ArrayObject;
+use Illuminate\Support\Facades\Log;
+use Swapbot\Models\Data\SwapRuleConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
@@ -58,6 +60,20 @@ class SwapConfig extends ArrayObject implements APISerializeable {
 
     public function setStrategy(Strategy $strategy) {
         $this->strategy_obj = $strategy;
+    }
+
+    public function buildAppliedSwapRules($all_swap_rules) {
+        $applied_swap_rules = [];
+        if (isset($this['swap_rule_ids']) AND is_array($this['swap_rule_ids'])) {
+            foreach ($this['swap_rule_ids'] as $applied_swap_rule_uuid) {
+                foreach($all_swap_rules as $all_swap_rule) {
+                    if ($all_swap_rule['uuid'] == $applied_swap_rule_uuid) {
+                        $applied_swap_rules[] = SwapRuleConfig::createFromSerialized($all_swap_rule);
+                    }
+                }
+            }
+        }
+        return $applied_swap_rules;
     }
 
 

@@ -66,7 +66,7 @@ class SwapProcessor {
         //   this locks in any quotes if quotes are used
         $strategy = $swap_config->getStrategy();
         $in_quantity = $transaction['xchain_notification']['quantity'];
-        $initial_receipt_vars = $strategy->caculateInitialReceiptValues($swap_config, $in_quantity);
+        $initial_receipt_vars = $strategy->calculateInitialReceiptValues($swap_config, $in_quantity, $swap_config->buildAppliedSwapRules($bot['swap_rules']));
         Log::debug("createNewSwap \$transaction=".json_encode($transaction, 192));
 
         // new swap vars
@@ -340,35 +340,39 @@ class SwapProcessor {
     
     protected function doSwap($swap_process) {
         if ($swap_process['swap_was_handled']) { return; }
+        $swap_config = $swap_process['swap_config'];
+        $bot = $swap_process['bot'];
+        $swap = $swap_process['swap'];
+
 
         // log out of stock or not ready
-        if ($swap_process['swap']->isOutOfStock()) {
-            $refund_config = $swap_process['bot']['refund_config'];
-            Log::debug("({$swap_process['block_height']}) swapShouldBeAutomaticallyRefunded: ".json_encode($refund_config->swapShouldBeAutomaticallyRefunded($swap_process['swap'], $swap_process['block_height']), 192));
-            if ($refund_config->swapShouldBeAutomaticallyRefunded($swap_process['swap'], $swap_process['block_height'])) {
+        if ($swap->isOutOfStock()) {
+            $refund_config = $bot['refund_config'];
+            Log::debug("({$swap_process['block_height']}) swapShouldBeAutomaticallyRefunded: ".json_encode($refund_config->swapShouldBeAutomaticallyRefunded($swap, $swap_process['block_height']), 192));
+            if ($refund_config->swapShouldBeAutomaticallyRefunded($swap, $swap_process['block_height'])) {
                 // log automatic refund
-                $this->bot_event_logger->logAutomaticRefund($swap_process['bot'], $swap_process['swap'], $refund_config);
+                $this->bot_event_logger->logAutomaticRefund($bot, $swap, $refund_config);
 
                 // do automatic refund
                 $this->doRefund($swap_process, RefundConfig::REASON_OUT_OF_STOCK);
                 return;
             }
 
-            $this->bot_event_logger->logSwapOutOfStock($swap_process['bot'], $swap_process['swap']);
+            $this->bot_event_logger->logSwapOutOfStock($bot, $swap);
             return;
         }
-        if (!$swap_process['swap']->isReady()) {
-            $this->bot_event_logger->logSwapNotReady($swap_process['bot'], $swap_process['swap']);
+        if (!$swap->isReady()) {
+            $this->bot_event_logger->logSwapNotReady($bot, $swap);
             return;
         }
 
         $is_refunding = false;
         $refund_reason = null;
-        $strategy = $swap_process['swap_config']->getStrategy();
+        $strategy = $swap_config->getStrategy();
 
         // check shutting down state for refund
         if (!$is_refunding) {
-            if ($swap_process['bot']->isShuttingDown()) {
+            if ($bot->isShuttingDown()) {
                 $is_refunding = true;
                 $refund_reason = RefundConfig::REASON_SHUTTING_DOWN;
             }
@@ -376,19 +380,19 @@ class SwapProcessor {
 
         // check strategy for refund
         if (!$is_refunding) {
-            $is_refunding = $strategy->shouldRefundTransaction($swap_process['swap_config'], $swap_process['in_quantity']);
+            $is_refunding = $strategy->shouldRefundTransaction($swap_config, $swap_process['in_quantity'], $swap_config->buildAppliedSwapRules($bot['swap_rules']));
             if ($is_refunding) {
-                $refund_reason = $strategy->buildRefundReason($swap_process['swap_config'], $swap_process['in_quantity']);
+                $refund_reason = $strategy->buildRefundReason($swap_config, $swap_process['in_quantity']);
             }
         }
 
         // check forced refund
         if (!$is_refunding) {
-            $forced_refund = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['forcedRefund']) AND $swap_process['swap']['receipt']['forcedRefund']);
+            $forced_refund = (isset($swap['receipt']) AND isset($swap['receipt']['forcedRefund']) AND $swap['receipt']['forcedRefund']);
             if ($forced_refund) {
                 $is_refunding = true;
                 $refund_reason = RefundConfig::REASON_MANUAL_REFUND;
-                EventLog::log('Forced refund triggered', ['botName' => $swap_process['bot']['name'], 'swapId' => $swap_process['swap']['id']]);
+                EventLog::log('Forced refund triggered', ['botName' => $bot['name'], 'swapId' => $swap['id']]);
             }
         }
 

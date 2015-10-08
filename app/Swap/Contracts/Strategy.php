@@ -7,7 +7,7 @@ use Swapbot\Models\Data\SwapConfig;
 
 interface Strategy {
 
-    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in);
+    public function calculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in);
 
     public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in);
     public function buildRefundReason(SwapConfig $swap_config, $quantity_in);

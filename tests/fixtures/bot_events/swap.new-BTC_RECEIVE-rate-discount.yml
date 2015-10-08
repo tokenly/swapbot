@@ -1,0 +1,10 @@
+name: swap.new
+state: 'brandnew'
+isComplete: false
+isError: false
+txidIn: "00000000000000000000000000000000000000000000000000000BTCtx222222"
+
+quantityIn: 0.0009
+assetIn: 'BTC'
+quantityOut: 1000
+assetOut: 'LTBCOIN'

@@ -6,19 +6,24 @@ use Illuminate\Support\MessageBag;
 use Swapbot\Models\Data\RefundConfig;
 use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
+use Swapbot\Swap\Rules\SwapRuleHandler;
 use Swapbot\Swap\Strategies\StrategyHelpers;
 use Swapbot\Util\Validator\ValidatorHelper;
 
 class RateStrategy implements Strategy {
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in) {
+    function __construct(SwapRuleHandler $swap_rule_handler) {
+        $this->swap_rule_handler = $swap_rule_handler;
+    }
+
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
         // if there is a minimum and the input is below this minimum
         //   then it should be refunded
         if ($quantity_in < $swap_config['min']) {
             return true;
         }
 
-        $swap_vars = $this->caculateInitialReceiptValues($swap_config, $quantity_in);
+        $swap_vars = $this->calculateInitialReceiptValues($swap_config, $quantity_in, $swap_rules);
 
         // never try to send 0 of an asset
         if ($swap_vars['quantityOut'] <= 0) { return true; }
@@ -31,16 +36,26 @@ class RateStrategy implements Strategy {
     }
 
 
-    public function caculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in) {
-        $quantity_out = round($quantity_in * $swap_config['rate'], 8);
+    public function calculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+        $raw_quantity_out = $quantity_in * $swap_config['rate'];
+        $quantity_out = round($raw_quantity_out, 8);
 
-        return [
+        $receipt_values = [
             'quantityIn'  => $quantity_in,
             'assetIn'     => $swap_config['in'],
 
             'quantityOut' => $quantity_out,
             'assetOut'    => $swap_config['out'],
         ];
+
+        // execute the rule engine
+        $modified_quantity_out = $this->swap_rule_handler->modifyInitialQuantityOut($raw_quantity_out, $swap_rules, $quantity_in, $swap_config);
+        if ($modified_quantity_out !== null) {
+            $receipt_values['originalQuantityOut'] = $receipt_values['quantityOut'];
+            $receipt_values['quantityOut'] = $modified_quantity_out;
+        }
+
+        return $receipt_values;
     }
 
     public function unSerializeDataToSwap($data, SwapConfig $swap_config) {
