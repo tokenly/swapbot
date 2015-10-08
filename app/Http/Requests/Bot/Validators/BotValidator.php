@@ -120,8 +120,6 @@ class BotValidator {
                 $strategy = $this->swap_strategy_factory->newStrategy($strategy_name);
                 $strategy->validateSwap($swap_number, $swap, $validator->errors());
 
-                Log::debug("\$swap['swap_rule_ids']=".json_encode(isset($swap['swap_rule_ids']) ? $swap['swap_rule_ids'] : null, 192));
-
                 // validate any attatched swap rules
                 if (isset($swap['swap_rule_ids']) AND is_array($swap['swap_rule_ids'])) {
                     $this->validateAppliedSwapRuleIDs($swap['swap_rule_ids'], $swap_rules_by_id, $strategy, $validator);

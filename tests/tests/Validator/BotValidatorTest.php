@@ -469,14 +469,6 @@ class BotValidatorTest extends TestCase {
                 'error' => 'Please specify a valid id for this swap.',
             ],
 
-            [
-                // fixed doesn't allow advanced swap rules required
-                'vars' => array_replace_recursive($fixed_sample_vars, ['swaps' => [
-                    0 => ['swap_rule_ids' => [$sample_swap_rule['uuid']]],
-                ]]),
-                'error' => 'Advanced swap rules for fixed swaps are not allowed',
-            ],
-
         ];
 
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
