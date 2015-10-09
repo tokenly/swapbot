@@ -30,7 +30,7 @@ SwapbotSendItem = React.createClass
         if this.props.direction == BotConstants.DIRECTION_SELL
             return swapUtils.rawInAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
 
-        return getInAmount()
+        return this.getInAmount()
 
     getInAmount: ()->
         if this.props.direction == BotConstants.DIRECTION_SELL
