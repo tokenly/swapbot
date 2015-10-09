@@ -2,7 +2,6 @@
 constants = require './05_constants'
 popoverLabels = require './05_popover_labels'
 form = require './10_form_helpers'
-sbAdmin = sbAdmin or {}; sbAdmin.popover = require './10_popover_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 swapbot = swapbot or {}; swapbot.swapUtils = require '../shared/swapUtils'
 # ---- end references

@@ -1,5 +1,6 @@
 # ---- begin references
-sbAdmin = sbAdmin or {}; sbAdmin.popover = require './10_popover_utils'
+swapbot = swapbot or {}; swapbot.formatters = require 
+sbAdmin = sbAdmin or {}; sbAdmin.popover = require '../shared/popover'
 sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
 # ---- end references
 
@@ -15,7 +16,7 @@ buildLabelEl = (label, id)->
             properties[k] = v
 
         if label.popover?
-            labelText = [labelText, m("button", type: 'button', class: 'label-popover-help', onclick: sbAdmin.popover.buildOnclick(label.popover), "")]
+            labelText = [labelText, m("button", type: 'button', class: 'label-popover-help', onclick: sbAdmin.popover.buildOnClick(label.popover), "")]
     else
         labelText = label
         properties = {for: id, class: 'control-label'}

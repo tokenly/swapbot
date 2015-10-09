@@ -16,6 +16,19 @@ exports.buildOnClick = (popoverConfig)->
         el = jQuery(e.target)
         el.webuiPopover(popoverConfig)
         el.webuiPopover('show')
+
+        # launch body click handler
+        $('body').off('click.sb-popover').on('click.sb-popover', (e)->
+            if $(e.target).parents('.webui-popover').length then return
+            el.webuiPopover('hide')
+            return
+        )
+
+        # destroy body click handler
+        el.on 'hide.webui.popover', (e)->
+            $('body').off('click.sb-popover')
+            return
+
         return
 
 # ---------------------------------------------------------------------------------
