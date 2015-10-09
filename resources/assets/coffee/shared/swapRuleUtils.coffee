@@ -2,6 +2,7 @@
 
 formatters   = require './formatters'
 BotConstants = require '../bot/constants/BotConstants'
+popover      = require './popover'
 
 exports = {}
 
@@ -64,15 +65,27 @@ exports.buildDiscountMessageTextForPlaceOrder = (swapConfig)->
     # build discount texts
     discountTexts = []
     sortDiscounts(combinedDiscounts).map (discount)->
-        discountTexts.push("a #{formatters.formatPercentage(discount.pct * 100)}% discount for purchasing #{discount.moq} #{swapConfig.out}")
+        discountTexts.push("#{formatters.formatPercentage(discount.pct * 100)}% discount when purchasing #{discount.moq} #{swapConfig.out}")
     dtLength = discountTexts.length
     if not dtLength then return null
 
-    if dtLength > 1
-        discountTexts[dtLength-1] = "and #{discountTexts[dtLength-1]}"
+    offersText = exports.buildSwapRuleGroupSummaryProse([swapConfig])
 
+    popoverConfig = {
+        title: "Available Discounts"
+        content: """
+            <p>The following discounts are available for this purchase:</p>
+            <ul>
+                <li>#{discountTexts.join('</li><li>')}</li>
+            </ul>
+            <p>Discounts are not cumulative.  The highest matching discount will be applied.</p>
+        """
+    }
+    return React.createElement('span', {className: "noUnderline"}, [
+        offersText,
+        React.createElement('button', {className: 'button-question button-question-dark button-question-small', title: "About the Available Discounts", onClick: popover.buildOnClick(popoverConfig)}, ""),
+    ])
 
-    return "Offers "+discountTexts.join(", ")+"."
 
 exports.modifyInitialQuantityIn = (outAmount, inAmount, swapConfig)->
     bestDiscount = findBestDiscount(swapConfig.swapRules, outAmount)

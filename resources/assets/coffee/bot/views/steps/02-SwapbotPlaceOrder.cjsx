@@ -113,6 +113,7 @@ SwapbotSendItem = React.createClass
             transactionHeaderText = <span>Sell {formatters.formatCurrency(inAmount)} {swapConfig.in} for {formatters.formatCurrency(outAmount)} {swapConfig.out}</span>
 
         discountMessageText = swapRuleUtils.buildDiscountMessageTextForPlaceOrder(swapConfig)
+        # console.log "discountMessageText=", discountMessageText
 
         <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
             <a className="choose-swap" onClick={this.buildChooseSwap(inAmount, outAmount, isChooseable)} href="#next-step">

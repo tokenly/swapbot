@@ -165,7 +165,7 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
         if marketBuffer > maxMarketBuffer
             marketBuffer = maxMarketBuffer
 
-    console.log "btcCost=#{btcCost} marketBuffer=#{marketBuffer}"
+    # console.log "btcCost=#{btcCost} marketBuffer=#{marketBuffer}"
 
     inAmount = outAmount * btcCost
     buffer = inAmount * marketBuffer
