@@ -27,7 +27,7 @@ class ProcessPendingSwapCommand extends Command {
      *
      * @var string
      */
-    protected $description = 'Process a Pending Swap or all swaps.';
+    protected $description = 'Process a Pending Swap.';
 
     /**
      * Create a new command instance.
@@ -48,7 +48,7 @@ class ProcessPendingSwapCommand extends Command {
     protected function getArguments()
     {
         return [
-            ['swap-id', InputArgument::REQUIRED, 'A swap ID to process a single swap.'],
+            ['swap-id', InputArgument::REQUIRED, 'A swap ID or UUID'],
         ];
     }
 
