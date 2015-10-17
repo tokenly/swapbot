@@ -18,6 +18,7 @@ use Swapbot\Statemachines\SwapCommand\SwapCompleted;
 use Swapbot\Statemachines\SwapCommand\SwapConfirmed;
 use Swapbot\Statemachines\SwapCommand\SwapConfirming;
 use Swapbot\Statemachines\SwapCommand\SwapErrored;
+use Swapbot\Statemachines\SwapCommand\SwapInvalidated;
 use Swapbot\Statemachines\SwapCommand\SwapPermanentlyErrored;
 use Swapbot\Statemachines\SwapCommand\SwapRefund;
 use Swapbot\Statemachines\SwapCommand\SwapReset;
@@ -50,6 +51,7 @@ class SwapStateMachineFactory extends StateMachineFactory {
             SwapState::COMPLETE        => new SwapState(SwapState::COMPLETE),
             SwapState::ERROR           => new SwapState(SwapState::ERROR),
             SwapState::PERMANENT_ERROR => new SwapState(SwapState::PERMANENT_ERROR),
+            SwapState::INVALIDATED     => new SwapState(SwapState::INVALIDATED),
         ];
 
     }
@@ -128,6 +130,17 @@ class SwapStateMachineFactory extends StateMachineFactory {
 
         // SwapState::PERMANENT_ERROR => SwapState::READY with SwapStateEvent::SWAP_RETRY via SwapRetry
         $this->addTransitionToStates($states, SwapState::PERMANENT_ERROR, SwapState::READY, SwapStateEvent::SWAP_RETRY, new SwapRetry());
+
+
+
+        // SwapState::READY => SwapState::INVALIDATED with SwapStateEvent::SWAP_WAS_INVALIDATED via SwapPermanentlyErrored
+        $this->addTransitionToStates($states, SwapState::READY, SwapState::INVALIDATED, SwapStateEvent::SWAP_WAS_INVALIDATED, new SwapInvalidated());
+
+        // SwapState::OUT_OF_STOCK => SwapState::INVALIDATED with SwapStateEvent::SWAP_WAS_INVALIDATED via SwapPermanentlyErrored
+        $this->addTransitionToStates($states, SwapState::OUT_OF_STOCK, SwapState::INVALIDATED, SwapStateEvent::SWAP_WAS_INVALIDATED, new SwapInvalidated());
+
+        // SwapState::CONFIRMING => SwapState::INVALIDATED with SwapStateEvent::SWAP_WAS_INVALIDATED via SwapPermanentlyErrored
+        $this->addTransitionToStates($states, SwapState::CONFIRMING, SwapState::INVALIDATED, SwapStateEvent::SWAP_WAS_INVALIDATED, new SwapInvalidated());
 
 
         return $states;

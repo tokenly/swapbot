@@ -384,7 +384,17 @@ class BotEventLogger {
     }
 
 
+    public function logSwapTXIDInUpdate(Bot $bot, Swap $swap, $receipt_update_vars, $invalid_txid) {
+        $this->logSwapEvent('swap.txidInUpdate', $bot, $swap, $receipt_update_vars, [], ['invalidTxid' => $invalid_txid]);
+    }
 
+    public function logSwapTXIDOutUpdate(Bot $bot, Swap $swap, $receipt_update_vars, $invalid_txid) {
+        $this->logSwapEvent('swap.txidOutUpdate', $bot, $swap, $receipt_update_vars, [], ['invalidTxid' => $invalid_txid]);
+    }
+
+    public function logSwapReplaced(Bot $bot, Swap $swap, Swap $replacing_swap) {
+        $this->logSwapEvent('swap.replaced', $bot, $swap, [], [], ['newUuid' => $replacing_swap['uuid']]);
+    }
 
 
 

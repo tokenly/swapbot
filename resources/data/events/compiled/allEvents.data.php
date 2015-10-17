@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-09-24 20:53:31
+// compiled on 2015-10-17 14:56:22
 
 return array (
   'swap.new' => 
@@ -120,6 +120,44 @@ return array (
       1 => 'assetOut',
       2 => 'destination',
       3 => 'confirmationsOut',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.txidInUpdate' => 
+  array (
+    'name' => 'swap.txidInUpdate',
+    'label' => 'Swap TXID In Changed',
+    'level' => 'INFO',
+    'msg' => 'Swap Transaction ID changed from <?php echo e($invalidTxid); ?> to <?php echo e($txidIn); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'invalidTxid',
+      1 => 'txidIn',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.txidOutUpdate' => 
+  array (
+    'name' => 'swap.txidOutUpdate',
+    'label' => 'Swap TXID Out Changed',
+    'level' => 'INFO',
+    'msg' => 'Swap Transaction ID changed from <?php echo e($invalidTxid); ?> to <?php echo e($txidOut); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'invalidTxid',
+      1 => 'txidOut',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.replaced' => 
+  array (
+    'name' => 'swap.replaced',
+    'label' => 'Swap Replaced by a New Swap',
+    'level' => 'INFO',
+    'msg' => 'This swap was replaced by swap <?php echo e($newUuid); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'newUuid',
     ),
     'swapEventStream' => true,
   ),

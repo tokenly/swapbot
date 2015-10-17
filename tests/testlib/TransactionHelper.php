@@ -22,9 +22,15 @@ class TransactionHelper  {
         ];
     }
 
+    public function newSampleTransactionWithXchainNotification($notification, $bot=null) {
+        $vars = [];
+        $vars['txid'] = $notification['txid'];
+        $vars['xchain_notification'] = $notification;
+        return $this->newSampleTransaction($bot, $vars);
+    }
+
     public function newSampleTransaction($bot=null, $vars=[]) {
-        $attributes = array_replace_recursive($this->sampleTransactionVars(), ['txid' => $this->randomTXID()],
-         $vars);
+        $attributes = array_replace_recursive($this->sampleTransactionVars(), ['txid' => $this->randomTXID()], $vars);
         if ($bot == null) {
             $bot = app()->make('BotHelper')->newSampleBotWithUniqueSlug();
         }
@@ -36,5 +42,9 @@ class TransactionHelper  {
 
     public function randomTXID() {
         return 'transactionid00000000000'.$this->token_generator->generateToken(40);
+    }
+
+    public function sampleXChainNotific() {
+        // code
     }
 }

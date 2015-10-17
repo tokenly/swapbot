@@ -67,7 +67,8 @@ class SwapProcessor {
         $strategy = $swap_config->getStrategy();
         $in_quantity = $transaction['xchain_notification']['quantity'];
         $initial_receipt_vars = $strategy->calculateInitialReceiptValues($swap_config, $in_quantity, $swap_config->buildAppliedSwapRules($bot['swap_rules']));
-        Log::debug("createNewSwap \$transaction=".json_encode($transaction, 192));
+        // Log::debug("createNewSwap \$transaction=".json_encode($transaction, 192));
+        // Log::debug("\$in_quantity=$in_quantity \$initial_receipt_vars=".json_encode($initial_receipt_vars, 192));
 
         // new swap vars
         $new_swap = $this->swap_repository->create([
@@ -348,7 +349,7 @@ class SwapProcessor {
         // log out of stock or not ready
         if ($swap->isOutOfStock()) {
             $refund_config = $bot['refund_config'];
-            Log::debug("({$swap_process['block_height']}) swapShouldBeAutomaticallyRefunded: ".json_encode($refund_config->swapShouldBeAutomaticallyRefunded($swap, $swap_process['block_height']), 192));
+            // Log::debug("({$swap_process['block_height']}) swapShouldBeAutomaticallyRefunded: ".json_encode($refund_config->swapShouldBeAutomaticallyRefunded($swap, $swap_process['block_height']), 192));
             if ($refund_config->swapShouldBeAutomaticallyRefunded($swap, $swap_process['block_height'])) {
                 // log automatic refund
                 $this->bot_event_logger->logAutomaticRefund($bot, $swap, $refund_config);
@@ -559,7 +560,7 @@ class SwapProcessor {
     }
 
     protected function checkForPermanentlyFailedSwap($swap_process) {
-        Log::debug("checkForPermanentlyFailedSwap \$swap_process['state_trigger']={$swap_process['state_trigger']}");
+        // Log::debug("checkForPermanentlyFailedSwap \$swap_process['state_trigger']={$swap_process['state_trigger']}");
         if ($swap_process['state_trigger'] == SwapStateEvent::SWAP_ERRORED OR (!$swap_process['state_trigger'] AND $swap_process['swap']['state'] == SwapState::ERROR)) {
             if ($swap_process['confirmations'] >= self::PERMANENTLY_FAIL_AFTER_CONFIRMATIONS) {
                 $bot = (isset($swap_process['bot'])) ? $swap_process['bot'] : null;

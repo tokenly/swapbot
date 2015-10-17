@@ -68,7 +68,7 @@ class BotHelper  {
                     'in'       => 'BTC',
                     'out'      => 'LTBCOIN',
                     'strategy' => 'rate',
-                    'rate'     => 0.00000150,
+                    'rate'     => 15000000,
                     'min'      => 0,
                 ],
             ],
@@ -181,15 +181,23 @@ class BotHelper  {
             }
 
             // sample address
-            if (!isset($attributes['address'])) {
-                $attributes['address'] = '1xxxxxxxxxxxxxxxxxxxxxxxx'. substr(md5(uniqid()),-8);
-            }
+            if (!isset($attributes['address'])) { $attributes['address'] = '1xxxxxxxxxxxxxxxxxxxxxxxx'. substr(md5(uniqid()),-8); }
 
             $bot_model = $this->bot_repository->create($attributes);
             return $bot_model;
         } catch (ValidationException $e) {
             throw new Exception("ValidationException: ".json_encode($e->errors()->all(), 192), $e->getCode());
         }
+    }
+
+    public function sampleAddressVars($attributes = []) {
+
+        // sample address IDs
+        if (!isset($attributes['public_address_id'])) { $attributes['public_address_id'] = '11111111-1111-1111-1111-'. substr(md5(uniqid()),-12); }
+        if (!isset($attributes['public_receive_monitor_id'])) { $attributes['public_receive_monitor_id'] = '11111111-1111-1111-2222-'. substr(md5(uniqid()),-12); }
+        if (!isset($attributes['public_send_monitor_id'])) { $attributes['public_send_monitor_id'] = '11111111-1111-1111-3333-'. substr(md5(uniqid()),-12); }
+
+        return $attributes;
     }
 
 

@@ -16,6 +16,7 @@ class SwapState extends State {
     const COMPLETE        = 'complete';
     const ERROR           = 'error';
     const PERMANENT_ERROR = 'permanenterror';
+    const INVALIDATED     = 'invalidated';
 
     // states that are not final
     public static function allPendingStates() {
@@ -34,6 +35,7 @@ class SwapState extends State {
             case 'complete':       return 'Complete';
             case 'error':          return 'Error';
             case 'permanenterror': return 'Permanent Error';
+            case 'invalidated':    return 'Invalidated';
 
             default:               return 'Unknown';
         }

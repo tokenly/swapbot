@@ -68,6 +68,33 @@ events:
     msgVars: [quantityOut,assetOut,destination,confirmationsOut]
     swapEventStream: true
 
+  -
+    name: swap.txidInUpdate
+    label: Swap TXID In Changed
+    level: INFO
+    msg: |
+        Swap Transaction ID changed from {{ $invalidTxid }} to {{ $txidIn }}.
+    msgVars: [invalidTxid, txidIn]
+    swapEventStream: true
+
+  -
+    name: swap.txidOutUpdate
+    label: Swap TXID Out Changed
+    level: INFO
+    msg: |
+        Swap Transaction ID changed from {{ $invalidTxid }} to {{ $txidOut }}.
+    msgVars: [invalidTxid, txidOut]
+    swapEventStream: true
+
+  -
+    name: swap.replaced
+    label: Swap Replaced by a New Swap
+    level: INFO
+    msg: |
+        This swap was replaced by swap {{ $newUuid }}.
+    msgVars: [newUuid]
+    swapEventStream: true
+
   # ### Swap Errors
   -
     name: swap.failed

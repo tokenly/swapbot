@@ -3,6 +3,7 @@
 namespace Swapbot\Handlers\Commands;
 
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Models\Data\BotPaymentState;
 use Swapbot\Models\Data\BotPaymentStateEvent;

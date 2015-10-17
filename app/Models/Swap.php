@@ -105,6 +105,7 @@ class Swap extends APIModel {
             case SwapState::PERMANENT_ERROR:
             case SwapState::OUT_OF_STOCK:
             case SwapState::OUT_OF_FUEL:
+            case SwapState::INVALIDATED:
                 return true;
         }
 

@@ -246,6 +246,55 @@ class SwapStateTest extends TestCase {
         $this->checkState($swap, SwapState::READY);
         
 
+        ////////////////////////////////////////////////////////////////////////
+        // READY -> INVALIDATED
+
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition to ready
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // transition to invalid
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_WAS_INVALIDATED);
+        $this->checkState($swap, SwapState::INVALIDATED);
+        
+
+        ////////////////////////////////////////////////////////////////////////
+        // OUT_OF_STOCK -> INVALIDATED
+
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock depleted
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_DEPLETED);
+        $this->checkState($swap, SwapState::OUT_OF_STOCK);
+
+        // transition to invalid
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_WAS_INVALIDATED);
+        $this->checkState($swap, SwapState::INVALIDATED);
+        
+
+        ////////////////////////////////////////////////////////////////////////
+        // READY -> CONFIRMING -> INVALIDATED
+
+        // make a sample swap and state machine
+        $swap = app('SwapHelper')->newSampleSwap();
+        $state_machine = $swap->statemachine();
+
+        // transition with stock checked
+        $state_machine->triggerEvent(SwapStateEvent::STOCK_CHECKED);
+        $this->checkState($swap, SwapState::READY);
+
+        // confirming
+        $state_machine->triggerEvent(SwapStateEvent::CONFIRMING);
+        $this->checkState($swap, SwapState::CONFIRMING);
+
+        // transition to invalid
+        $state_machine->triggerEvent(SwapStateEvent::SWAP_WAS_INVALIDATED);
+        $this->checkState($swap, SwapState::INVALIDATED);
+
     }
 
 

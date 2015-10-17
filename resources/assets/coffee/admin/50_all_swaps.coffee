@@ -109,6 +109,7 @@ ctrl.allswaps.view = ()->
         {k: 'Complete', v: 'complete'},
         {k: 'Error', v: 'error'},
         {k: 'Permanent Error', v: 'permanenterror'},
+        {k: 'Invalid', v: 'invalidated'},
     ]
 
     filterSelectEl = sbAdmin.form.mInputEl({type: "select", options: filterOptions, id: "filter", onchange: vm.changeFilterFn }, vm.swapFilterState)

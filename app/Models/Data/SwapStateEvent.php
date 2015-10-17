@@ -17,6 +17,8 @@ class SwapStateEvent {
     const CONFIRMING               = 'confirming';
     const CONFIRMED                = 'confirmed';
 
+    const SWAP_WAS_INVALIDATED     = 'invalidated';
+
     const SWAP_RETRY               = 'swapRetry';
     const SWAP_RESET               = 'swapReset';
 
