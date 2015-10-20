@@ -127,7 +127,7 @@ class InvalidationEventProcessor {
                     BotEventLogger::logSwapReplaced($bot, $original_swap, $confirmed_swap);
                 }
 
-                $this->invalidateSwap($original_swap);
+                $this->invalidateAndCloseSwap($original_swap);
 
             } else {
                 // a new swap with this txid doesn't exist yet
@@ -143,7 +143,7 @@ class InvalidationEventProcessor {
                     BotEventLogger::logSwapTXIDInUpdate($bot, $original_swap, $swap_update_vars['receipt'], $invalid_txid);
                 } else {
                     // the original swap will never confirm
-                    $this->invalidateSwap($original_swap);
+                    $this->invalidateAndCloseSwap($original_swap);
                 }
             }
         });
@@ -238,9 +238,12 @@ class InvalidationEventProcessor {
         return $matched_swaps[0];
     }
 
-    protected function invalidateSwap($swap) {
+    protected function invalidateAndCloseSwap($swap) {
         // move the swap to an invalidated state
         $swap->stateMachine()->triggerEvent(SwapStateEvent::SWAP_WAS_INVALIDATED);
+
+        // close the swap account with xchain
+        AccountHandler::closeSwapAccount($swap);
 
     }
 }

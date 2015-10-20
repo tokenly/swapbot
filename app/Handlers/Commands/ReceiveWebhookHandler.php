@@ -65,7 +65,7 @@ class ReceiveWebhookHandler {
 
             case 'invalidation':
                 // new invalidation event
-                // EventLog::log('event.invalidation', $payload);
+                EventLog::log('event.invalidation', $payload);
                 $this->invalidation_event_processor->handleInvalidation($payload);
                 break;
 
