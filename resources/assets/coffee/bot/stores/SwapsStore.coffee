@@ -35,9 +35,11 @@ handleSwapstreamEvents = (eventWrappers)->
                 #   so the newest event always takes precidence
                 newSwap = buildSwapFromSwapEvent(eventWrapper)
                 allMySwapsById[swapId] = $.extend({}, newSwap, allMySwapsById[swapId])
+                allMySwapsById[swapId].createdAt = eventWrapper.createdAt
         else
             # new swap
             allMySwapsById[swapId] = buildSwapFromSwapEvent(eventWrapper)
+            allMySwapsById[swapId].createdAt = eventWrapper.createdAt
 
         anyChanged = true
 
@@ -53,9 +55,13 @@ rebuildAllMySwaps = ()->
     for id, swap of allMySwapsById
         newAllMySwaps.push(swap)
 
-    # sort by most recent active first
+    # sort by most recently created first
     newAllMySwaps.sort (a,b)->
-        return b.serial - a.serial
+        # return b.serial - a.serial
+        # return b.createdAt - a.createdAt
+        bDate = new Date(b.createdAt)
+        aDate = new Date(a.createdAt)
+        return bDate - aDate
 
     return newAllMySwaps
 
