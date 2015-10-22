@@ -1,7 +1,8 @@
 # swapUtils functions
 
 swapbot = swapbot or {}; swapbot.formatters = require './formatters'
-swapRuleUtils = require './swapRuleUtils'
+swapRuleUtils  = require './swapRuleUtils'
+whitelistUtils = require './whitelistUtils'
 
 exports = {}
 
@@ -336,7 +337,7 @@ exports.swapDetailsProse = (swapConfig)->
 
 
 # returns [firstSwapDescription, otherSwapDescriptions]
-exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
+exports.buildExchangeDescriptionsForGroup = (bot, swapConfigGroup)->
     mainDesc = ''
         
     otherTokenEls = []
@@ -352,8 +353,13 @@ exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
     # console.log "swapRulesSummaryProse=", swapRulesSummaryProse
     if swapRulesSummaryProse then swapRulesSummary = React.createElement('span', null, swapRulesSummaryProse)
 
+    # whitelist summary
+    whitelistSummary = null
+    whitelistSummaryProse = whitelistUtils.buildWhitelistSummaryProse(bot)
+    if whitelistSummaryProse then whitelistSummary = React.createElement('span', null, whitelistSummaryProse)
+
     if otherTokenEls.length == 0
-        return [mainDesc, otherSwapDescriptions, swapRulesSummary]
+        return [mainDesc, otherSwapDescriptions, swapRulesSummary, whitelistSummary]
 
     tokenDescs = []
     otherCount = otherTokenEls.length
@@ -377,7 +383,7 @@ exports.buildExchangeDescriptionsForGroup = (swapConfigGroup)->
         
         otherSwapDescriptions = React.createElement('span', null, [els, ' are also accepted'])
 
-    return [mainDesc, otherSwapDescriptions, swapRulesSummary]
+    return [mainDesc, otherSwapDescriptions, swapRulesSummary, whitelistSummary]
     
 
 exports.inAmountFromOutAmount = (outAmount, swapConfig, currentRate)->

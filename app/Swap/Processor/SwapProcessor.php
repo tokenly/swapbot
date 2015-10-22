@@ -379,6 +379,15 @@ class SwapProcessor {
             }
         }
 
+        // check whitelist refund
+        if (!$is_refunding) {
+            if ($this->failsWhitelistTest($bot, $swap_process['destination'])) {
+                $is_refunding = true;
+                $refund_reason = RefundConfig::REASON_WHITELIST_MISMATCH;
+                EventLog::log('Whitelist mismatch refund triggered', ['botName' => $bot['name'], 'swapId' => $swap['id']]);
+            }
+        }
+
         // check strategy for refund
         if (!$is_refunding) {
             $is_refunding = $strategy->shouldRefundTransaction($swap_config, $swap_process['in_quantity'], $swap_config->buildAppliedSwapRules($bot['swap_rules']));
@@ -604,11 +613,26 @@ class SwapProcessor {
         return RequestIDGenerator::generateSendHash($type.','.$bot['uuid'].','.$swap['uuid'], $destination, $quantity, $asset);
     }
 
+    protected function failsWhitelistTest(Bot $bot, $destination) {
+        $failed_whitelist_test = false;
+
+        $allowed_whitelist_addresses = $bot['whitelist_addresses'];
+        if (is_array($allowed_whitelist_addresses) AND $allowed_whitelist_addresses) {
+            if ($destination AND in_array($destination, $allowed_whitelist_addresses)) {
+                // there was a whitelist and the destination was in it
+                $failed_whitelist_test = false;
+            } else {
+                // there was a whitelist and the destination was not in it
+                $failed_whitelist_test = true;
+            }
+        }
+
+        return $failed_whitelist_test;
+    }
 
 
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
-    // Bill Bot
 
     protected function allSwapsAreComplete($transaction) {
         $all_swaps = $this->swap_repository->findByTransactionID($transaction['id']);

@@ -1,0 +1,4 @@
+subject: Your Swap was Refunded
+body: ['has been refunded', 'deposit did not come from a whitelisted address']
+to: {"testCustomer@tokenly.co": ~}
+from: {"no-reply@tokenly.co": Tokenly Bot}

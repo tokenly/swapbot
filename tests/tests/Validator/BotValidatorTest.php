@@ -85,6 +85,10 @@ class BotValidatorTest extends TestCase {
                 'vars' => array_replace_recursive($sample_vars, ['blacklist_addresses' => ['abadaddress1']]),
                 'error' => 'not a valid bitcoin address.',
             ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['whitelist_addresses' => ['abadaddress1']]),
+                'error' => 'not a valid bitcoin address.',
+            ],
 
             [
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['strategy' => null,]]]),

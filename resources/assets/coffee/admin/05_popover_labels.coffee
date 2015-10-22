@@ -1,5 +1,34 @@
 popoverLabels = {}
 
+
+# ---------------------------------------------------------------------------------
+# general form help
+
+popoverLabels.blacklistedAddresses = {
+    text: "Blacklisted Addresses"
+    popover: {
+        title: "About Blacklisted Addresses"
+        content: """
+            <p>Tokens received from blacklisted addresses do not trigger swaps and will not be refunded.</p>
+            <p>Use blacklisted addresses to fill the Swapbot with additional inventory and BTC fuel.</p>
+        """
+    }
+}
+
+popoverLabels.whitelistedAddresses = {
+    text: "Whitelisted Addresses"
+    popover: {
+        title: "About Whitelisted Addresses"
+        content: """
+            <p>If any whitelisted addresses are defined, then only swaps originating from these addresses will be processed.  All other swaps will be refunded.</p>
+            <p>Use whitelisted addresses to create Swapbots that can only be used by specific people.</p>
+        """
+    }
+}
+
+# ---------------------------------------------------------------------------------
+# swaps
+
 popoverLabels.swapTypeChoice = (number, action)->
     return {
         text: "Type for #{action} Swap ##{number}"

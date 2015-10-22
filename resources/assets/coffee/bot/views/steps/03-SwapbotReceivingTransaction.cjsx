@@ -7,6 +7,7 @@ SwapMatcher = require '../../util/SwapMatcher'
 NeedHelpLink = require '../../views/includes/NeedHelpLink'
 PlaceOrderInput = require '../../views/includes/PlaceOrderInput'
 ReactZeroClipboard = require '../../views/includes/ReactZeroClipboard'
+whitelistUtils   = require '../../../shared/whitelistUtils'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
 swapbot = swapbot or {}; swapbot.quoteUtils = require '../../util/quoteUtils'
 # ---- end references
@@ -143,6 +144,7 @@ SwapbotReceivingTransaction = React.createClass
         #    <button className={"copyToClipboard"+(if this.state.addressCopied then ' copied' else '')} title="copy to clipboard"><i className="fa fa-clipboard"></i> {if this.state.addressCopied then 'Copied' else 'Copy'}</button>
         # </ReactZeroClipboard>
 
+        whitelistMessageText = whitelistUtils.buildMessageTextForPlaceOrder(this.props.bot)
 
         return <div id="swapbot-container" className="section grid-100">
             <div id="swap-step-2" className="content">
@@ -162,6 +164,15 @@ SwapbotReceivingTransaction = React.createClass
                     To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
 
                     { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
+
+                    { if whitelistMessageText
+                        <p>
+                        <span className="whitelist-message">
+                            {whitelistMessageText}
+                            <br />
+                        </span>
+                        </p>
+                    }
 
                 </div>
 

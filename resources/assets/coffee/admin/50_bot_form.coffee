@@ -69,6 +69,25 @@ buildBlacklistAddressesGroup = ()->
 
 # ################################################
 
+buildWhitelistAddressesGroup = ()->
+    return sbAdmin.formGroup.newGroup({
+        id: 'whitelist'
+        fields: [
+            {name: 'address', }
+        ]
+        addLabel: " Add Another Whitelist Address"
+        buildItemRow: (builder, number, item)->
+            return [
+                builder.row([
+                    builder.field(null, 'address', "1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 4), 
+                ]),
+            ]
+        translateFieldToNumberedValues: 'address'
+        useCompactNumberedLayout: true
+    })
+
+# ################################################
+
 buildOffsetKey = (swapDirection, offset)->
     return swapDirection+"_"+offset
 
@@ -176,17 +195,6 @@ nameToSlug = (name)->
 
 vm = ctrl.botForm.vm = do ()->
 
-    buildBlacklistAddressesPropValue = (addresses)->
-        out = []
-        for address in addresses
-            out.push(m.prop(address))
-
-        # always have at least one
-        if not out.length
-            out.push(m.prop(''))
-
-        return out
-
     vm = {}
     vm.init = ()->
         # view status
@@ -198,6 +206,7 @@ vm = ctrl.botForm.vm = do ()->
         # fields
         vm.name = m.prop('')
         vm.urlSlug = m.prop('')
+        vm.useWhitelisting = m.prop(false)
         vm.description = m.prop('')
         vm.hash = m.prop('')
         vm.paymentPlan = m.prop('monthly001')
@@ -210,6 +219,7 @@ vm = ctrl.botForm.vm = do ()->
         
         vm.incomeRulesGroup = buildIncomeRulesGroup()
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
+        vm.whitelistAddressesGroup = buildWhitelistAddressesGroup()
 
 
         vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()))
@@ -244,6 +254,9 @@ vm = ctrl.botForm.vm = do ()->
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
+                    vm.whitelistAddressesGroup.unserialize(botData.whitelistAddresses)
+                    if botData.whitelistAddresses?.length
+                        vm.useWhitelisting(true)
 
                     vm.backgroundOverlaySettings(if botData.backgroundOverlaySettings?.start then window.JSON.stringify(botData.backgroundOverlaySettings) else '')
                     vm.backgroundImageDetails(botData.backgroundImageDetails)
@@ -288,6 +301,7 @@ vm = ctrl.botForm.vm = do ()->
                 returnFee: vm.returnFee() + ""
                 incomeRules: vm.incomeRulesGroup.serialize()
                 blacklistAddresses: vm.blacklistAddressesGroup.serialize()
+                whitelistAddresses: if vm.useWhitelisting() then vm.whitelistAddressesGroup.serialize() else []
                 confirmationsRequired: vm.confirmationsRequired() + ""
                 refundConfig: {refundAfterBlocks: vm.refundAfterBlocks() + ""}
                 backgroundImageId: vm.backgroundImageId() or ''
@@ -441,10 +455,19 @@ ctrl.botForm.view = ()->
                         ]),
                     ]),
 
-                    m("h5", "Blacklisted Addresses"),
-                    m("p", [m("small", "Tokens received from blacklisted addresses do not trigger swaps.  These addresses can be used to fill the SwapBot with additional inventory.")]),
+                    m("div", {class: "spacer1"}),
+
+                    m("div", sbAdmin.form.mLabelEl(popoverLabels.blacklistedAddresses)),
                     vm.blacklistAddressesGroup.buildInputs(),
 
+                    m("div", {class: "spacer1"}),
+                    m("div", sbAdmin.form.mLabelEl(popoverLabels.whitelistedAddresses)),
+
+                    sbAdmin.form.mCheckboxField("Restrict this bot to whitelisted addresses only", {id: 'useWhitelisting', type: 'checkbox', }, vm.useWhitelisting),
+                    (
+                        if vm.useWhitelisting()
+                            vm.whitelistAddressesGroup.buildInputs()
+                    ),
 
                     # -------------------------------------------------------------------------------------------------------------------------------------------
 

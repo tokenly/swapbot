@@ -40,6 +40,11 @@ class BotTransformer {
             $out['blacklist_addresses'] = $this->sanitizeBlacklistAddresses($attributes['blacklistAddresses']);
         }
 
+        // santize whitelistAddresses
+        if (isset($attributes['whitelistAddresses'])) {
+            $out['whitelist_addresses'] = $this->sanitizeWhitelistAddresses($attributes['whitelistAddresses']);
+        }
+
         // santize incomeRules
         if (isset($attributes['incomeRules'])) {
             $out['income_rules'] = $this->sanitizeIncomeRules($attributes['incomeRules']);
@@ -107,6 +112,23 @@ class BotTransformer {
         }
 
         return $blacklist_addresses_out;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Whitelist Addresses
+
+    protected function sanitizeWhitelistAddresses($whitelist_addresses) {
+        $whitelist_addresses_out = [];
+
+        if ($whitelist_addresses) {
+            foreach(array_values($whitelist_addresses) as $offset => $whitelist_address) {
+                if (strlen($whitelist_address)) {
+                    $whitelist_addresses_out[] = $whitelist_address;
+                }
+            }
+        }
+
+        return $whitelist_addresses_out;
     }
 
     ////////////////////////////////////////////////////////////////////////

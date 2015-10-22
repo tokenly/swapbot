@@ -6,6 +6,7 @@ PlaceOrderInput  = require '../../views/includes/PlaceOrderInput'
 QuotebotStore    = require '../../stores/QuotebotStore'
 quoteUtils       = require '../../util/quoteUtils'
 swapRuleUtils    = require '../../../shared/swapRuleUtils'
+whitelistUtils   = require '../../../shared/whitelistUtils'
 swapUtils        = require '../../../shared/swapUtils'
 UserChoiceStore  = require '../../stores/UserChoiceStore'
 UserInputActions = require '../../actions/UserInputActions'
@@ -115,6 +116,8 @@ SwapbotSendItem = React.createClass
         discountMessageText = swapRuleUtils.buildDiscountMessageTextForPlaceOrder(swapConfig)
         # console.log "discountMessageText=", discountMessageText
 
+        whitelistMessageText = whitelistUtils.buildMessageTextForPlaceOrder(this.props.bot)
+
         <li className={'choose-swap'+(if isChooseable then ' chooseable' else ' unchooseable')}>
             <a className="choose-swap" onClick={this.buildChooseSwap(inAmount, outAmount, isChooseable)} href="#next-step">
                 { if errorMsg
@@ -132,6 +135,12 @@ SwapbotSendItem = React.createClass
                                 { if discountMessageText
                                     <span className="discountMessage">
                                         {discountMessageText}
+                                        <br />
+                                    </span>
+                                }
+                                { if whitelistMessageText
+                                    <span className="whitelist-message">
+                                        {whitelistMessageText}
                                         <br />
                                     </span>
                                 }

@@ -69,6 +69,9 @@ class BotValidator {
             // validate blacklist addresses
             $this->validateBlacklistAddresses(isset($posted_data['blacklist_addresses']) ? $posted_data['blacklist_addresses'] : null, $validator);
 
+            // validate whitelist addresses
+            $this->validateWhitelistAddresses(isset($posted_data['whitelist_addresses']) ? $posted_data['whitelist_addresses'] : null, $validator);
+
             // validate income rules
             $this->validateIncomeRules(isset($posted_data['income_rules']) ? $posted_data['income_rules'] : null, $validator);
 
@@ -144,6 +147,19 @@ class BotValidator {
             foreach(array_values($blacklist_addresses) as $offset => $blacklist_address) {
                 if (strlen($blacklist_address) AND !AddressValidator::isValid($blacklist_address)) {
                     $validator->errors()->add('blacklist_addresses', "Blacklist address {$blacklist_address} was not a valid bitcoin address.");
+                }
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    // Whitelist Addresses
+
+    protected function validateWhitelistAddresses($whitelist_addresses, $validator) {
+        if ($whitelist_addresses) {
+            foreach(array_values($whitelist_addresses) as $offset => $whitelist_address) {
+                if (strlen($whitelist_address) AND !AddressValidator::isValid($whitelist_address)) {
+                    $validator->errors()->add('whitelist_addresses', "Whitelist address {$whitelist_address} was not a valid bitcoin address.");
                 }
             }
         }

@@ -8,7 +8,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
 form = {}
 
 buildLabelEl = (label, id)->
-    if typeof label == 'object'
+    if typeof label == 'object' and label.text?
         labelText = label.text
         properties = {for: id, class: 'control-label'}
         for k, v of label
@@ -22,6 +22,7 @@ buildLabelEl = (label, id)->
         properties = {for: id, class: 'control-label'}
 
     return m("label", properties, labelText)
+
 
 
 form.mValueDisplay = (label, attributes, valueOrProp)->
@@ -51,6 +52,16 @@ form.mFormField = (label, attributes, prop)->
     inputEl = form.mInputEl(attributes, prop)
     return form.composeFormField(labelEl, inputEl)
 
+form.mCheckboxField = (label, attributes, prop)->
+    inputEl = form.mInputEl(attributes, prop)
+
+    if label? and typeof label == 'object'
+        label.text = [inputEl, label.text]
+    else
+        label = [inputEl, " ", label]
+
+    return buildLabelEl(label, attributes.id)
+
 form.mLabelEl = (labelDef, id=null)->
     if not id? then id = ""
     return buildLabelEl(labelDef, id)
@@ -61,25 +72,33 @@ form.mInputEl = (attributes, prop=null)->
     name = inputProps.name or inputProps.id
 
     if prop?
-        if attributes.onchange?
-            inputProps.onchange = (e)->
-                (attributes.onchange)(e)
-                return (m.withAttr("value", prop))(e)
-        else
-            inputProps.onchange = m.withAttr("value", prop)
+        if inputProps.type == 'checkbox'
+            inputProps.onclick = m.withAttr("checked", prop)
+            inputProps.checked = prop()
 
-        if attributes.onkeyup?
-            inputProps.onkeyup = (e)->
-                (attributes.onkeyup)(e)
-                return (m.withAttr("value", prop))(e)
         else
-            inputProps.onkeyup = m.withAttr("value", prop)
 
-        
+            if attributes.onchange?
+                inputProps.onchange = (e)->
+                    (attributes.onchange)(e)
+                    return (m.withAttr("value", prop))(e)
+            else
+                inputProps.onchange = m.withAttr("value", prop)
+
+            if attributes.onkeyup?
+                inputProps.onkeyup = (e)->
+                    (attributes.onkeyup)(e)
+                    return (m.withAttr("value", prop))(e)
+            else
+                inputProps.onkeyup = m.withAttr("value", prop)
+
+
         inputProps.value = prop()
     
     # defaults
-    inputProps.class = 'form-control' if not inputProps.class?
+    if not inputProps.class?
+        if inputProps.type != 'checkbox'
+            inputProps.class = 'form-control'
     inputProps.name = inputProps.id if not inputProps.name?
 
     # postfix
@@ -97,6 +116,9 @@ form.mInputEl = (attributes, prop=null)->
             delete inputProps.type
             options = inputProps.options or [{k:'- None -', v: ''}]
             inputEl = m("select", inputProps, buildOpts(options))
+        when 'checkbox'
+            inputEl = m("input", inputProps)
+
         else
             inputEl = m("input", inputProps)
 

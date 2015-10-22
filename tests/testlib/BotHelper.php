@@ -49,6 +49,7 @@ class BotHelper  {
 
             'balances_updated_at'         => null,
             'blacklist_addresses'         => ['1JY6wKwW5D5Yy64RKA7rDyyEdYrLSD3J6B'],
+            'whitelist_addresses'         => [],
             'return_fee'                  => 0.0001,
             'confirmations_required'      => 2,
             'state'                       => BotState::BRAND_NEW,
@@ -114,6 +115,7 @@ class BotHelper  {
         // add swaps, blacklist addresses, income rules and refundConfig
         $out['swaps']              = $sample_bot_vars['swaps'];
         $out['blacklistAddresses'] = $sample_bot_vars['blacklist_addresses'];
+        $out['whitelistAddresses'] = $sample_bot_vars['whitelist_addresses'];
         $out['incomeRules']        = $sample_bot_vars['income_rules'];
         $out['refundConfig']       = $sample_bot_vars['refund_config'];
         

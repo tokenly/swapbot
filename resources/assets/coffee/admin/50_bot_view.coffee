@@ -76,7 +76,35 @@ buildBlacklistAddressesGroup = ()->
             for item, offset in items
                 addressList += (if offset > 0 then ", " else "")+item.address()
 
-            return m("div", {class: "item-group"}, [
+            return m("div", {class: ""}, [
+                m("div", { class: "row"}, m("div", {class: "col-md-12 form-control-static"}, addressList)),
+            ])
+
+            
+        translateFieldToNumberedValues: 'address'
+        useCompactNumberedLayout: true
+        displayOnly: true
+    })
+
+# ################################################
+
+buildWhitelistAddressesGroup = ()->
+    return sbAdmin.formGroup.newGroup({
+        id: 'whitelist'
+        fields: [
+            {name: 'address', }
+        ]
+        buildAllItemRows: (items)->
+            if not items or (items.length == 1 and not items[0].address())
+                return [
+                    m("span", {class: 'empty'}, "No whitelisted addresses are defined."),
+                ]
+
+            addressList = ""
+            for item, offset in items
+                addressList += (if offset > 0 then ", " else "")+item.address()
+
+            return m("div", {class: ""}, [
                 m("div", { class: "row"}, m("div", {class: "col-md-12 form-control-static"}, addressList)),
             ])
 
@@ -231,6 +259,7 @@ vm = ctrl.botView.vm = do ()->
 
         vm.incomeRulesGroup = buildIncomeRulesGroup()
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
+        vm.whitelistAddressesGroup = buildWhitelistAddressesGroup()
 
         vm.backgroundImageDetails = m.prop('')
         vm.logoImageDetails       = m.prop('')
@@ -266,6 +295,7 @@ vm = ctrl.botView.vm = do ()->
 
                 vm.incomeRulesGroup.unserialize(botData.incomeRules)
                 vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
+                vm.whitelistAddressesGroup.unserialize(botData.whitelistAddresses)
 
                 vm.backgroundImageDetails(botData.backgroundImageDetails)
                 vm.logoImageDetails(botData.logoImageDetails)
@@ -472,6 +502,18 @@ ctrl.botView.view = ()->
                 m("hr"),
                 m("h4", "Blacklisted Addresses"),
                 vm.blacklistAddressesGroup.buildValues(),
+
+
+                # -------------------------------------------------------------------------------------------------------------------------------------------
+                (
+                    if not vm.whitelistAddressesGroup.isEmpty()
+                        [
+                            m("div", {class: "spacer1"}),
+                            m("hr"),
+                            m("h4", "Whitelisted Addresses"),
+                            vm.whitelistAddressesGroup.buildValues(),
+                        ]
+                ),
 
 
                 # -------------------------------------------------------------------------------------------------------------------------------------------

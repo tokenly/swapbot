@@ -11,11 +11,12 @@ class RefundConfig extends ArrayObject implements APISerializeable {
 
     protected $strategy_obj = null;
 
-    const REASON_OUT_OF_STOCK  = 'outOfStock';
-    const REASON_BELOW_MINIMUM = 'belowMinimum';
-    const REASON_MANUAL_REFUND = 'manualRefund';
-    const REASON_SHUTTING_DOWN = 'shuttingDown';
-    const REASON_UNKNOWN       = 'unknown';
+    const REASON_OUT_OF_STOCK       = 'outOfStock';
+    const REASON_BELOW_MINIMUM      = 'belowMinimum';
+    const REASON_MANUAL_REFUND      = 'manualRefund';
+    const REASON_SHUTTING_DOWN      = 'shuttingDown';
+    const REASON_WHITELIST_MISMATCH = 'whitelistMismatch';
+    const REASON_UNKNOWN            = 'unknown';
     
 
 
@@ -39,6 +40,10 @@ class RefundConfig extends ArrayObject implements APISerializeable {
             
             case self::REASON_SHUTTING_DOWN:
                 $refund_reason = 'This bot is shutting down';
+                break;
+
+            case self::REASON_WHITELIST_MISMATCH:
+                $refund_reason = 'Your deposit did not come from a whitelisted address';
                 break;
             
             default:

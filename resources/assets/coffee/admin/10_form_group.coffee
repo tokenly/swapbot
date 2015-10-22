@@ -101,7 +101,7 @@ groupBuilder.newGroup = (config)->
                         ]),
                     ]),
                 )
-            return m("div", {class: "item-group"+(if config.useCompactNumberedLayout? then " form-group" else "")}, [
+            return m("div", {class: (if config.useCompactNumberedLayout? then "form-group" else "item-group")}, [
                 m("div", { class: "row"}, colEls),
             ])
 
@@ -155,14 +155,14 @@ groupBuilder.newGroup = (config)->
     formGroup.unserialize = (itemsData)->
         newItems = []
 
-
-        for rawItemData in itemsData
-            if config.translateFieldToNumberedValues?
-                itemData = {}
-                itemData[config.translateFieldToNumberedValues] = rawItemData
-            else
-                itemData = rawItemData
-            newItems.push(buildNewItem(config, itemData))
+        if itemsData?
+            for rawItemData in itemsData
+                if config.translateFieldToNumberedValues?
+                    itemData = {}
+                    itemData[config.translateFieldToNumberedValues] = rawItemData
+                else
+                    itemData = rawItemData
+                newItems.push(buildNewItem(config, itemData))
 
         # build a blank single item if there was not data
         if not itemsData or not itemsData.length
@@ -182,6 +182,8 @@ groupBuilder.newGroup = (config)->
             serializedData = formGroup.prop()
         return serializedData
 
+    formGroup.isEmpty = ()->
+        return formGroup.prop().length == 0
 
     return formGroup
 

@@ -1,0 +1,79 @@
+# A whitelisted address triggers a refund
+#   with 2 confirmations
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
+    whitelist_addresses: ["1ARandomOtherAddressXXXXXXXXXXXXXX "]
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  -
+    meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  - meta: { baseFilename: confirmed_LTBCOIN_REFUND_notification_01.yml }
+    blockId: 300002
+
+events:
+  - {type: xchainNotification, offset: 0}
+  - {type: addCustomer, baseFilename: customer01.yml, data: {} }
+  - {type: xchainNotification, startOffset: 1}
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_LTBCOIN-refund.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-LTBCOIN.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-LTBCOIN.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap refunding
+    meta: { baseFilename: swap.refunding-2confirmations.yml }
+  - #### swap refunded
+    meta: { baseFilename: swap.refunded-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-refunded.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-LTBCOIN-refund.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-LTBCOIN-refund.yml }
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+expectedBotModels:
+  - 
+    state: active
+
+expectedSwapModels:
+  -
+    meta: { baseFilename: swap_model_LTBCOIN_BTC-refunded-complete.yml }
+    receipt:
+        refundReason: 'whitelistMismatch'
+
+expectedEmails:
+  - meta: { baseFilename: 01-welcome.yml }
+  - meta: { baseFilename: 02-received.yml }
+  - meta: { baseFilename: refunded-whitelistMismatch.yml }

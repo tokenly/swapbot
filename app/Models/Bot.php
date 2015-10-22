@@ -22,8 +22,8 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
-    protected $api_attributes_public = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
+    protected $api_attributes = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
+    protected $api_attributes_public = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
     protected $api_attributes_public_simple = ['id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address', 'state', 'created_at', 'last_changed_at',];
 
     protected $dates = ['balances_updated_at', 'last_changed_at',];
@@ -52,6 +52,9 @@ class Bot extends APIModel {
 
     public function setBlacklistAddressesAttribute($blacklist_addresses) { $this->attributes['blacklist_addresses'] = json_encode($this->serializeBlacklistAddresses($blacklist_addresses)); }
     public function getBlacklistAddressesAttribute() { return $this->unSerializeBlacklistAddresses(json_decode($this->attributes['blacklist_addresses'], true)); }
+
+    public function setWhitelistAddressesAttribute($whitelist_addresses) { $this->attributes['whitelist_addresses'] = json_encode($this->serializeWhitelistAddresses($whitelist_addresses)); }
+    public function getWhitelistAddressesAttribute() { return $this->unSerializeWhitelistAddresses(json_decode($this->attributes['whitelist_addresses'], true)); }
 
     public function setReturnFeeAttribute($return_fee) { $this->attributes['return_fee'] = CurrencyUtil::valueToSatoshis($return_fee); }
     public function getReturnFeeAttribute() { return isset($this->attributes['return_fee']) ? CurrencyUtil::satoshisToValue($this->attributes['return_fee']) : 0; }
@@ -276,6 +279,23 @@ class Bot extends APIModel {
         return $serialized_blacklist_addresses;
     }
 
+    public function serializeWhitelistAddresses($whitelist_addresses) {
+        $serialized_whitelist_addresses = [];
+        if (is_array($whitelist_addresses)) {
+            foreach($whitelist_addresses as $address) {
+                if (strlen($address)) {
+                    $serialized_whitelist_addresses[] = $address;
+                }
+            }
+        }
+        return $serialized_whitelist_addresses;
+    }
+
+    public function unSerializeWhitelistAddresses($serialized_whitelist_addresses) {
+        if (!is_array($serialized_whitelist_addresses)) { return []; }
+        return $serialized_whitelist_addresses;
+    }
+
     ////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////
 
@@ -377,7 +397,7 @@ class Bot extends APIModel {
         //  'blacklist_addresses', 'balances', 'payment_plan', 'payment_address', 'state', 'hash'
         
         // these fields will affect the robohash
-        $fields = ['uuid', 'name', 'username', 'description', 'swaps', 'address', 'return_fee', 'income_rules', 'confirmations_required', ];
+        $fields = ['uuid', 'name', 'username', 'description', 'swaps', 'address', 'return_fee', 'income_rules', 'confirmations_required', 'whitelist_addresses', ];
 
         $source = "";
         foreach($fields as $field) {
