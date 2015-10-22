@@ -25,9 +25,9 @@ swapIsValid = (swap, userChoices)->
         return false
 
     # never match invalid swaps
-    console.log "swap.state=#{swap.state}"
-    if swap.state == 'invalidated'
-        return false
+    switch swap.state
+        when 'invalidated','error','permanenterror'
+            return false
 
     # ignore old swaps
     if userChoices.swapIDsToIgnore[swap.id]?
