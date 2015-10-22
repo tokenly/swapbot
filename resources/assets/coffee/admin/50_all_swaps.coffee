@@ -61,9 +61,10 @@ vm = ctrl.allswaps.vm = do ()->
         # e.preventDefault()
 
         rows = []
-        rows.push(['In Qty', 'In Asset','Out Qty','Out Asset','State','Updated','Bot','Owner',])
+        rows.push(['ID','In Qty', 'In Asset','Out Qty','Out Asset','State','Updated','Bot','Owner',])
         for swap in vm.swaps()
             rows.push([
+                swap.id,
                 "#{swap.receipt.quantityIn}",
                 "#{swap.receipt.assetIn}",
                 "#{swap.receipt.quantityOut}",
