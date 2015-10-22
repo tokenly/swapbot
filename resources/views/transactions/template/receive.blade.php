@@ -119,5 +119,7 @@
         "blockhash": "0000000000000000148c1ae2b62db079f8cc21501141e4bd582bebd1aa9b1c7f",
         "blocktime": 1421379546,
         "blockheight": 339155
-    }
+    },
+
+    "transactionFingerprint": "0000000000000000000000000000000000000000000000000000000000111111"
 }

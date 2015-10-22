@@ -393,7 +393,7 @@ class BotEventLogger {
     }
 
     public function logSwapReplaced(Bot $bot, Swap $swap, Swap $replacing_swap) {
-        $this->logSwapEvent('swap.replaced', $bot, $swap, [], [], ['newUuid' => $replacing_swap['uuid']]);
+        $this->logSwapEvent('swap.replaced', $bot, $swap, [], ['state' => SwapState::INVALIDATED], ['newUuid' => $replacing_swap['uuid']]);
     }
 
 

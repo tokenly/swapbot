@@ -443,6 +443,32 @@ onQuotebotPriceUpdated = ()->
 
 # #############################################
 
+handleSwapstreamEvents = (eventWrappers)->
+    anyChanged = false
+    for eventWrapper in eventWrappers
+        swapId = eventWrapper.swapUuid
+        event = eventWrapper.event
+
+    # check for a swap.replaced event
+    if event.name == 'swap.replaced'
+        oldSwapId = eventWrapper.swapUuid
+        replacingSwapId = event.newUuid
+        console.log "replacing swap #{oldSwapId} with swap #{replacingSwapId}"
+
+        replacingSwap = SwapsStore.getSwapById(replacingSwapId)
+        if not replacingSwap?
+            console.error("could not find new swap by swap id #{replacingSwapId}")
+
+        if not userChoices.swap? or userChoices.swap.id != replacingSwap.id
+            console.log "new swap id is #{replacingSwapId}"
+            userChoices.swap = replacingSwap
+            emitChange()
+    
+    return
+
+
+# #############################################
+
 exports.init = ()->
     # init emitter
     eventEmitter = new window.EventEmitter()
@@ -513,6 +539,9 @@ exports.init = ()->
 
             when BotConstants.UI_BEGIN_SWAPS
                 routeToStep('choose')
+
+            when BotConstants.BOT_HANDLE_NEW_SWAPSTREAM_EVENTS
+                handleSwapstreamEvents(action.swapstreamEvents)
 
             # else
             #     console.log "unknown action: #{action.actionType}"

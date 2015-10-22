@@ -15,6 +15,7 @@ use Swapbot\Models\Data\SwapState;
 use Swapbot\Models\Data\SwapStateEvent;
 use Swapbot\Providers\Accounts\Facade\AccountHandler;
 use Swapbot\Repositories\BotRepository;
+use Swapbot\Repositories\CustomerRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 use Swapbot\Swap\Logger\Facade\BotEventLogger;
@@ -30,11 +31,12 @@ class InvalidationEventProcessor {
      *
      * @return void
      */
-    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, TransactionRepository $transaction_repository, BalanceUpdater $balance_updater)
+    public function __construct(BotRepository $bot_repository, SwapRepository $swap_repository, TransactionRepository $transaction_repository, CustomerRepository $customer_repository, BalanceUpdater $balance_updater)
     {
         $this->bot_repository         = $bot_repository;
         $this->swap_repository        = $swap_repository;
         $this->transaction_repository = $transaction_repository;
+        $this->customer_repository    = $customer_repository;
         $this->balance_updater        = $balance_updater;
     }
 
@@ -121,7 +123,8 @@ class InvalidationEventProcessor {
             if ($confirmed_swap) {
                 // send an event that this new swap replaced the old swap
                 if ($is_the_same_transaction) {
-                    // perhaps migrate customers here...
+                    // migrate customers to the new swap
+                    $this->migrateCustomers($original_swap, $confirmed_swap);
 
                     // log the replace
                     BotEventLogger::logSwapReplaced($bot, $original_swap, $confirmed_swap);
@@ -246,4 +249,9 @@ class InvalidationEventProcessor {
         AccountHandler::closeSwapAccount($swap);
 
     }
+
+    protected function migrateCustomers($original_swap, $confirmed_swap) {
+        $this->customer_repository->migrateSwap($original_swap['id'], $confirmed_swap['id']);
+    }
+
 }

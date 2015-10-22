@@ -59,6 +59,7 @@ class TestReceiveFromXChainTemplateCommand extends Command {
             ['sender',             's',  InputOption::VALUE_OPTIONAL, 'Sender Address', '1SENDER000000111111111111111111111'],
             ['txid',               null, InputOption::VALUE_OPTIONAL, 'Transaction ID', 1],
             ['txidout',            null, InputOption::VALUE_OPTIONAL, 'Transaction ID out for Sends', null],
+            ['replacing-txid',     null, InputOption::VALUE_OPTIONAL, 'Replacing Transaction ID out for Invalidations', null],
             ['trigger-send-error', null, InputOption::VALUE_NONE,     'Trigger a send error'],
             ['notification-id',    'i',  InputOption::VALUE_OPTIONAL, 'Notification ID', null],
             ['asset',              'a',  InputOption::VALUE_OPTIONAL, 'Asset', 'BTC'],
@@ -143,6 +144,10 @@ class TestReceiveFromXChainTemplateCommand extends Command {
         $txid = $this->input->getOption('txid');
         if (strlen($txid) < 51) { $txid = 'deadbeef00000000000000000000000000000000000000000000000000'.sprintf('%06x',$txid); }
 
+        if (strlen($replacing_txid = $this->input->getOption('replacing-txid'))) {
+            if (strlen($replacing_txid) < 51) { $replacing_txid = 'deadbeef00000000000000000000000000000000000000000000000000'.sprintf('%06x',$replacing_txid); }
+        }
+
         $sender = $this->input->getOption('sender');
         if (strlen($sender) < 30) { $sender = '1SENDER000000000000000000000'.sprintf('%06x',$sender); }
 
@@ -152,11 +157,12 @@ class TestReceiveFromXChainTemplateCommand extends Command {
             'sender'         => $sender,
             'confirmations'  => $this->input->getOption('confirmations'),
             'txid'           => $txid,
+            'replacingTxid'  => $replacing_txid,
             'notificationId' => $notification_id,
             'timestamp'      => time(),
             'bot'            => $bot,
         ];
-        $this->comment("Sending notification of {$vars['quantity']} {$vars['asset']} from $sender to bot {$bot['name']}");
+        $this->comment("Sending {$template_name} notification of {$vars['quantity']} {$vars['asset']} from $sender to bot {$bot['name']}");
         $rendered_view = view('transactions.template.'.$template_name, $vars)->render();
         $resolved_notification = json_decode($rendered_view, true);
         return $resolved_notification;

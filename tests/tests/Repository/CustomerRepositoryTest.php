@@ -40,6 +40,59 @@ class CustomerRepositoryTest extends TestCase {
         PHPUnit::assertEquals($customer_3['id'], $loaded_customers[0]['id']);
     }
 
+    public function testMigrateCustomers()
+    {
+        $swap1 = app('SwapHelper')->newSampleSwap();
+        $swap2 = app('SwapHelper')->newSampleSwap();
+        $swap3 = app('SwapHelper')->newSampleSwap();
+        $customer_1 = app()->make('CustomerHelper')->newSampleCustomer($swap1);
+        $customer_2 = app()->make('CustomerHelper')->newSampleCustomer($swap1, ['email' => 'dude2@tokenly.co',]);
+        $customer_3 = app()->make('CustomerHelper')->newSampleCustomer($swap2);
+
+        $customer_repository = app('Swapbot\Repositories\CustomerRepository');
+        
+
+        $loaded_customers = $customer_repository->findBySwap($swap1);
+        PHPUnit::assertCount(2, $loaded_customers);
+
+        // migrate
+        $customer_repository->migrateSwap($swap1['id'], $swap3['id']);
+
+        $loaded_customers = $customer_repository->findBySwap($swap1);
+        PHPUnit::assertCount(0, $loaded_customers);
+
+        $loaded_customers = $customer_repository->findBySwap($swap3);
+        PHPUnit::assertCount(2, $loaded_customers);
+
+    }
+
+
+    public function testMigrateConflictingEmailCustomers()
+    {
+        $swap1 = app('SwapHelper')->newSampleSwap();
+        $swap2 = app('SwapHelper')->newSampleSwap();
+        $swap3 = app('SwapHelper')->newSampleSwap();
+        $customer_1 = app()->make('CustomerHelper')->newSampleCustomer($swap1);
+        $customer_2 = app()->make('CustomerHelper')->newSampleCustomer($swap1, ['email' => 'dude2@tokenly.co',]);
+        $customer_3 = app()->make('CustomerHelper')->newSampleCustomer($swap2);
+
+        $customer_repository = app('Swapbot\Repositories\CustomerRepository');
+        
+
+        $loaded_customers = $customer_repository->findBySwap($swap1);
+        PHPUnit::assertCount(2, $loaded_customers);
+
+        // migrate
+        $customer_repository->migrateSwap($swap1['id'], $swap2['id']);
+
+        $loaded_customers = $customer_repository->findBySwap($swap1);
+        PHPUnit::assertCount(0, $loaded_customers);
+
+        $loaded_customers = $customer_repository->findBySwap($swap2);
+        PHPUnit::assertCount(2, $loaded_customers);
+
+    }
+
 
 
 }
