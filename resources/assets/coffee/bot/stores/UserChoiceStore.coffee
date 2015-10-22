@@ -278,15 +278,18 @@ changeSwapMatchMode = (newSwapMatchMode)->
 checkForAutoMatch = ()->
     matchedSwaps = refreshMatchedSwaps()
 
-    if userChoices.swapMatchMode != MATCH_AUTO then return false
+    # all auto matching is disabled for now
+    #   https://github.com/tokenly/swapbot/issues/199
+    return false;
 
-    if userChoices.numberOfMatchedSwaps == 1
-        matchedSingleSwap = matchedSwaps[0]
-        # console.log "Auto match found"
-        updateChosenSwap(matchedSingleSwap)
-        return true
+    # if userChoices.swapMatchMode != MATCH_AUTO then return false
 
-    return false
+    # if userChoices.numberOfMatchedSwaps == 1
+    #     matchedSingleSwap = matchedSwaps[0]
+    #     updateChosenSwap(matchedSingleSwap)
+    #     return true
+
+    # return false
 
 refreshMatchedSwaps = ()->
     userChoices.numberOfMatchedSwaps = 0
