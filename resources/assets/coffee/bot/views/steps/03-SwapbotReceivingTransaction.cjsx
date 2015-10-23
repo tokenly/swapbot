@@ -1,13 +1,14 @@
 # ---- begin references
-UserInputActions = require '../../actions/UserInputActions'
-SwapsStore = require '../../stores/SwapsStore'
-UserChoiceStore = require '../../stores/UserChoiceStore'
-Pockets = require '../../util/Pockets'
-SwapMatcher = require '../../util/SwapMatcher'
-NeedHelpLink = require '../../views/includes/NeedHelpLink'
-PlaceOrderInput = require '../../views/includes/PlaceOrderInput'
+UserInputActions   = require '../../actions/UserInputActions'
+SwapsStore         = require '../../stores/SwapsStore'
+UserChoiceStore    = require '../../stores/UserChoiceStore'
+Pockets            = require '../../util/Pockets'
+SwapMatcher        = require '../../util/SwapMatcher'
+NeedHelpLink       = require '../../views/includes/NeedHelpLink'
+PlaceOrderInput    = require '../../views/includes/PlaceOrderInput'
 ReactZeroClipboard = require '../../views/includes/ReactZeroClipboard'
-whitelistUtils   = require '../../../shared/whitelistUtils'
+whitelistUtils     = require '../../../shared/whitelistUtils'
+QRCodeUtil         = require '../../../shared/QRCodeUtil'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
 swapbot = swapbot or {}; swapbot.quoteUtils = require '../../util/quoteUtils'
 # ---- end references
@@ -146,6 +147,10 @@ SwapbotReceivingTransaction = React.createClass
 
         whitelistMessageText = whitelistUtils.buildMessageTextForPlaceOrder(this.props.bot)
 
+        setTimeout ()=>
+            QRCodeUtil.buildQRCodeIcon(document.getElementById('QRCodeIcon'), "Send #{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} #{this.state.userChoices.inAsset} to #{bot.address}", 'bitcoin:'+bot.address, 32, 32)
+        , 1
+
         return <div id="swapbot-container" className="section grid-100">
             <div id="swap-step-2" className="content">
                 <h2>Receiving transaction</h2>
@@ -164,6 +169,8 @@ SwapbotReceivingTransaction = React.createClass
                     To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
 
                     { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
+
+                    <a href="#" id="QRCodeIcon" className="qrCodeIcon"></a>
 
                     { if whitelistMessageText
                         <p>

@@ -14,8 +14,6 @@ exports.buildOnClick = (popoverConfig)->
         if not popoverConfig.width? then popoverConfig.width = 420
 
         el = jQuery(e.target)
-        el.webuiPopover(popoverConfig)
-        el.webuiPopover('show')
 
         # launch body click handler
         $('body').off('click.sb-popover').on('click.sb-popover', (e)->
@@ -25,9 +23,19 @@ exports.buildOnClick = (popoverConfig)->
         )
 
         # destroy body click handler
-        el.on 'hide.webui.popover', (e)->
+        el.off('hide.webui.popover').on 'hide.webui.popover', (e)->
             $('body').off('click.sb-popover')
             return
+
+
+        el.off('shown.webui.popover').on 'shown.webui.popover', (e)->
+            if popoverConfig.onShown?
+                popoverConfig.onShown.call(this, e)
+            return
+
+        el.webuiPopover(popoverConfig)
+        el.webuiPopover('show')
+
 
         return
 
