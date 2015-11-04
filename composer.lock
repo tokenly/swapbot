@@ -1130,7 +1130,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/socialite/zipball/8a9e4b61f5078ca1c10fb608d76e845825ca5a3b",
+                "url": "https://api.github.com/repos/laravel/socialite/zipball/dab36b0ac2e62ad5a82810f035e248526bc31353",
                 "reference": "0f7c3b02f7e3fd715592b49da080973bd8aec2bb",
                 "shasum": ""
             },
@@ -3137,7 +3137,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/c4dbdb76b542ee9f25f567bd7b633c804628039a",
+                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/0d283ef8704a513eee1cb116ee185007272a67a2",
                 "reference": "c4dbdb76b542ee9f25f567bd7b633c804628039a",
                 "shasum": ""
             },
@@ -3301,12 +3301,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "4f38ada567aa7e02f8d7ba11ac12e35be1f64067"
+                "reference": "67a37af0040428ae0f76fb9e183e2799c90d19bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/2bea4f2b0711bc730fe0a994a4cf0d2088597f4e",
-                "reference": "4f38ada567aa7e02f8d7ba11ac12e35be1f64067",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/67a37af0040428ae0f76fb9e183e2799c90d19bf",
+                "reference": "67a37af0040428ae0f76fb9e183e2799c90d19bf",
                 "shasum": ""
             },
             "require": {
@@ -3337,7 +3337,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-08-27 19:33:52"
+            "time": "2015-11-04 13:35:32"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",
