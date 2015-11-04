@@ -179,6 +179,11 @@ class WhitelistController extends APIController {
         $errors = [];
         $addresses = [];
         foreach($data as $offset => $address) {
+            $address = trim($address);
+
+            // ignore blank lines
+            if (!strlen($address)) { continue; }
+
             if (AddressValidator::isValid($address)) {
                 $addresses[] = $address;
             } else {
