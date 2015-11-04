@@ -22,8 +22,8 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
-    protected $api_attributes_public = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
+    protected $api_attributes = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'whitelist_uuid', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
+    protected $api_attributes_public = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'resolved_whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
     protected $api_attributes_public_simple = ['id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address', 'state', 'created_at', 'last_changed_at',];
 
     protected $dates = ['balances_updated_at', 'last_changed_at',];
@@ -55,6 +55,8 @@ class Bot extends APIModel {
 
     public function setWhitelistAddressesAttribute($whitelist_addresses) { $this->attributes['whitelist_addresses'] = json_encode($this->serializeWhitelistAddresses($whitelist_addresses)); }
     public function getWhitelistAddressesAttribute() { return $this->unSerializeWhitelistAddresses(json_decode($this->attributes['whitelist_addresses'], true)); }
+
+    public function getResolvedWhitelistAddressesAttribute() { return $this->allWhitelistedAddresses(); }
 
     public function setReturnFeeAttribute($return_fee) { $this->attributes['return_fee'] = CurrencyUtil::valueToSatoshis($return_fee); }
     public function getReturnFeeAttribute() { return isset($this->attributes['return_fee']) ? CurrencyUtil::satoshisToValue($this->attributes['return_fee']) : 0; }
@@ -416,6 +418,24 @@ class Bot extends APIModel {
         $hash = hash("sha256", $source);
         // Log::debug("For bot: {$this['uuid']}\nsource=\n$source\nhash: $hash");
         return $hash;
+    }
+
+    // ------------------------------------------------------------------------
+    
+    public function allWhitelistedAddresses() {
+        $allowed_whitelist_addresses = $this['whitelist_addresses'];
+        if (!is_array($allowed_whitelist_addresses)) { $allowed_whitelist_addresses = []; }
+
+        // apply uploaded whitelist
+        if (isset($this['whitelist_uuid']) AND $this['whitelist_uuid']) {
+            $whitelist = app('Swapbot\Repositories\WhitelistRepository')->findByUuid($this['whitelist_uuid']);
+            if ($whitelist) {
+                $addresses = $whitelist['data'];
+                $allowed_whitelist_addresses = array_merge($allowed_whitelist_addresses, $addresses);
+            }
+        }
+
+        return $allowed_whitelist_addresses;
     }
     
 }

@@ -1,0 +1,59 @@
+# a matching whitelisted address in a csv file allows the swap
+
+whitelists:
+  - name: My Whitelist One
+    uuid: whitelist01
+    data: [SENDER01, 1ARandomOtherAddressXXXXXXXXXXX222]
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
+    whitelist_addresses: [NOTXXXXXSENDER01, 1ARandomOtherAddressXXXXXXXXXXXXXX]
+    whitelist_uuid: whitelist01
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  # - 
+  #   meta: { baseFilename: send_BTC.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### waiting on confirmation
+    meta: { baseFilename: swap.confirming-LTBCOIN.yml }
+  - #### CONFIRMING
+    meta: { baseFilename: swap.stateChange-confirming.yml }
+
+
+  - #### transaction handled previously
+    meta: { baseFilename: tx.previous.yml }
+  - #### confirming swap
+    meta: { baseFilename: swap.confirmed-LTBCOIN.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-2confirmations.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+expectedTransactionModels:
+  - 
+    meta: { baseFilename: transaction_model_01-2CONF.yml }
+    confirmations: 2

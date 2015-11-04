@@ -110,7 +110,7 @@ ctrl.botShutdownForm.view = ()->
                                     ),
                                 ]),
                                 m("div", {class: 'panel-body'},
-                                    "If you shutdown this bot it will be permanently deactivated and not complete any more new swaps.  Any new swaps will be refunded automatically.  After 6 confirmations, all of the remaining funds will be forwarded to the address entered below."
+                                    "If you shutdown this bot it will be permanently deactivated and will not complete any more new swaps.  Any new swaps will be refunded automatically.  After 6 confirmations, all of the remaining funds will be forwarded to the address entered below."
                                 ),
                             ])
                         ]),

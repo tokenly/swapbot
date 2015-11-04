@@ -179,6 +179,25 @@ api.getSwapsForAllUsers = (filters=null)->
 
 
 
+api.newWhitelist = (whitelistAttributes)->
+    return api.send('POST', 'whitelists', whitelistAttributes)
+
+api.updateWhitelist = (id, whitelistAttributes)->
+    return api.send('PUT', "whitelists/#{id}", whitelistAttributes)
+
+api.getAllWhitelists = ()->
+    return api.send('GET', 'whitelists')
+
+api.getAllWhitelistNames = ()->
+    return api.send('GET', 'whitelists', {select: 'name'})
+
+api.getWhitelist = (id)->
+    return api.send('GET', "whitelists/#{id}")
+
+api.deleteWhitelist = (id)->
+    return api.send('DELETE', "whitelists/#{id}", {})
+
+
 # ############################################################
 
 api.send = (method, apiPathSuffix, params=null, additionalOpts={})->

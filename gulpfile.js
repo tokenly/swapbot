@@ -51,6 +51,8 @@ function browserifyBundle(b, name, destLocation) {
 
         .pipe(rev.manifest({path: 'public/manifest/rev-manifest.json', base: 'public', merge: true}))
         .pipe(gulp.dest('public'))
+
+        .pipe(notify('build complete'))
         ;
 }
 

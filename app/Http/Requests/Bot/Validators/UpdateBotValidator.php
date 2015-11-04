@@ -20,6 +20,7 @@ class UpdateBotValidator extends BotValidator {
         'background_image_id'         => 'sometimes',
         'logo_image_id'               => 'sometimes',
         'background_overlay_settings' => 'sometimes',
+        'whitelist_uuid'              => 'sometimes',
     ];
 
 

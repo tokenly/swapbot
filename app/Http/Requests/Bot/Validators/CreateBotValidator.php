@@ -19,6 +19,7 @@ class CreateBotValidator extends BotValidator {
         'background_image_id'         => '',
         'logo_image_id'               => '',
         'background_overlay_settings' => '',
+        'whitelist_uuid'              => '',
     ];
 
 

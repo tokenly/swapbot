@@ -82,6 +82,9 @@ nav.buildNav = ()->
                     m("a[href='/admin/dashboard']", {class: "", config: m.route}, "Dashboard"),
                 ]),
                 m("li", { class: ""}, [
+                    m("a[href='/admin/whitelists']", {class: "", config: m.route}, "Whitelists"),
+                ]),
+                m("li", { class: ""}, [
                     m("a[href='/admin/edit/bot/new']", {class: "", config: m.route}, "New Bot"),
                 ]),
                 buildAdminPanelNavLink(user),

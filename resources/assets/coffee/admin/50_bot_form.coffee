@@ -10,9 +10,10 @@ sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swaputils = require './10_swap_utils'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
-popoverLabels = require './05_popover_labels'
+popoverLabels     = require './05_popover_labels'
 swapGroupRenderer = require './10_swap_form_group_renderer'
 swapRulesRenderer = require './10_swap_rules_renderer'
+WhitelistUtils    = require './10_whitelist_utils'
 # ---- end references
 
 $ = window.jQuery
@@ -202,6 +203,8 @@ vm = ctrl.botForm.vm = do ()->
         vm.formStatus = m.prop('active')
         vm.resourceId = m.prop('')
         vm.allPlansData = m.prop(null)
+        vm.whitelistOptions = m.prop()
+        WhitelistUtils.populateWhitelistOptions(vm.whitelistOptions)
 
         # fields
         vm.name = m.prop('')
@@ -220,6 +223,7 @@ vm = ctrl.botForm.vm = do ()->
         vm.incomeRulesGroup = buildIncomeRulesGroup()
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
         vm.whitelistAddressesGroup = buildWhitelistAddressesGroup()
+        vm.whitelistUuid = m.prop('')
 
 
         vm.backgroundOverlaySettings = m.prop(window.JSON.stringify(sbAdmin.botutils.defaultOverlay()))
@@ -256,6 +260,10 @@ vm = ctrl.botForm.vm = do ()->
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
                     vm.whitelistAddressesGroup.unserialize(botData.whitelistAddresses)
                     if botData.whitelistAddresses?.length
+                        vm.useWhitelisting(true)
+
+                    vm.whitelistUuid(botData.whitelistUuid)
+                    if botData.whitelistUuid.length > 0
                         vm.useWhitelisting(true)
 
                     vm.backgroundOverlaySettings(if botData.backgroundOverlaySettings?.start then window.JSON.stringify(botData.backgroundOverlaySettings) else '')
@@ -302,6 +310,7 @@ vm = ctrl.botForm.vm = do ()->
                 incomeRules: vm.incomeRulesGroup.serialize()
                 blacklistAddresses: vm.blacklistAddressesGroup.serialize()
                 whitelistAddresses: if vm.useWhitelisting() then vm.whitelistAddressesGroup.serialize() else []
+                whitelistUuid: if vm.useWhitelisting() then vm.whitelistUuid() else ''
                 confirmationsRequired: vm.confirmationsRequired() + ""
                 refundConfig: {refundAfterBlocks: vm.refundAfterBlocks() + ""}
                 backgroundImageId: vm.backgroundImageId() or ''
@@ -466,7 +475,18 @@ ctrl.botForm.view = ()->
                     sbAdmin.form.mCheckboxField("Restrict this bot to whitelisted addresses only", {id: 'useWhitelisting', type: 'checkbox', }, vm.useWhitelisting),
                     (
                         if vm.useWhitelisting()
-                            vm.whitelistAddressesGroup.buildInputs()
+                            [
+                                m("div", {class: "spacer1"}),
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-4"}, [
+                                        sbAdmin.form.mFormField("Apply An Uploaded Whitelist", {id: 'applyUploadedWhitelist', type: 'select', options: vm.whitelistOptions()}, vm.whitelistUuid),
+
+                                    ])
+                                ])
+                                m("div", {class: "spacer1"}),
+                                m("label", {}, "Whitelist Individual Addresses")
+                                vm.whitelistAddressesGroup.buildInputs()
+                            ]
                     ),
 
                     # -------------------------------------------------------------------------------------------------------------------------------------------

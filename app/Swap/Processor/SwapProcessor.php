@@ -616,7 +616,9 @@ class SwapProcessor {
     protected function failsWhitelistTest(Bot $bot, $destination) {
         $failed_whitelist_test = false;
 
-        $allowed_whitelist_addresses = $bot['whitelist_addresses'];
+        // get the individual whitelists and the whitelisted file
+        $allowed_whitelist_addresses = $bot->allWhitelistedAddresses();
+
         if (is_array($allowed_whitelist_addresses) AND $allowed_whitelist_addresses) {
             if ($destination AND in_array($destination, $allowed_whitelist_addresses)) {
                 // there was a whitelist and the destination was in it

@@ -3,6 +3,7 @@
 namespace Swapbot\Http\Controllers\API\Base;
 
 use Exception;
+use Illuminate\Contracts\Validation\ValidationException;
 use Swapbot\Http\Controllers\Controller;
 
 class APIController extends Controller {
@@ -23,4 +24,18 @@ class APIController extends Controller {
         }
     }
 
+    protected function validateAttributesForAPI($attributes, array $rules, array $messages = [], array $customAttributes = []) {
+        $validator = $this->getValidationFactory()->make($attributes, $rules, $messages, $customAttributes);
+
+        if ($validator->fails()) { throw new ValidationException($validator); }
+
+        $validated_attributes = [];
+        foreach(array_keys($rules) as $rule_key) {
+            if (isset($attributes[$rule_key])) {
+                $validated_attributes[$rule_key] = $attributes[$rule_key];
+            }
+        }
+
+        return $validated_attributes;
+    }
 }

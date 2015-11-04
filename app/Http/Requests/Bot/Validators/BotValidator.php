@@ -13,6 +13,7 @@ use Sabberworm\CSS\Value\Color as CSSColor;
 use Swapbot\Models\User;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\ImageRepository;
+use Swapbot\Repositories\WhitelistRepository;
 use Swapbot\Swap\Factory\StrategyFactory;
 use Swapbot\Swap\Strategies\StrategyHelpers;
 use Swapbot\Util\Slug\Slugifier;
@@ -24,11 +25,12 @@ class BotValidator {
     protected $swaps_required = true;
     protected $income_rules_required = false;
 
-    function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory, ImageRepository $image_repository, BotRepository $bot_repository) {
+    function __construct(Factory $validator_factory, StrategyFactory $swap_strategy_factory, ImageRepository $image_repository, BotRepository $bot_repository, WhitelistRepository $whitelist_repository) {
         $this->validator_factory     = $validator_factory;
         $this->swap_strategy_factory = $swap_strategy_factory;
         $this->image_repository      = $image_repository;
         $this->bot_repository        = $bot_repository;
+        $this->whitelist_repository  = $whitelist_repository;
 
         $this->initValidatorRules();
     }
@@ -87,6 +89,9 @@ class BotValidator {
 
             // validate swap rules
             $this->validateSwapRules($swap_rules, $validator);
+
+            // validate whitelist uuid
+            $this->validateWhitelistUUID(isset($posted_data['whitelist_uuid']) ? $posted_data['whitelist_uuid'] : null, $user, $validator);
 
         });
         return $validator;
@@ -390,6 +395,24 @@ class BotValidator {
             $validator->errors()->add('pct_'.$identifier, "Please specify a percentage for {$text_identifier}");
         }
 
+    }
+
+    protected function validateWhitelistUUID($whitelist_uuid, $user, $validator) {
+        if ($whitelist_uuid === null) { return; }
+
+        $whitelist = $this->whitelist_repository->findByUuid($whitelist_uuid);
+
+        if (!$whitelist['user_id']) {
+            $validator->errors()->add('whitelistUuid', "This whitelist was not found");
+            return;
+        }
+
+        if ($whitelist['user_id'] != $user['id'] AND !$user->hasPermission('editBots')) {
+            $validator->errors()->add('whitelistUuid', "You do not have permission to add this whitelist to this bot");
+            return;
+        }
+
+        return;
     }
 
     // 'moq' => '10',

@@ -112,6 +112,9 @@ $router->get('api/v1/images', 'API\Image\ImageController@show');
 $router->get('api/v1/swaps/{swapuuid}', 'API\Swap\SwapsController@show');
 $router->get('api/v1/swaps', 'API\Swap\SwapsController@index');
 
+// Whitelists API
+$router->resource('api/v1/whitelists', 'API\Whitelist\WhitelistController', ['except' => ['create','edit']]);
+
 
 // webhook notifications
 $router->post('/_xchain_client_receive', 'WebhookController@receive');

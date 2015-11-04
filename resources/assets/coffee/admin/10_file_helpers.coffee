@@ -29,11 +29,11 @@ dragdrop = (element, options) ->
 
     activate = (e) ->
         e.preventDefault()
-        element.className = 'uploader upload-active'
+        element.className = 'uploader fileUploadDisplay upload-active'
         return
 
     deactivate = ->
-        element.className = 'uploader'
+        element.className = 'uploader fileUploadDisplay'
 
     update = (e) ->
         e.preventDefault()
@@ -71,6 +71,7 @@ fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetail
     attributes.config = (element, isInitialized)->
         if not isInitialized
             dragdrop(element, {onchange: onChange})
+            # m.redraw(true)
         return
 
     fileUploadDomEl = null
@@ -100,6 +101,7 @@ fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetail
         imageIdProp(null)
         imageDetailsProp(null)
         e.preventDefault()
+        e.stopPropagation()
         return
 
     tryAgainFn = (e)->
@@ -118,7 +120,7 @@ fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetail
     existingImageDetails = imageDetailsProp()
     if existingImageDetails? and existingImageDetails[imageStyle+'Url']?
         # existing image
-        imageDisplayOrUpload = m('div.imageDisplay', attributes, [
+        imageDisplayOrUpload = m('div.fileUploadDisplay.imageDisplay', attributes, [
             m('img', {src: existingImageDetails[imageStyle+'Url']}),
             m("a", {class: "remove-link", href: '#remove', onclick: removeImgFn}, [
                 m("span", {class: "glyphicon glyphicon-remove-circle", title: "Remove Image"}, ''),
@@ -142,7 +144,7 @@ fileHelper.mImageUploadAndDisplay = (label, attributes, imageIdProp, imageDetail
 
     else
         # upload a new image
-        imageDisplayOrUpload = m('div.uploader', attributes, [
+        imageDisplayOrUpload = m('div.uploader.fileUploadDisplay', attributes, [
             m('span', {class: 'fileUploadLabel'}, ['Drop An Image Here or', m('br'), 'Click to Upload (2 MB Max)', if sizeDesc then [m('br'), sizeDesc]]),
             fileUploadEl,
         ])
@@ -180,6 +182,5 @@ fileHelper.submit = (apiCallFn, apiCallArgs, errorsProp, fileHelperStatusProp)->
             # reject the parent
             return m.deferred().reject(error).promise
     )
-
 
 module.exports = fileHelper

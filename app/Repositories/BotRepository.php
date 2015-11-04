@@ -73,6 +73,10 @@ class BotRepository extends APIRepository
         return $this->prototype_model->where('payment_send_monitor_id', $monitor_id)->first();
     }
 
+    public function findAllByWhitelistUuid($whitelist_uuid) {
+        return $this->prototype_model->where('whitelist_uuid', $whitelist_uuid)->get();
+    }
+
 
 
     // locks the bot, then executes $func inside the lock

@@ -36,6 +36,7 @@ groupBuilder.newGroup = (config)->
     idPrefix = config.id or "group"
     config.displayOnly = config.displayOnly or false
     numberOfColumns = if config.displayOnly then 12 else 11
+    isEmpty = true
 
     # ############################################################################################################
     # build a row
@@ -137,12 +138,12 @@ groupBuilder.newGroup = (config)->
         if config.buildAllItemRows?
             values = config.buildAllItemRows(formGroup.prop())
 
-        if not values?
+        if not values? and config.buildItemRow?
             values = formGroup.prop().map (item, offset)->
                 number = offset + 1
                 row = config.buildItemRow(newRowBuilder(number, item), number, item)
                 return row
-            
+
         return values
 
 
@@ -163,6 +164,7 @@ groupBuilder.newGroup = (config)->
                 else
                     itemData = rawItemData
                 newItems.push(buildNewItem(config, itemData))
+                isEmpty = false
 
         # build a blank single item if there was not data
         if not itemsData or not itemsData.length
@@ -183,7 +185,8 @@ groupBuilder.newGroup = (config)->
         return serializedData
 
     formGroup.isEmpty = ()->
-        return formGroup.prop().length == 0
+        return isEmpty
+        # return formGroup.prop().length == 0
 
     return formGroup
 

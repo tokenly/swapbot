@@ -38,7 +38,7 @@ class ScenarioRunner
     static $XCHAIN_MOCK_RECORDER = false;
     static $XCHAIN_MOCK_BUILDER = false;
 
-    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, Repository $cache_store) {
+    function __construct(Application $app, BotHelper $bot_helper, UserHelper $user_helper, CustomerHelper $customer_helper, TransactionRepository $transaction_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotLeaseEntryRepository $bot_lease_entry_repository, BotEventRepository $bot_event_repository, BotRepository $bot_repository, SwapRepository $swap_repository, BotLedgerEntryHelper $bot_ledger_entry_helper, Repository $cache_store, WhitelistHelper $whitelist_helper) {
         $this->app                         = $app;
         $this->bot_helper                  = $bot_helper;
         $this->user_helper                 = $user_helper;
@@ -51,6 +51,7 @@ class ScenarioRunner
         $this->bot_lease_entry_repository  = $bot_lease_entry_repository;
         $this->bot_ledger_entry_helper     = $bot_ledger_entry_helper;
         $this->cache_store                 = $cache_store;
+        $this->whitelist_helper            = $whitelist_helper;
     }
 
     public function init($test_case) {
@@ -122,6 +123,7 @@ class ScenarioRunner
         DateProvider::setNow(Carbon::parse('2015-06-01'));
 
         // set up the scenario
+        $whitelists = $this->addWhitelists(isset($scenario_data['whitelists']) ? $scenario_data['whitelists'] : []);
         $bots = $this->addBots(isset($scenario_data['bots']) ? $scenario_data['bots'] : []);
 
         // set up xchain balances
@@ -289,6 +291,23 @@ class ScenarioRunner
     }
 
 
+    ////////////////////////////////////////////////////////////////////////
+    // Whitelists
+
+    protected function addWhitelists($whitelists) {
+        if (!isset($this->whitelist_models)) { $this->whitelist_models = []; }
+        foreach($whitelists as $whitelist_entry) {
+            // $whitelist_attributes = $this->loadBaseFilename($whitelist_entry, "whitelists");
+            // unset($whitelist_entry['meta']);
+            // $whitelist_attributes = array_replace_recursive($whitelist_attributes, $whitelist_entry);
+
+            $whitelist_attributes = $whitelist_entry;
+
+            $whitelist = $this->whitelist_helper->newSampleWhitelist($this->getSampleUser(), $whitelist_attributes);
+            $this->whitelist_models[] = $whitelist;
+        }
+        return $this->whitelist_models;
+    }
     ////////////////////////////////////////////////////////////////////////
     // Bots
 

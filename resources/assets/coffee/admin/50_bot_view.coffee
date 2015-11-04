@@ -18,6 +18,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_group_renderer'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 swapRulesRenderer = require './10_swap_rules_renderer'
+WhitelistUtils    = require './10_whitelist_utils'
 # ---- end references
 
 ctrl = {}
@@ -96,9 +97,7 @@ buildWhitelistAddressesGroup = ()->
         ]
         buildAllItemRows: (items)->
             if not items or (items.length == 1 and not items[0].address())
-                return [
-                    m("span", {class: 'empty'}, "No whitelisted addresses are defined."),
-                ]
+                return null
 
             addressList = ""
             for item, offset in items
@@ -260,6 +259,7 @@ vm = ctrl.botView.vm = do ()->
         vm.incomeRulesGroup = buildIncomeRulesGroup()
         vm.blacklistAddressesGroup = buildBlacklistAddressesGroup()
         vm.whitelistAddressesGroup = buildWhitelistAddressesGroup()
+        vm.whitelistFileName = m.prop('')
 
         vm.backgroundImageDetails = m.prop('')
         vm.logoImageDetails       = m.prop('')
@@ -296,6 +296,9 @@ vm = ctrl.botView.vm = do ()->
                 vm.incomeRulesGroup.unserialize(botData.incomeRules)
                 vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)
                 vm.whitelistAddressesGroup.unserialize(botData.whitelistAddresses)
+
+                # load the whitelist name
+                WhitelistUtils.resolveWhitelistName(botData.whitelistUuid, vm.whitelistFileName)
 
                 vm.backgroundImageDetails(botData.backgroundImageDetails)
                 vm.logoImageDetails(botData.logoImageDetails)
@@ -506,12 +509,21 @@ ctrl.botView.view = ()->
 
                 # -------------------------------------------------------------------------------------------------------------------------------------------
                 (
-                    if not vm.whitelistAddressesGroup.isEmpty()
+                    if not vm.whitelistAddressesGroup.isEmpty() or vm.whitelistFileName().length > 0
                         [
                             m("div", {class: "spacer1"}),
                             m("hr"),
-                            m("h4", "Whitelisted Addresses"),
-                            vm.whitelistAddressesGroup.buildValues(),
+                            if vm.whitelistFileName().length > 0
+                                [
+                                    m("h4", "Whitelist File Applied"),
+                                    m("div", {class: 'whitelistFilename'}, vm.whitelistFileName())
+                                ]
+                            if not vm.whitelistAddressesGroup.isEmpty()
+                                [
+                                    if vm.whitelistFileName().length > 0 then m("div", {class: "spacer1"}) else null,
+                                    m("h4", "Whitelisted Addresses"),
+                                    vm.whitelistAddressesGroup.buildValues(),
+                                ]
                         ]
                 ),
 

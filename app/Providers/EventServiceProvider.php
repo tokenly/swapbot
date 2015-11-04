@@ -22,12 +22,13 @@ class EventServiceProvider extends ServiceProvider {
 	 * @var array
 	 */
 	protected $subscribe = [
-		'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler',
-		'Swapbot\Handlers\Events\BotIndexHandler',
-		'Swapbot\Handlers\Events\CustomerEmailHandler',
-		'Swapbot\Handlers\Events\AdminEmailHandler',
-		'Swapbot\Handlers\Events\KeenEventsHandler',
-		'Swapbot\Handlers\Events\SlackEventsHandler',
+		\Swapbot\Handlers\Events\BotUpdatesForDisplayHandler::class,
+		\Swapbot\Handlers\Events\BotIndexHandler::class,
+		\Swapbot\Handlers\Events\CustomerEmailHandler::class,
+		\Swapbot\Handlers\Events\AdminEmailHandler::class,
+		\Swapbot\Handlers\Events\KeenEventsHandler::class,
+		\Swapbot\Handlers\Events\SlackEventsHandler::class,
+		\Swapbot\Handlers\Events\WhitelistEventsHandler::class,
 	];
 
 

@@ -8,7 +8,7 @@ class BotValidatorTest extends TestCase {
 
     public function testBotCreateValidator()
     {
-        // most be a user
+        // must be a user
         $sample_vars = $this->app->make('BotHelper')->sampleBotVars();
 
         $test_specs = [
@@ -571,6 +571,38 @@ class BotValidatorTest extends TestCase {
         $validator = $this->app->make('Swapbot\Http\Requests\Bot\Validators\UpdateBotValidator');
 
         $this->app->make('ValidatorHelper')->runTests($test_specs, $validator, [app('UserHelper')->getSampleUser()]);
+    }
+
+    public function testBotWhitelistValidation()
+    {
+        $user        = app('UserHelper')->newRandomUser();
+        $user_2      = app('UserHelper')->newRandomUser();
+        $whitelist   = app('WhitelistHelper')->newSampleWhitelist($user);
+        $whitelist_2 = app('WhitelistHelper')->newSampleWhitelist($user_2);
+
+        // sample bot
+        $sample_vars = app('BotHelper')->sampleBotVars();
+
+        $test_specs = [
+            [
+                'vars' => array_replace_recursive($sample_vars, ['whitelist_uuid' => $whitelist['uuid']]),
+                'error' => null, // valid
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['whitelist_uuid' => 'bad']),
+                'error' => 'This whitelist was not found',
+            ],
+            [
+                'vars' => array_replace_recursive($sample_vars, ['whitelist_uuid' => $whitelist_2['uuid']]),
+                'error' => 'You do not have permission to add this whitelist to this bot',
+            ],
+        ];
+
+        $validator = app('Swapbot\Http\Requests\Bot\Validators\CreateBotValidator');
+        app('ValidatorHelper')->runTests($test_specs, $validator, [$user]);
+
+        $validator = app('Swapbot\Http\Requests\Bot\Validators\UpdateBotValidator');
+        app('ValidatorHelper')->runTests($test_specs, $validator, [$user]);
     }
 
     ////////////////////////////////////////////////////////////////////////

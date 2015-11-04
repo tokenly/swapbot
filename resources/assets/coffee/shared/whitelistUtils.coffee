@@ -1,7 +1,6 @@
 # swapRuleUtils functions
 
 formatters   = require './formatters'
-BotConstants = require '../bot/constants/BotConstants'
 popover      = require './popover'
 
 exports = {}
@@ -17,7 +16,7 @@ exports = {}
 exports.buildWhitelistSummaryProse = (bot)->
     MAX_LENGTH_TO_SHOW = 4
 
-    whitelistAddresses = bot.whitelistAddresses
+    whitelistAddresses = bot.resolvedWhitelistAddresses
     if whitelistAddresses? and whitelistAddresses.length > 0
         out = "Note: Swaps are only allowed from "
         if whitelistAddresses.length > MAX_LENGTH_TO_SHOW
@@ -31,17 +30,22 @@ exports.buildWhitelistSummaryProse = (bot)->
     return null
 
 exports.buildMessageTextForPlaceOrder = (bot)->
-    whitelistAddresses = bot.whitelistAddresses
+    whitelistAddresses = bot.resolvedWhitelistAddresses
     if whitelistAddresses? and whitelistAddresses.length > 0
+
+        isLong = whitelistAddresses.length > 20
+
 
         popoverConfig = {
             title: "Whitelisted Addresses"
             content: """
+                <div#{if isLong then ' class="longPopoverDesc"'}>
                 <p>You must send you deposit from one of the following addresses to complete this purchase:</p>
                 <ul>
-                    <li>#{bot.whitelistAddresses.join('</li><li>')}</li>
+                    <li>#{bot.resolvedWhitelistAddresses.join('</li><li>')}</li>
                 </ul>
                 <p>Deposits sent from any other addresses will be refunded.</p>
+                </div>
             """
         }
         return React.createElement('span', {className: "noUnderline"}, [
