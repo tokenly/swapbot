@@ -263,7 +263,7 @@ vm = ctrl.botForm.vm = do ()->
                         vm.useWhitelisting(true)
 
                     vm.whitelistUuid(botData.whitelistUuid)
-                    if botData.whitelistUuid.length > 0
+                    if botData.whitelistUuid?.length > 0
                         vm.useWhitelisting(true)
 
                     vm.backgroundOverlaySettings(if botData.backgroundOverlaySettings?.start then window.JSON.stringify(botData.backgroundOverlaySettings) else '')
