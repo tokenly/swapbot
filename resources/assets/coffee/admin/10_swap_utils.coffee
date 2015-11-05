@@ -73,7 +73,7 @@ swaputils.normalizeSwapsForSaving = (swaps)->
 
         return swapOut
 
-    console.log "swapsOut=",swapsOut
+    # console.log "swapsOut=",swapsOut
     return swapsOut
 
 swaputils.buildSwapsPropValue = (swaps, swapRulesProp, defaultSwapDirection=constants.DIRECTION_SELL)->

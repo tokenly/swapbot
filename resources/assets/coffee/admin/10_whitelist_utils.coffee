@@ -11,7 +11,7 @@ exports.populateWhitelistOptions = (whitelistProp)->
 
     SwapbotAPI.getAllWhitelistNames().then(
         (whitelists)->
-            console.log "whitelists=", whitelists
+            # console.log "whitelists=", whitelists
             opts = []
             opts.push({k: '- None -', v: ''})
             whitelists.map (whitelist)->
