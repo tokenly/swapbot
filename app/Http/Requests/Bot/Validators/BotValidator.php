@@ -91,7 +91,7 @@ class BotValidator {
             $this->validateSwapRules($swap_rules, $validator);
 
             // validate whitelist uuid
-            $this->validateWhitelistUUID(isset($posted_data['whitelist_uuid']) ? $posted_data['whitelist_uuid'] : null, $user, $validator);
+            $this->validateWhitelistUUID((isset($posted_data['whitelist_uuid']) AND strlen($posted_data['whitelist_uuid'])) ? $posted_data['whitelist_uuid'] : null, $user, $validator);
 
         });
         return $validator;
