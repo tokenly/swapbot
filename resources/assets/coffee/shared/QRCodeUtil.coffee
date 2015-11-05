@@ -35,7 +35,7 @@ do ($=jQuery)->
             content: """<div class="fullQrCode"></div>"""
             onShown: buildOnShownFn(text)
             width: 450
-            height: 420
+            height: 430
         })
 
         $(domElement).data('hasqrcode', true)
