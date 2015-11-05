@@ -2,6 +2,7 @@
 sbAdmin = sbAdmin or {}; sbAdmin.currencyutils = require './10_currency_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.pocketsUtils = require './10_pockets_utils'
+SwapbotAPI = require './10_api_functions'
 # ---- end references
 
 # botPaymentUtils functions
@@ -83,10 +84,53 @@ buildPaymentStatusAndDetails = (botEventsProp)->
 # ------------------------------------------------------------------------
 
 
+botPaymentUtils.buildFormattedBotDueDateTextFromBot = (bot, paymentStatuses)->
+    # only load once
+    if paymentStatuses[bot.id]?.loaded
+        return
+
+    paymentStatuses[bot.id] = {}
+    paymentStatuses[bot.id].loaded = true
+    paymentStatuses[bot.id].resultText = m.prop(null)
+
+    loadedPaymentBalances = null
+    loadedPayments = null
+
+    SwapbotAPI.getBotPaymentBalances(bot.id).then(
+        (apiResponse)->
+            loadedPaymentBalances = []
+            for asset, val of apiResponse.balances
+                loadedPaymentBalances.push({asset: asset, val: val})
+            finish()
+            return
+        , (errorResponse)->
+            console.error(errorResponse.errors)
+            return
+    )
+
+    SwapbotAPI.getAllBotPayments(bot.id).then(
+        (apiResponse)->
+            apiResponse.reverse()
+            loadedPayments = apiResponse
+            finish()
+            return
+        , (errorResponse)->
+            console.error(errorResponse.errors)
+            return
+    )
+
+    finish = ()->
+        if not loadedPayments? or not loadedPaymentBalances?
+            return
+        paymentStatuses[bot.id].resultText(botPaymentUtils.buildFormattedBotDueDateText(loadedPayments, loadedPaymentBalances))
+        return
+
+    return
+
 botPaymentUtils.buildFormattedBotDueDateText = (payments, balances)->
     dueDate = botPaymentUtils.buildBotDueDate(payments, balances)
     if not dueDate?
-        return m('span', {class: "label label-default label-big"}, 'Unknown')
+        return m('span', {class: "label label-default label-big"}, 'Pending')
 
     now = moment()
     formattedDate = dueDate.format('MMM D YYYY, h:mm a')

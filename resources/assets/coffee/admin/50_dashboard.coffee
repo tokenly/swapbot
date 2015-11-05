@@ -3,6 +3,10 @@ sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
+Stateutils      = require './10_state_utils'
+BotPaymentUtils = require './10_bot_payment_utils'
+AddressUtils    = require '../shared/addressUtils'
+
 # ---- end references
 
 ctrl = {}
@@ -21,6 +25,8 @@ vm = ctrl.dashboard.vm = do ()->
     vm = {}
     vm.init = ()->
         vm.user = m.prop(sbAdmin.auth.getUser())
+
+        vm.paymentStatuses = {}
 
         # swapbots
         vm.bots = m.prop([])
@@ -44,25 +50,48 @@ ctrl.dashboard.controller = ()->
 
 ctrl.dashboard.view = ()->
     if vm.bots().length
+        sortedBots = vm.bots().slice(0)
+        sortedBots.sort (a,b)->
+            return (if b.name.toUpperCase() < a.name.toUpperCase() then 1 else -1)
+
         botsListEl = [
             m("p", {class: ""}, "Here is a list of your Swapbots:"),
 
             m("div", { class: "row"}, [
-                m("div", {class: "col-md-10 col-lg-8"}, [
-                    m("ul", {class: "list-unstyled striped-list bot-list"}, [
-                        vm.bots().map((bot)->
-                            return m("li", {}, [
-                                m("div", {}, [
-                                    if bot.hash.length then m("a[href='/admin/view/bot/#{bot.id}']", {config: m.route}, sbAdmin.robohashUtils.img(bot.hash, 'tinyRoboHead')) else m('div', {class: 'emptyRoboHead'}, ''),
-                                    m("a[href='/admin/view/bot/#{bot.id}']", {class: "", config: m.route}, "#{bot.name}"),
-                                    " ",
-                                    m("a[href='/admin/edit/bot/#{bot.id}']", {class: "dashboard-edit-link pull-right", config: m.route}, [
-                                        m("span", {class: "glyphicon glyphicon-edit", title: "Edit Swapbot #{bot.name}"}, ''),
-                                        " Edit",
-                                    ]),
-                                ])
-                            ])
-                        )
+                m("div", {class: "col-md-12"}, [
+                    m("table", {class: "table table-striped bot-table"}, [
+                        m("thead", {}, [
+                            m("tr", {}, [
+                                m("th", {}, "Bot Admin"),
+                                m("th", {}, "Public Link"),
+                                m("th", {}, "Status"),
+                                m("th", {}, "Next Payment Due"),
+                                m("th", {}, ""),
+                            ]),
+                        ]),
+                        m("tbody", {}, 
+                            sortedBots.map((bot)->
+                                BotPaymentUtils.buildFormattedBotDueDateTextFromBot(bot, vm.paymentStatuses)
+
+                                return m("tr", {}, [
+                                            m("td", {}, [
+                                                if bot.hash.length then m("a[href='/admin/view/bot/#{bot.id}']", {config: m.route}, sbAdmin.robohashUtils.img(bot.hash, 'tinyRoboHead')) else m('div', {class: 'emptyRoboHead'}, ''),
+                                                m("a[href='/admin/view/bot/#{bot.id}']", {class: "", config: m.route}, "#{bot.name}"),
+                                            ]),
+                                            m("td", {}, [
+                                                m("a[href='#{AddressUtils.publicBotHrefFromBot(bot)}']", {target: "_blank", class: "",}, "Public Bot Link"),
+                                            ]),
+                                            m("td", {}, Stateutils.buildStateSpan(bot.state)),
+                                            m("td", {}, vm.paymentStatuses[bot.id].resultText()),
+                                            m("td", {}, [
+                                                m("a[href='/admin/edit/bot/#{bot.id}']", {class: "dashboard-edit-link", config: m.route}, [
+                                                    m("span", {class: "glyphicon glyphicon-edit", title: "Edit Swapbot #{bot.name}"}, ''),
+                                                    " Edit",
+                                                ]),
+                                            ]),
+                                        ])
+                            ),
+                        ),
                     ]),
                 ]),
             ]),
@@ -83,7 +112,8 @@ ctrl.dashboard.view = ()->
         ]
 
     mEl = m("div", [
-        m("h2", "Welcome to Swapbot, #{vm.user().name}"),
+        m("h2", "Hi #{vm.user().name}."),
+        m("h3", "Welcome to your Swapbot Control Panel."),
 
         m("div", {class: "spacer1"}),
 
