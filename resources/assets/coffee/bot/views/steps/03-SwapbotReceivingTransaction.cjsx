@@ -148,7 +148,14 @@ SwapbotReceivingTransaction = React.createClass
         whitelistMessageText = whitelistUtils.buildMessageTextForPlaceOrder(this.props.bot)
 
         setTimeout ()=>
-            QRCodeUtil.buildQRCodeIcon(document.getElementById('QRCodeIcon'), "Send #{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} #{this.state.userChoices.inAsset} to #{bot.address}", 'bitcoin:'+bot.address, 32, 32)
+            URI = 'counterparty:'+bot.address + 
+                  '?amount='+swapbot.formatters.formatCurrencyAsNumber(this.state.userChoices.inAmount) + 
+                  '&asset='+this.state.userChoices.inAsset + 
+                  '&label='+encodeURIComponent('Swapbot '+bot.name)
+
+            text = """<a href="#{URI}">Send #{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} #{this.state.userChoices.inAsset} to #{bot.address}</a>"""
+            QRCodeUtil.buildQRCodeIcon(document.getElementById('QRCodeIcon'), text, URI, 32, 32)
+
         , 1
 
         return <div id="swapbot-container" className="section grid-100">
