@@ -65,7 +65,7 @@ class BotUpdatesForDisplayHandler {
         $pusher_vars = [
             'id'          => Uuid::uuid4()->toString(),
             'isBotUpdate' => true,
-            'bot'         => $bot->serializeForAPI(),
+            'bot'         => $bot->serializeForAPI('public'),
         ];
 
         $this->pusher_client->send('/swapbot_botstream_'.$bot['uuid'], $pusher_vars);
