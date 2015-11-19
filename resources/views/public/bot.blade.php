@@ -145,6 +145,8 @@ ga('send', 'pageview');
 </script>
 @endif
 
+@include('partials.tawk')
+
 </body>
 
 </html>

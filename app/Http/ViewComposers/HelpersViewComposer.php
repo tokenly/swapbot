@@ -51,6 +51,12 @@ class HelpersViewComposer
             ],
 
 
+            'tawk'           => [
+                'active'  => !!env('TAWK_ACTIVE'),
+                'embedId' => env('TAWK_EMBED_ID'),
+            ],
+
+
             'manifest'
         ]);
     }

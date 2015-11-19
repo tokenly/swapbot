@@ -148,6 +148,8 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
  --}}
 
 
+@include('partials.tawk')
+
 
 </body>
 

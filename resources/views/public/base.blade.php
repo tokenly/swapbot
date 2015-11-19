@@ -46,5 +46,7 @@
     window.asyncLoad("//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700", "css");
 </script>
 
+@include('partials.tawk')
+
 </body>
 </html>

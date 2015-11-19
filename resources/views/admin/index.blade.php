@@ -65,5 +65,8 @@
     @foreach ($admin_scripts as $script)
         <script src="/js/admin/{{$manifest($script)}}"></script>
     @endforeach
+
+@include('partials.tawk')
+
 </body>
 </html>
