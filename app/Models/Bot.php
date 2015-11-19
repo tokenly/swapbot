@@ -22,9 +22,27 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 class Bot extends APIModel {
 
-    protected $api_attributes = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'whitelist_uuid', 'balances', 'all_balances_by_type', 'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
-    protected $api_attributes_public = ['id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 'logo_image_details', 'swaps', 'swap_rules', 'resolved_whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'return_fee', 'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',];
-    protected $api_attributes_public_simple = ['id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address', 'state', 'created_at', 'last_changed_at',];
+    protected $api_attributes = [
+        'id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 
+        'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'whitelist_uuid', 'balances', 'all_balances_by_type', 
+        'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 
+        'hash', 'created_at', 'last_changed_at',
+    ];
+    protected $api_attributes_admin_all_bots = [
+        'id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings', 
+        'logo_image_details', 'swaps', 'swap_rules', 'blacklist_addresses', 'whitelist_addresses', 'whitelist_uuid', 'balances', 'all_balances_by_type', 
+        'address', 'payment_plan', 'payment_address','return_fee', 'state', 'payment_state', 'income_rules', 'refund_config', 'confirmations_required', 
+        'hash', 'created_at', 'last_changed_at', 'user_email',
+    ];
+    protected $api_attributes_public = [
+        'id', 'name', 'username', 'url_slug', 'description', 'description_html', 'background_image_details', 'background_overlay_settings',
+        'logo_image_details', 'swaps', 'swap_rules', 'resolved_whitelist_addresses', 'balances', 'all_balances_by_type', 'address', 'return_fee',
+        'state', 'refund_config', 'confirmations_required', 'hash', 'created_at', 'last_changed_at',
+    ];
+    protected $api_attributes_public_simple = [
+        'id', 'name', 'username', 'bot_url', 'description_html', 'robohash_image', 'background_image', 'logo_image', 'swaps', 'balances', 'address',
+        'state', 'created_at', 'last_changed_at',
+    ];
 
     protected $dates = ['balances_updated_at', 'last_changed_at',];
 
@@ -73,6 +91,11 @@ class Bot extends APIModel {
     public function getUsernameAttribute() {
         // get username
         return $this->user['username'];
+    }
+
+    public function getUserEmailAttribute() {
+        // get user's email
+        return $this->user['email'];
     }
 
     public function getDescriptionHtmlAttribute() {

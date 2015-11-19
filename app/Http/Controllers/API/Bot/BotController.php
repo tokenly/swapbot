@@ -33,20 +33,27 @@ class BotController extends APIController {
      */
     public function index(Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper)
     {
+        $user = $auth->getUser();
+        $api_output_context = null;
+
         $params = $request->all();
         if ($params AND array_key_exists('allusers', $params)) {
             // all users
             $api_helper->requirePermission($auth->getUser(), 'viewBots', 'view all bots');
 
             $resources = $repository->findAll();
+
+            if ($user->hasPermission('viewBots')) {
+                $api_output_context = 'admin_all_bots';
+            }
         } else {
             // all bots for this user
-            $resources = $repository->findByUser($auth->getUser());
+            $resources = $repository->findByUser($user);
         }
 
 
         // format for API
-        return $api_helper->transformResourcesForOutput($resources);
+        return $api_helper->transformResourcesForOutput($resources, $api_output_context);
     }
 
     /**

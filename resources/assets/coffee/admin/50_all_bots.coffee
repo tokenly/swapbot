@@ -90,7 +90,10 @@ ctrl.allbots.view = ()->
                                 m("a[href='/admin/view/bot/#{bot.id}']", {class: "", config: m.route}, "Admin"),
                             ]),
                             m("td", {}, bot.state),
-                            m("td", {}, bot.username),
+                            m("td", {}, [
+                                if bot.userEmail then m("a[href='mailto:#{bot.userEmail}']", {}, "#{bot.username} <#{bot.userEmail}>")
+                                else bot.username
+                            ]),
                         ])
                     )
                 ]),
