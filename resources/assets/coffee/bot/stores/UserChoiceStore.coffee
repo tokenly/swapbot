@@ -461,9 +461,10 @@ handleSwapstreamEvents = (eventWrappers)->
             replacingSwap = SwapsStore.getSwapById(replacingSwapId)
             if not replacingSwap?
                 console.error("could not find new swap by swap id #{replacingSwapId}")
+                return
 
-            if not userChoices.swap? or userChoices.swap.id != replacingSwap.id
-                # console.log "new swap id is #{replacingSwapId}"
+            if userChoices.swap and userChoices.swap.id == oldSwapId
+                # console.log "replacing old swap #{oldSwapId} with new swap id #{replacingSwapId}"
                 userChoices.swap = replacingSwap
                 emitChange()
     
