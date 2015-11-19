@@ -66,6 +66,9 @@ class BotStateTest extends TestCase {
         // SHUTTING_DOWN -> SHUTDOWN
         $this->runTransitionTest($state_machine, $bot, BotStateEvent::COMPLETE_SHUTDOWN, BotState::SHUTDOWN);
 
+        // SHUTDOWN -> ACTIVE
+        $this->runTransitionTest($state_machine, $bot, BotStateEvent::REVIVED, BotState::ACTIVE);
+
 
 
         // check shutting down an UNPAID bot

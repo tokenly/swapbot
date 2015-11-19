@@ -15,6 +15,7 @@ use Swapbot\Statemachines\BotCommand\Fueled;
 use Swapbot\Statemachines\BotCommand\LeaseExpired;
 use Swapbot\Statemachines\BotCommand\MonthlyFeePaid;
 use Swapbot\Statemachines\BotCommand\PaymentExhausted;
+use Swapbot\Statemachines\BotCommand\Revived;
 use Swapbot\Statemachines\BotCommand\StartShutdown;
 use Swapbot\Statemachines\StateMachineFactory;
 
@@ -87,6 +88,10 @@ class BotStateMachineFactory extends StateMachineFactory {
 
         // BotState::SHUTTING_DOWN => BotState::SHUTDOWN
         $this->addTransitionToStates($states, BotState::SHUTTING_DOWN, BotState::SHUTDOWN,      BotStateEvent::COMPLETE_SHUTDOWN,      new CompleteShutdown());
+
+
+        // BotState::SHUTDOWN => BotState::ACTIVE
+        $this->addTransitionToStates($states, BotState::SHUTDOWN,      BotState::ACTIVE,        BotStateEvent::REVIVED,                new Revived());
 
 
 

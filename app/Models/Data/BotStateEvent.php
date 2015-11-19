@@ -15,4 +15,6 @@ class BotStateEvent {
     const START_SHUTDOWN         = 'startShutdown';
     const COMPLETE_SHUTDOWN      = 'completeShutdown';
 
+    const REVIVED                = 'revived';
+
 }
