@@ -23,7 +23,10 @@ exports.buildWhitelistSummaryProse = (bot)->
             remainder = whitelistAddresses.length - MAX_LENGTH_TO_SHOW
             out += whitelistAddresses.slice(0, MAX_LENGTH_TO_SHOW).join(", ") + " and #{remainder} more"
         else
-            out += whitelistAddresses.slice(0, -1).join(", ") + " and " + whitelistAddresses.slice(-1)
+            if whitelistAddresses.length > 1
+                out += whitelistAddresses.slice(0, -1).join(", ") + " and " + whitelistAddresses.slice(-1)
+            else
+                out += whitelistAddresses[0]
 
         return out
 
