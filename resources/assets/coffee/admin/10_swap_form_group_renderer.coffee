@@ -189,11 +189,11 @@ swapGroupRenderers.fiat.sell = (number, swap, vmProps, offsetKey)->
         leftCols: [
             m("div", {class: "col-md-5"}, [sharedSwapTypeFormField(number, swap),]),
 
-            m("div", {class: "col-md-4"}, [
+            m("div", {class: "col-md-3"}, [
                 formFieldFn(popoverLabels.fiatSellSendsAsset, {id: "swap_out_#{offsetKey}", 'placeholder': "MYPRODUCT", }, swap.out),
             ]),
-            m("div", {class: "col-md-3"}, [
-                sbAdmin.form.mValueDisplay(popoverLabels.fiatSellReceivesAsset, {id: "swap_in_#{offsetKey}", }, swap.in()),
+            m("div", {class: "col-md-4"}, [
+                formFieldFn(popoverLabels.fiatSellReceivesAsset, {id: "swap_in_#{offsetKey}", type: 'select', options: vmProps.pricedTokenOpts() }, swap.in),
             ]),
 
         ],
@@ -202,10 +202,10 @@ swapGroupRenderers.fiat.sell = (number, swap, vmProps, offsetKey)->
             m("div", {class: "col-md-4"}, [
                 formFieldFn(popoverLabels.fiatSellPrice, {type: "number", step: "any", min: "0", id: "swap_cost_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: 'USD'}, swap.cost),
             ]),
-            m("div", {class: "col-md-5"}, [
+            m("div", {class: "col-md-4"}, [
                 formFieldFn(popoverLabels.fiatSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_min_out_#{offsetKey}", 'placeholder': "1", postfixLimit: 7, postfix: swap.out(),}, swap.min_out),
             ]),
-            m("div", {class: "col-md-2"}, [
+            m("div", {class: "col-md-3"}, [
                 formFieldFn(popoverLabels.fiatSellIsDivisible, {type: "select", options: sbAdmin.form.yesNoOptions(), id: "swap_divisible_#{offsetKey}", }, swap.divisible),
             ]),
         ]
@@ -427,7 +427,7 @@ buildOffsetKey = (swapDirection, offset)->
 # ################################################
 
 swapgrouprenderer.buildSwapsSection = (swapDirection, duplicateSwapsOffsetsMap, vm)->
-    vmProps = {sellSwaps: vm.sellSwaps, buySwaps: vm.buySwaps, swapRules: vm.swapRules}
+    vmProps = {sellSwaps: vm.sellSwaps, buySwaps: vm.buySwaps, swapRules: vm.swapRules, pricedTokenOpts: vm.pricedTokenOpts}
 
     addTempIDFn = (swapsArray)->
         return swapsArray.map (swap, offset)->

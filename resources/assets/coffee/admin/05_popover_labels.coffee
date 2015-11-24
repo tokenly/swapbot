@@ -47,7 +47,7 @@ popoverLabels.swapTypeChoice = (number, action)->
                         <p>Users may send twice or three times as much as the expected amount and receive 2 or 3 times as many tokens in return.</p>
                     </li>
                     <li>
-                        <strong>Swaps By USD Amount paid in BTC</strong> (Sell Only)<br/>
+                        <strong>Swaps By USD Amount paid in BTC or Tokens</strong> (Sell Only)<br/>
                         <p>This type of swap accepts BTC only.  The tokens for sale are priced in a US dollar amount.  And the amount of tokens sent in return is dependent on the current USD value of BTC when the transaction is received.</p>
                         <p>Users are asked to send a small bit of extra BTC in order to adjust for market fluctuations.  Any excess BTC is returned to the user along with their tokens.</p>
                     </li>
@@ -255,7 +255,8 @@ popoverLabels.fiatSellReceivesAsset = {
     popover: {
         title: "About the Asset to Receive"
         content: """
-            <p>This Swapbot will receive BTC and get a quote in USD at the current market rate.</p>
+            <p>This Swapbot will receive BTC or tokens and get a quote in USD at the current market rate.</p>
+            <p>Not all tokens are supported.</p>
         """
     }
 }

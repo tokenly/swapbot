@@ -139,6 +139,9 @@ api.getAllBotPayments = (id)->
 api.getAllPlansData = ()->
     return api.send('GET', "plans")
 
+api.getPricedTokens = ()->
+    return api.send('GET', "pricedtokens")
+
 
 api.uploadImage = (files)->
     deferred = m.deferred()

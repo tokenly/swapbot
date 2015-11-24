@@ -101,12 +101,12 @@ nav.buildNav = ()->
 
 nav.buildInContainer = (mEl)->
     return m("div", { class: "container-fluid", style: {marginTop: "0px", marginBottom: "24px"}}, [
-        m("div", { class: "row"}, [
-            m("div", { class: "col-md-12 col-lg-10 col-lg-offset-1"}, [
-                mEl
+            m("div", { class: "row"}, [
+                m("div", { class: "col-md-12 col-lg-10 col-lg-offset-1"}, [
+                    mEl
+                ])
             ])
         ])
-    ])
 
 
 

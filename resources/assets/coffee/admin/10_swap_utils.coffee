@@ -97,9 +97,9 @@ swaputils.allStrategyOptions = (swapDirection)->
 
     else
         return [
-            {k: "By Price",                  v: 'rate'}
-            {k: "By Fixed Amounts",          v: 'fixed'}
-            {k: "By USD Amount paid in BTC", v: 'fiat'}
+            {k: "By Price",                            v: 'rate'}
+            {k: "By Fixed Amounts",                    v: 'fixed'}
+            {k: "By USD amount paid in BTC or Tokens", v: 'fiat'}
         ]
 
 strategyLabelCache = null

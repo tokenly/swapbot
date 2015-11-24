@@ -86,6 +86,9 @@ $router->post('api/v1/bots/shutdown/{botuuid}', 'API\Bot\BotController@shutdown'
 // Bot Plans API
 $router->get('api/v1/plans', 'API\Bot\PlansController@getPaymentPlans');
 
+// Priced Tokens API
+$router->get('api/v1/pricedtokens', 'API\Bot\PricedTokensController@getPricedTokens');
+
 // Balance Refresh
 $router->post('api/v1/balancerefresh/{botuuid}', 'API\BalanceRefresh\BalanceRefreshController@refresh');
 

@@ -203,6 +203,7 @@ vm = ctrl.botForm.vm = do ()->
         vm.formStatus = m.prop('active')
         vm.resourceId = m.prop('')
         vm.allPlansData = m.prop(null)
+        vm.pricedTokenOpts = m.prop([{k: 'Loading...', v: ''}])
         vm.whitelistOptions = m.prop()
         WhitelistUtils.populateWhitelistOptions(vm.whitelistOptions)
 
@@ -284,6 +285,22 @@ vm = ctrl.botForm.vm = do ()->
                     vm.errorMessages(errorResponse.errors)
                     return
             )
+
+        # get the token options
+        sbAdmin.api.getPricedTokens().then(
+            (apiResponse)->
+                opts = [{k:'Bitcoin (BTC)', v: 'BTC'}]
+                for tokenInfo in apiResponse
+                    name = tokenInfo.token
+                    if tokenInfo.token != tokenInfo.symbol then name = "#{name} (#{tokenInfo.symbol})"
+                    opts.push({k: name, v: tokenInfo.token})
+                
+                vm.pricedTokenOpts(opts)
+                return
+            , (errorResponse)->
+                vm.errorMessages(errorResponse.errors)
+                return
+        )
 
         # get the plan options
         sbAdmin.api.getAllPlansData().then(
