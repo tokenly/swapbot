@@ -1,0 +1,23 @@
+# a confirmed XCP received notification
+
+txid: 00000000000000000000000000000000000000000000000000000XCPtx333333
+network: counterparty
+event: receive
+notifiedAddress: SWAPBOTADDR01
+notifiedAddressId: PUBLIC_RECEIVE_MONITOR_ID_01
+sources: [SENDER01]
+destinations: [botaddress000000000000000000000001]
+confirmed: true
+confirmations: 1
+asset: XCP
+quantity: 10
+blockId: 300000
+counterpartyTx:
+  type: send
+  sources: [SENDER01]
+  destinations: [SWAPBOTADDR01]
+  asset: XCP
+  quantity: 10
+  quantitySat: 1000000000
+  dustSize: 0.00005430
+  dustSizeSat: 1000

@@ -1,0 +1,12 @@
+name: swap.found
+msg: Received 6.66666667 XCP from SENDER01 with 2 confirmations. Will vend 1 DRAGONMEAT to SENDER01.
+
+inQty: 6.66666667
+inAsset: XCP
+
+outQty: 1
+outAsset: DRAGONMEAT
+
+source: SENDER01
+destination: SENDER01
+confirmations: 2

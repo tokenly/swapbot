@@ -1,0 +1,47 @@
+name: Dragonmeat Selling Bot
+description: The dragonmeat seller
+active: true
+state: active
+payment_plan: monthly001
+confirmations_required: 2
+
+address: botaddress000000000000000000000001
+public_address_id: PUBLIC_ADDRESS_ID_01
+public_receive_monitor_id: PUBLIC_RECEIVE_MONITOR_ID_01
+public_send_monitor_id: PUBLIC_SEND_MONITOR_ID_01
+
+payment_address: paymentaddress00000000000000000001
+payment_address_id: PAYMENT_ADDRESS_ID_01
+payment_receive_monitor_id: PAYMENT_RECEIVE_MONITOR_ID_01
+payment_send_monitor_id: PAYMENT_SEND_MONITOR_ID_01
+
+return_fee: 0.0001
+
+balances:
+    DRAGONMEAT: 25
+    XCP: 0
+    BTC: 1
+
+swaps:
+  -
+    strategy: fiat
+    in: XCP
+    out: DRAGONMEAT
+    fiat: USD
+    cost: 5.00
+    type: sell
+    divisible: false
+    min_out: 1
+
+income_rules:
+  -
+    asset: BTC
+    minThreshold: 10
+    paymentAmount: 2
+    address: INCOME_FORWARDING_ADDRESS_0000001
+
+payments:
+  - {credit: true, amount: 100.0, asset: SWAPBOTMONTH }
+
+leases:
+  - {start_date: '2015-06-01', length: 1}

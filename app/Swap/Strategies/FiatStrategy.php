@@ -10,16 +10,19 @@ use Swapbot\Models\Data\SwapConfig;
 use Swapbot\Swap\Contracts\Strategy;
 use Swapbot\Swap\Rules\SwapRuleHandler;
 use Swapbot\Swap\Strategies\StrategyHelpers;
+use Swapbot\Util\PricedTokens\PricedTokensHelper;
 use Swapbot\Util\Validator\ValidatorHelper;
+use Tokenly\CurrencyLib\CurrencyUtil;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\QuotebotClient\Client as QuotebotClient;
 
 class FiatStrategy implements Strategy {
 
 
-    function __construct(QuotebotClient $quotebot_client, SwapRuleHandler $swap_rule_handler) {
-        $this->quotebot_client = $quotebot_client;
-        $this->swap_rule_handler = $swap_rule_handler;
+    function __construct(QuotebotClient $quotebot_client, SwapRuleHandler $swap_rule_handler, PricedTokensHelper $priced_tokens_helper) {
+        $this->quotebot_client      = $quotebot_client;
+        $this->swap_rule_handler    = $swap_rule_handler;
+        $this->priced_tokens_helper = $priced_tokens_helper;
     }
 
     public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
@@ -153,7 +156,10 @@ class FiatStrategy implements Strategy {
             // in and out assets
             if (!StrategyHelpers::validateAssetName($in_value, 'receive', $swap_config_number, 'in', $errors)) { $assets_are_valid = false; }
             if (!StrategyHelpers::validateAssetName($out_value, 'send', $swap_config_number, 'out', $errors)) { $assets_are_valid = false; }
-            if ($in_value !== 'BTC') { $errors->add('type', "Only BTC is supported"); }
+
+            if ($in_value != 'BTC' AND !$this->priced_tokens_helper->isPriceableToken($in_value)) {
+                $errors->add('type', "This token type is not supported");
+            }
 
             // cost
             if (strlen($cost_value)) {
@@ -248,18 +254,46 @@ class FiatStrategy implements Strategy {
     // Conversion
 
     protected function getFiatConversionRate($asset, $fiat, $source) {
+        $btc_conversion_rate = $this->getBTCConversionRate($fiat, $source);
+        if ($asset == 'BTC') { return $btc_conversion_rate; }
+
+        $asset_to_btc_rate = $this->getLowestAssetToBTCRate($asset);
+        if (!$asset_to_btc_rate) {
+            throw new Exception("Unable to convert asset $asset to fiat", 1);
+        }
+
+        return $asset_to_btc_rate * $btc_conversion_rate;
+    }
+
+    protected function getBTCConversionRate($fiat, $source) {
         try {
-            $quote_entry = $this->quotebot_client->loadQuote($source, [$fiat, $asset]);
+            $quote_entry = $this->quotebot_client->loadQuote($source, [$fiat, 'BTC']);
         } catch (Exception $e) {
             EventLog::logError('loadquote.failed', $e);
 
             // fallback to last cache
-            $quote_entry = $this->quotebot_client->getQuote($source, [$fiat, $asset]);       
+            $quote_entry = $this->quotebot_client->getQuote($source, [$fiat, 'BTC']);       
         }
 
         return $quote_entry['last'];
     }
 
-    
+    protected function getLowestAssetToBTCRate($asset, $asset_quote_source='poloniex') {
+        try {
+            $quote_entry = $this->quotebot_client->loadQuote($asset_quote_source, ['BTC', $asset]);
+        } catch (Exception $e) {
+            EventLog::logError('loadquote.failed', $e);
+
+            // fallback to last cache
+            $quote_entry = $this->quotebot_client->getQuote($asset_quote_source, ['BTC', $asset]);       
+        }
+
+        $value = min($quote_entry['last'], $quote_entry['lastAvg']);
+        if ($quote_entry['inSatoshis']) {
+            $value = CurrencyUtil::satoshisToValue($value);
+        }
+
+        return $value;
+    }
 
 }

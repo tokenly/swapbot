@@ -6,16 +6,18 @@ Dispatcher = require '../dispatcher/Dispatcher'
 exports = {}
 
 eventEmitter = null
-currentQuote = null
+currentQuotes = {}
 
 addNewQuote = (newQuote)->
-    currentQuote = newQuote
+    currentQuotes[newQuote.source+'.'+newQuote.pair] = newQuote
+    console.log "currentQuotes updated with #{newQuote.source+'.'+newQuote.pair}"
     emitChange()
     return
 
 emitChange = ()->
     eventEmitter.emitEvent('change')
     return
+
 
 
 # #############################################
@@ -33,12 +35,8 @@ exports.init = ()->
 
     return
 
-exports.getCurrentQuote = ()->
-    return currentQuote
-
-exports.getCurrentPrice = ()->
-    if not currentQuote? then return null
-    return currentQuote.last
+exports.getCurrentQuotes = ()->
+    return currentQuotes
 
 exports.addChangeListener = (callback)->
     eventEmitter.addListener('change', callback)

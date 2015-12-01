@@ -327,7 +327,7 @@ class BotValidator {
     protected function validateAppliedSwapRuleIDs($applied_swap_rule_ids, $swap_rules_by_id, $strategy, $validator) {
         foreach($applied_swap_rule_ids as $applied_swap_rule_id) {
             if (!isset($swap_rules_by_id[$applied_swap_rule_id])) {
-                Log::debug("\$applied_swap_rule_id={$applied_swap_rule_id} \$swap_rules_by_id=".json_encode($swap_rules_by_id, 192));
+                // Log::debug("\$applied_swap_rule_id={$applied_swap_rule_id} \$swap_rules_by_id=".json_encode($swap_rules_by_id, 192));
                 $validator->errors()->add('applied_swap_rule_id', "Please specify a valid id for this swap.");
                 continue;
             }
@@ -345,7 +345,7 @@ class BotValidator {
     }
 
     protected function validateSwapRule($offset, $swap_rule, $validator) {
-        Log::debug("\$swap_rule=".json_encode($swap_rule, 192));
+        // Log::debug("\$swap_rule=".json_encode($swap_rule, 192));
         $swap_rule_number = $offset + 1;
 
         // name required

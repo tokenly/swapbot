@@ -1,0 +1,8 @@
+method: POST
+path: /sends/PUBLIC_ADDRESS_ID_01
+data:
+    destination: SENDER01
+    quantity: 1
+    asset: DRAGONMEAT
+    sweep: false
+    fee: 0.0001

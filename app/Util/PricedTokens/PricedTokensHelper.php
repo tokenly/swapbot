@@ -31,6 +31,11 @@ class PricedTokensHelper {
         return null;
     }
 
+    public function isPriceableToken($token) {
+        $all_priced_tokens = $this->getAllPricedTokens();
+        return isset($all_priced_tokens[$token]);
+    }
+
     // ------------------------------------------------------------------------
     
     protected function normalizePricedTokensResponse($raw_priced_tokens) {

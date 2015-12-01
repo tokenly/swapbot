@@ -4,7 +4,7 @@ Dispatcher = require '../dispatcher/Dispatcher'
 QuotebotStore = require '../stores/QuotebotStore'
 SwapsStore = require '../stores/SwapsStore'
 SwapMatcher = require '../util/SwapMatcher'
-swapbot = swapbot or {}; swapbot.swapUtils = require '../../shared/swapUtils'
+swapUtils = require '../util/swapUtils'
 # ---- end references
 
 exports = {}
@@ -337,11 +337,11 @@ _recalculateSwapConfigArtifacts = ()->
     if userChoices.direction == BotConstants.DIRECTION_SELL
         # calculate the new inAmount based on the outAmount
         if userChoices.outAmount? and userChoices.swapConfig?
-            userChoices.inAmount = swapbot.swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig, userChoices.lockedInRate)
+            userChoices.inAmount = swapUtils.inAmountFromOutAmount(userChoices.outAmount, userChoices.swapConfig, userChoices.lockedInRate)
     else
         # calculate the new outAmount based on the inAmount
         if userChoices.inAmount? and userChoices.swapConfig?
-            userChoices.outAmount = swapbot.swapUtils.outAmountFromInAmount(userChoices.inAmount, userChoices.swapConfig)
+            userChoices.outAmount = swapUtils.outAmountFromInAmount(userChoices.inAmount, userChoices.swapConfig)
     # console.log "_recalculateSwapConfigArtifacts userChoices.direction=#{userChoices.direction} userChoices.inAmount=#{userChoices.inAmount} userChoices.outAmount=#{userChoices.outAmount}"
 
     if userChoices.swapConfig
@@ -440,11 +440,6 @@ onSwapStoreChanged = ()->
 
 # #############################################
 
-onQuotebotPriceUpdated = ()->
-    price = QuotebotStore.getCurrentPrice()
-    return
-
-# #############################################
 
 handleSwapstreamEvents = (eventWrappers)->
     anyChanged = false

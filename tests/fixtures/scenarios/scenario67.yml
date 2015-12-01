@@ -1,0 +1,72 @@
+# test fiat-based token purchase with XCP
+#   when exact amount was sent (how lucky!)
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot04-dragonmeat.yml }
+
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      DRAGONMEAT: 25
+      XCP: 0
+      BTC: 1
+    sending:
+      BTC: 0
+
+
+quotebot:
+  - source: bitcoinAverage
+    pair: USD:BTC
+    last: 300
+  - source: poloniex
+    pair: BTC:XCP
+    last: 250000
+    lastAvg: 250000
+    inSatoshis: true
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_XCP_RECEIVE_notification_01.yml }
+    quantity: 6.66666667
+    confirmations: 2
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_DRAGONMEAT.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-XCP_DRAGONMEAT.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-XCP_DRAGONMEAT-2confirmations.yml }
+  - #### swap found
+    meta: { baseFilename: swap.sent-XCP_DRAGONMEAT-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      DRAGONMEAT: 24
+      BTC: 0.9999 # 1 + 0.00005430 (dist) - 0.0001 (fee) - 0.00005430 (dust)
+      XCP: 0
+
+expectedQuoteClientCalls:
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: poloniex, pair: BTC:XCP }
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: poloniex, pair: BTC:XCP }

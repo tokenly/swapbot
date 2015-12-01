@@ -1,8 +1,9 @@
 # swapUtils functions
 
-swapbot = swapbot or {}; swapbot.formatters = require './formatters'
-swapRuleUtils  = require './swapRuleUtils'
-whitelistUtils = require './whitelistUtils'
+swapbot = swapbot or {}; swapbot.formatters = require '../../shared/formatters'
+swapRuleUtils  = require '../../shared/swapRuleUtils'
+whitelistUtils = require '../../shared/whitelistUtils'
+quoteUtils     = require './quoteUtils'
 
 exports = {}
 
@@ -59,42 +60,6 @@ normalizeInAndOutQuantities = (rawOut, rawIn, minValue=1)->
 # #############################################
 # local
 
-buildDetailsProse = {rate: {}, fixed: {}, fiat: {}, }
-
-# ------------------------------------------------
-buildDetailsProse.rate.sell = (swapConfig)->
-    price = 1 / swapConfig.rate
-
-    return "sells #{swapConfig.out} at a price of #{formatCurrencyFn(price)} #{swapConfig.in} each. A minimum sale of #{formatCurrencyFn(swapConfig.min)} #{swapConfig.in} is required."
-
-buildDetailsProse.rate.buy = (swapConfig)->
-    price = swapConfig.rate
-    return "buys #{swapConfig.in} at a rate of #{formatCurrencyFn(price)} #{swapConfig.out} each."
-
-
-# ------------------------------------------------
-buildDetailsProse.fixed.sell = (swapConfig)->
-    return "sells exactly #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out} for each exact multiple of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in} received."
-
-buildDetailsProse.fixed.buy = (swapConfig)->
-    return "buys #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in} and pays #{formatCurrencyFn(swapConfig.out_qty)} #{swapConfig.out}.  Multiples of #{formatCurrencyFn(swapConfig.in_qty)} #{swapConfig.in} are accepted."
-
-
-# ------------------------------------------------
-buildDetailsProse.fiat.sell = (swapConfig)->
-    formatFiatCurrency = swapbot.formatters.formatArbitraryPrecisionFiatCurrency
-    cost = swapConfig.cost
-    
-    if swapConfig.divisible
-        divisibleMsg = "Partial units of #{swapConfig.out} may be sold."
-    else
-        divisibleMsg = "Only whole units of #{swapConfig.out} are sold. Extra BTC is returned as change."
-
-    return "sells #{swapConfig.out} at a price of #{formatFiatCurrency(cost)} USD worth of #{swapConfig.in} each. A minimum sale of #{formatCurrencyFn(swapConfig.min_out)} #{swapConfig.out} is required. #{divisibleMsg}"
-
-buildDetailsProse.fiat.buy = (swapConfig)->
-    return ""
-
 
 # #############################################
 
@@ -133,42 +98,55 @@ buildInAmountFromOutAmount.fixed = (outAmount, swapConfig)->
 
     return [inAmount, rawInAmount]
 
-buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentRate)->
+buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentQuotes)->
     if not outAmount? or isNaN(outAmount)
         return 0
 
-    if currentRate == 0
+    fiatRate = buildFiatRateForToken(swapConfig.in, 'USD', currentQuotes)
+    console.log "buildInAmountFromOutAmount fiatRate for #{swapConfig.in} is ",fiatRate
+    if fiatRate == 0
         return 0
 
-    [inAmount, buffer, rawInAmount, rawBuffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
+    [inAmount, buffer, rawInAmount, rawBuffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentQuotes)
     return [inAmount + buffer, rawInAmount + rawBuffer]
 
 
-buildInAmountAndBuffer = (outAmount, swapConfig, currentRate)->
+buildInAmountAndBuffer = (outAmount, swapConfig, currentQuotes)->
     if not outAmount? or isNaN(outAmount)
         return 0
 
-    if currentRate == 0
+    fiatRate = buildFiatRateForToken(swapConfig.in, 'USD', currentQuotes)
+    if fiatRate == 0
         return 0
 
-    btcCost = swapConfig.cost / currentRate
+    tokenCost = swapConfig.cost / fiatRate
 
 
 
     if swapConfig.divisible
         marketBuffer = 0
     else
-        marketBuffer = 0.02
+        isBTC = (swapConfig.in == 'BTC')
+
+        # use a smaller market buffer for tokens...
+
+        if isBTC
+            # start with a max of 2%
+            marketBuffer = 0.02
+        else
+            # start with a max of 0.005 percent
+            marketBuffer = 0.005
+
 
         # if marketBuffer is more 40% of the cost of a single token, then adjust it
-        maxMarketBufferValue = btcCost * 0.40
+        maxMarketBufferValue = tokenCost * 0.40
         maxMarketBuffer = maxMarketBufferValue / outAmount
         if marketBuffer > maxMarketBuffer
             marketBuffer = maxMarketBuffer
 
-    # console.log "btcCost=#{btcCost} marketBuffer=#{marketBuffer}"
+    # console.log "tokenCost=#{tokenCost} marketBuffer=#{marketBuffer}"
 
-    inAmount = outAmount * btcCost
+    inAmount = outAmount * tokenCost
     buffer = inAmount * marketBuffer
     rawInAmount = inAmount
     rawBuffer = buffer
@@ -202,7 +180,7 @@ buildOutAmountFromInAmount.fixed = (inAmount, swapConfig)->
 
     return outAmount
 
-buildOutAmountFromInAmount.fiat = (inAmount, swapConfig, currentRate)->
+buildOutAmountFromInAmount.fiat = (inAmount, swapConfig, currentQuotes)->
     # not implemented
     return 0
 
@@ -313,11 +291,12 @@ showChangeMessagePopover = (e)->
     return
 
 buildChangeMessage = {}
-buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
-    [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentRate)
+buildChangeMessage.fiat = (outAmount, swapConfig, currentQuotes)->
+    [inAmount, buffer] = buildInAmountAndBuffer(outAmount, swapConfig, currentQuotes)
     if buffer? and Math.round(buffer * exports.SATOSHI) > 0
         assetIn = swapConfig.in
-        fiatSuffix = ' ('+swapbot.formatters.formatFiatCurrency(buffer * currentRate)+')'
+        fiatRate = buildFiatRateForToken(swapConfig.in, 'USD', currentQuotes)
+        fiatSuffix = ' ('+swapbot.formatters.formatFiatCurrency(buffer * fiatRate)+')'
         return React.createElement('span',{className: "changeMessage"}, [
             "This includes a ",
             React.createElement('span', {className: "popover", title: "More about buffering", onClick: showChangeMessagePopover}, "buffer"),
@@ -328,12 +307,14 @@ buildChangeMessage.fiat = (outAmount, swapConfig, currentRate)->
 
     return null
 
+# ------------------------------------------------------------------------
+
+buildFiatRateForToken = (token, fiat, quotes)->
+    return quoteUtils.resolveFiatPriceFromQuotes(token, fiat, quotes)
+
 # #############################################
 # exports
 
-
-exports.swapDetailsProse = (swapConfig)->
-    return buildDetailsProse[swapConfig.strategy][swapConfig.direction](swapConfig)
 
 
 # returns [firstSwapDescription, otherSwapDescriptions]
@@ -386,13 +367,13 @@ exports.buildExchangeDescriptionsForGroup = (bot, swapConfigGroup)->
     return [mainDesc, otherSwapDescriptions, swapRulesSummary, whitelistSummary]
     
 
-exports.inAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
-    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
+exports.inAmountFromOutAmount = (outAmount, swapConfig, currentQuotes)->
+    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentQuotes)
     inAmount = 0 if inAmount == NaN
     return inAmount
 
-exports.rawInAmountFromOutAmount = (outAmount, swapConfig, currentRate)->
-    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentRate)
+exports.rawInAmountFromOutAmount = (outAmount, swapConfig, currentQuotes)->
+    [inAmount, rawInAmount] = buildInAmountFromOutAmount[swapConfig.strategy](outAmount, swapConfig, currentQuotes)
     rawInAmount = 0 if rawInAmount == NaN
     return rawInAmount
 
@@ -415,8 +396,8 @@ exports.validateInAmount = (inAmount, swapConfig)->
     # no error
     return null
 
-exports.buildChangeMessage = (outAmount, swapConfig, currentRate)->
-    return buildChangeMessage[swapConfig.strategy]?(outAmount, swapConfig, currentRate)
+exports.buildChangeMessage = (outAmount, swapConfig, currentQuotes)->
+    return buildChangeMessage[swapConfig.strategy]?(outAmount, swapConfig, currentQuotes)
 
 # groups by asset out and 
 exports.groupSwapConfigs = (allSwapConfigs)->

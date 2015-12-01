@@ -48,8 +48,8 @@ popoverLabels.swapTypeChoice = (number, action)->
                     </li>
                     <li>
                         <strong>Swaps By USD Amount paid in BTC or Tokens</strong> (Sell Only)<br/>
-                        <p>This type of swap accepts BTC only.  The tokens for sale are priced in a US dollar amount.  And the amount of tokens sent in return is dependent on the current USD value of BTC when the transaction is received.</p>
-                        <p>Users are asked to send a small bit of extra BTC in order to adjust for market fluctuations.  Any excess BTC is returned to the user along with their tokens.</p>
+                        <p>This type of swap accepts BTC and supported tokens only.  The tokens for sale are priced in a US dollar amount.  The amount of tokens sent in return is dependent on the current USD value of BTC when the transaction is received.</p>
+                        <p>When purchasing with BTC, users are asked to send a small bit of extra BTC in order to adjust for market fluctuations.  Any excess BTC is returned to the user along with their tokens.</p>
                     </li>
                 </ol>
             """
@@ -275,7 +275,7 @@ popoverLabels.fiatSellPrice = {
         title: "About the Price"
         content: """
             <p>This is the cost in USD that the user will pay for 1 token.</p>
-            <p>When the BTC transaction is received, this Swapbot will get a quote in USD at the current market rate.</p>
+            <p>When the deposit transaction is received, this Swapbot will get a quote in USD at the current market rate.</p>
         """
     }
 }
@@ -294,8 +294,8 @@ popoverLabels.fiatSellIsDivisible = {
     popover: {
         title: "About Token is Divisible"
         content: """
-            <p>If this token is marked as divisible, then an exact amount of this token will be sent to the user based on the BTC received and market rate.</p>
-            <p>If the token is not divisible, then the number of tokens purchased will be rounded down to the nearest whole number and the rest of the BTC received will be sent as change.  This swapbot will ask the user to send an additional small BTC buffer to account for market fluctuations.</p>
+            <p>If this token is marked as divisible, then an exact amount of this token will be sent to the user based on the market rate of the BTC or tokens received.</p>
+            <p>If the token is not divisible, then the number of tokens purchased will be rounded down to the nearest whole number.  If the customer deposited BTC, then the excess BTC will be sent back as change.  This swapbot will ask the user to send an additional small BTC buffer to account for market fluctuations when selling tokens for BTC.</p>
         """
     }
 }

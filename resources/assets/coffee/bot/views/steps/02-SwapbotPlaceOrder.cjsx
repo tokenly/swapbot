@@ -6,10 +6,10 @@ PlaceOrderInput  = require '../../views/includes/PlaceOrderInput'
 QuotebotStore    = require '../../stores/QuotebotStore'
 quoteUtils       = require '../../util/quoteUtils'
 swapRuleUtils    = require '../../../shared/swapRuleUtils'
-whitelistUtils   = require '../../../shared/whitelistUtils'
-swapUtils        = require '../../../shared/swapUtils'
+swapUtils        = require '../../util/swapUtils'
 UserChoiceStore  = require '../../stores/UserChoiceStore'
 UserInputActions = require '../../actions/UserInputActions'
+whitelistUtils   = require '../../../shared/whitelistUtils'
 # ---- end references
 
 SwapbotPlaceOrder = null
@@ -17,7 +17,7 @@ SwapbotPlaceOrder = null
 getViewState = ()->
     return { 
         userChoices: UserChoiceStore.getUserChoices() 
-        currentBTCPrice: QuotebotStore.getCurrentPrice() 
+        currentQuote: QuotebotStore.getCurrentQuotes() 
     }
 
 
@@ -29,13 +29,13 @@ SwapbotSendItem = React.createClass
 
     getRawInAmount: ()->
         if this.props.direction == BotConstants.DIRECTION_SELL
-            return swapUtils.rawInAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+            return swapUtils.rawInAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentQuote)
 
         return this.getInAmount()
 
     getInAmount: ()->
         if this.props.direction == BotConstants.DIRECTION_SELL
-            inAmount = swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+            inAmount = swapUtils.inAmountFromOutAmount(this.props.outAmount, this.props.swapConfig, this.props.currentQuote)
         else
             inAmount = this.props.inAmount
 
@@ -75,7 +75,7 @@ SwapbotSendItem = React.createClass
             e.preventDefault()
             if not isChooseable then return
 
-            UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentBTCPrice)
+            UserInputActions.chooseSwapConfigAtRate(this.props.swapConfig, this.props.currentQuote)
 
             return
 
@@ -97,7 +97,7 @@ SwapbotSendItem = React.createClass
             <span className="fiatSuffix">
                 { quoteUtils.fiatQuoteSuffix(swapConfig, inAmount, swapConfig.in) }
             </span>
-        changeMessage = swapUtils.buildChangeMessage(outAmount, this.props.swapConfig, this.props.currentBTCPrice)
+        changeMessage = swapUtils.buildChangeMessage(outAmount, this.props.swapConfig, this.props.currentQuote)
 
         appliedDiscountMessage = ''
         appliedDiscount = swapRuleUtils.getAppliedDiscount(outAmount, this.props.swapConfig)
@@ -223,7 +223,7 @@ SwapbotPlaceOrder = React.createClass
         return if not matchingSwapConfigs
 
         if matchingSwapConfigs.length == 1
-            UserInputActions.chooseSwapConfigAtRate(matchingSwapConfigs[0], this.state.currentBTCPrice)
+            UserInputActions.chooseSwapConfigAtRate(matchingSwapConfigs[0], this.state.currentQuote)
 
         return
 
@@ -271,7 +271,7 @@ SwapbotPlaceOrder = React.createClass
                             { 
                                 if matchingSwapConfigs
                                     for matchedSwapConfig, offset in matchingSwapConfigs
-                                            <SwapbotSendItem key={'swap' + offset} direction={this.state.userChoices.direction} inAmount={this.state.userChoices.inAmount} outAmount={this.state.userChoices.outAmount} currentBTCPrice={this.state.currentBTCPrice} swapConfig={matchedSwapConfig} bot={bot} />
+                                            <SwapbotSendItem key={'swap' + offset} direction={this.state.userChoices.direction} inAmount={this.state.userChoices.inAmount} outAmount={this.state.userChoices.outAmount} currentQuote={this.state.currentQuote} swapConfig={matchedSwapConfig} bot={bot} />
                             }
                         </ul>
                         <p className="description">After receiving one of those token types, this bot will wait for <b>{formatters.confirmationsProse(bot.confirmationsRequired)}</b> and return tokens <b>to the same address</b>.</p>

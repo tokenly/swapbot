@@ -2,7 +2,7 @@
 UserInputActions = require '../../actions/UserInputActions'
 UserInterfaceStateStore = require '../../stores/UserInterfaceStateStore'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
-swapbot = swapbot or {}; swapbot.swapUtils = require '../../../shared/swapUtils'
+swapUtils = require '../../util/swapUtils'
 # ---- end references
 
 SwapbotChoose = null
@@ -23,7 +23,7 @@ SwapbotChoose = React.createClass
 
 
     componentDidMount: ()->
-        # this.numberOfSwapGroups = swapbot.swapUtils.groupSwapConfigs(this.prop.bot.swaps).length
+        # this.numberOfSwapGroups = swapUtils.groupSwapConfigs(this.prop.bot.swaps).length
         UserInterfaceStateStore.addChangeListener(this._onChange)
         return
 
@@ -48,7 +48,7 @@ SwapbotChoose = React.createClass
         bot = this.props.bot
         return null if not bot
 
-        swapConfigGroups = swapbot.swapUtils.groupSwapConfigs(bot.swaps)
+        swapConfigGroups = swapUtils.groupSwapConfigs(bot.swaps)
 
         <div id="swap-step-1">
             <div className="section grid-50">
@@ -108,7 +108,7 @@ SwapbotChoose = React.createClass
 
 
                                     isChooseable = swapbot.formatters.isNotZero(bot.balances[outAsset])
-                                    [firstSwapDescription, otherSwapDescriptions, swapRulesSummary, whitelistSummary] = swapbot.swapUtils.buildExchangeDescriptionsForGroup(bot, swapConfigGroup)
+                                    [firstSwapDescription, otherSwapDescriptions, swapRulesSummary, whitelistSummary] = swapUtils.buildExchangeDescriptionsForGroup(bot, swapConfigGroup)
 
                                     <li key={"swapGroup#{index}"} className={"chooseable swap"+(" unchooseable" if not isChooseable) }>
                                         <a href="#choose-swap" onClick={this.buildChooseAsset((if isSell then outAsset else inAsset), isSell, isChooseable)}>
@@ -145,7 +145,7 @@ SwapbotChoose = React.createClass
             </div>
 
     calculateBuyableAmount: (bot, swapConfigGroup)->
-        return swapbot.swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroup)
+        return swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroup)
 
 # #############################################
 module.exports = SwapbotChoose

@@ -22,7 +22,7 @@
         <env name="MAIL_DRIVER" value="log"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="KEEN_QUEUE_CONNECTION" value="sync"/>
-        <env name="DEFAULT_PRICED_TOKENS" value="[{&quot;token&quot;:&quot;LTBCOIN&quot;,&quot;symbol&quot;:&quot;LTB&quot;},{&quot;token&quot;:&quot;FOOCOIN&quot;}]"/>
+        <env name="DEFAULT_PRICED_TOKENS" value="[{&quot;token&quot;:&quot;LTBCOIN&quot;,&quot;symbol&quot;:&quot;LTB&quot;},{&quot;token&quot;:&quot;FOOCOIN&quot;},{&quot;token&quot;:&quot;XCP&quot;}]"/>
         <!-- <env name="DB_DATABASE" value="swapbot_test"/> -->
     </php>
 </phpunit>

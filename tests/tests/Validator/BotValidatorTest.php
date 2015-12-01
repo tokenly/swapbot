@@ -255,7 +255,11 @@ class BotValidatorTest extends TestCase {
             ],
             [
                 'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['in' => 'BAD',]]]),
-                'error' => 'Only BTC is supported',
+                'error' => 'This token type is not supported',
+            ],
+            [
+                'vars' => array_replace_recursive($fiat_sample_vars, ['swaps' => [0 => ['in' => 'XCP',]]]),
+                'error' => null,
             ],
         ]);
 

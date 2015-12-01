@@ -21,12 +21,16 @@ class PricedTokensAPITest extends TestCase {
         // check response
         PHPUnit::assertEquals([
             [
-                "token" => "FOOCOIN",
+                "token"  => "FOOCOIN",
                 "symbol" => "FOOCOIN"
             ],
             [
-                "token" => "LTBCOIN",
+                "token"  => "LTBCOIN",
                 "symbol" => "LTB"
+            ],
+            [
+                "token"  => "XCP",
+                "symbol" => "XCP"
             ],
         ], $response);
     }

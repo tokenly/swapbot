@@ -3,7 +3,7 @@ UserInputActions = require '../../actions/UserInputActions'
 UserChoiceStore = require '../../stores/UserChoiceStore'
 BotConstants = require '../../constants/BotConstants'
 swapbot = swapbot or {}; swapbot.formatters = require '../../../shared/formatters'
-swapbot = swapbot or {}; swapbot.swapUtils = require '../../../shared/swapUtils'
+swapUtils = require '../../util/swapUtils'
 # ---- end references
 
 PlaceOrderInput = null
@@ -52,8 +52,8 @@ PlaceOrderInput = React.createClass
         isBuy = not isSell
         sellingOrBuyingAsset = (if isSell then outAsset else inAsset)
         if isBuy
-            swapConfigGroups = swapbot.swapUtils.getBuySwapConfigsByInAsset(bot.swaps, inAsset)
-            maxBuyableAmount = swapbot.formatters.formatCurrencyWithForcedZero(swapbot.swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroups))
+            swapConfigGroups = swapUtils.getBuySwapConfigsByInAsset(bot.swaps, inAsset)
+            maxBuyableAmount = swapbot.formatters.formatCurrencyWithForcedZero(swapUtils.calculateMaxBuyableAmount(bot.balances, swapConfigGroups))
             sellingOrBuyingAmount = this.state.userChoices.inAmount
         else
             sellingOrBuyingAmount = this.state.userChoices.outAmount

@@ -1,0 +1,13 @@
+name: swap.new
+state: 'brandnew'
+isComplete: false
+isError: false
+txidIn: "00000000000000000000000000000000000000000000000000000XCPtx333333"
+
+quantityIn: 6.66666667
+assetIn: 'XCP'
+quantityOut: 1
+assetOut: 'DRAGONMEAT'
+
+changeOut: 0
+changeOutAsset: 'BTC'
