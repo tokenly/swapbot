@@ -10,6 +10,8 @@ exports = {}
 # #############################################
 # local
 
+formatCurrencyFn = formatters.formatCurrency
+
 buildDetailsProse = {rate: {}, fixed: {}, fiat: {}, }
 
 # ------------------------------------------------
