@@ -1130,7 +1130,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/socialite/zipball/dab36b0ac2e62ad5a82810f035e248526bc31353",
+                "url": "https://api.github.com/repos/laravel/socialite/zipball/297945170f17298247a4bd2fd5fe1d8a9a277e21",
                 "reference": "0f7c3b02f7e3fd715592b49da080973bd8aec2bb",
                 "shasum": ""
             },
@@ -3137,7 +3137,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/0d283ef8704a513eee1cb116ee185007272a67a2",
+                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/ff328acb464abe77996083d40f24abc529a84c1a",
                 "reference": "c4dbdb76b542ee9f25f567bd7b633c804628039a",
                 "shasum": ""
             },
@@ -3546,12 +3546,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/quotebot-client.git",
-                "reference": "e35eccb5ba81c5597ba85772de6f1aaf1956cb0f"
+                "reference": "d58787af4de6a3d8c13da485a11885d394fc9f7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/e35eccb5ba81c5597ba85772de6f1aaf1956cb0f",
-                "reference": "e35eccb5ba81c5597ba85772de6f1aaf1956cb0f",
+                "url": "https://api.github.com/repos/tokenly/quotebot-client/zipball/d58787af4de6a3d8c13da485a11885d394fc9f7d",
+                "reference": "d58787af4de6a3d8c13da485a11885d394fc9f7d",
                 "shasum": ""
             },
             "require": {
@@ -3579,7 +3579,7 @@
                 }
             ],
             "description": "A quotebot client library",
-            "time": "2015-09-07 12:36:05"
+            "time": "2015-12-01 14:10:28"
         },
         {
             "name": "tokenly/token-generator",
@@ -3631,7 +3631,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/9acdb7559306a9d1b053a09530505625e45f81fc",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/69bc89e20e84e73cd3f4f2532f54ff03ef2bf22c",
                 "reference": "9acdb7559306a9d1b053a09530505625e45f81fc",
                 "shasum": ""
             },
