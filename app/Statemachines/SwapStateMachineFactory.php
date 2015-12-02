@@ -76,7 +76,7 @@ class SwapStateMachineFactory extends StateMachineFactory {
         // SwapState::OUT_OF_STOCK => SwapState::READY with SwapStateEvent::STOCK_CHECKED via StockChecked
         $this->addTransitionToStates($states, SwapState::OUT_OF_STOCK, SwapState::READY, SwapStateEvent::STOCK_CHECKED, new StockChecked());
 
-        // SwapState::OUT_OF_FUEL => SwapState::READY with SwapStateEvent::FUEL_CHECKED via StockChecked
+        // SwapState::OUT_OF_FUEL => SwapState::READY with SwapStateEvent::FUEL_CHECKED via FuelChecked
         $this->addTransitionToStates($states, SwapState::OUT_OF_FUEL, SwapState::READY, SwapStateEvent::FUEL_CHECKED, new FuelChecked());
 
         // SwapState::READY => SwapState::CONFIRMING with SwapStateEvent::CONFIRMING via SwapConfirming

@@ -37,7 +37,7 @@ class ReconcileBotSwapStatesHandler {
         $block_height = $command->block_height;
 
         DB::transaction(function () use ($bot, $block_height) {
-            $states = [SwapState::OUT_OF_STOCK];
+            $states = [SwapState::OUT_OF_STOCK, SwapState::OUT_OF_FUEL];
             $swaps = $this->swap_repository->findByBotIDWithStates($bot['id'], $states);
             
             foreach($swaps as $swap) {

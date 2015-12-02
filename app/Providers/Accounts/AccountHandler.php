@@ -161,8 +161,15 @@ class AccountHandler {
 
         // add dust and change to non BTC purchases
         if ($desired_asset != 'BTC') {
-            $change_out = isset($swap['receipt']['changeOut']) ? $swap['receipt']['changeOut'] : 0;
             $dust_size = SwapProcessor::DEFAULT_REGULAR_DUST_SIZE;
+
+            if ($swap['receipt']['assetIn'] == 'BTC') {
+                $change_out = isset($swap['receipt']['changeOut']) ? $swap['receipt']['changeOut'] : 0;
+            } else {
+                // no change is sent for fiat purchases that are paid with non-BTC tokens
+                $change_out = 0;
+            }
+
             $balances['BTC'] = $change_out + $dust_size;
         }
 
