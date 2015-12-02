@@ -1,0 +1,17 @@
+name: send.confirmed
+
+destination: SENDER01
+confirmations: '2'
+quantityIn: 6.67666667
+assetIn: 'XCP'
+txidIn: '00000000000000000000000000000000000000000000000000000XCPtx333333'
+quantityOut: 1
+assetOut: 'DRAGONMEAT'
+changeOut: 0
+changeOutAsset: 'BTC'
+txidOut: '0000000000000000000000000000001111'
+confirmationsOut: 2
+state: 'complete'
+type: swap
+isComplete: true
+isError: false

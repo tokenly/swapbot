@@ -1,0 +1,86 @@
+# test fiat-based token purchase with XCP
+#   when overpaid by a small amount
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot04-dragonmeat.yml }
+
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      DRAGONMEAT: 25
+      XCP: 0
+      BTC: 1
+    sending:
+      BTC: 0
+
+
+quotebot:
+  - source: bitcoinAverage
+    pair: USD:BTC
+    last: 300
+  - source: poloniex
+    pair: BTC:XCP
+    last: 250000
+    lastAvg: 250000
+    inSatoshis: true
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_XCP_RECEIVE_notification_01.yml }
+    quantity: 6.67666667
+    confirmations: 2
+  - meta: { baseFilename: confirmed_DRAGONMEAT_SEND_notification_01.yml }
+    confirmations: 2
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_DRAGONMEAT.yml }
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-XCP_DRAGONMEAT.yml }
+    quantityIn: 6.67666667
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-XCP_DRAGONMEAT-2confirmations.yml }
+    inQty: 6.67666667
+    msg: Received 6.67666667 XCP from SENDER01 with 2 confirmations. Will vend 1 DRAGONMEAT to SENDER01.
+  - #### swap sent
+    meta: { baseFilename: swap.sent-XCP_DRAGONMEAT-2confirmations.yml }
+    quantityIn: 6.67666667
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-DRAGONMEAT.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-DRAGONMEAT.yml }
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      DRAGONMEAT: 24
+      BTC: 0.9999 # 1 + 0.00005430 (dist) - 0.0001 (fee) - 0.00005430 (dust)
+      XCP: 6.67666667
+
+expectedQuoteClientCalls:
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: poloniex, pair: BTC:XCP }
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: poloniex, pair: BTC:XCP }
