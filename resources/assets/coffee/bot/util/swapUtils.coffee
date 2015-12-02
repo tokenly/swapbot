@@ -123,7 +123,7 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentQuotes)->
 
 
 
-    if swapConfig.divisible
+    if swapConfig.divisible == '1'
         marketBuffer = 0
     else
         isBTC = (swapConfig.in == 'BTC')

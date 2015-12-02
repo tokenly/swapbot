@@ -38,10 +38,14 @@ buildDetailsProse.fiat.sell = (swapConfig)->
     formatFiatCurrency = formatters.formatArbitraryPrecisionFiatCurrency
     cost = swapConfig.cost
     
-    if swapConfig.divisible
+    if swapConfig.divisible == '1'
         divisibleMsg = "Partial units of #{swapConfig.out} may be sold."
     else
-        divisibleMsg = "Only whole units of #{swapConfig.out} are sold. Extra BTC is returned as change."
+        divisibleMsg = "Only whole units of #{swapConfig.out} are sold."
+        if swapConfig.in == 'BTC'
+            divisibleMsg += " Extra BTC is returned as change."
+        else
+            divisibleMsg += " Extra #{swapConfig.in} deposited is not returned."
 
     return "sells #{swapConfig.out} at a price of #{formatFiatCurrency(cost)} USD worth of #{swapConfig.in} each. A minimum sale of #{formatCurrencyFn(swapConfig.min_out)} #{swapConfig.out} is required. #{divisibleMsg}"
 

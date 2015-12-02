@@ -10,7 +10,7 @@ currentQuotes = {}
 
 addNewQuote = (newQuote)->
     currentQuotes[newQuote.source+'.'+newQuote.pair] = newQuote
-    console.log "currentQuotes updated with #{newQuote.source+'.'+newQuote.pair}"
+    # console.log "currentQuotes updated with #{newQuote.source+'.'+newQuote.pair}"
     emitChange()
     return
 
