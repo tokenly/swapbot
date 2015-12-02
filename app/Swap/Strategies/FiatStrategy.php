@@ -79,7 +79,9 @@ class FiatStrategy implements Strategy {
 
 
         $change_quantity_out = 0;
-        if (!$swap_config['divisible']) {
+
+        // change is only calculated for BTC and with non-divisible swaps
+        if (!$swap_config['divisible'] AND $swap_config['in'] == 'BTC') {
             // round down and calculate change
             $unrounded_quantity_out = $quantity_out;
             $quantity_out = floor($quantity_out);
