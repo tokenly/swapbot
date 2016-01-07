@@ -4,13 +4,16 @@ namespace Swapbot\Console\Commands\Bot;
 
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Foundation\Bus\DispatchesCommands;
 use Swapbot\Commands\DeleteBot;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class DeleteBotCommand extends Command {
 
+    use ConfirmableTrait;
     use DispatchesCommands;
 
     /**
@@ -50,6 +53,7 @@ class DeleteBotCommand extends Command {
 
         return [
             ['dry-run' , 'd',  InputOption::VALUE_NONE, 'Dry Run'],
+            ['force',    null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
         ];
     }
 
@@ -63,6 +67,13 @@ class DeleteBotCommand extends Command {
     {
         $bot_id = $this->input->getArgument('bot-id');
         $is_dry_run = !!$this->input->getOption('dry-run');
+
+        // confirm
+        if (!$is_dry_run) {
+            // require confirmation
+            if (!$this->confirmToProceed()) { return; }
+        }
+
         if ($is_dry_run) { $this->comment("[Dry Run]"); }
 
         // load the bot
@@ -78,12 +89,6 @@ class DeleteBotCommand extends Command {
             if ($is_dry_run) {
                 $this->comment("[Dry Run] Would delete bot {$bot['name']} ({$bot['uuid']})");
             } else {
-                $confirmed = $this->confirm("Are you sure you want to delete bot {$bot['name']} ({$bot['uuid']})?", false);
-                if (!$confirmed) {
-                    $this->error("Aborting");
-                    return;
-                }
-
                 $this->comment("Deleting bot {$bot['name']} ({$bot['uuid']})");
                 $this->dispatch(new DeleteBot($bot));
             }
