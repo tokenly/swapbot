@@ -49,6 +49,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\SendSlackTestEventCommand',
 		'Swapbot\Console\Commands\Development\SendKeenSwapbotEvents',
 		'Swapbot\Console\Commands\Development\CreateMissingURLSlugsCommand',
+		'Swapbot\Console\Commands\Development\ArchiveOldBotEventsCommand',
 
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',

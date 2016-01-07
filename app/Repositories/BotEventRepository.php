@@ -2,6 +2,7 @@
 
 namespace Swapbot\Repositories;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Swapbot\Models\BotEvent;
@@ -93,11 +94,39 @@ class BotEventRepository extends APIRepository
     }
 
 
+    // note that this is a slow operation - do not use in production
+    public function slowFindByEventName($event_name) {
+        $iterator = call_user_func([$this->model_type, 'where'], 'event', 'LIKE', '%"name"%"'.$event_name.'"%')
+            ->orderBy('serial', 'asc')
+            ->get();
 
+        foreach($iterator as $event_model) {
+            if ($event_model['event']['name'] == $event_name) {
+                yield $event_model;
+            }
+        }
+    }
+
+    public function archive($event) {
+        DB::transaction(function() use ($event) {
+            $create_vars = $event->getOriginal();
+
+            // set date
+            $create_vars['archived_at'] = Carbon::now();
+
+            // create the new one
+            DB::table('bot_events_archive')->insert($create_vars);
+
+            // delete the old one
+            self::delete($event);
+        });
+    }
+
+    // ------------------------------------------------------------------------
+    
     protected function modifyAttributesBeforeCreate($attributes) {
         $attributes['serial'] = round(microtime(true) * 1000);
         return $attributes;
     }
-
 
 }
