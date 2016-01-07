@@ -3,9 +3,11 @@
 use Illuminate\Support\Facades\DB;
 use Swapbot\Commands\DeleteBot;
 use Swapbot\Repositories\BotEventRepository;
+use Swapbot\Repositories\BotIndexRepository;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\CustomerRepository;
+use Swapbot\Repositories\SwapIndexRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Repositories\TransactionRepository;
 
@@ -16,15 +18,18 @@ class DeleteBotHandler {
      *
      * @return void
      */
-    public function __construct(BotRepository $repository, TransactionRepository $transaction_repository, SwapRepository $swap_repository, CustomerRepository $customer_repository, BotEventRepository $bot_event_repository, BotLedgerEntryRepository $bot_ledger_entry_repository)
+    public function __construct(BotRepository $repository, TransactionRepository $transaction_repository, SwapRepository $swap_repository, CustomerRepository $customer_repository, BotEventRepository $bot_event_repository, BotLedgerEntryRepository $bot_ledger_entry_repository, BotIndexRepository $bot_index_repository, SwapIndexRepository $swap_index_repository)
     {
         $this->repository                  = $repository;
         $this->transaction_repository      = $transaction_repository;
-        $this->swap_repository = $swap_repository;
-        $this->customer_repository = $customer_repository;
+        $this->swap_repository             = $swap_repository;
+        $this->customer_repository         = $customer_repository;
         $this->bot_ledger_entry_repository = $bot_ledger_entry_repository;
         $this->bot_event_repository        = $bot_event_repository;
+        $this->bot_index_repository        = $bot_index_repository;
+        $this->swap_index_repository       = $swap_index_repository;
     }
+
 
     /**
      * Handle the command.
@@ -65,6 +70,12 @@ class DeleteBotHandler {
         foreach ($this->bot_event_repository->findByBotId($bot['id']) as $bot_event) {
             $this->bot_event_repository->delete($bot_event);
         };
+
+        // delete the bot index entries
+        $this->bot_index_repository->clearIndex($bot);
+
+        // delete the swap index entries
+        $this->swap_index_repository->clearIndex($bot);
 
         if ($driver_name == 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
