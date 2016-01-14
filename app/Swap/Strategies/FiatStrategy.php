@@ -209,12 +209,12 @@ class FiatStrategy implements Strategy {
         $conversion_rate = $this->getFiatConversionRate($swap_config['in'], $swap_config['fiat'], $swap_config['source']);
 
         return [
-            [
-                'in'   => $swap_config['fiat'],
-                'out'  => $swap_config['out'],
-                // 'rate' => (1 / $swap_config['cost']),
-                'cost' => ($swap_config['cost']),
-            ],
+            // [
+            //     'in'   => $swap_config['fiat'],
+            //     'out'  => $swap_config['out'],
+            //     // 'rate' => (1 / $swap_config['cost']),
+            //     'cost' => ($swap_config['cost']),
+            // ],
             [
                 'in'   => $swap_config['in'],
                 'out'  => $swap_config['out'],
