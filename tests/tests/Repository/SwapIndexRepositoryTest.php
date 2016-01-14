@@ -133,9 +133,9 @@ class SwapIndexRepositoryTest extends TestCase {
         PHPUnit::assertEquals($bot_1['uuid'], $found_bots[0]['uuid']);
 
 
-        $found_bots = $this->runSearch(['inToken' => 'USD']);
-        PHPUnit::assertCount(1, $found_bots);
-        PHPUnit::assertEquals($bot_1['uuid'], $found_bots[0]['uuid']);
+        // $found_bots = $this->runSearch(['inToken' => 'USD']);
+        // PHPUnit::assertCount(1, $found_bots);
+        // PHPUnit::assertEquals($bot_1['uuid'], $found_bots[0]['uuid']);
     }
 
     public function testSortSwapsByCost()
