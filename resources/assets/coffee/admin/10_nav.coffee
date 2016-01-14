@@ -89,9 +89,13 @@ nav.buildNav = ()->
                 ]),
                 buildAdminPanelNavLink(user),
                 m("li", { class: ""}, [
-                    m("a[href='https://www.youtube.com/watch?v=MCdFHx3yTfE']", {target: "_blank",}, [
-                        m('span', {class: "glyphicon glyphicon-film",}, ''),
-                        " Tutorial Video"
+                    # m("a[href='https://www.youtube.com/watch?v=MCdFHx3yTfE']", {target: "_blank",}, [
+                    #     m('span', {class: "glyphicon glyphicon-film",}, ''),
+                    #     " Tutorial Video"
+                    # ]),
+                    m("a[href='http://www.scribd.com/doc/295135666/SwapBot-Vending-for-Operators']", {target: "_blank",}, [
+                        m('span', {class: "glyphicon glyphicon-book",}, ''),
+                        " Documentation"
                     ]),
                 ]),
             ]),
