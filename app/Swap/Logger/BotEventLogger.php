@@ -560,6 +560,7 @@ class BotEventLogger {
 
         if ($use_full_swap_details) {
             return [
+                'source'           => isset($receipt['source'])           ? $receipt['source']            : null,
                 'destination'      => isset($receipt['destination'])      ? $receipt['destination']       : null,
 
                 'quantityIn'       => isset($receipt['quantityIn'])       ? $receipt['quantityIn']        : null,

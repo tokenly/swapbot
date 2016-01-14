@@ -57,7 +57,7 @@ class ArchiveOldBotEventsCommand extends Command {
     protected function getOptions()
     {
         return [
-            // ['all', 'a', InputOption::VALUE_NONE, 'Process all pending swaps.'],
+            ['limit', 'l', InputOption::VALUE_OPTIONAL, 'Limit number of items to archive.', null],
         ];
     }
 
@@ -71,17 +71,22 @@ class ArchiveOldBotEventsCommand extends Command {
     {
         try {
             // get a single swap and process it
-            $event_name = $this->input->getArgument('event-name');
-            $this->comment("Archiving events with name: $event_name");
+            $event_name = $this->argument('event-name');
+            $limit = $this->option('limit');
+            if ($limit !== null) { $limit = intval($limit); }
+            $this->comment("Archiving events with name: $event_name".($limit ? " (limit $limit)" : ''));
 
             $archived_count = 0;
-            DB::transaction(function() use ($event_name, &$archived_count) {
+            DB::transaction(function() use ($event_name, $limit, &$archived_count) {
                 $bot_event_repository = app('Swapbot\Repositories\BotEventRepository');
-                foreach ($bot_event_repository->slowFindByEventName($event_name) as $bot_event_model) {
+                foreach ($bot_event_repository->slowFindByEventName($event_name, $limit) as $bot_event_model) {
                     // archive the event
                     $bot_event_repository->archive($bot_event_model);
-                    // echo "Archiving {$bot_event_model['id']} {$bot_event_model['event']['name']}\n";
                     ++$archived_count;
+
+                    if ($limit !== null AND $archived_count >= $limit) {
+                        break;
+                    }
                 }
             });
 

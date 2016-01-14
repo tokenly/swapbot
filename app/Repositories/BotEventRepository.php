@@ -95,12 +95,16 @@ class BotEventRepository extends APIRepository
 
 
     // note that this is a slow operation - do not use in production
-    public function slowFindByEventName($event_name) {
-        $iterator = call_user_func([$this->model_type, 'where'], 'event', 'LIKE', '%"name"%"'.$event_name.'"%')
-            ->orderBy('serial', 'asc')
-            ->get();
+    public function slowFindByEventName($event_name, $limit=null) {
+        $query = 
+            call_user_func([$this->model_type, 'where'], 'event', 'LIKE', '%"name"%"'.$event_name.'"%')
+            ->orderBy('serial', 'asc');
 
-        foreach($iterator as $event_model) {
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        foreach($query->get() as $event_model) {
             if ($event_model['event']['name'] == $event_name) {
                 yield $event_model;
             }
