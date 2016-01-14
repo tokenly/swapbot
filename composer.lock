@@ -134,7 +134,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/79d644b495754c955f652fee8a6ca799f923bec6",
+                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/e2426740fdd851f60d9d6ae0de07bc7f10cb9461",
                 "reference": "4a41d6b4710ad1609a3f53da664d0ee010d240d7",
                 "shasum": ""
             },
@@ -3137,7 +3137,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/ff328acb464abe77996083d40f24abc529a84c1a",
+                "url": "https://api.github.com/repos/tokenly/accounts-client/zipball/d37473dc9763a8d85500384454f72c31de174f3f",
                 "reference": "c4dbdb76b542ee9f25f567bd7b633c804628039a",
                 "shasum": ""
             },
@@ -3385,12 +3385,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-event-log.git",
-                "reference": "f689da183dff772708863d79fda0985c06d4730b"
+                "reference": "9782f261845b0db5b2f03f362014b3af54ba6a94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/f689da183dff772708863d79fda0985c06d4730b",
-                "reference": "f689da183dff772708863d79fda0985c06d4730b",
+                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/9782f261845b0db5b2f03f362014b3af54ba6a94",
+                "reference": "9782f261845b0db5b2f03f362014b3af54ba6a94",
                 "shasum": ""
             },
             "require": {
@@ -3417,7 +3417,7 @@
                 }
             ],
             "description": "An event logger provider for Laravel.",
-            "time": "2015-07-02 20:58:07"
+            "time": "2016-01-08 13:51:26"
         },
         {
             "name": "tokenly/laravel-keen-events",
@@ -3631,7 +3631,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/69bc89e20e84e73cd3f4f2532f54ff03ef2bf22c",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/e9abffec1c2ae8ce06c9d02bbf2cb95cb54e1c9a",
                 "reference": "9acdb7559306a9d1b053a09530505625e45f81fc",
                 "shasum": ""
             },
