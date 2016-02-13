@@ -21,8 +21,14 @@ resolveRate = (asset, fiat, currentQuotes)->
     assetQuote = currentQuotes["poloniex.BTC:#{asset}"]
     if not assetQuote then return 0
 
+    # the assetRate is the lowest of:
+    #   1) the current price
+    #   2) the 24 hour average price
     assetRate = assetQuote.last
     if not assetRate then return 0
+    lowestAssetRateAvg = assetQuote.lastAvg
+    if not lowestAssetRateAvg then return 0
+    assetRate = Math.min(assetRate, lowestAssetRateAvg)
 
     if assetQuote.inSatoshis
         assetRate = assetRate / SATOSHI

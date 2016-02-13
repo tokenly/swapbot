@@ -103,7 +103,7 @@ buildInAmountFromOutAmount.fiat = (outAmount, swapConfig, currentQuotes)->
         return 0
 
     fiatRate = buildFiatRateForToken(swapConfig.in, 'USD', currentQuotes)
-    console.log "buildInAmountFromOutAmount fiatRate for #{swapConfig.in} is ",fiatRate
+    # console.log "buildInAmountFromOutAmount fiatRate for #{swapConfig.in} is ",fiatRate
     if fiatRate == 0
         return 0
 
@@ -121,9 +121,7 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentQuotes)->
 
     tokenCost = swapConfig.cost / fiatRate
 
-
-
-    if swapConfig.divisible == '1'
+    if swapConfig.divisible == '1' or swapConfig.divisible == true
         marketBuffer = 0
     else
         isBTC = (swapConfig.in == 'BTC')
