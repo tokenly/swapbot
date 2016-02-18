@@ -121,26 +121,28 @@ buildInAmountAndBuffer = (outAmount, swapConfig, currentQuotes)->
 
     tokenCost = swapConfig.cost / fiatRate
 
-    if swapConfig.divisible == '1' or swapConfig.divisible == true
-        marketBuffer = 0
-    else
-        isBTC = (swapConfig.in == 'BTC')
+    isDivisible = (swapConfig.divisible == '1' or swapConfig.divisible == true)
+    isBTC = (swapConfig.in == 'BTC')
 
-        # use a smaller market buffer for tokens...
+    # use a smaller market buffer for tokens...
 
-        if isBTC
-            # start with a max of 2%
-            marketBuffer = 0.02
-        else
-            # start with a max of 0.005 percent
+    if isBTC
+        # start with a max of 2%
+        marketBuffer = 0.02
+
+        if isDivisible
             marketBuffer = 0.005
 
+    else
+        # start with a max of 0.005 percent
+        marketBuffer = 0.005
 
-        # if marketBuffer is more 40% of the cost of a single token, then adjust it
-        maxMarketBufferValue = tokenCost * 0.40
-        maxMarketBuffer = maxMarketBufferValue / outAmount
-        if marketBuffer > maxMarketBuffer
-            marketBuffer = maxMarketBuffer
+
+    # if marketBuffer is more 40% of the cost of a single token, then adjust it
+    maxMarketBufferValue = tokenCost * 0.40
+    maxMarketBuffer = maxMarketBufferValue / outAmount
+    if marketBuffer > maxMarketBuffer
+        marketBuffer = maxMarketBuffer
 
     # console.log "tokenCost=#{tokenCost} marketBuffer=#{marketBuffer}"
 
@@ -272,21 +274,29 @@ validateInAmount.fiat = (inAmount, swapConfig)->
 
 # #############################################
 
-showChangeMessagePopover = (e)->
-    e.preventDefault()
-    e.stopPropagation()
+showChangeMessagePopover = (swapConfig)->
+    return (e)->
+        e.preventDefault()
+        e.stopPropagation()
 
-    content = """
-        <p>The tokens you are purchasing have a price set in dollars.  Since the price of bitcoin constantly changes, please deposit this additional buffer to make sure you send enough to complete your purchase.</p>
-        <p>Your price in BTC is locked in the as soon as the bot sees your transaction on the bitcoin network.  Any excess is refunded and you may be refunded more than the buffer if the price of BTC goes up or less than the buffer if the BTC price goes down.</p>
-    """
+        isDivisible = (swapConfig.divisible == '1' or swapConfig.divisible == true)
 
-    el = $(e.target)
-    # console.log "clicked: ",el
-    el.webuiPopover({trigger:'manual', title:'About the BTC Buffer', content: content, animation:'pop', closeable: true, })
-    el.webuiPopover('show')
 
-    return
+        content = """
+            <p>The tokens you are purchasing have a price set in dollars.  Since the price of bitcoin constantly changes, please deposit this additional buffer to make sure you send enough to complete your purchase.</p>
+            <p>Your price in BTC is locked in the as soon as the bot sees your transaction on the bitcoin network.
+            #{if !isDivisible then 'Any excess is refunded and you may be refunded more than the buffer if the price of BTC goes up or less than the buffer if the BTC price goes down.' else ''}
+            </p>
+        """
+
+
+
+        el = $(e.target)
+        # console.log "clicked: ",el
+        el.webuiPopover({trigger:'manual', title:'About the BTC Buffer', content: content, animation:'pop', closeable: true, })
+        el.webuiPopover('show')
+
+        return
 
 buildChangeMessage = {}
 buildChangeMessage.fiat = (outAmount, swapConfig, currentQuotes)->
@@ -297,7 +307,7 @@ buildChangeMessage.fiat = (outAmount, swapConfig, currentQuotes)->
         fiatSuffix = ' ('+swapbot.formatters.formatFiatCurrency(buffer * fiatRate)+')'
         return React.createElement('span',{className: "changeMessage"}, [
             "This includes a ",
-            React.createElement('span', {className: "popover", title: "More about buffering", onClick: showChangeMessagePopover}, "buffer"),
+            React.createElement('span', {className: "popover", title: "More about buffering", onClick: showChangeMessagePopover(swapConfig)}, "buffer"),
             " of #{swapbot.formatters.formatCurrency(buffer)} #{assetIn} #{fiatSuffix}.",
         ])
             

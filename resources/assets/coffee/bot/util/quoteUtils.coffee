@@ -13,6 +13,7 @@ SATOSHI = 100000000
 
 resolveRate = (asset, fiat, currentQuotes)->
     if asset == 'BTC'
+        # console.log "using BTC rate of #{currentQuotes["bitcoinAverage.USD:BTC"]?.last}"
         return currentQuotes["bitcoinAverage.USD:BTC"]?.last
 
     btcRate = resolveRate('BTC', 'USD', currentQuotes)
