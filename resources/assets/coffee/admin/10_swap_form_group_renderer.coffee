@@ -15,7 +15,8 @@ popoverLabels  = sbAdmin.popoverLabels
 
 buildOnSwaptypeChange = (number, swap)->
     return (e)->
-        value = e.srcElement.value
+        srcElement = e.srcElement ? e.target
+        value = srcElement.value
         if value == 'fiat'
             swap.in('BTC')
         return
