@@ -232,7 +232,7 @@ vm = ctrl.botView.vm = do ()->
 
         vm.errorMessages = m.prop([])
         vm.formStatus = m.prop('active')
-        vm.resourceId = m.prop('new')
+        vm.resourceId = m.prop(null)
         vm.botEvents = m.prop([])
         vm.allPlansData = m.prop(null)
 
@@ -376,253 +376,258 @@ ctrl.botView.controller = ()->
 ctrl.botView.view = ()->
     botPaymentUtils = sbAdmin.botPaymentUtils
 
-    # console.log "vm.balances()=",vm.balances()
+    console.log "vm.resourceId()=",vm.resourceId()
 
-    mEl = m("div", [
+    if vm.resourceId()
 
+        mEl = m("div", [
 
-            m("div", { class: "row"}, [
-                m("div", {class: "col-md-10"}, [
-                    m("h2", "SwapBot #{vm.name()}"),
-                ]),
-                m("div", {class: "col-md-2 text-right"}, [
-                    sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead'),
-                ]),
-            ]),
-
-
-            
-
-            m("div", {class: "spacer1"}),
-
-            m("div", {class: "bot-status"}, [
-                sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), sbAdmin.planutils.planData(vm.paymentPlan(), vm.allPlansData()), vm.paymentAddress(), vm.address()))
-            ]),
-
-            m("div", {class: "spacer1"}),
-
-            m("div", {class: "bot-view"}, [
-                sbAdmin.form.mAlerts(vm.errorMessages),
 
                 m("div", { class: "row"}, [
-
-                    m("div", {class: "col-md-8"}, [
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-3"}, [
-                                sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
-                            ]),
-                            m("div", {class: "col-md-6"}, [
-                                sbAdmin.form.mValueDisplay("Bot Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
-                            ]),
-                            m("div", {class: "col-md-3"}, [
-                                sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, sbAdmin.stateutils.buildStateSpan(vm.state())),
-                            ]),
-                        ]),
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-3"}, [
-                                sbAdmin.form.mValueDisplay("Return Fee", {id: 'return_fee',  }, vm.returnFee()+' BTC'),
-                            ]),
-                            m("div", {class: "col-md-3"}, [
-                                sbAdmin.form.mValueDisplay("Confirmations", {id: 'confirmations_required', }, vm.confirmationsRequired()),
-                            ]),
-                            m("div", {class: "col-md-6"}, [
-                                sbAdmin.form.mValueDisplay("Refund Out of Stock Swaps After", {id: 'refund_after_blocks', }, vm.refundAfterBlocks()+" blocks"),
-                            ]),
-                        ]),
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-12"}, [
-                                sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, m.trust(vm.description())),
-                            ]),
-                        ]),
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-7"}, [
-                                sbAdmin.fileHelper.mImageDisplay("Custom Background Image", {id: 'BGImage'}, vm.backgroundImageDetails, 'medium'),
-                            ]),
-                            m("div", {class: "col-md-5"}, [
-                                sbAdmin.fileHelper.mImageDisplay("Custom Logo Image", {id: 'LogoImage'}, vm.logoImageDetails, 'thumb'),
-                            ]),
-                        ]),
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-7"}, [
-                                
-                                sbAdmin.form.mValueDisplay("Background Overlay", {id: 'BackgroundOverlay',  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlaySettings())),
-                            ]),
-                        ]),
-
-
-
-                        m("div", { class: "row"}, [
-                            m("div", {class: "col-md-12"}, [
-                                sbAdmin.form.mValueDisplay("Public Bot Address", {id: 'description',  }, [
-                                    m("a", {href: botPublicAddress(vm)}, botPublicAddress(vm))
-                                ]),
-                            ]),
-                        ]),
+                    m("div", {class: "col-md-10"}, [
+                        m("h2", "SwapBot #{vm.name()}"),
                     ]),
-
-                    # #### Balances
-                    m("div", {class: "col-md-4"}, [
-                        sbAdmin.form.mValueDisplay("Bot Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.balances())),
+                    m("div", {class: "col-md-2 text-right"}, [
+                        sbAdmin.robohashUtils.img(vm.hash(), 'mediumRoboHead'),
                     ]),
                 ]),
 
 
-                # -------------------------------------------------------------------------------------------------------------------------------------------
+                
+
                 m("div", {class: "spacer1"}),
-                m("hr"),
 
-                m("h3", "Swaps Selling Tokens"),
-                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_SELL, vm.swaps(), vm.swapRules()),
+                m("div", {class: "bot-status"}, [
+                    sbAdmin.stateutils.buildStateDisplay(sbAdmin.stateutils.buildStateDetails(vm.state(), sbAdmin.planutils.planData(vm.paymentPlan(), vm.allPlansData()), vm.paymentAddress(), vm.address()))
+                ]),
+
                 m("div", {class: "spacer1"}),
-                m("h3", "Swaps Purchasing Tokens"),
-                sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_BUY, vm.swaps(), vm.swapRules()),
 
+                m("div", {class: "bot-view"}, [
+                    sbAdmin.form.mAlerts(vm.errorMessages),
 
-                # -------------------------------------------------------------------------------------------------------------------------------------------
-                m("div", {class: "spacer1"}),
-                m("hr"),
-
-                # swap rules
-                m("h3", "Advanced Swap Rules"),
-                swapRulesRenderer.buildRulesForDisplay(vm.swapRules),
-
-
-                # -------------------------------------------------------------------------------------------------------------------------------------------
-                m("div", {class: "spacer1"}),
-                m("hr"),
-
-                # overflow/income address
-                vm.incomeRulesGroup.buildValues(),
-
-
-                # -------------------------------------------------------------------------------------------------------------------------------------------
-                m("div", {class: "spacer1"}),
-                m("hr"),
-                m("h4", "Blacklisted Addresses"),
-                vm.blacklistAddressesGroup.buildValues(),
-
-
-                # -------------------------------------------------------------------------------------------------------------------------------------------
-                (
-                    if not vm.whitelistAddressesGroup.isEmpty() or vm.whitelistFileName().length > 0
-                        [
-                            m("div", {class: "spacer1"}),
-                            m("hr"),
-                            if vm.whitelistFileName().length > 0
-                                [
-                                    m("h4", "Whitelist File Applied"),
-                                    m("div", {class: 'whitelistFilename'}, vm.whitelistFileName())
-                                ]
-                            if not vm.whitelistAddressesGroup.isEmpty()
-                                [
-                                    if vm.whitelistFileName().length > 0 then m("div", {class: "spacer1"}) else null,
-                                    m("h4", "Whitelisted Addresses"),
-                                    vm.whitelistAddressesGroup.buildValues(),
-                                ]
-                        ]
-                ),
-
-
-                # -------------------------------------------------------------------------------------------------------------------------------------------
-                m("div", {class: "spacer1"}),
-                m("hr"),
-
-                m("div", {class: "bot-payments"}, [
-                    m("h3", "Payment"),
                     m("div", { class: "row"}, [
-                        m("div", {class: "col-md-9"}, [
+
+                        m("div", {class: "col-md-8"}, [
+
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-3"}, [
-                                    sbAdmin.form.mValueDisplay("Next Payment Due", {id: 'due-date',  }, if vm.paymentsSet() then botPaymentUtils.buildFormattedBotDueDateText(vm.payments(), vm.paymentBalances()) else 'loading...'),
-                                ]),
-                                m("div", {class: "col-md-3"}, [
-                                    sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
+                                    sbAdmin.form.mValueDisplay("Bot Name", {id: 'name',  }, vm.name()),
                                 ]),
                                 m("div", {class: "col-md-6"}, [
-                                    sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
+                                    sbAdmin.form.mValueDisplay("Bot Address", {id: 'address',  }, if vm.address() then vm.address() else m("span", {class: 'no'}, "[ none ]")),
+                                ]),
+                                m("div", {class: "col-md-3"}, [
+                                    sbAdmin.form.mValueDisplay("Status", {id: 'status',  }, sbAdmin.stateutils.buildStateSpan(vm.state())),
                                 ]),
                             ]),
-                    
+
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-3"}, [
-                                    botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)
+                                    sbAdmin.form.mValueDisplay("Return Fee", {id: 'return_fee',  }, vm.returnFee()+' BTC'),
                                 ]),
                                 m("div", {class: "col-md-3"}, [
-                                    botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)
+                                    sbAdmin.form.mValueDisplay("Confirmations", {id: 'confirmations_required', }, vm.confirmationsRequired()),
                                 ]),
                                 m("div", {class: "col-md-6"}, [
-                                    botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)
+                                    sbAdmin.form.mValueDisplay("Refund Out of Stock Swaps After", {id: 'refund_after_blocks', }, vm.refundAfterBlocks()+" blocks"),
                                 ]),
                             ]),
 
                             m("div", { class: "row"}, [
                                 m("div", {class: "col-md-12"}, [
-                                    botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)
+                                    sbAdmin.form.mValueDisplay("Bot Description", {id: 'description',  }, m.trust(vm.description())),
                                 ]),
                             ]),
 
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-7"}, [
+                                    sbAdmin.fileHelper.mImageDisplay("Custom Background Image", {id: 'BGImage'}, vm.backgroundImageDetails, 'medium'),
+                                ]),
+                                m("div", {class: "col-md-5"}, [
+                                    sbAdmin.fileHelper.mImageDisplay("Custom Logo Image", {id: 'LogoImage'}, vm.logoImageDetails, 'thumb'),
+                                ]),
+                            ]),
+
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-7"}, [
+                                    
+                                    sbAdmin.form.mValueDisplay("Background Overlay", {id: 'BackgroundOverlay',  }, sbAdmin.botutils.overlayDesc(vm.backgroundOverlaySettings())),
+                                ]),
+                            ]),
+
+
+
+                            m("div", { class: "row"}, [
+                                m("div", {class: "col-md-12"}, [
+                                    sbAdmin.form.mValueDisplay("Public Bot Address", {id: 'description',  }, [
+                                        m("a", {href: botPublicAddress(vm)}, botPublicAddress(vm))
+                                    ]),
+                                ]),
+                            ]),
                         ]),
-                        m("div", {class: "col-md-3"}, [
-                            sbAdmin.form.mValueDisplay("Payment Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
+
+                        # #### Balances
+                        m("div", {class: "col-md-4"}, [
+                            sbAdmin.form.mValueDisplay("Bot Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.balances())),
                         ]),
                     ]),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    m("h3", "Swaps Selling Tokens"),
+                    sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_SELL, vm.swaps(), vm.swapRules()),
+                    m("div", {class: "spacer1"}),
+                    m("h3", "Swaps Purchasing Tokens"),
+                    sbAdmin.swapgrouprenderer.buildSwapsSectionForDisplay(constants.DIRECTION_BUY, vm.swaps(), vm.swapRules()),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    # swap rules
+                    m("h3", "Advanced Swap Rules"),
+                    swapRulesRenderer.buildRulesForDisplay(vm.swapRules),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    # overflow/income address
+                    vm.incomeRulesGroup.buildValues(),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+                    m("h4", "Blacklisted Addresses"),
+                    vm.blacklistAddressesGroup.buildValues(),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    (
+                        if not vm.whitelistAddressesGroup.isEmpty() or vm.whitelistFileName().length > 0
+                            [
+                                m("div", {class: "spacer1"}),
+                                m("hr"),
+                                if vm.whitelistFileName().length > 0
+                                    [
+                                        m("h4", "Whitelist File Applied"),
+                                        m("div", {class: 'whitelistFilename'}, vm.whitelistFileName())
+                                    ]
+                                if not vm.whitelistAddressesGroup.isEmpty()
+                                    [
+                                        if vm.whitelistFileName().length > 0 then m("div", {class: "spacer1"}) else null,
+                                        m("h4", "Whitelisted Addresses"),
+                                        vm.whitelistAddressesGroup.buildValues(),
+                                    ]
+                            ]
+                    ),
+
+
+                    # -------------------------------------------------------------------------------------------------------------------------------------------
+                    m("div", {class: "spacer1"}),
+                    m("hr"),
+
+                    m("div", {class: "bot-payments"}, [
+                        m("h3", "Payment"),
+                        m("div", { class: "row"}, [
+                            m("div", {class: "col-md-9"}, [
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-3"}, [
+                                        sbAdmin.form.mValueDisplay("Next Payment Due", {id: 'due-date',  }, if vm.paymentsSet() then botPaymentUtils.buildFormattedBotDueDateText(vm.payments(), vm.paymentBalances()) else 'loading...'),
+                                    ]),
+                                    m("div", {class: "col-md-3"}, [
+                                        sbAdmin.form.mValueDisplay("Payment Plan", {id: 'rate',  }, sbAdmin.planutils.paymentPlanDesc(vm.paymentPlan(), vm.allPlansData())),
+                                    ]),
+                                    m("div", {class: "col-md-6"}, [
+                                        sbAdmin.form.mValueDisplay("Payment Address", {id: 'paymentAddress',  }, vm.paymentAddress()),
+                                    ]),
+                                ]),
+                        
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-3"}, [
+                                        botPaymentUtils.buildMakePaymentPulldown(vm.paymentAssetType, vm.allPlansData, vm.btcQuote)
+                                    ]),
+                                    m("div", {class: "col-md-3"}, [
+                                        botPaymentUtils.buildMonthsPaymentPulldown(vm.paymentMonths)
+                                    ]),
+                                    m("div", {class: "col-md-6"}, [
+                                        botPaymentUtils.buildPayHereDisplay(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.allPlansData, vm.btcQuote)
+                                    ]),
+                                ]),
+
+                                m("div", { class: "row"}, [
+                                    m("div", {class: "col-md-12"}, [
+                                        botPaymentUtils.buildReceivingPayment(vm.paymentAssetType, vm.paymentMonths, vm.paymentAddress, vm.botEvents, vm.allPlansData, vm.btcQuote)
+                                    ]),
+                                ]),
+
+                            ]),
+                            m("div", {class: "col-md-3"}, [
+                                sbAdmin.form.mValueDisplay("Payment Account Balances", {id: 'balances',  }, sbAdmin.utils.buildBalancesMElement(vm.paymentBalances())),
+                            ]),
+                        ]),
+                        
+                    ]),
+
+                    m("div", {class: "spacer1"}),
                     
-                ]),
+                    m("a[href='/admin/payments/bot/#{vm.resourceId()}']", {class: "btn btn-info", config: m.route}, "View Payment History"),
 
-                m("div", {class: "spacer1"}),
-                
-                m("a[href='/admin/payments/bot/#{vm.resourceId()}']", {class: "btn btn-info", config: m.route}, "View Payment History"),
+                    m("div", {class: "spacer1"}),
 
-                m("div", {class: "spacer1"}),
-
-                m("hr"),
-                m("div", {class: "bot-events"}, [
-                    m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
-                    m("h3", "Events"),
-                    if vm.botEvents().length == 0 then m("div", {class:"empty no-events", }, "No Events Yet") else null,
-                    m("ul", {class: "list-unstyled striped-list bot-list event-list"+(if vm.showDebug then ' event-list-debug' else '')}, [
-                        vm.botEvents().map (botEventObj)->
-                            if not vm.showDebug and botEventObj.level <= 100
-                                return
-                            dateObj = window.moment(botEventObj.createdAt)
-                            return m("li", {class: "bot-list-entry event"}, [
-                                m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
-                                m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
-                                m("span", {class: "msg"}, (botEventObj.message or botEventObj.event?.msg)),
-                            ])
-                    ]),
-                    m("div", {class: "pull-right"}, [
-                        m("a[href='#show-debug']", {onclick: vm.toggleDebugView, class: "btn #{if vm.showDebug then 'btn-warning' else 'btn-default'} btn-xs", style: {"margin-right": "16px",} }, [
-                            if vm.showDebug then "Hide Debug" else "Show Debug"
+                    m("hr"),
+                    m("div", {class: "bot-events"}, [
+                        m("div", {class: "pulse-spinner pull-right"}, [m("div", {class: "rect1",}),m("div", {class: "rect2",}),m("div", {class: "rect3",}),m("div", {class: "rect4",}),m("div", {class: "rect5",}),]),
+                        m("h3", "Events"),
+                        if vm.botEvents().length == 0 then m("div", {class:"empty no-events", }, "No Events Yet") else null,
+                        m("ul", {class: "list-unstyled striped-list bot-list event-list"+(if vm.showDebug then ' event-list-debug' else '')}, [
+                            vm.botEvents().map (botEventObj)->
+                                if not vm.showDebug and botEventObj.level <= 100
+                                    return
+                                dateObj = window.moment(botEventObj.createdAt)
+                                return m("li", {class: "bot-list-entry event"}, [
+                                    m("div", {class: "labelWrapper"}, buildMLevel(botEventObj.level)),
+                                    m("span", {class: "date", title: dateObj.format('MMMM Do YYYY, h:mm:ss a')}, dateObj.format('MMM D h:mm a')),
+                                    m("span", {class: "msg"}, (botEventObj.message or botEventObj.event?.msg)),
+                                ])
+                        ]),
+                        m("div", {class: "pull-right"}, [
+                            m("a[href='#show-debug']", {onclick: vm.toggleDebugView, class: "btn #{if vm.showDebug then 'btn-warning' else 'btn-default'} btn-xs", style: {"margin-right": "16px",} }, [
+                                if vm.showDebug then "Hide Debug" else "Show Debug"
+                            ]),
                         ]),
                     ]),
+
+                    m("div", {class: "spacer1"}),
+
+                    m("hr"),
+
+                    m("div", {class: "spacer2"}),
+
+                    m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
+
+                    (
+                        if vm.username() == sbAdmin.auth.getUser().username or sbAdmin.auth.hasPermssion('editBots')
+                            m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot")
+                        else
+                            null
+                    ),
+
+
                 ]),
 
-                m("div", {class: "spacer1"}),
 
-                m("hr"),
-
-                m("div", {class: "spacer2"}),
-
-                m("a[href='/admin/dashboard']", {class: "btn btn-default pull-right", config: m.route}, "Back to Dashboard"),
-
-                (
-                    if vm.username() == sbAdmin.auth.getUser().username or sbAdmin.auth.hasPermssion('editBots')
-                        m("a[href='/admin/edit/bot/#{vm.resourceId()}']", {class: "btn btn-success", config: m.route}, "Edit This Bot")
-                    else
-                        null
-                ),
-
-
-            ]),
-
-
-    ])
+        ])
+    else
+        # still loading...
+        mEl = m("div", {class: 'loading-banner'}, "Loading...")
     return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
 
 ######
