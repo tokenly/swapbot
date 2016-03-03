@@ -3,6 +3,7 @@ UserInputActions   = require '../../actions/UserInputActions'
 SwapsStore         = require '../../stores/SwapsStore'
 UserChoiceStore    = require '../../stores/UserChoiceStore'
 Pockets            = require '../../util/Pockets'
+IndieSquare        = require '../../util/IndieSquare'
 SwapMatcher        = require '../../util/SwapMatcher'
 NeedHelpLink       = require '../../views/includes/NeedHelpLink'
 PlaceOrderInput    = require '../../views/includes/PlaceOrderInput'
@@ -153,8 +154,17 @@ SwapbotReceivingTransaction = React.createClass
                   '&asset='+this.state.userChoices.inAsset + 
                   '&label='+encodeURIComponent('Swapbot '+bot.name)
 
-            text = """<a href="#{URI}">Send #{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} #{this.state.userChoices.inAsset} to #{bot.address}</a>"""
-            QRCodeUtil.buildQRCodeIcon(document.getElementById('QRCodeIcon'), text, URI, 32, 32)
+            title = """
+                <div class="qrCodeTitle">
+                    <div class="img"><img src="/images/indiesquare/indiesquare-logo.png" alt="Indie Square Wallet Logo"></div>
+                    <span class="line1">Send #{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} #{this.state.userChoices.inAsset}</span>
+                    <span class="line2">to #{bot.address}</span>
+                </div>
+            """
+            footer = """
+                <div class="qrCodeFooter">Read this QR Code from the <a target="_blank" href="https://wallet.indiesquare.me/">IndieSquare Wallet</a> app.</div>
+            """
+            QRCodeUtil.buildQRCodeIcon(document.getElementById('QRCodeIcon'), title, URI, 32, 32, footer)
 
         , 1
 
@@ -175,7 +185,8 @@ SwapbotReceivingTransaction = React.createClass
                 <div className="sendInstructions">
                     To begin this swap, send <strong>{swapbot.formatters.formatCurrency(this.state.userChoices.inAmount)} {this.state.userChoices.inAsset}{fiatSuffix}</strong> to {bot.address}
 
-                    { Pockets.buildPaymentButton(bot.address, "The Swapbot named #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
+                    { Pockets.buildPaymentButton(bot.address, "Swapbot #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
+                    { IndieSquare.buildPaymentButton(bot.address, "Swapbot #{bot.name} for #{swapbot.formatters.formatCurrency(this.state.userChoices.outAmount)} #{this.state.userChoices.outAsset}", this.state.userChoices.inAmount, this.state.userChoices.inAsset) }
 
                     <a href="#" id="QRCodeIcon" className="qrCodeIcon"></a>
 

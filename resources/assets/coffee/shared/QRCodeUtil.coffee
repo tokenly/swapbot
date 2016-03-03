@@ -20,7 +20,7 @@ do ($=jQuery)->
             return
 
 
-    exports.buildQRCodeIcon = (domElement, title, text, xSize, ySize)->
+    exports.buildQRCodeIcon = (domElement, title, text, xSize, ySize, footer='')->
         if $(domElement).data('hasqrcode') then return
 
         qrcode = new QRCode(domElement, {
@@ -32,10 +32,10 @@ do ($=jQuery)->
         $(domElement).on 'click', popover.buildOnClick({
             placement: "left"
             title: title
-            content: """<div class="fullQrCode"></div>"""
+            content: """<div class="fullQrCode"></div>#{footer}"""
             onShown: buildOnShownFn(text)
-            width: 450
-            height: 430
+            width: 450 + 64
+            height: 430 + 48
         })
 
         $(domElement).data('hasqrcode', true)
