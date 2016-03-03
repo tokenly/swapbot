@@ -9,7 +9,7 @@ pocketsImage = null
 
 buildPaymentLinkFns = {}
 
-browserType = ()->
+getBrowserType = ()->
     if navigator.userAgent.match(/(android)/i)
         return 'android'
     if navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)/i) && !window.MSStream
@@ -37,12 +37,12 @@ buildPaymentLinkFns.ios = (address, label, amount, token)->
 # ------------------------------------------------------------------------
     
 exports.buildPaymentButton = (address, label, amount, token)->
-    browserType = browserType()
-    isMobile = (browserType == 'android' or browserType == 'ios')
+    browserTypeName = getBrowserType()
+    isMobile = (browserTypeName == 'android' or browserTypeName == 'ios')
     if not isMobile
         return null
 
-    href = buildPaymentLinkFns[browserType](address, label, amount, token)
+    href = buildPaymentLinkFns[browserTypeName](address, label, amount, token)
 
     return React.createElement('a', {href: href, target: '_blank', className: 'indiesquareLink', title: "Pay with IndieSquare"}, [
         React.createElement('img', {src: '/images/indiesquare/pay-with-indiesquare.png', style: {height: "32px"}}),
