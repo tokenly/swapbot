@@ -124,7 +124,7 @@
 {{-- app --}}
 <script src="/js/bot/{{$manifest('bot-combined.js')}}"></script>
 <script>
-    if (BotApp != null) {
+    if (window.BotApp != null) {
         BotApp.init({!! json_encode($bot->serializeForAPI('public'), JSON_HEX_APOS) !!}, {url: '{!! $quotebot['url'] !!}', apiToken: '{!! $quotebot['apiToken'] !!}'}, '{!! $quotebotPusherUrl !!}')
     } else {
         if (window.confirm("There was a problem loading the code in your browser.  Click OK to reload this page.")) { 
