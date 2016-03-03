@@ -8,7 +8,14 @@ pocketsUrl = null
 pocketsImage = null
 
 buildPromoLink = ()->
-    # isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+    isChrome = (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
+    if not isChrome
+        return null
+
+    isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i)
+    if isMobile
+        return null
+
     href = "http://pockets.tokenly.com"
     return React.createElement('a', {href: href, target: '_blank', className: 'pocketsLink', title: "Learn More About Tokenly Pockets"}, [
         React.createElement('img', {src: '/images/pockets/paywithpockets-blue.png', height: '32px', 'width': '87px'}),
