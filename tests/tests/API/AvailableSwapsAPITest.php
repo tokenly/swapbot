@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\RedirectResponse;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Models\User;
 use \PHPUnit_Framework_Assert as PHPUnit;
 
@@ -58,9 +59,15 @@ class AvailableSwapsAPITest extends TestCase {
         PHPUnit::assertEquals($bot_3['uuid'], $found_available_swaps[0]['bot']['id']);
         PHPUnit::assertEquals($bot_2['uuid'], $found_available_swaps[1]['bot']['id']);
 
+        // filter out a bot that is BRAND_NEW
+        app('Swapbot\Repositories\BotRepository')->update($bot_2, ['state' => BotState::BRAND_NEW]);
+        $found_available_swaps = $this->runSearch(['inToken' => 'TOKENLY', 'outToken' => 'BTC', 'sort' => 'cost', ]);
+        PHPUnit::assertCount(1, $found_available_swaps);
+        PHPUnit::assertEquals($bot_3['uuid'], $found_available_swaps[0]['bot']['id']);
 
     }
 
+    // ------------------------------------------------------------------------
 
     protected function buildBot($swaps=null, $name_or_vars=null) {
         if ($swaps === null) { $swaps = $this->swaps1(); }

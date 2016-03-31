@@ -39,8 +39,8 @@ class PublicAvailableSwapsController extends APIController {
         // format for API
         $available_swaps_output = [];
         foreach($available_swaps as $available_swap) {
-            // ignore shutdown bots
-            if ($available_swap['bot']['state'] == BotState::SHUTDOWN) { continue; }
+            // ignore all bots that are not active
+            if (!$available_swap['bot']->isActive()) { continue; }
 
             $swap_config = $available_swap['swap'];
             $swap_details_for_api = $swap_strategy_factory->getStrategy($swap_config['strategy'])->buildSwapDetailsForAPI($swap_config, $request->input('inToken'));

@@ -1,5 +1,6 @@
 <?php
 
+use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\SwapIndexRepository;
 use Tokenly\LaravelApiProvider\Filter\IndexRequestFilter;
 use \PHPUnit_Framework_Assert as PHPUnit;
@@ -184,6 +185,31 @@ class SwapIndexRepositoryTest extends TestCase {
         PHPUnit::assertEquals($bot_2['uuid'], $found_bots[1]['uuid']);
 
     }
+
+
+    public function testFilterInactiveBots()
+    {
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        $index = app('Swapbot\Repositories\SwapIndexRepository');
+        $helper = app('BotHelper');
+        $test_helper = app('APITestHelper');
+        $bot_1 = $this->buildBot($this->swaps1(), 'bot one');
+        $bot_2 = $this->buildBot($this->swaps3(), ['name' => 'bot two', ]);
+
+        // update the bot state
+        app('Swapbot\Repositories\BotRepository')->update($bot_2, ['state' => BotState::BRAND_NEW]);
+
+        ////////////////////////////////////////////////////////////////////////
+        // IN
+
+        $found_bots = $this->runSearch(['inToken' => 'BTC', ]);
+        PHPUnit::assertCount(1, $found_bots);
+        PHPUnit::assertEquals($bot_1['uuid'], $found_bots[0]['uuid']);
+
+    }
+
+    // ------------------------------------------------------------------------
 
     protected function buildBot($swaps=null, $name_or_vars=null) {
         if ($swaps === null) { $swaps = $this->swaps1(); }
