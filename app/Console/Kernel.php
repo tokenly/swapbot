@@ -51,6 +51,8 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\CreateMissingURLSlugsCommand',
 		'Swapbot\Console\Commands\Development\ArchiveOldBotEventsCommand',
 
+		'Swapbot\Console\Commands\Stats\AggregateStatsCommand',
+
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',
 		'Tokenly\QuotebotClient\Console\PopulateQuotesCommand',

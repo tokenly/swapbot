@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Swapbot\Swap\Stats\SwapStatsAggregator;
 
 class AppServiceProvider extends ServiceProvider {
 
@@ -33,6 +34,14 @@ class AppServiceProvider extends ServiceProvider {
 			'Illuminate\Contracts\Auth\Registrar',
 			'Swapbot\Services\Registrar'
 		);
+
+        $this->app->bind('Swapbot\Swap\Stats\SwapStatsAggregator', function($app) {
+            return new SwapStatsAggregator(
+            	$app->make('Swapbot\Repositories\BotEventRepository'),
+            	$app->make('Swapbot\Repositories\BotRepository')
+            );
+        });
+
 	}
 
 }

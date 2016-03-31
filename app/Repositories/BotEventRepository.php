@@ -126,6 +126,12 @@ class BotEventRepository extends APIRepository
         });
     }
 
+    public function findAllByEventNameInChunks($event_name, $callback, $chunk_size=500) {
+        $query = $this->prototype_model->orderBy('id', 'ASC');
+        $query->where('event', 'LIKE', '%"name"%"'.$event_name.'"%');
+        $query->chunk($chunk_size, $callback);
+    }
+
     // ------------------------------------------------------------------------
     
     protected function modifyAttributesBeforeCreate($attributes) {
