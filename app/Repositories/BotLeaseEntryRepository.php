@@ -50,10 +50,16 @@ class BotLeaseEntryRepository extends APIRepository
     public function extendLease(Bot $bot, BotEvent $bot_event, $length_in_months=1) {
         $last_lease = $this->getLastEntryForBot($bot);
         if ($last_lease) {
-            return $this->addEntryForBot($bot, $bot_event['id'], Carbon::parse($last_lease['end_date']), $length_in_months);
+            $last_lease_end_date = Carbon::parse($last_lease['end_date']);
+
+            // if the lease expires in the future, extend it
+            if ($last_lease_end_date >= DateProvider::now()) {
+                return $this->addEntryForBot($bot, $bot_event['id'], $last_lease_end_date, $length_in_months);
+            }
         }
 
         // create a new lease if no old one was found
+        //   or if the old one expired in the past
         return $this->addEntryForBot($bot, $bot_event['id'], DateProvider::now(), $length_in_months);
 
     }
