@@ -27,37 +27,33 @@ class HelpersViewComposer
         // Settings
         $pusher_url = Config::get('tokenlyPusher.clientUrl');
         $view->with([
-            'env'                      => app()->environment(),
-            'pusherUrl'                => $pusher_url,
+            'env'                => app()->environment(),
+            'pusherUrl'          => $pusher_url,
 
-            'fmt'                      => $this->formatting_helper,
-            'currency'                 => function($value, $places=null) { return $this->formatting_helper->formatCurrency($value, $places); },
-            'manifest'                 => function($filename) { return $this->manifest($filename); },
+            'fmt'                => $this->formatting_helper,
+            'currency'           => function($value, $places=null) { return $this->formatting_helper->formatCurrency($value, $places); },
+            'manifest'           => function($filename) { return $this->manifest($filename); },
 
-            'tokenlyAccountsSiteUrl'   => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/',
-            'tokenlyAccountsUpdateUrl' => rtrim(env('TOKENLY_ACCOUNTS_PROVIDER_HOST'), '/').'/auth/update',
+            'tokenpassSiteUrl'   => rtrim(env('TOKENPASS_PROVIDER_HOST'), '/').'/',
+            'tokenpassUpdateUrl' => rtrim(env('TOKENPASS_PROVIDER_HOST'), '/').'/auth/update',
 
-            'robohashUrl'              => rtrim(env('ROBOHASH_URL', 'https://robohash.tokenly.com'), '/'),
-            'quotebotPusherUrl'        => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
-            'analyticsId'              => env('GOOGLE_ANALYTICS_ID'),
-            'quotebot'          => [
-                'url'           => rtrim(Config::get('quotebot.connection_url'), '/'),
-                'apiToken'      => Config::get('quotebot.api_token'),
+            'robohashUrl'        => rtrim(env('ROBOHASH_URL', 'https://robohash.tokenly.com'), '/'),
+            'quotebotPusherUrl'  => rtrim(env('QUOTEBOT_PUSHER_CLIENT_URL', $pusher_url), '/'),
+            'analyticsId'        => env('GOOGLE_ANALYTICS_ID'),
+            'quotebot'           => [
+                'url'      => rtrim(Config::get('quotebot.connection_url'), '/'),
+                'apiToken' => Config::get('quotebot.api_token'),
             ],
 
-            'bugsnag'           => [
-                'apiKey'        => env('BUGSNAG_API_KEY'),
-                'releaseStage'  => env('BUGSNAG_RELEASE_STAGE', 'production'),
+            'bugsnag'            => [
+                'apiKey'       => env('BUGSNAG_API_KEY'),
+                'releaseStage' => env('BUGSNAG_RELEASE_STAGE', 'production'),
             ],
 
-
-            'tawk'           => [
+            'tawk'               => [
                 'active'  => !!env('TAWK_ACTIVE'),
                 'embedId' => env('TAWK_EMBED_ID'),
             ],
-
-
-            'manifest'
         ]);
     }
 

@@ -12,7 +12,7 @@ use Laravel\Socialite\Two\InvalidStateException;
 use Swapbot\Http\Controllers\Controller;
 use Swapbot\Models\User;
 use Swapbot\Repositories\UserRepository;
-use Tokenly\AccountsClient\Facade\TokenlyAccounts;
+use Tokenly\TokenpassClient\Facade\Tokenpass;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class AccountController extends Controller
@@ -68,8 +68,8 @@ class AccountController extends Controller
     {
 
         try {
-            // check for an error returned from Tokenly Accounts
-            $error_description = TokenlyAccounts::checkForError($request);
+            // check for an error returned from Tokenpass
+            $error_description = Tokenpass::checkForError($request);
             if ($error_description) {
                 return view('public.oauth.authorization-failed', ['error_msg' => $error_description]);
             }
@@ -157,7 +157,7 @@ class AccountController extends Controller
 
 
     /**
-     * Obtain the user information from Tokenly Accounts.
+     * Obtain the user information from Tokenpass.
      *
      * @return Response
      */

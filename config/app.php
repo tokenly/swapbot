@@ -173,7 +173,7 @@ return [
 		'GrahamCampbell\Markdown\MarkdownServiceProvider',
 		'Codesleeve\LaravelStapler\Providers\L5ServiceProvider',
 		Fideloper\Proxy\TrustedProxyServiceProvider::class,
-		Tokenly\AccountsClient\Provider\TokenlyAccountsServiceProvider::class,
+		Tokenly\TokenpassClient\Provider\TokenpassServiceProvider::class,
 
 	],
 

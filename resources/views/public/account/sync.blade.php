@@ -1,7 +1,7 @@
 @extends('public.base')
 
 @section('header_content')
-<h1>My Tokenly Account</h1>
+<h1>My Tokenpass Account</h1>
 @stop
 
 @section('content')
@@ -16,9 +16,9 @@
                 <div class="spacer1"></div>
 
                 @if ($synced)
-                    <p>Your Swapbot Account settings are now <strong>up to date</strong> with your Tokenly Account.</p>
+                    <p>Your Swapbot Account settings are now <strong>up to date</strong> with your Tokenpass Account.</p>
 
-                    <p>To make changes to your account, please <a target="_blank" href="{{$tokenlyAccountsUpdateUrl}}">edit your Tokenly Account</a> and then Sync your account again.</p>
+                    <p>To make changes to your account, please <a target="_blank" href="{{$tokenpassUpdateUrl}}">edit your Tokenly Account</a> and then Sync your account again.</p>
 
                     <div class="spacer1"></div>
 
@@ -28,7 +28,7 @@
 
                     </p>
                 @else
-                    <p>Please authorize Tokenly Accounts to sync your information with Swapbot by clicking the button below.</p>
+                    <p>Please authorize Tokenpass to sync your information with Swapbot by clicking the button below.</p>
 
                     <p>
                         <a href="/account/authorize" class="btn btn-success">Sync My Account</a>

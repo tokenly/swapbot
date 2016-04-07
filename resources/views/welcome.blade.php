@@ -42,7 +42,7 @@
 
 
 
-                    <p>Swapbots allow you to offer your own tokens for exchange to users who want them. <a href="/account/login">Log in or register with Tokenly Accounts to set up your
+                    <p>Swapbots allow you to offer your own tokens for exchange to users who want them. <a href="/account/login">Log in or register with Tokenpass to set up your
                         own Swapbot</a>.</p>
                     <div class="spacer2"></div>
 
