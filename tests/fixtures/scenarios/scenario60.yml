@@ -44,7 +44,9 @@ expectedXChainCalls:
   - meta: { baseFilename: send_BTC-refund.yml }
   - meta: { baseFilename: get_accounts.yml } # first try - found other accounts
   - meta: { baseFilename: get_accounts.yml } # later block, found no other accounts
+  - meta: { baseFilename: getfee_LTBCOIN.yml }
   - meta: { baseFilename: shutdown-send_LTBCOIN.yml }
+  - meta: { baseFilename: getfee_BTC.yml }
   - meta: { baseFilename: shutdown-send_BTC.yml }
 
 expectedBotEvents:

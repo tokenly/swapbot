@@ -70,7 +70,11 @@ class ShutdownHandler {
             if ($asset == 'BTC') { continue; }
             if ($quantity <= 0) { continue; }
 
-            if ($btc_balance < ($fee + $dust_size)) { throw new Exception("Not enough BTC to refund token $asset", 1); }
+            // get the recommended fee
+            $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $quantity, $asset);
+            // Log::debug("getRecommendedFee \$fee=".json_encode($fee, 192));
+
+            if ($fee === null OR $btc_balance < ($fee + $dust_size)) { throw new Exception("Not enough BTC to refund token $asset", 1); }
 
             // send to the shutdown address
             $request_id = RequestIDGenerator::generateSendHash(['shutdown', $bot['uuid']], $shutdown_address, $quantity, $asset);
@@ -88,22 +92,40 @@ class ShutdownHandler {
         }
 
         // send the btc last
+        $btc_quantity_to_send = $btc_balance - $fee;
+        $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $btc_quantity_to_send, 'BTC');
+        // Log::debug("getRecommendedFee \$fee=".json_encode($fee, 192));
         if (($btc_balance - $fee) > 0) {
             // send to the shutdown address
-            $quantity = $btc_balance - $fee;
-            Log::debug("\$quantity=".json_encode($quantity, 192));
-            $request_id = RequestIDGenerator::generateSendHash(['shutdown', $bot['uuid']], $shutdown_address, $quantity, 'BTC');
-            $results = $this->xchain_client->sendConfirmed($bot['public_address_id'], $shutdown_address, $quantity, 'BTC', $fee, null, $request_id);
+            $btc_quantity_to_send = $btc_balance - $fee;
+            Log::debug("\$btc_quantity_to_send=".json_encode($btc_quantity_to_send, 192));
+            $request_id = RequestIDGenerator::generateSendHash(['shutdown', $bot['uuid']], $shutdown_address, $btc_quantity_to_send, 'BTC');
+            $results = $this->xchain_client->sendConfirmed($bot['public_address_id'], $shutdown_address, $btc_quantity_to_send, 'BTC', $fee, null, $request_id);
             $txid = $results['txid'];
 
             // Log it
-            BotEventLogger::logBotShutdownSend($bot, $shutdown_address, $quantity, 'BTC', $txid);
+            BotEventLogger::logBotShutdownSend($bot, $shutdown_address, $btc_quantity_to_send, 'BTC', $txid);
 
             // update balances
             $this->balance_updater->syncBalances($bot);
         }
 
         return true;
+    }
+
+    protected function getRecommendedFee(Bot $bot, $btc_balance, $shutdown_address, $quantity, $asset) {
+        $dust_size = SwapProcessor::DEFAULT_REGULAR_DUST_SIZE;
+
+        // get the recommended fee
+        foreach (['med', 'low'] as $priority) {
+            $recommended_fee = $this->xchain_client->estimateFee($priority, $bot['public_address_id'], $shutdown_address, $quantity, $asset);
+            $fee_float = $recommended_fee->getFloat();
+            if ($btc_balance >= $fee_float + $dust_size) {
+                return $fee_float;
+            }
+        }
+
+        return null;
     }
 
 }
