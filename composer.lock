@@ -3341,16 +3341,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/hmac-auth.git",
-                "reference": "ba521174be7be3037247427368da739d4797a3ea"
+                "reference": "14cab75f2805921772cb54c941d58adbef62a614"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/ba521174be7be3037247427368da739d4797a3ea",
-                "reference": "ba521174be7be3037247427368da739d4797a3ea",
+                "url": "https://api.github.com/repos/tokenly/hmac-auth/zipball/14cab75f2805921772cb54c941d58adbef62a614",
+                "reference": "14cab75f2805921772cb54c941d58adbef62a614",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0"
+                "php": ">=5.5.0"
             },
             "require-dev": {
                 "guzzlehttp/guzzle": "~6",
@@ -3385,7 +3385,7 @@
                 }
             ],
             "description": "HMAC authentication for Tokenly APIs",
-            "time": "2016-04-16 17:17:55"
+            "time": "2016-04-16 17:59:13"
         },
         {
             "name": "tokenly/laravel-api-provider",
