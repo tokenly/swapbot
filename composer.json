@@ -16,7 +16,7 @@
 		"linusu/bitcoin-address-validator": "~0",
 		"metabor/statemachine": "1.1.*",
 		"pda/pheanstalk": "~3",
-		"tokenly/consul-health-daemon": "dev-master",
+		"tokenly/consul-health-daemon": "^0.1",
 		"tokenly/laravel-record-lock": "dev-master",
 		"graham-campbell/markdown": "~3.2",
 		"codesleeve/laravel-stapler": "dev-master",

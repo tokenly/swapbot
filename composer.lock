@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "be122c4897e74e085ec04dc565eb8c92",
-    "content-hash": "c55d8576f924b741f0aa9cfc8710a0c0",
+    "hash": "5da4ecdf02b777fab5bdee82c95fcf96",
+    "content-hash": "b77d3d9668ca59f4f6456366e1fdc672",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3297,16 +3297,16 @@
         },
         {
             "name": "tokenly/consul-health-daemon",
-            "version": "dev-master",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/consul-health-daemon.git",
-                "reference": "a2ac467fd96e5704172642c01dd2cdd9904a6b5c"
+                "reference": "6fafc6f789c7ee739281dcca41a47ed14b6d830d"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tokenly/consul-health-daemon/zipball/6fafc6f789c7ee739281dcca41a47ed14b6d830d",
-                "reference": "a2ac467fd96e5704172642c01dd2cdd9904a6b5c",
+                "reference": "6fafc6f789c7ee739281dcca41a47ed14b6d830d",
                 "shasum": ""
             },
             "require": {
@@ -3333,7 +3333,7 @@
                 }
             ],
             "description": "A library to monitor services health and report to consul",
-            "time": "2015-06-18 13:29:14"
+            "time": "2016-03-04 14:45:44"
         },
         {
             "name": "tokenly/hmac-auth",
@@ -5524,7 +5524,6 @@
         "tokenly/laravel-event-log": 20,
         "tokenly/laravel-api-provider": 20,
         "tokenly/laravel-blocking-beanstalkd": 20,
-        "tokenly/consul-health-daemon": 20,
         "tokenly/laravel-record-lock": 20,
         "codesleeve/laravel-stapler": 20,
         "laravel/socialite": 20,
