@@ -92,8 +92,9 @@ class ShutdownHandler {
         }
 
         // send the btc last
+        $btc_quantity_to_estimate = $btc_balance;
         $btc_quantity_to_send = $btc_balance - $fee;
-        $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $btc_quantity_to_send, 'BTC');
+        $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $btc_quantity_to_estimate, 'BTC');
         // Log::debug("getRecommendedFee \$fee=".json_encode($fee, 192));
         if (($btc_balance - $fee) > 0) {
             // send to the shutdown address
