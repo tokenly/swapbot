@@ -2,6 +2,6 @@ method: POST
 path: /estimatefee/PUBLIC_ADDRESS_ID_01
 data:
     destination: 1JztLWos5K7LsqW5E78EASgiVBaCe6f7cD
-    quantity: 0.9997457
+    quantity: 0.9998457
     asset: BTC
     sweep: false
