@@ -254,8 +254,8 @@ vm = ctrl.botForm.vm = do ()->
                     # split swaps into buy and sell
                     [buySwapsData, sellSwapsData] = splitBotDataIntoBuyAndSellSwaps(botData.swaps)
                     vm.swapRules = m.prop(swapRulesRenderer.unserialize(botData.swapRules))
-                    vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData, vm.swapRules))
-                    vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData, vm.swapRules))
+                    vm.sellSwaps(sbAdmin.swaputils.buildSwapsPropValue(sellSwapsData, vm.swapRules, constants.DIRECTION_SELL))
+                    vm.buySwaps(sbAdmin.swaputils.buildSwapsPropValue(buySwapsData, vm.swapRules, constants.DIRECTION_BUY))
 
                     vm.incomeRulesGroup.unserialize(botData.incomeRules)
                     vm.blacklistAddressesGroup.unserialize(botData.blacklistAddresses)

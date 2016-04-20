@@ -81,7 +81,7 @@ swaputils.buildSwapsPropValue = (swaps, swapRulesProp, defaultSwapDirection=cons
     for swap in swaps
         out.push(swaputils.newSwapProp(swap, swapRulesProp))
 
-    # always have at least one
+    # always have at least one sell swap
     if not out.length and defaultSwapDirection == constants.DIRECTION_SELL
         out.push(swaputils.newSwapProp({direction: defaultSwapDirection}))
 
