@@ -90,7 +90,7 @@ swapGroupRenderers.rate.sell = (number, swap, vmProps, offsetKey)->
                 formFieldFn(popoverLabels.rateSellPrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in(), }, swap.price),
             ]),
             m("div", {class: "col-md-5"}, [
-                formFieldFn(popoverLabels.rateSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
+                formFieldFn(popoverLabels.rateSellMinimumSale, {type: "number", step: "any", min: "0", id: "swap_min_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
             ]),
         ]
     }
@@ -117,7 +117,7 @@ swapGroupRenderers.rate.buy = (number, swap, vmProps, offsetKey)->
                 formFieldFn(popoverLabels.rateBuyPurchasePrice, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.out(), }, swap.rate),
             ]),
             m("div", {class: "col-md-5"}, [
-                formFieldFn(popoverLabels.rateBuyMinimumSale, {type: "number", step: "any", min: "0", id: "swap_rate_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
+                formFieldFn(popoverLabels.rateBuyMinimumSale, {type: "number", step: "any", min: "0", id: "swap_min_#{offsetKey}", 'placeholder': "0.000001", postfixLimit: 7, postfix: swap.in()}, swap.min),
             ]),
         ]
     }
