@@ -1,0 +1,9 @@
+name: income.forwardSent
+
+destination: 'INCOME_FORWARDING_ADDRESS_0000001'
+quantityOut: 0.9999
+assetOut: 'BTC'
+confirmations: 1
+
+state: active
+isActive: true

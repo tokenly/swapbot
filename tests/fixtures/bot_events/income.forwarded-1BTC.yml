@@ -1,0 +1,9 @@
+name: income.forwarded
+
+destination: 'INCOME_FORWARDING_ADDRESS_0000001'
+quantityOut: 0.9999
+assetOut: 'BTC'
+txid: '0000000000000000000000000000001111'
+
+state: active
+isActive: true

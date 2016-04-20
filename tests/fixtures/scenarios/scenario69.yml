@@ -1,0 +1,66 @@
+# Test income forwarding set too high
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    balances:
+      BTC: 1
+      LTBCOIN: 0
+    income_rules:
+      -
+        asset: BTC
+        minThreshold: 1
+        paymentAmount: 2  # <-- higher than threshold
+        address: INCOME_FORWARDING_ADDRESS_0000001
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - # block
+    meta: { baseFilename: block_notification_01.yml }
+    height: 300000
+
+  - # send income to the forwarding address (mempool)
+    meta: { baseFilename: mempool_BTC_SEND_INCOME_notification_1BTC.yml }
+
+  - # send income to the forwarding address (confirmed)
+    meta: { baseFilename: confirmed_BTC_SEND_INCOME_notification_1BTC.yml }
+
+  - # send income to the forwarding address (2 confirmations)
+    meta: { baseFilename: confirmed_BTC_SEND_INCOME_notification_1BTC.yml }
+    confirmations: 2
+    blockId: 300003
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_BTC_TO_FORWARDING_ADDRESS-1BTC.yml }
+    data:
+      requestId: "buildFn:incomeForward"
+
+expectedBotEvents:
+  - #### income forwarded
+    meta: { baseFilename: income.forwarded-1BTC.yml }
+
+  - #### income forward sent (mempool)
+    meta: { baseFilename: income.forwardSent-mempool-1BTC.yml }
+
+  - #### income forward sent (confirmed)
+    meta: { baseFilename: income.forwardSent-confirmed-1BTC.yml }
+
+  - #### income forward sent (confirmed 2)
+    meta: { baseFilename: income.forwardSent-confirmed-1BTC.yml }
+    confirmations: 2
+
+expectedBotModels:
+  - 
+    state: active
+    balances:
+      BTC: 0
+      LTBCOIN: 0
+
+
