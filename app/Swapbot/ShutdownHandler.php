@@ -72,6 +72,9 @@ class ShutdownHandler {
 
             // get the recommended fee
             $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $quantity, $asset);
+            if ($fee < Config::get('swapbot.defaultFee')) {
+                $fee = Config::get('swapbot.defaultFee');
+            }
             // Log::debug("getRecommendedFee \$fee=".json_encode($fee, 192));
 
             if ($fee === null OR $btc_balance < ($fee + $dust_size)) { throw new Exception("Not enough BTC to refund token $asset", 1); }
@@ -93,7 +96,6 @@ class ShutdownHandler {
 
         // send the btc last
         $btc_quantity_to_estimate = $btc_balance;
-        $btc_quantity_to_send = $btc_balance - $fee;
         $fee = $this->getRecommendedFee($bot, $btc_balance, $shutdown_address, $btc_quantity_to_estimate, 'BTC');
         // Log::debug("getRecommendedFee \$fee=".json_encode($fee, 192));
         if (($btc_balance - $fee) > 0) {
