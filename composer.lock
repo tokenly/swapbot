@@ -130,12 +130,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/CodeSleeve/laravel-stapler.git",
-                "reference": "4a41d6b4710ad1609a3f53da664d0ee010d240d7"
+                "reference": "edb5c3ac338c4e182643501a6b9db6dabac8d387"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/edb5c3ac338c4e182643501a6b9db6dabac8d387",
-                "reference": "4a41d6b4710ad1609a3f53da664d0ee010d240d7",
+                "reference": "edb5c3ac338c4e182643501a6b9db6dabac8d387",
                 "shasum": ""
             },
             "require": {
@@ -1138,12 +1138,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/socialite.git",
-                "reference": "0f7c3b02f7e3fd715592b49da080973bd8aec2bb"
+                "reference": "297945170f17298247a4bd2fd5fe1d8a9a277e21"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/socialite/zipball/297945170f17298247a4bd2fd5fe1d8a9a277e21",
-                "reference": "0f7c3b02f7e3fd715592b49da080973bd8aec2bb",
+                "reference": "297945170f17298247a4bd2fd5fe1d8a9a277e21",
                 "shasum": ""
             },
             "require": {
@@ -2299,12 +2299,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "6c905bbed1e728226de656e4c07d620dfe9e80d9"
+                "reference": "65791be28189e2c3d2d289d1b0b23d1f1e521c65"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/config/zipball/65791be28189e2c3d2d289d1b0b23d1f1e521c65",
-                "reference": "6c905bbed1e728226de656e4c07d620dfe9e80d9",
+                "reference": "65791be28189e2c3d2d289d1b0b23d1f1e521c65",
                 "shasum": ""
             },
             "require": {
@@ -3393,12 +3393,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "67a37af0040428ae0f76fb9e183e2799c90d19bf"
+                "reference": "961569215d03cf36db9016bb6fa6d6dde82f8fe4"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/961569215d03cf36db9016bb6fa6d6dde82f8fe4",
-                "reference": "67a37af0040428ae0f76fb9e183e2799c90d19bf",
+                "reference": "961569215d03cf36db9016bb6fa6d6dde82f8fe4",
                 "shasum": ""
             },
             "require": {
@@ -3477,12 +3477,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-event-log.git",
-                "reference": "5fca6919819e2a180a4f6465364234d58dac6c32"
+                "reference": "dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3",
-                "reference": "5fca6919819e2a180a4f6465364234d58dac6c32",
+                "reference": "dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3",
                 "shasum": ""
             },
             "require": {
@@ -3509,7 +3509,7 @@
                 }
             ],
             "description": "An event logger provider for Laravel.",
-            "time": "2016-01-14 17:34:56"
+            "time": "2016-02-06 16:24:12"
         },
         {
             "name": "tokenly/laravel-keen-events",
@@ -3557,12 +3557,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-record-lock.git",
-                "reference": "a408f6d820faf355fe681d9483beb3dec16ef741"
+                "reference": "f45b9c1eeef9cac7d8bf486effab56ad995c35cb"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/tokenly/laravel-record-lock/zipball/f45b9c1eeef9cac7d8bf486effab56ad995c35cb",
-                "reference": "a408f6d820faf355fe681d9483beb3dec16ef741",
+                "reference": "f45b9c1eeef9cac7d8bf486effab56ad995c35cb",
                 "shasum": ""
             },
             "require": {
