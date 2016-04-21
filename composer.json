@@ -19,7 +19,7 @@
 		"tokenly/consul-health-daemon": "^0.1",
 		"tokenly/laravel-record-lock": "dev-master",
 		"graham-campbell/markdown": "~3.2",
-		"codesleeve/laravel-stapler": "dev-master",
+		"codesleeve/laravel-stapler": "^1.0",
 		"aws/aws-sdk-php": "^2.0.0",
 		"sabberworm/php-css-parser": "^7.0.0",
 		"laravel/socialite": "^3.0@dev",

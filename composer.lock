@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5da4ecdf02b777fab5bdee82c95fcf96",
-    "content-hash": "b77d3d9668ca59f4f6456366e1fdc672",
+    "hash": "4fec999baae50808539a0596bf4f57fb",
+    "content-hash": "97752153110ca8ab4e017169b212c81e",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -126,16 +126,16 @@
         },
         {
             "name": "codesleeve/laravel-stapler",
-            "version": "dev-master",
+            "version": "v1.0.05",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CodeSleeve/laravel-stapler.git",
-                "reference": "edb5c3ac338c4e182643501a6b9db6dabac8d387"
+                "reference": "79d644b495754c955f652fee8a6ca799f923bec6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/edb5c3ac338c4e182643501a6b9db6dabac8d387",
-                "reference": "edb5c3ac338c4e182643501a6b9db6dabac8d387",
+                "url": "https://api.github.com/repos/CodeSleeve/laravel-stapler/zipball/79d644b495754c955f652fee8a6ca799f923bec6",
+                "reference": "79d644b495754c955f652fee8a6ca799f923bec6",
                 "shasum": ""
             },
             "require": {
@@ -172,7 +172,7 @@
                 "stapler",
                 "upload"
             ],
-            "time": "2015-07-22 19:39:24"
+            "time": "2015-09-21 00:06:39"
         },
         {
             "name": "codesleeve/stapler",
@@ -5525,7 +5525,6 @@
         "tokenly/laravel-api-provider": 20,
         "tokenly/laravel-blocking-beanstalkd": 20,
         "tokenly/laravel-record-lock": 20,
-        "codesleeve/laravel-stapler": 20,
         "laravel/socialite": 20,
         "fideloper/proxy": 20,
         "tokenly/laravel-keen-events": 20,
