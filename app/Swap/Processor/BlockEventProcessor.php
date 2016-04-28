@@ -12,6 +12,7 @@ use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
 use Swapbot\Repositories\BlockRepository;
 use Swapbot\Repositories\BotRepository;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class BlockEventProcessor {
 
@@ -38,14 +39,18 @@ class BlockEventProcessor {
 
         // bring all bots up to date
         foreach ($this->bot_repository->findAll() as $bot) {
-            // make sure the bot is in good standing
-            $this->dispatch(new ReconcileBotState($bot));
+            try {
+                // make sure the bot is in good standing
+                $this->dispatch(new ReconcileBotState($bot));
 
-            // check the bot payment state
-            $this->dispatch(new ReconcileBotPaymentState($bot));
+                // check the bot payment state
+                $this->dispatch(new ReconcileBotPaymentState($bot));
 
-            // and process all pending swaps (swaps may have timed out)
-            $this->dispatch(new ProcessPendingSwapsForBot($bot, $xchain_notification['height']));
+                // and process all pending swaps (swaps may have timed out)
+                $this->dispatch(new ProcessPendingSwapsForBot($bot, $xchain_notification['height']));
+            } catch (Exception $e) {
+                EventLog::logError('reconcileBot.error', $e, ['botName' => $bot['name'], 'botId' => $bot['id'],]);
+            }
         }
 
         // process any income forwarding payments that are pending
