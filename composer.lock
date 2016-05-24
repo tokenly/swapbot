@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4fec999baae50808539a0596bf4f57fb",
-    "content-hash": "97752153110ca8ab4e017169b212c81e",
+    "hash": "3dfd26356424adfdfc04792819cbb41f",
+    "content-hash": "a1369107f9b15aa033b0e1ea837695ae",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3389,23 +3389,23 @@
         },
         {
             "name": "tokenly/laravel-api-provider",
-            "version": "dev-master",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "961569215d03cf36db9016bb6fa6d6dde82f8fe4"
+                "reference": "fc255637a8b76f232695693dd6d83a68d8ade173"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/961569215d03cf36db9016bb6fa6d6dde82f8fe4",
-                "reference": "961569215d03cf36db9016bb6fa6d6dde82f8fe4",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/fc255637a8b76f232695693dd6d83a68d8ade173",
+                "reference": "fc255637a8b76f232695693dd6d83a68d8ade173",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.5.0",
                 "ramsey/uuid": "~2.",
-                "tokenly/hmac-auth": "dev-master",
-                "tokenly/laravel-event-log": "dev-master",
+                "tokenly/hmac-auth": "^1",
+                "tokenly/laravel-event-log": "^1",
                 "tokenly/token-generator": "dev-master"
             },
             "require-dev": {
@@ -3429,7 +3429,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2015-11-04 13:35:32"
+            "time": "2016-05-24 17:37:01"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",
@@ -3473,16 +3473,16 @@
         },
         {
             "name": "tokenly/laravel-event-log",
-            "version": "dev-master",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-event-log.git",
-                "reference": "dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3"
+                "reference": "5abdc480415b776cbc09a06e90828ac1bad8a57a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3",
-                "reference": "dbe414b1b6e7f26af1e4261938cea3f3fd2d0ee3",
+                "url": "https://api.github.com/repos/tokenly/laravel-event-log/zipball/5abdc480415b776cbc09a06e90828ac1bad8a57a",
+                "reference": "5abdc480415b776cbc09a06e90828ac1bad8a57a",
                 "shasum": ""
             },
             "require": {
@@ -3509,7 +3509,7 @@
                 }
             ],
             "description": "An event logger provider for Laravel.",
-            "time": "2016-02-06 16:24:12"
+            "time": "2016-05-24 17:49:34"
         },
         {
             "name": "tokenly/laravel-keen-events",
@@ -5521,8 +5521,6 @@
     "stability-flags": {
         "tokenly/token-generator": 20,
         "tokenly/pusher-client": 20,
-        "tokenly/laravel-event-log": 20,
-        "tokenly/laravel-api-provider": 20,
         "tokenly/laravel-blocking-beanstalkd": 20,
         "tokenly/laravel-record-lock": 20,
         "laravel/socialite": 20,
