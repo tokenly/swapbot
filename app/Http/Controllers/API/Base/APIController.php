@@ -15,11 +15,14 @@ class APIController extends Controller {
     }
 
     public function addMiddleware() {
+        // log all API calls
+        $this->middleware('api.logApiCalls');
+
         // catch all errors and return a JSON response
         $this->middleware('api.catchErrors');
 
         if ($this->protected) {
-            // require hmacauth middleware for all API requests
+            // require hmacauth middleware for all protected API requests
             $this->middleware('api.protectedAuth');
         }
     }
