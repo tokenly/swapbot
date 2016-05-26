@@ -92,6 +92,8 @@ class BotHelper  {
 
             'swap_rules'                  => null,
 
+            'registered_with_tokenpass'   => false,
+
         ];
     }
 

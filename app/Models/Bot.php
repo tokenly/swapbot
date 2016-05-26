@@ -50,6 +50,7 @@ class Bot extends APIModel {
         'background_overlay_settings' => 'json',
         'all_balances_by_type'        => 'json',
         'swap_rules'                  => 'json',
+        'registered_with_tokenpass'   => 'boolean',
     ];
 
     protected $state_machine           = null;

@@ -11,6 +11,9 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase {
         parent::setUp();
 
         if ($this->use_database) { $this->setUpDb(); }
+
+        // mock tokenpass api by default
+        app('TokenpassHelper')->mockTokenpassAPI();
     }
 
 

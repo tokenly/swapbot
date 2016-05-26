@@ -15,6 +15,7 @@ use Swapbot\Repositories\BotRepository;
 use Swapbot\Statemachines\BotStateMachineFactory;
 use Swapbot\Swap\DateProvider\Facade\DateProvider;
 use Swapbot\Swap\Logger\BotEventLogger;
+use Swapbot\Swap\Tokenpass\Facade\TokenpassHandler;
 use Swapbot\Swapbot\ShutdownHandler;
 
 class ReconcileBotStateHandler {
@@ -75,6 +76,11 @@ class ReconcileBotStateHandler {
                             // loop again
                             $loop_again = true;
                             break;
+                        }
+
+                        // check to see if we need to register with tokenpass
+                        if (TokenpassHandler::shouldRegisterBotWithTokenpass($locked_bot)) {
+                            TokenpassHandler::registerBotWithTokenpass($locked_bot);
                         }
 
                         // check out of fuel

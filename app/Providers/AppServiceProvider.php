@@ -42,6 +42,10 @@ class AppServiceProvider extends ServiceProvider {
             );
         });
 
+        $this->app->bind('tokenpasshandler', function($app) {
+            return $app->make('Swapbot\Swap\Tokenpass\TokenpassHandler');
+        });
+
 	}
 
 }

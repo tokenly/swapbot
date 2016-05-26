@@ -11,6 +11,7 @@ use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BotLedgerEntryRepository;
 use Swapbot\Statemachines\BotCommand\BotCommand;
 use Swapbot\Swap\DateProvider\Facade\DateProvider;
+use Swapbot\Swap\Tokenpass\Facade\TokenpassHandler;
 use Swapbot\Swap\Util\RequestIDGenerator;
 
 
@@ -39,6 +40,10 @@ class FirstMonthlyFeePaid extends BotCommand {
 
             // move the initial fuel
             $this->moveInitialFuel($bot);
+
+            // register the bot with Tokenpass
+            TokenpassHandler::registerBotWithTokenpass($bot);
+            
         });
     }
 

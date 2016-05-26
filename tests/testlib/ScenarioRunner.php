@@ -526,6 +526,7 @@ class ScenarioRunner
         return [
             '/accounts/transfer/',
             '/accounts/balances/',
+            '/message/sign/',
         ];
     }
 
@@ -574,7 +575,7 @@ class ScenarioRunner
 
     protected function validateExpectedXChainCall($expected_xchain_call, $actual_xchain_call) {
         PHPUnit::assertNotEmpty($actual_xchain_call, "Missing xchain call ".json_encode($expected_xchain_call, 192));
-        PHPUnit::assertEquals($expected_xchain_call, $actual_xchain_call, "ExpectedXChainCall mismatch");
+        PHPUnit::assertEquals($expected_xchain_call, $actual_xchain_call, "ExpectedXChainCall mismatch. Actual call: ".json_encode($actual_xchain_call, 192));
     }
 
 
@@ -596,7 +597,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['requestId','to','account','unconfirmed',];
+        $optional_fields = ['requestId','to','account','unconfirmed','custom_inputs',];
         foreach ($optional_fields as $field) {
             if (isset($expected_xchain_call['data'][$field])) {
                 $actual = isset($actual_xchain_call['data'][$field]) ? $actual_xchain_call['data'][$field] : null;

@@ -76,7 +76,7 @@ expectedEmails:
   - meta: { baseFilename: 01-welcome.yml }
 
 
-ignoreXchainCallPrefixes: ['/accounts/balances/']
+ignoreXchainCallPrefixes: ['/accounts/balances/', '/message/sign/']
 ignoreEventPrefixes: ~
 
 

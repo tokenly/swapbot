@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3dfd26356424adfdfc04792819cbb41f",
-    "content-hash": "a1369107f9b15aa033b0e1ea837695ae",
+    "hash": "3fa7cf8fbe3cea594a13b3662df49db9",
+    "content-hash": "da1c5b071654c37a3b0711f39c002d9e",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3715,16 +3715,16 @@
         },
         {
             "name": "tokenly/tokenpass-client",
-            "version": "v1.0.2",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/tokenpass-client.git",
-                "reference": "774b70f1e7fcc75b1fb0e2e892b39b89519325fd"
+                "reference": "160690bd8d12c8c1f8e8641fbe69d4c77c85865c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/tokenpass-client/zipball/774b70f1e7fcc75b1fb0e2e892b39b89519325fd",
-                "reference": "774b70f1e7fcc75b1fb0e2e892b39b89519325fd",
+                "url": "https://api.github.com/repos/tokenly/tokenpass-client/zipball/160690bd8d12c8c1f8e8641fbe69d4c77c85865c",
+                "reference": "160690bd8d12c8c1f8e8641fbe69d4c77c85865c",
                 "shasum": ""
             },
             "require": {
@@ -3759,7 +3759,7 @@
                 "tokenly",
                 "tokenpass"
             ],
-            "time": "2016-04-07 17:07:49"
+            "time": "2016-05-26 01:29:45"
         },
         {
             "name": "tokenly/xchain-client",
@@ -3767,12 +3767,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/xchain-client.git",
-                "reference": "a6ab4ddb89c56b7b77c85d6a83edfdeff840d772"
+                "reference": "b516b1a58d46dde124d41f57d0ec68cc1eaa880b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/a6ab4ddb89c56b7b77c85d6a83edfdeff840d772",
-                "reference": "a6ab4ddb89c56b7b77c85d6a83edfdeff840d772",
+                "url": "https://api.github.com/repos/tokenly/xchain-client/zipball/b516b1a58d46dde124d41f57d0ec68cc1eaa880b",
+                "reference": "b516b1a58d46dde124d41f57d0ec68cc1eaa880b",
                 "shasum": ""
             },
             "require": {
@@ -3797,12 +3797,12 @@
             "authors": [
                 {
                     "name": "Devon Weller",
-                    "email": "dweller@devonweller.com",
-                    "homepage": "http://devonweller.com"
+                    "email": "dweller@tokenly.com",
+                    "homepage": "http://tokenly.com"
                 }
             ],
             "description": "A library",
-            "time": "2016-04-16 17:51:01"
+            "time": "2016-05-26 01:25:19"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -5526,6 +5526,7 @@
         "laravel/socialite": 20,
         "fideloper/proxy": 20,
         "tokenly/laravel-keen-events": 20,
+        "tokenly/tokenpass-client": 20,
         "tokenly/quotebot-client": 20,
         "tokenly/xchain-client": 20,
         "mockery/mockery": 20
