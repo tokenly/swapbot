@@ -1,0 +1,3 @@
+method: deletePromisedTransaction
+args:
+  - '*'               # promise_id

@@ -1,0 +1,8 @@
+method: promiseTransaction
+args:
+  - botaddress000000000000000000000001 # source
+  - SENDER01                           # destination
+  - BTC                                # asset
+  - 50000                              # quantity
+  - '*'                                # expiration
+  - null                               # txid

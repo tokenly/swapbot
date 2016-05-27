@@ -40,4 +40,8 @@ class TokenpassCalledAPIMethods extends ArrayObject {
         return $call_details['method'];
     }
 
+    public function reset() {
+        $this['calls'] = [];
+    }
+
 }

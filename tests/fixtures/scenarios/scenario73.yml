@@ -1,0 +1,42 @@
+# refund deletes the tokenpass promise
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+    confirmations_required: 2
+    swaps:
+      -
+        in: BTC
+        out: LTBCOIN
+        strategy: rate
+        rate: 1000000
+        min: 0.002
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  -
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+  -
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  -
+    meta: { baseFilename: confirmed_BTC_RECEIVE_notification_01.yml }
+    confirmations: 3
+    blockId: 300002
+
+
+############################
+# validate the expected results
+
+expectedTokenpassCalls:
+  - 
+    meta: { baseFilename: createPromise_100000000000LTBCOIN.yml }
+  -
+    meta: { baseFilename: updatePromise_unconfirmed.yml }
+  -
+    meta: { baseFilename: deletePromise.yml }
+
+

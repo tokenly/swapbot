@@ -1,0 +1,24 @@
+# 0-conf and 1-conf notifications trigger tokenpass promises
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+############################
+# receive notifications from xchain
+
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+
+expectedTokenpassCalls:
+  - 
+    meta: { baseFilename: createPromise_00050000BTC.yml }
+  -
+    meta: { baseFilename: updatePromise_unconfirmed.yml }
+

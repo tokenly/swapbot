@@ -1,0 +1,5 @@
+method: updatePromisedTransaction
+args:
+  - '*'               # promise_id
+  - 
+    expiration: '*'   # data

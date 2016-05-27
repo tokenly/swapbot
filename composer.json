@@ -35,10 +35,10 @@
         "tokenly/xchain-client": "dev-master"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~4.0",
+		"phpunit/phpunit": "^5.3",
 		"graphp/graphviz": "~0.2.0",
 		"phpspec/phpspec": "~2.1",
-		"mockery/mockery": "0.9.*@dev",
+		"mockery/mockery": "^0.9",
 	    "doctrine/dbal": "~2.3"
 	},
 	"autoload": {

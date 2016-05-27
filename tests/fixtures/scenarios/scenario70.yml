@@ -1,0 +1,37 @@
+# mempool transaction received triggers tokenpass promise
+# receive LTBCOIN
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+
+
+############################
+# validate the expected results
+expectedXChainCalls: none
+
+expectedTokenpassCalls:
+  - 
+    meta: { baseFilename: createPromise_00050000BTC.yml }
+
+expectedBotEvents:
+  - #### PAYMENT STATE OK
+    meta: { baseFilename: bot.paymentStateChange-ok.yml }
+  - #### NEW
+    meta: { baseFilename: swap.new.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-unconfirmed.yml }
+
+ignoreEventPrefixes:
+  - account.transferIncome
+  - account.transferInventory
+  - bot.balancesSynced

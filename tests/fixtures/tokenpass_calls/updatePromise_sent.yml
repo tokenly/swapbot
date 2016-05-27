@@ -1,0 +1,6 @@
+method: updatePromisedTransaction
+args:
+  - '*'               # promise_id
+  -                   # data
+    expiration: '*'
+    txid: '0000000000000000000000000000001111'

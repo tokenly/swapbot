@@ -21,8 +21,10 @@ use Swapbot\Repositories\BotRepository;
 use Swapbot\Repositories\SwapRepository;
 use Swapbot\Swap\Exception\SwapStrategyException;
 use Swapbot\Swap\Logger\BotEventLogger;
+use Swapbot\Swap\Tokenpass\Facade\TokenpassHandler;
 use Swapbot\Swap\Util\RequestIDGenerator;
 use Tokenly\CurrencyLib\CurrencyUtil;
+use Tokenly\CurrencyLib\Quantity;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\XChainClient\Client;
 
@@ -221,13 +223,19 @@ class SwapProcessor {
             // mark details
             $receipt_update_vars = $this->buildReceiptUpdateVars($swap_process);
 
+            // create or update the token promise with tokenpass
+            $existing_promise_id = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['promise_id'])) ? $swap_process['swap']['receipt']['promise_id'] : null;
+            $promise_id = TokenpassHandler::updateOrCreateTokenPromise($swap_process['bot'], $existing_promise_id, $swap_process['destination'], Quantity::fromFloat($swap_process['quantity']), $swap_process['asset']);
+
+            $receipt_update_vars['promise_id'] = $promise_id;
+
             // determine if this is an update
             $any_changed = false;
             $previous_receipt = $swap_process['swap']['receipt'];
             foreach($receipt_update_vars as $k => $v) {
                 if (!isset($previous_receipt[$k]) OR $v != $previous_receipt[$k]) { $any_changed = true; }
             }
-
+            Log::debug("\$promise_id=$promise_id \$any_changed=".json_encode($any_changed)." \$receipt_update_vars=".json_encode($receipt_update_vars, 192));
             // only update if something has changed
             if ($any_changed) {
                 $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
@@ -279,6 +287,11 @@ class SwapProcessor {
         if ($swap_process['confirmations'] < $swap_process['bot']['confirmations_required']) {
             // move the swap into the confirming state
             $swap_process['state_trigger'] = SwapStateEvent::CONFIRMING;
+
+            // create or update the token promise with tokenpass
+            $existing_promise_id = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['promise_id'])) ? $swap_process['swap']['receipt']['promise_id'] : null;
+            $promise_id = TokenpassHandler::updateOrCreateTokenPromise($swap_process['bot'], $existing_promise_id, $swap_process['destination'], Quantity::fromFloat($swap_process['quantity']), $swap_process['asset']);
+            Log::debug("handleUnconfirmedSwap \$existing_promise_id=".json_encode($existing_promise_id, 192)." returned \$promise_id=".json_encode($promise_id, 192));
             
             // don't process it any further
             $swap_process['swap_was_handled'] = true;
@@ -297,6 +310,8 @@ class SwapProcessor {
                 'confirmations' => $swap_process['confirmations'],
                 'destination'   => $swap_process['destination'],
 
+                'promise_id'    => $promise_id,
+
                 'timestamp'     => time(),
             ];
 
@@ -307,6 +322,10 @@ class SwapProcessor {
             $this->bot_event_logger->logConfirmingSwap($swap_process['bot'], $swap_process['swap'], $receipt_update_vars, $swap_update_vars);
         } else if ($swap_process['confirmations'] >= $swap_process['bot']['confirmations_required']) {
             if ($swap_process['swap']->isConfirming()) {
+
+                // create or update the token promise with tokenpass
+                $existing_promise_id = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['promise_id'])) ? $swap_process['swap']['receipt']['promise_id'] : null;
+                $promise_id = TokenpassHandler::updateOrCreateTokenPromise($swap_process['bot'], $existing_promise_id, $swap_process['destination'], Quantity::fromFloat($swap_process['quantity']), $swap_process['asset']);
 
                 // mark details
                 $receipt_update_vars = [
@@ -322,6 +341,8 @@ class SwapProcessor {
                     'confirmations' => $swap_process['confirmations'],
                     'destination'   => $swap_process['destination'],
 
+                    'promise_id'    => $promise_id,
+
                     'timestamp'     => time(),
                 ];
                 $swap_process['swap_update_vars']['receipt'] = $receipt_update_vars;
@@ -333,6 +354,7 @@ class SwapProcessor {
                 // the swap just became confirmed
                 //   update the state right now
                 $swap_process['swap']->stateMachine()->triggerEvent(SwapStateEvent::CONFIRMED);
+
 
             }
         }
@@ -356,6 +378,7 @@ class SwapProcessor {
 
                 // do automatic refund
                 $this->doRefund($swap_process, RefundConfig::REASON_OUT_OF_STOCK);
+
                 return;
             }
 
@@ -459,6 +482,9 @@ class SwapProcessor {
             throw $e;
         }
 
+        // update the promise with the new TXID
+        $existing_promise_id = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['promise_id'])) ? $swap_process['swap']['receipt']['promise_id'] : null;
+        $promise_id = TokenpassHandler::updateOrCreateTokenPromise($swap_process['bot'], $existing_promise_id, $swap_process['destination'], Quantity::fromFloat($swap_process['quantity']), $swap_process['asset'], $send_result['txid']);
 
         // update the txidOut
         $receipt_update_vars['txidOut'] = $send_result['txid'];
@@ -482,6 +508,12 @@ class SwapProcessor {
         try {
             list($out_quantity, $out_asset, $fee, $dust_size) = $this->buildRefundDetails($swap_process['bot'], $swap_process['xchain_notification']);
 
+            // cancel the provisional transacton
+            $existing_promise_id = (isset($swap_process['swap']['receipt']) AND isset($swap_process['swap']['receipt']['promise_id'])) ? $swap_process['swap']['receipt']['promise_id'] : null;
+            if ($existing_promise_id) {
+                TokenpassHandler::deleteTokenPromise($swap_process['bot'], $existing_promise_id);
+            }
+
             // build trial receipt vars
             $receipt_update_vars = [
                 'type'             => 'refund',
@@ -498,6 +530,8 @@ class SwapProcessor {
 
                 'confirmations'    => $swap_process['confirmations'],
                 'destination'      => $swap_process['destination'],
+
+                'promise_id'       => null,
 
                 'completedAt'      => time(),
                 'timestamp'        => time(),

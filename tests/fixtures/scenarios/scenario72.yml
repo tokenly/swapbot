@@ -1,0 +1,42 @@
+# 0-conf and 1-conf notifications trigger tokenpass promises
+#   and a send triggers a tokenpass txid update
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot01.yml }
+
+############################
+# receive notifications from xchain
+
+xchainNotifications:
+  - meta: { baseFilename: mempool_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+  - meta: { baseFilename: confirmed_LTBCOIN_RECEIVE_notification_01.yml }
+    confirmations: 2
+    blockId: 300001
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    blockId: 300002
+  - meta: { baseFilename: confirmed_BTC_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
+
+############################
+# validate the expected results
+
+
+
+############################
+# validate the expected results
+
+expectedTokenpassCalls:
+  - 
+    meta: { baseFilename: createPromise_00050000BTC.yml }
+  -
+    meta: { baseFilename: updatePromise_unconfirmed.yml }
+  -
+    meta: { baseFilename: updatePromise_unconfirmed.yml }
+  -
+    meta: { baseFilename: updatePromise_sent.yml }
+
+

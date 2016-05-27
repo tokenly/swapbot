@@ -116,6 +116,9 @@ class ScenarioRunner
         // setup mock quotebot (first)
         $this->quotebot_recorder = $this->installMockQuotebot(isset($scenario_data['quotebot']) ? $scenario_data['quotebot'] : null);
 
+        // mock tokenpass API calls
+        $this->installMockTokenpass();
+
         // setup mock mailer
         $this->mock_mailer_recorder = $this->installMockMailer();
 
@@ -145,6 +148,7 @@ class ScenarioRunner
         if (isset($scenario_data['expectedEmails'])) { $this->validateExpectedEmails($scenario_data['expectedEmails']); }
         if (isset($scenario_data['expectedQuoteClientCalls'])) { $this->validateExpecteQuoteClientCalls($scenario_data['expectedQuoteClientCalls']); }
         if (isset($scenario_data['expectedLeaseEntries'])) { $this->validateExpectedBotLeaseEntryModels($scenario_data['expectedLeaseEntries']); }
+        if (isset($scenario_data['expectedTokenpassCalls'])) { $this->validateExpectedTokenpassCalls($scenario_data['expectedTokenpassCalls'], $scenario_data); }
     }
 
 
@@ -989,6 +993,9 @@ class ScenarioRunner
         if (isset($actual_swap_model['receipt']['timestamp'])) { $normalized_expected_swap_model['receipt']['timestamp'] = $actual_swap_model['receipt']['timestamp']; }
         if (isset($actual_swap_model['receipt']['completedAt'])) { $normalized_expected_swap_model['receipt']['completedAt'] = $actual_swap_model['receipt']['completedAt']; }
 
+        // receipt promise_id
+        if (isset($actual_swap_model['receipt']['promise_id'])) { $normalized_expected_swap_model['receipt']['promise_id'] = $actual_swap_model['receipt']['promise_id']; }
+
         ///////////////////
 
 
@@ -1296,6 +1303,67 @@ class ScenarioRunner
         }
 
         PHPUnit::assertEquals($normalized_expected_quotebot_client_calls, $actual_calls, "QuoteClientCalls mismatch");
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    // Mock Tokenpass
+
+    public function installMockTokenpass() {
+        $this->tokenpass_api_calls = app('TokenpassHelper')->mockTokenpassAPI();
+    }    
+    
+
+    protected function validateExpectedTokenpassCalls($expected_tokenpass_calls) {
+        $ignore_methods_map = [
+            'getProvisionalSourceProofSuffix' => true,
+            'signMessage'                     => true,
+            'registerProvisionalSource'       => true,
+        ];
+
+
+        // normalize actual calls
+        $actual_calls = [];
+        $raw_actual_calls = $this->tokenpass_api_calls->getCalls();
+        foreach($raw_actual_calls as $raw_actual_call) {
+            if (isset($ignore_methods_map[$raw_actual_call['method']])) { continue; }
+            $actual_calls[] = $raw_actual_call;
+        }
+
+        // normalize expected calls
+        $normalized_expected_tokenpass_calls = [];
+        foreach($expected_tokenpass_calls as $expected_call_offset => $raw_expected_tokenpass_call) {
+            $expected_tokenpass_call = $raw_expected_tokenpass_call;
+            unset($expected_tokenpass_call['meta']);
+            $expected_tokenpass_call = array_replace_recursive($this->loadBaseFilename($raw_expected_tokenpass_call, "tokenpass_calls"), $expected_tokenpass_call);
+
+            if (isset($actual_calls[$expected_call_offset])) {
+                $expected_tokenpass_call['args'] = $this->allowWildcards($expected_tokenpass_call['args'], $actual_calls[$expected_call_offset]['args']);
+            }
+
+            $normalized_expected_tokenpass_calls[] = $expected_tokenpass_call;
+        }
+
+
+
+        PHPUnit::assertEquals($normalized_expected_tokenpass_calls, $actual_calls, "TokenpassClientCalls mismatch".((count($normalized_expected_tokenpass_calls) == count($actual_calls)) ? "" : "Actual calls: ".json_encode($actual_calls, 192)));
+        // PHPUnit::assertEquals($normalized_expected_tokenpass_calls, $actual_calls, "TokenpassClientCalls mismatch. Actual calls: ".json_encode($actual_calls, 192));
+    }
+
+    protected function allowWildcards($expected, $actual, $recursive=true) {
+        $normalized_expected = [];
+
+        foreach($expected as $offset => $expected_val) {
+            if (is_array($expected_val) AND isset($actual[$offset]) AND is_array($actual[$offset]) AND $recursive) {
+                $expected_val = $this->allowWildcards($expected_val, $actual[$offset], true);
+            } else if ($expected_val == '*') {
+                $expected_val = isset($actual[$offset]) ? $actual[$offset] : '**NOTFOUND**';
+            }
+
+            $normalized_expected[$offset] = $expected_val;
+        }
+
+        return $normalized_expected;
     }
 
     ////////////////////////////////////////////////////////////////////////
