@@ -32,8 +32,8 @@ class TokenpassHelper  {
                 $functions_to_mock = [
                     'registerProvisionalSource'       => null,
                     'getProvisionalSourceProofSuffix' => '1myaddress_1000deadbeef00011000deadbeef0001',
-                    'promiseTransaction'              => function () {    return ['tx' => ['promise_id' => crc32(json_encode(func_get_args())) % 1000000]]; },
-                    'updatePromisedTransaction'       => function ($id) { return ['tx' => ['promise_id' => $id]]; },
+                    'promiseTransaction'              => function () {    return ['promise_id' => crc32(json_encode(func_get_args())) % 1000000]; },
+                    'updatePromisedTransaction'       => function ($id) { return ['promise_id' => $id]; },
                     'deletePromisedTransaction'       => ['result' => true],
                 ];
 

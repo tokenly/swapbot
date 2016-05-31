@@ -9,6 +9,7 @@ use Swapbot\Repositories\BotRepository;
 use Tokenly\CurrencyLib\Quantity;
 use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\TokenpassClient\TokenpassAPI;
+use Exception;
 
 /**
 * TokenpassHandler
@@ -79,7 +80,7 @@ class TokenpassHandler
             if ($txid !== null) { $update_vars['txid'] = $txid; }
             
             $result = $this->tokenpass_api->updatePromisedTransaction($promise_id, $update_vars);
-            $updated_promise_id = $result['tx']['promise_id'];
+            $updated_promise_id = $result['promise_id'];
             EventLog::info('tokenpass.promiseUpdated', ['source' => $source, 'destination' => $destination, 'asset' => $asset, 'quantity' => $quantity->getFloat(), 'promise_id' => $updated_promise_id, 'botId' => $bot['id']]);
             return $updated_promise_id;
 
@@ -97,7 +98,7 @@ class TokenpassHandler
         // create a new token promise
         try {
             $result = $this->tokenpass_api->promiseTransaction($source, $destination, $asset, $quantity->getSatoshis(), $expiration, $txid);
-            $new_promise_id = $result['tx']['promise_id'];
+            $new_promise_id = $result['promise_id'];
             EventLog::info('tokenpass.promiseCreated', ['source' => $source, 'destination' => $destination, 'asset' => $asset, 'quantity' => $quantity->getFloat(), 'new_promise_id' => $new_promise_id, 'botId' => $bot['id']]);
             return $new_promise_id;
         } catch (Exception $e) {
