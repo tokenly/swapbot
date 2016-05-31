@@ -81,7 +81,7 @@ class TokenpassHandler
             
             $result = $this->tokenpass_api->updatePromisedTransaction($promise_id, $update_vars);
             $updated_promise_id = $result['promise_id'];
-            EventLog::info('tokenpass.promiseUpdated', ['source' => $source, 'destination' => $destination, 'asset' => $asset, 'quantity' => $quantity->getFloat(), 'promise_id' => $updated_promise_id, 'botId' => $bot['id']]);
+            EventLog::info('tokenpass.promiseUpdated', ['source' => $source, 'destination' => $destination, 'asset' => $asset, 'quantity' => $quantity->getFloat(), 'promise_id' => $updated_promise_id, 'txid' => $txid, 'botId' => $bot['id']]);
             return $updated_promise_id;
 
         } catch (Exception $e) {
