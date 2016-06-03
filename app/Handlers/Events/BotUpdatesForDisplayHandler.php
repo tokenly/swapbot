@@ -23,6 +23,9 @@ class BotUpdatesForDisplayHandler {
 
         // Log::debug('sendBotEventToPusher: '.'/swapbot_events_'.$bot['uuid']);
         $this->pusher_client->send('/swapbot_events_'.$bot['uuid'], $event);
+
+        // send all swapbot events to the all channel
+        $this->pusher_client->send('/all_swapbot_events', $event);
     }
 
     public function sendSwapEventToPusher(Event $event) {
