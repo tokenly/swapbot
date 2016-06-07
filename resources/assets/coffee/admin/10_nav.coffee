@@ -56,6 +56,11 @@ buildAdminPanelNavLink = (user)->
             m("a[href='/admin/settings']", {class: "", config: m.route}, "Global Settings"),
         ]))
 
+    if user.privileges?.globalAlert
+        els.push(m("li", { class: ""}, [
+            m("a[href='/admin/globalalert']", {class: "", config: m.route}, "Global Alert"),
+        ]))
+
     if els.length > 1
         return m("li", { class: "dropdown"}, [
             m("a[href=#]", {class: "dropdown-toggle", "data-toggle": "dropdown", "role": "button", "aria-expanded": "false",}, [

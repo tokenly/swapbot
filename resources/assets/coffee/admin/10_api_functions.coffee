@@ -235,6 +235,7 @@ api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
                     newError = new Error()
                     newError.errors = json.errors
                     newError.message = json.message
+                    newError.status = ''+xhr.status
                     throw newError
                 throw new Error('invalid response code: '+code)
 
@@ -254,6 +255,7 @@ api.send = (method, apiPathSuffix, params=null, additionalOpts={})->
             errMsg = "Received an invalid response from server (#{code})"
             newError = new Error()
             newError.errors = [errMsg]
+            newError.status = ''+xhr.status
             throw newError
 
 

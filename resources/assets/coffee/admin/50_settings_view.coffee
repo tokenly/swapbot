@@ -19,7 +19,11 @@ vm = ctrl.settingsView.vm = do ()->
         # settings
         vm.settings = m.prop([])
         sbAdmin.api.getAllSettings().then (settingsList)->
-            vm.settings(settingsList)
+            filteredSettingsList = []
+            for setting in settingsList
+                if setting.name == 'globalAlert' then continue
+                filteredSettingsList.push(setting)
+            vm.settings(filteredSettingsList)
             return
 
         return
