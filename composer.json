@@ -9,7 +9,7 @@
         "ramsey/uuid": "~2.",
 		"satooshi/php-coveralls": "~0",
 		"tokenly/token-generator": "dev-master",
-		"tokenly/pusher-client": "dev-master",
+		"tokenly/pusher-client": "^1",
 		"tokenly/laravel-event-log": "^1.1",
 		"tokenly/laravel-api-provider": "^0.2",
 		"tokenly/laravel-blocking-beanstalkd": "dev-master",
