@@ -4,6 +4,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -139,7 +140,7 @@ ctrl.botShutdownForm.view = ()->
 
 
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

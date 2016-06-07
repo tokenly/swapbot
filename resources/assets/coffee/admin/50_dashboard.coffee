@@ -3,9 +3,10 @@ sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.robohashUtils = require './10_robohash_utils'
-Stateutils      = require './10_state_utils'
-BotPaymentUtils = require './10_bot_payment_utils'
-AddressUtils    = require '../shared/addressUtils'
+Stateutils       = require './10_state_utils'
+BotPaymentUtils  = require './10_bot_payment_utils'
+AddressUtils     = require '../shared/addressUtils'
+GlobalAlertPanel = require './10_global_alert_panel'
 
 # ---- end references
 
@@ -124,7 +125,7 @@ ctrl.dashboard.view = ()->
         m("a[href='/admin/edit/bot/new']", {class: "btn btn-primary", config: m.route}, "Create a new Swapbot"),
         
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

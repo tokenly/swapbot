@@ -9,6 +9,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.planutils = require './10_plan_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.pusherutils = require './10_pusher_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.quotebotSubscriber = require './10_quotebot_subscriber'
 sbAdmin = sbAdmin or {}; sbAdmin.utils = require './10_utils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -243,7 +244,7 @@ ctrl.botPaymentsView.view = ()->
 
 
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 ######
 module.exports = ctrl.botPaymentsView

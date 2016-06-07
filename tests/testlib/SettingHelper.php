@@ -8,11 +8,11 @@ class SettingHelper  {
         $this->setting_repository = $setting_repository;
     }
 
-    public function sampleSettingVars() {
-        return [
+    public function sampleSettingVars($override_vars = []) {
+        return array_replace_recursive([
             'name'  => 'foo',
             'value' => ['bar' => 'baz', 'bar2' => 'baz2'],
-        ];
+        ], $override_vars);
     }
 
     public function newSampleSetting($vars=[]) {

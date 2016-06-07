@@ -70,6 +70,9 @@ $router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@
 // Version API
 $router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVersion');
 
+// Global Alert API
+$router->resource('api/v1/globalalert', 'API\Settings\PublicGlobalAlertController@getGlobalAlert');
+
 
 
 

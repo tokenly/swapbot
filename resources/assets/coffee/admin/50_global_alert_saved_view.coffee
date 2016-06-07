@@ -1,6 +1,7 @@
 # ---- begin references
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -30,7 +31,7 @@ ctrl.globalAlertSaved.view = ()->
 
 
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 ######
 module.exports = ctrl.globalAlertSaved

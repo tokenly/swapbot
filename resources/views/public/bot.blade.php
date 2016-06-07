@@ -83,6 +83,8 @@
             <!-- DEFAULT CONTENT -->
     
 
+            <div id="GlobalAlertComponent">{{-- REACT --}}</div>
+
             <div id="SwapPurchaseStepsComponent">
                 {{-- REACT --}}
                 <div class="description">{!! $bot['descriptionHtml'] !!}</div>

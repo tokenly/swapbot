@@ -5,6 +5,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.csvutils = require './10_csv_utils'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -181,7 +182,7 @@ ctrl.allswaps.view = ()->
         m("div", {class: "spacer1"}),
     ])
 
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

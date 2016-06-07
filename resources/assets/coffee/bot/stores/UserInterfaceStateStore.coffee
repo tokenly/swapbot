@@ -1,8 +1,9 @@
 # ---- begin references
-BotConstants = require '../constants/BotConstants'
-Settings = require '../constants/Settings'
-Dispatcher = require '../dispatcher/Dispatcher'
-SwapsStore = require '../stores/SwapsStore'
+BotConstants     = require '../constants/BotConstants'
+Settings         = require '../constants/Settings'
+Dispatcher       = require '../dispatcher/Dispatcher'
+SwapsStore       = require '../stores/SwapsStore'
+GlobalAlertStore = require '../stores/GlobalAlertStore'
 # ---- end references
 
 Settings = require '../constants/Settings'
@@ -16,6 +17,9 @@ uiState = {
         maxSwapsRequestedFromServer: Settings.SWAPS_TO_SHOW
         numberOfSwapsLoaded: 0
         loading: false
+    globalAlert:
+        status: false
+        content: ''
 }
 
 eventEmitter = null
@@ -72,6 +76,20 @@ swapsStoreChanged = ()->
         emitChange()
     return
 
+globalAlertDataStoreChanged = ()->
+    newAlertData = GlobalAlertStore.getCurrentAlertData()
+    oldAlertData = uiState.globalAlert
+    if alertDataChanged(oldAlertData, newAlertData)
+        uiState.globalAlert = newAlertData
+        console.log "alertDataChanged: NEW: ", uiState.globalAlert
+        emitChange()
+    return
+
+alertDataChanged = (d1, d2)->
+    if (d1?.status != d2?.status) then return true
+    if (d1?.content != d2?.content) then return true
+    return false
+
 
 # #############################################
 
@@ -101,6 +119,7 @@ exports.init = ()->
         return
 
     SwapsStore.addChangeListener(swapsStoreChanged)
+    GlobalAlertStore.addChangeListener(globalAlertDataStoreChanged)
 
     return
 

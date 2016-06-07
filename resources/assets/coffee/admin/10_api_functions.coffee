@@ -201,6 +201,10 @@ api.deleteWhitelist = (id)->
     return api.send('DELETE', "whitelists/#{id}", {})
 
 
+
+api.getGlobalAlert = ()->
+    return api.send('GET', 'globalalert')
+
 # ############################################################
 
 api.send = (method, apiPathSuffix, params=null, additionalOpts={})->

@@ -2,6 +2,7 @@
 sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -68,7 +69,7 @@ ctrl.usersView.view = ()->
         m("a[href='/admin/edit/user/new']", {class: "btn btn-primary", config: m.route}, "Create a new user"),
         
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

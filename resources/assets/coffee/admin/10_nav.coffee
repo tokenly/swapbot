@@ -56,7 +56,7 @@ buildAdminPanelNavLink = (user)->
             m("a[href='/admin/settings']", {class: "", config: m.route}, "Global Settings"),
         ]))
 
-    if user.privileges?.globalAlert
+    if user.privileges?.manageGlobalAlert
         els.push(m("li", { class: ""}, [
             m("a[href='/admin/globalalert']", {class: "", config: m.route}, "Global Alert"),
         ]))

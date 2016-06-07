@@ -3,6 +3,8 @@ sbAdmin.ctrl = sbAdmin.ctrl or {};
 
 # ---- begin references
 QuotebotSubscriber               = require './10_quotebot_subscriber'
+GlobalAlertSubscriber            = require './10_global_alert_subscriber'
+GlobalAlertPanel                 = require './10_global_alert_panel'
 sbAdmin.ctrl.allbots             = require './50_all_bots'
 sbAdmin.ctrl.allswaps            = require './50_all_swaps'
 sbAdmin.ctrl.botForm             = require './50_bot_form'
@@ -57,4 +59,8 @@ m.route(
 )
 
 # init the quotebot
-QuotebotSubscriber.initSubscriber(window.QUOTEBOT_URL, window.QUOTEBOT_API_TOKEN, window.QUOTEBOT_PUSHER_URL);
+QuotebotSubscriber.initSubscriber(window.QUOTEBOT_URL, window.QUOTEBOT_API_TOKEN, window.QUOTEBOT_PUSHER_URL)
+
+# init global alert listener
+GlobalAlertSubscriber.initSubscriber()
+GlobalAlertPanel.init()

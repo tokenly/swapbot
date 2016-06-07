@@ -14,6 +14,7 @@ popoverLabels     = require './05_popover_labels'
 swapGroupRenderer = require './10_swap_form_group_renderer'
 swapRulesRenderer = require './10_swap_rules_renderer'
 WhitelistUtils    = require './10_whitelist_utils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 $ = window.jQuery
@@ -524,7 +525,7 @@ ctrl.botForm.view = ()->
 
 
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

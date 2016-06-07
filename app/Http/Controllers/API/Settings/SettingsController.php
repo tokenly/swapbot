@@ -8,13 +8,17 @@ use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Swapbot\Events\SettingWasChanged;
 use Swapbot\Http\Controllers\API\Base\APIController;
 use Swapbot\Http\Requests;
 use Swapbot\Http\Requests\Settings\Transformers\SettingTransformer;
-use Swapbot\Http\Requests\Settings\Validators\UpdateSettingValidator;
 use Swapbot\Http\Requests\Settings\Validators\CreateSettingValidator;
+use Swapbot\Http\Requests\Settings\Validators\UpdateSettingValidator;
+use Swapbot\Models\Setting;
+use Swapbot\Models\User;
 use Swapbot\Repositories\SettingRepository;
 use Tokenly\LaravelApiProvider\Helpers\APIControllerHelper;
 
@@ -32,12 +36,10 @@ class SettingsController extends APIController {
     public function index(Guard $auth, SettingRepository $repository, APIControllerHelper $api_helper)
     {
         $auth_user = $auth->getUser();
-        if (!$auth_user->hasPermission('manageSettings')) {
-            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage settings", 403));
-        }
 
         // all users for this user
         $resources = $repository->findAll();
+        $resources = $this->resourcesThatAreAuthorized($resources, $auth_user);
 
         // format for API
         return $api_helper->transformResourcesForOutput($resources);
@@ -53,11 +55,8 @@ class SettingsController extends APIController {
     public function store(Request $request, Guard $auth, CreateSettingValidator $validator, SettingTransformer $transformer, SettingRepository $repository, APIControllerHelper $api_helper)
     {
         $auth_user = $auth->getUser();
-        if (!$auth_user->hasPermission('manageSettings')) {
-            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage settings", 403));
-        }
 
-        // issue a create settings command
+        // create the settings
         try {
             // transform
             $create_vars = $transformer->santizeAttributes($request->all(), $validator->getRules());
@@ -65,8 +64,14 @@ class SettingsController extends APIController {
             // validate
             $validator->validate($create_vars);
 
+            // require permissions
+            $this->requirePermissionsForSettingName($auth_user, $create_vars['name'], $api_helper);
+
             // create a settings
-            $settings = $repository->createOrUpdate($create_vars['name'], $create_vars['value']);
+            $resource = $repository->createOrUpdate($create_vars['name'], $create_vars['value']);
+
+            // fire event
+            $this->fireSettingsChangeEvent($resource, 'create');
 
         } catch (ValidationException $e) {
             // handle validation errors
@@ -78,7 +83,7 @@ class SettingsController extends APIController {
         }
 
         // return the model id
-        return $api_helper->transformResourceForOutput($settings);
+        return $api_helper->transformResourceForOutput($resource);
     }
 
 
@@ -94,11 +99,8 @@ class SettingsController extends APIController {
     public function show($id, Guard $auth, SettingRepository $repository, APIControllerHelper $api_helper)
     {
         $auth_user = $auth->getUser();
-        if (!$auth_user->hasPermission('manageSettings')) {
-            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage settings", 403));
-        }
-
         $resource = $api_helper->requireResource($id, $repository);
+        $this->requirePermissionsForSettingName($auth_user, $resource['name'], $api_helper);
         return $api_helper->transformResourceForOutput($resource);
     }
 
@@ -116,11 +118,8 @@ class SettingsController extends APIController {
     public function update($id, Request $request, Guard $auth, UpdateSettingValidator $validator, SettingTransformer $transformer, SettingRepository $repository, APIControllerHelper $api_helper)
     {
         $auth_user = $auth->getUser();
-        if (!$auth_user->hasPermission('manageSettings')) {
-            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage settings", 403));
-        }
-
         $resource = $api_helper->requireResource($id, $repository);
+        $this->requirePermissionsForSettingName($auth_user, $resource['name'], $api_helper);
 
         // update settings
         try {
@@ -132,6 +131,10 @@ class SettingsController extends APIController {
             Log::debug('$update_vars='.json_encode($update_vars, 192));
 
             $repository->update($resource, $update_vars);
+
+            // fire event
+            $this->fireSettingsChangeEvent($resource, 'update');
+
         } catch (InvalidArgumentException $e) {
             // handle invalid argument errors
             throw new HttpResponseException($api_helper->newJsonResponseWithErrors($e->getMessage(), 422));
@@ -157,16 +160,56 @@ class SettingsController extends APIController {
     public function destroy($id, Guard $auth, SettingRepository $repository, APIControllerHelper $api_helper)
     {
         $auth_user = $auth->getUser();
-        if (!$auth_user->hasPermission('manageSettings')) {
-            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage settings", 403));
-        }
         $resource = $api_helper->requireResource($id, $repository);
+        $this->requirePermissionsForSettingName($auth_user, $resource['name'], $api_helper);
 
         // issue a delete user command
         $repository->delete($resource);
 
+        $this->fireSettingsChangeEvent($resource, 'delete');
+
         // return a 204 response
         return new Response('', 204);
+    }
+
+
+    // ------------------------------------------------------------------------
+
+    protected function requirePermissionsForSettingName(User $user, $setting_name, $api_helper) {
+        Log::debug("requirePermissionsForSettingName \$setting_name=".json_encode($setting_name, 192));
+        $permission_spec = $this->permissionSpecBySettingName($setting_name);
+        if (!$user->hasPermission($permission_spec['permission'])) {
+            // permissions not found
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("This user is not authorized to manage {$permission_spec['descPlural']}", 403));
+        }
+    }
+
+    protected function permissionSpecBySettingName($setting_name) {
+        switch ($setting_name) {
+            case 'globalAlert':
+                return [
+                    'permission' => 'manageGlobalAlert',
+                    'descSingular' => 'global alert',
+                    'descPlural' => 'global alerts',
+                ];
+        }
+
+        return [
+            'permission' => 'manageSettings',
+            'descSingular' => 'setting',
+            'descPlural' => 'settings',
+        ];
+    }
+
+    protected function resourcesThatAreAuthorized($collection, User $user) {
+        return $collection->filter(function ($resource) use ($user) {
+            $permission_spec = $this->permissionSpecBySettingName($resource['name']);
+            return $user->hasPermission($permission_spec['permission']);
+        });
+    }
+
+    protected function fireSettingsChangeEvent(Setting $setting, $event_type) {
+        Event::fire(new SettingWasChanged($setting, $event_type));
     }
 
 }

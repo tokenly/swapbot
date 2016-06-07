@@ -5,8 +5,11 @@ namespace Swapbot\Handlers\Events;
 use Illuminate\Support\Facades\Log;
 use Rhumsaa\Uuid\Uuid;
 use Swapbot\Events\Event;
+use Swapbot\Events\SettingWasChanged;
 use Swapbot\Models\Bot;
 use Swapbot\Models\BotEvent;
+use Swapbot\Models\Setting;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 use Tokenly\PusherClient\Client;
 
 
@@ -74,6 +77,42 @@ class BotUpdatesForDisplayHandler {
         $this->pusher_client->send('/swapbot_botstream_'.$bot['uuid'], $pusher_vars);
     }
 
+    public function handleSettingUpdate(SettingWasChanged $event) {
+        $setting = $event->setting;
+        if ($setting['name'] == 'globalAlert') {
+            $event_type = $event->event_type;
+            Log::debug("handleSettingUpdate \$event_type=".json_encode($event_type, 192));
+
+            // delete
+            if ($event_type == 'delete') {
+                $this->handleGlobalAlertChange(false, '');
+                return;
+            }
+
+            $alert_data = $setting['value'];
+            $status = (is_array($alert_data) AND isset($alert_data['status'])) ? $alert_data['status'] : null;
+            if ($status === null) {
+                EventLog::logError('event.invalid', ['name' => 'globalAlert', 'alert_data' => $alert_data,]);
+                return;
+            }
+            $content = (is_array($alert_data) AND isset($alert_data['content'])) ? $alert_data['content'] : '';
+            $this->handleGlobalAlertChange($alert_data['status'], $alert_data['content']);
+        }
+    }
+
+    public function handleGlobalAlertChange($active, $raw_content) {
+        $content = $raw_content;
+        if (!$active) { $content = ''; }
+        $pusher_vars = [
+            'alertType' => 'global',
+            'content'   => $content,
+            'status'    => $active,
+        ];
+        // Log::debug("\$pusher_vars=".json_encode($pusher_vars, 192));
+
+        $this->pusher_client->send('/swapbot_alerts', $pusher_vars);
+    }
+
 
     /**
      * Register the listeners for the subscriber.
@@ -92,6 +131,8 @@ class BotUpdatesForDisplayHandler {
         $events->listen('Swapbot\Events\BotPaymentAccountUpdated', 'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendAccountUpdatedToPusher');
 
         $events->listen('Swapbot\Events\BotUpdated',               'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@sendBotUpdateToPusher');
+
+        $events->listen('Swapbot\Events\SettingWasChanged',        'Swapbot\Handlers\Events\BotUpdatesForDisplayHandler@handleSettingUpdate');
     }
 
 

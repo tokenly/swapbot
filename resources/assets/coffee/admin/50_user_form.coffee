@@ -3,6 +3,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.api = require './10_api_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.auth = require './10_auth_functions'
 sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -154,7 +155,7 @@ ctrl.userForm.view = ()->
 
 
     ])
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######

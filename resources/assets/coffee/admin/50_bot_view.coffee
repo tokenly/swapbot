@@ -19,6 +19,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.swapgrouprenderer = require './10_swap_form_gro
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
 swapRulesRenderer = require './10_swap_rules_renderer'
 WhitelistUtils    = require './10_whitelist_utils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -628,7 +629,7 @@ ctrl.botView.view = ()->
     else
         # still loading...
         mEl = m("div", {class: 'loading-banner'}, "Loading...")
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 ######
 module.exports = ctrl.botView

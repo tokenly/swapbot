@@ -5,6 +5,7 @@ sbAdmin = sbAdmin or {}; sbAdmin.form = require './10_form_helpers'
 sbAdmin = sbAdmin or {}; sbAdmin.nav = require './10_nav'
 sbAdmin = sbAdmin or {}; sbAdmin.pusherutils = require './10_pusher_utils'
 swapbot = swapbot or {}; swapbot.addressUtils = require '../shared/addressUtils'
+GlobalAlertPanel = require './10_global_alert_panel'
 # ---- end references
 
 ctrl = {}
@@ -154,7 +155,7 @@ ctrl.swapEvents.view = ()->
             ]),
         ])
 
-    return [sbAdmin.nav.buildNav(), sbAdmin.nav.buildInContainer(mEl)]
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 
 ######
