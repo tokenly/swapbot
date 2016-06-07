@@ -1,6 +1,6 @@
 <?php
 
-// compiled on 2015-10-17 14:56:22
+// compiled on 2016-06-07 01:00:28
 
 return array (
   'swap.new' => 
@@ -158,6 +158,25 @@ return array (
     'msgVars' => 
     array (
       0 => 'newUuid',
+    ),
+    'swapEventStream' => true,
+  ),
+  'swap.complete' => 
+  array (
+    'name' => 'swap.complete',
+    'label' => 'Swap Complete',
+    'level' => 'INFO',
+    'msg' => 'Completed swap of <?php echo e($currency($quantityIn)); ?> <?php echo e($assetIn); ?><?php echo e($swap ? \' \'.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : \'\'); ?> for <?php echo e($currency($quantityOut)); ?> <?php echo e($assetOut); ?><?php echo e((isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : ""); ?> to <?php echo e($destination); ?>.',
+    'msgVars' => 
+    array (
+      0 => 'quantityIn',
+      1 => 'assetIn',
+      2 => 'quantityOut',
+      3 => 'assetOut',
+      4 => 'destination',
+      5 => 'confirmationsOut',
+      6 => 'changeOut',
+      7 => 'changeOutAsset',
     ),
     'swapEventStream' => true,
   ),

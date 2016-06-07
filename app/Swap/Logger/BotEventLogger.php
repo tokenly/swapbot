@@ -349,6 +349,10 @@ class BotEventLogger {
         $this->logSwapEvent('send.confirmed', $bot, $swap, $receipt_update_vars, $swap_update_vars);
     }
 
+    public function logSwapCompleted(Bot $bot, Swap $swap, $receipt_update_vars, $swap_update_vars=null) {
+        $this->logSwapEvent('swap.complete', $bot, $swap, $receipt_update_vars, $swap_update_vars);
+    }
+
     public function logUnconfirmedSwapSend(Bot $bot, Swap $swap, $receipt_update_vars) {
         $this->logSwapEvent('send.unconfirmed', $bot, $swap, $receipt_update_vars);
     }

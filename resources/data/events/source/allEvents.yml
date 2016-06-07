@@ -95,6 +95,15 @@ events:
     msgVars: [newUuid]
     swapEventStream: true
 
+  -
+    name: swap.complete
+    label: Swap Complete
+    level: INFO
+    msg: |
+        Completed swap of {{ $currency($quantityIn) }} {{ $assetIn }}{{ $swap ? ' '.$fmt->fiatSuffix($swap->getSwapConfigStrategy(), $quantityIn, $assetIn) : ''}} for {{ $currency($quantityOut) }} {{ $assetOut }}{{ (isset($changeOut) AND $changeOut > 0) ? " and {$currency($changeOut)} {$changeOutAsset} in change" : "" }} to {{ $destination }}.
+    msgVars: [quantityIn,assetIn,quantityOut,assetOut,destination,confirmationsOut,changeOut,changeOutAsset]
+    swapEventStream: true
+
   # ### Swap Errors
   -
     name: swap.failed

@@ -91,6 +91,8 @@ expectedBotEvents:
 
   - #### confirm the refund
     meta: { baseFilename: send.confirmed-BTC-refund.yml }
+  - #### complete
+    meta: { baseFilename: swap.complete-BTC-refund.yml }
   - #### cose the swap account
     meta: { baseFilename: account.closeSwapAccount-BTC-refund.yml }
     balances:

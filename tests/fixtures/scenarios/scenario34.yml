@@ -67,6 +67,8 @@ expectedBotEvents:
     quantityIn: 0.1
     quantityOut: 100000
 
+  - #### complete
+    meta: { baseFilename: swap.complete-BTC-1000000.yml }
   - #### cose the swap account
     meta: { baseFilename: account.closeSwapAccount-BTC.yml }
     balances:

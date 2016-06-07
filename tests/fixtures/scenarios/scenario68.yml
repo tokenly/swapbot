@@ -64,6 +64,8 @@ expectedBotEvents:
 
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-DRAGONMEAT.yml }
+  - #### complete
+    meta: { baseFilename: swap.complete-XCP-DRAGONMEAT.yml }
   - #### cose the swap account
     meta: { baseFilename: account.closeSwapAccount-DRAGONMEAT.yml }
   - #### COMPLETE

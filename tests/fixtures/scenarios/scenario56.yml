@@ -68,6 +68,8 @@ expectedBotEvents:
   - #### found a confirmed send transaction
     meta: { baseFilename: send.confirmed-BTC.yml }
     confirmations: 2
+  - #### complete
+    meta: { baseFilename: swap.complete-LTBCOIN.yml }
   - #### cose the swap account
     meta: { baseFilename: account.closeSwapAccount-LTBCOIN.yml }
   - #### COMPLETE

@@ -1,0 +1,24 @@
+name: swap.complete
+# msg: Swap entered state complete
+isComplete: true
+isError: false
+type: swap
+state: complete
+
+quantityIn: 6.67666667
+assetIn: XCP
+
+quantityOut: 1
+assetOut: DRAGONMEAT
+
+destination: SENDER01
+txidIn: '00000000000000000000000000000000000000000000000000000XCPtx333333'
+txidOut: "0000000000000000000000000000001111"
+
+confirmations: 2
+confirmationsOut: 2
+
+changeOut: 0
+changeOutAsset: 'BTC'
+
+

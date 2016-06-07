@@ -1,0 +1,20 @@
+name: swap.complete
+# msg: Swap entered state complete
+isComplete: true
+isError: false
+type: refund
+state: complete
+
+quantityIn: 0.001
+assetIn: BTC
+
+quantityOut: 0.0009
+assetOut: BTC
+
+destination: SENDER01
+txidIn: '00000000000000000000000000000000000000000000000000000BTCtx222222'
+txidOut: "0000000000000000000000000000001111"
+
+confirmations: 2
+confirmationsOut: 1
+

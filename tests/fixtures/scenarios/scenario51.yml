@@ -105,6 +105,9 @@ expectedBotEvents:
     meta: { baseFilename: send.confirmed-HAMBURGER.yml }
     confirmations: 2
     quantityIn: 0.035
+  - #### complete
+    meta: { baseFilename: swap.complete-HAMBURGER.yml }
+    quantityIn: 0.035
   - #### cose the swap account
     meta: { baseFilename: account.closeSwapAccount-HAMBURGER.yml }
     balances:

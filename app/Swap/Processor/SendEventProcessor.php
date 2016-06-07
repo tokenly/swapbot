@@ -226,6 +226,7 @@ class SendEventProcessor {
             ];
             $swap_update_vars_for_log = ['state' => SwapState::COMPLETE, ];
             $this->bot_event_logger->logSwapSendConfirmed($bot, $swap, $receipt_update_vars, $swap_update_vars_for_log);
+            $this->bot_event_logger->logSwapCompleted($bot, $swap, $receipt_update_vars, $swap_update_vars_for_log);
 
             // close the swap account by moving all the remaining funds back
             AccountHandler::closeSwapAccount($swap);
