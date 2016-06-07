@@ -75,7 +75,7 @@ class SettingAPITest extends TestCase {
 
         // plain user
         $user_helper = app('UserHelper');;
-        $authed_user = $user_helper->newRandomUser(['privileges' => ['globalAlert' => true,],]);
+        $authed_user = $user_helper->newRandomUser(['privileges' => ['manageGlobalAlert' => true,],]);
         $tester->be($authed_user);
 
         // test create

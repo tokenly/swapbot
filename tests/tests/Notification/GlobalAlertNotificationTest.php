@@ -23,7 +23,7 @@ class GlobalAlertNotificationTest extends TestCase {
 
         // create
         PHPUnit::assertCount(1, $notifications->getAllNotifications());
-        PHPUnit::assertEquals(true, array_get($notifications->getNotification(0), 'data.active'));
+        PHPUnit::assertEquals(true, array_get($notifications->getNotification(0), 'data.status'));
         PHPUnit::assertEquals('hello world', array_get($notifications->getNotification(0), 'data.content'));
         PHPUnit::assertEquals('global', array_get($notifications->getNotification(0), 'data.alertType'));
         $notifications->reset();
@@ -35,7 +35,7 @@ class GlobalAlertNotificationTest extends TestCase {
         ];
         Event::fire(new SettingWasChanged($setting, 'update'));
         PHPUnit::assertCount(1, $notifications->getAllNotifications());
-        PHPUnit::assertEquals(false, array_get($notifications->getNotification(0), 'data.active'));
+        PHPUnit::assertEquals(false, array_get($notifications->getNotification(0), 'data.status'));
         PHPUnit::assertEquals('', array_get($notifications->getNotification(0), 'data.content'));
         $notifications->reset();
 
@@ -46,7 +46,7 @@ class GlobalAlertNotificationTest extends TestCase {
         ];
         Event::fire(new SettingWasChanged($setting, 'delete'));
         PHPUnit::assertCount(1, $notifications->getAllNotifications());
-        PHPUnit::assertEquals(false, array_get($notifications->getNotification(0), 'data.active'));
+        PHPUnit::assertEquals(false, array_get($notifications->getNotification(0), 'data.status'));
         PHPUnit::assertEquals('', array_get($notifications->getNotification(0), 'data.content'));
         $notifications->reset();
     }
