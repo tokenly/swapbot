@@ -58,21 +58,9 @@ class ScenarioRunner
         if (!isset($this->inited)) {
             $this->inited = true;
 
+            // setup mock xchain
             $this->mock_builder = app('Tokenly\XChainClient\Mock\MockBuilder');
-
-            // setup mock xchain (only once)
-            if (self::$XCHAIN_MOCK_RECORDER === false) {
-                self::$XCHAIN_MOCK_RECORDER = $this->mock_builder->installXChainMockClient($test_case);
-                self::$XCHAIN_MOCK_BUILDER  = $this->mock_builder;
-
-                $this->xchain_mock_recorder = self::$XCHAIN_MOCK_RECORDER;
-            } else {
-                $this->mock_builder = self::$XCHAIN_MOCK_BUILDER;
-                $this->xchain_mock_recorder = self::$XCHAIN_MOCK_RECORDER;
-                $this->xchain_mock_recorder->calls = [];
-            }
-
-            // $this->xchain_mock_recorder = $this->mock_builder->installXChainMockClient($test_case);
+            $this->xchain_mock_recorder =  $this->mock_builder->installXChainMockClient($test_case);
 
             $this->mock_builder->stopThrowingExceptions();
             $this->mock_builder->clearBalances();

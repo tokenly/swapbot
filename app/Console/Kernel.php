@@ -51,6 +51,7 @@ class Kernel extends ConsoleKernel {
 		'Swapbot\Console\Commands\Development\CreateMissingURLSlugsCommand',
 		'Swapbot\Console\Commands\Development\ArchiveOldBotEventsCommand',
 		'Swapbot\Console\Commands\Development\SendTestGlobalAlertEvent',
+		'Swapbot\Console\Commands\Development\UpdateDynamicTests',
 
 		'Swapbot\Console\Commands\Stats\AggregateStatsCommand',
 
