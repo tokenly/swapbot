@@ -25,4 +25,18 @@
         <env name="DEFAULT_PRICED_TOKENS" value="[{&quot;token&quot;:&quot;LTBCOIN&quot;,&quot;symbol&quot;:&quot;LTB&quot;},{&quot;token&quot;:&quot;FOOCOIN&quot;},{&quot;token&quot;:&quot;XCP&quot;}]"/>
         <!-- <env name="DB_DATABASE" value="swapbot_test"/> -->
     </php>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./app</directory>
+            <exclude>
+                <directory>./build</directory>
+
+                <file>./app/Providers/AppServiceProvider.php</file>
+                <file>./app/Providers/BusServiceProvider.php</file>
+                <file>./app/Providers/ConfigServiceProvider.php</file>
+                <file>./app/Providers/EventServiceProvider.php</file>
+                <file>./app/Providers/RouteServiceProvider.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>
