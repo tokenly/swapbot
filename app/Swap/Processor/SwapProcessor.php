@@ -70,7 +70,7 @@ class SwapProcessor {
         $in_quantity = $transaction['xchain_notification']['quantity'];
         $initial_receipt_vars = $strategy->calculateInitialReceiptValues($swap_config, $in_quantity, $swap_config->buildAppliedSwapRules($bot['swap_rules']));
         // Log::debug("createNewSwap \$transaction=".json_encode($transaction, 192));
-        // Log::debug("\$in_quantity=$in_quantity \$initial_receipt_vars=".json_encode($initial_receipt_vars, 192));
+        Log::debug("\$in_quantity=$in_quantity \$initial_receipt_vars=".json_encode($initial_receipt_vars, 192));
 
         // new swap vars
         $new_swap = $this->swap_repository->create([
@@ -413,7 +413,8 @@ class SwapProcessor {
 
         // check strategy for refund
         if (!$is_refunding) {
-            $is_refunding = $strategy->shouldRefundTransaction($swap_config, $swap_process['in_quantity'], $swap_config->buildAppliedSwapRules($bot['swap_rules']));
+            $receipt_vars = $this->buildMergedReceiptVars($swap_process);
+            $is_refunding = $strategy->shouldRefundTransaction($swap_config, $swap_process['in_quantity'], $swap_config->buildAppliedSwapRules($bot['swap_rules']), $receipt_vars);
             if ($is_refunding) {
                 $refund_reason = $strategy->buildRefundReason($swap_config, $swap_process['in_quantity']);
             }
@@ -683,6 +684,20 @@ class SwapProcessor {
         }
 
         return $all_complete;
+    }
+
+    protected function buildMergedReceiptVars($swap_process) {
+        if (isset($swap_process['swap']) AND isset($swap_process['swap']['receipt'])) {
+            $receipt_vars = $swap_process['swap']['receipt'];
+
+            if (isset($swap_process['swap_update_vars']['receipt'])) {
+                $receipt_vars = array_merge($receipt_vars, $swap_process['swap_update_vars']['receipt']);
+            }
+
+            return $receipt_vars;
+        }
+
+        return null;
     }
 
 

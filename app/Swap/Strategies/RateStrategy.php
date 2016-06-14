@@ -16,7 +16,7 @@ class RateStrategy implements Strategy {
         $this->swap_rule_handler = $swap_rule_handler;
     }
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[], $receipt_vars=null) {
         // if there is a minimum and the input is below this minimum
         //   then it should be refunded
         if ($quantity_in < $swap_config['min']) {

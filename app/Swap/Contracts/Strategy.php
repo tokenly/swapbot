@@ -9,7 +9,7 @@ interface Strategy {
 
     public function calculateInitialReceiptValues(SwapConfig $swap_config, $quantity_in);
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in);
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[], $receipt_vars=null);
     public function buildRefundReason(SwapConfig $swap_config, $quantity_in);
 
     public function unSerializeDataToSwap($data, SwapConfig $swap_config);

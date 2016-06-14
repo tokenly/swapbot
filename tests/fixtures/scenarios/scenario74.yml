@@ -1,0 +1,103 @@
+# test fiat-based token purchase
+#   when the BTC rate rises, the decision to refund or swap should use the locked in rate
+
+############################
+# setup bots and payment
+bots:
+  - meta: { baseFilename: bot03-hamburger.yml }
+    confirmations_required: 2
+
+xchainBalances:
+  default:
+    unconfirmed:
+      BTC: 0
+    confirmed:
+      HAMBURGER: 25
+      BTC: 1
+    sending:
+      BTC: 0
+
+
+quotebot:
+  - source: bitcoinAverage
+    pair: USD:BTC
+    last: 200
+
+############################
+# receive notifications from xchain
+xchainNotifications:
+  - meta: { baseFilename: mempool_BTC_RECEIVE_notification_01.yml }
+    quantity: 0.025
+
+  # receive the second confirmation with a much lower BTC rate 
+  #   - this should not trigger a refund since the rate was locked in with the 0-conf transaction
+  - meta:
+      baseFilename: confirmed_BTC_RECEIVE_notification_01.yml
+      quotebotRates:
+        - source: bitcoinAverage
+          pair: USD:BTC
+          last: 100
+          lastAvg: 100
+    quantity: 0.025
+    confirmations: 2
+    blockId: 300001
+
+  - meta: { baseFilename: confirmed_HAMBURGER_SEND_notification_01.yml }
+    blockId: 300002
+  - meta: { baseFilename: confirmed_HAMBURGER_SEND_notification_01.yml }
+    confirmations: 2
+    blockId: 300003
+
+
+
+############################
+# validate the expected results
+expectedXChainCalls:
+  - 
+    meta: { baseFilename: send_HAMBURGER.yml }
+
+
+expectedBotEvents:
+  - #### NEW
+    meta: { baseFilename: swap.new-BTC_HAMBURGER.yml }
+  - #### READY
+    meta: { baseFilename: swap.stateChange-ready.yml }
+  - #### UNCONFIRMED TRANSACTION
+    meta: { baseFilename: swap.transaction.update-BTC_HAMBURGER_unconfirmed.yml }
+
+  - #### transaction handled previously (2 confirmations)
+    meta: { baseFilename: tx.previous-BTC-2.yml }
+  - #### swap found
+    meta: { baseFilename: swap.found-BTC_HAMBURGER-2confirmations.yml }
+  - #### swap sent
+    meta: { baseFilename: swap.sent-BTC_HAMBURGER-2confirmations.yml }
+  - #### SENT
+    meta: { baseFilename: swap.stateChange-sent.yml }
+
+  - #### found a confirmed send transaction
+    meta: { baseFilename: send.confirmed-HAMBURGER.yml }
+    confirmations: 2
+  - #### complete
+    meta: { baseFilename: swap.complete-HAMBURGER.yml }
+  - #### cose the swap account
+    meta: { baseFilename: account.closeSwapAccount-HAMBURGER.yml }
+  - #### COMPLETE
+    meta: { baseFilename: swap.stateChange-complete.yml }
+
+  - #### found a confirmed send transaction (2 confirmations)
+    meta: { baseFilename: send.confirmed-HAMBURGER.yml }
+    confirmations: 2
+    confirmationsOut: 2
+
+# check balance
+expectedBotModels:
+  - 
+    # bot should be in state active when done and have balances updated
+    state: active
+    balances:
+      HAMBURGER: 24
+      BTC: 1.0248457 # 1 + 0.025 (receive) - 0.0001 (fee) - 0.00005430 (dust)
+
+expectedQuoteClientCalls:
+  - { source: bitcoinAverage, pair: USD:BTC }
+  - { source: bitcoinAverage, pair: USD:BTC }

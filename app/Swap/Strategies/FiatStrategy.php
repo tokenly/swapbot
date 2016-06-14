@@ -25,12 +25,18 @@ class FiatStrategy implements Strategy {
         $this->priced_tokens_helper = $priced_tokens_helper;
     }
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
-        $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in, $swap_rules);
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[], $receipt_vars=null) {
+        if ($receipt_vars !== null AND isset($receipt_vars['quantityOut'])) {
+            // use the quantity out calculated in the original receipt to determine if we should refund
+            $quantity_out = $receipt_vars['quantityOut'];
+        } else {
+            $value_data = $this->buildQuantityConversionData($swap_config, $quantity_in, $swap_rules);
+            $quantity_out = $value_data['quantityOut'];
+        }
 
         // if this input would not purchase any outAsset or is below the minimum
         //   then it should be refunded
-        if ($value_data['quantityOut'] <= 0 OR $value_data['quantityOut'] < $swap_config['min_out']) {
+        if ($quantity_out <= 0 OR $quantity_out < $swap_config['min_out']) {
             return true;
         }
 

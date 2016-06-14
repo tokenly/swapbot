@@ -64,7 +64,6 @@ class TokenpassHandler
     }
 
     public function updateOrCreateTokenPromise(Bot $bot, $promise_id, $destination, Quantity $quantity, $asset, $txid=null) {
-        Log::debug("updateOrCreateTokenPromise \$promise_id=".json_encode($promise_id, 192));
         if ($promise_id === null) {
             return $this->createNewTokenPromise($bot, $destination, $quantity, $asset, $txid);
         }

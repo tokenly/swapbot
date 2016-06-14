@@ -90,6 +90,7 @@ class ScenariosTest extends TestCase {
     public function testScenario_71() { $this->runScenario(71); } 
     public function testScenario_72() { $this->runScenario(72); } 
     public function testScenario_73() { $this->runScenario(73); } 
+    public function testScenario_74() { $this->runScenario(74); } 
     // -- -END- DYNAMICALLY GENERATED TESTS --
 
     // ------------------------------------------------------------------------

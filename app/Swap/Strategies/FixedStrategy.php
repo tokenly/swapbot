@@ -16,7 +16,7 @@ class FixedStrategy implements Strategy {
         $this->swap_rule_handler = $swap_rule_handler;
     }
 
-    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[]) {
+    public function shouldRefundTransaction(SwapConfig $swap_config, $quantity_in, $swap_rules=[], $receipt_vars=null) {
         $swap_vars = $this->calculateInitialReceiptValues($swap_config, $quantity_in, $swap_rules);
 
         // never try to send 0 of an asset

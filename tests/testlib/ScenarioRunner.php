@@ -212,6 +212,11 @@ class ScenarioRunner
                 $this->mock_builder->stopThrowingExceptions();
             }
 
+            // look for changed quotebotRates
+            if (isset($meta['quotebotRates'])) {
+                $this->updateMockQuotebotRates($meta['quotebotRates']);
+            }
+
             // process the notification
             $this->dispatch(new ReceiveWebhook($notification));
 
@@ -1261,15 +1266,22 @@ class ScenarioRunner
     // Mock Quotebot
 
     public function installMockQuotebot($rate_entries=null) {
-        $quotebot_mock_builder = app('Tokenly\QuotebotClient\Mock\MockBuilder');
+        $this->quotebot_mock_builder = app('Tokenly\QuotebotClient\Mock\MockBuilder');
 
         if ($rate_entries !== null) {
-            $quotebot_mock_builder->setMockRates($rate_entries);
+            $this->quotebot_mock_builder->setMockRates($rate_entries);
         }
 
-        $quotebot_recorder = $quotebot_mock_builder->installQuotebotMockClient();
+        $quotebot_recorder = $this->quotebot_mock_builder->installQuotebotMockClient();
         return $quotebot_recorder;
-    }    
+    }
+
+    public function updateMockQuotebotRates($rate_entries) {
+        // ensure quoteboat builder exists
+        if (!isset($this->quotebot_mock_builder)) { $this->installMockQuotebot($rate_entries); }
+
+        $this->quotebot_mock_builder->setMockRates($rate_entries);
+    }
     
 
     protected function validateExpecteQuoteClientCalls($expected_quotebot_client_calls) {
