@@ -52,6 +52,8 @@ class ProcessIncomeForwardingForAllBotsHandler {
                     $bot_balance = $bot->getBalance($income_rule_config['asset']);
                     if ($bot_balance >= $income_rule_config['minThreshold']) {
                         try {
+                            $should_send = true;
+
                             // send the transaction
                             $asset = $income_rule_config['asset'];
                             $destination = $income_rule_config['address'];
@@ -60,9 +62,21 @@ class ProcessIncomeForwardingForAllBotsHandler {
                             if ($quantity < ForwardPaymentHandler::DEFAULT_REGULAR_DUST_SIZE) {
                                 $err_msg = "Unable to forward income because the amount was too small.";
                                 EventLog::logError('income.forward.insufficient', $err_msg, ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, ]);
+                                $should_send = false;
                             }
 
-                            if ($quantity >= ForwardPaymentHandler::DEFAULT_REGULAR_DUST_SIZE) {
+                            if ($asset != 'BTC') {
+                                // check that BTC balance is high enough to send
+                                $minimum_btc_balance_to_send = ForwardPaymentHandler::DEFAULT_REGULAR_DUST_SIZE + $fee;
+                                $btc_balance = $bot->getBalance('BTC');
+                                if ($btc_balance < $minimum_btc_balance_to_send) {
+                                    $err_msg = "Unable to forward income because there was not enough BTC fuel.";
+                                    EventLog::logError('income.forward.insufficientFuel', $err_msg, ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, 'btcBalance' => $btc_balance]);
+                                    $should_send = false;
+                                }
+                            }
+
+                            if ($should_send) {
                                 // don't do the same income forwarding send within 60 minutes
                                 $cache_key = $bot['uuid'].','.$income_rule_config['asset'];
                                 $send_uuid = Cache::get($cache_key);
