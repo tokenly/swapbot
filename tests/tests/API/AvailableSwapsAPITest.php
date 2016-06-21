@@ -53,6 +53,13 @@ class AvailableSwapsAPITest extends TestCase {
         PHPUnit::assertEquals('BTC', $found_available_swaps[1]['swap']['out']);
 
 
+        // filter by botId
+        $found_available_swaps = $this->runSearch(['botId' => $bot_2['uuid'], ]);
+        PHPUnit::assertCount(6, $found_available_swaps);
+        for ($i=0; $i < 6; $i++) { 
+            PHPUnit::assertEquals($bot_2['uuid'], $found_available_swaps[$i]['bot']['id']);
+        }
+
         // sort by cost
         $found_available_swaps = $this->runSearch(['inToken' => 'TOKENLY', 'outToken' => 'BTC', 'sort' => 'cost', ]);
         PHPUnit::assertCount(2, $found_available_swaps);

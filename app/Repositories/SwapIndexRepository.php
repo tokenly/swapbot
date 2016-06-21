@@ -4,6 +4,7 @@ namespace Swapbot\Repositories;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Swapbot\Models\Bot;
 use Swapbot\Repositories\BotRepository;
 use Tokenly\LaravelApiProvider\Filter\RequestFilter;
@@ -87,6 +88,10 @@ class SwapIndexRepository
     public function buildFindAllFilterDefinition() {
         return [
             'fields' => [
+                'botId' => [
+                    'field'     => 'bot_id',
+                    'transformFn' => [$this, 'transformBotUUIDToBotId'],
+                ],
                 'inToken' => [
                     'field'     => 'in',
                     'sortField' => 'in',
@@ -112,17 +117,25 @@ class SwapIndexRepository
         $query = DB::table($this->table)->newQuery()->from($this->table);
 
         if ($filter !== null) {
-            $filter->filter($query);
-            $filter->limit($query);
-            $filter->sort($query);
+            $filter->apply($query);
         }
 
         return $this->buildResponse($query);
     }
 
+    // public callback
+    public function transformBotUUIDToBotId($bot_uuid) {
+        $bot_id = null;
+        if ($bot_uuid) {
+            $bot = $this->bot_repository->findByUuid($bot_uuid);
+            if ($bot) {
+                $bot_id = $bot['id'];
+            }
+        }
+        return $bot_id;
+    }
 
-    ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
+    // ------------------------------------------------------------------------
     
     protected function findByToken($token, $direction) {
         $query = DB::table($this->table)
