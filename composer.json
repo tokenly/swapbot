@@ -11,7 +11,7 @@
 		"tokenly/token-generator": "dev-master",
 		"tokenly/pusher-client": "^1",
 		"tokenly/laravel-event-log": "^1.1",
-		"tokenly/laravel-api-provider": "^0.2",
+		"tokenly/laravel-api-provider": "^0.3",
 		"tokenly/laravel-blocking-beanstalkd": "dev-master",
 		"linusu/bitcoin-address-validator": "~0",
 		"metabor/statemachine": "1.1.*",

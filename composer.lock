@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d2126aaf4e7ee3249e3b6e2ad745accc",
-    "content-hash": "1496bc3a8064e86f61619317fd3d6ab5",
+    "hash": "099f3bf1c487e80f1130207c70f1c962",
+    "content-hash": "eadbc3530d0350161396f0e68e612e56",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -3499,16 +3499,16 @@
         },
         {
             "name": "tokenly/laravel-api-provider",
-            "version": "v0.2.1",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tokenly/laravel-api-provider.git",
-                "reference": "fc255637a8b76f232695693dd6d83a68d8ade173"
+                "reference": "63c4e9ca87d625800c08b67d615f660866ac04e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/fc255637a8b76f232695693dd6d83a68d8ade173",
-                "reference": "fc255637a8b76f232695693dd6d83a68d8ade173",
+                "url": "https://api.github.com/repos/tokenly/laravel-api-provider/zipball/63c4e9ca87d625800c08b67d615f660866ac04e6",
+                "reference": "63c4e9ca87d625800c08b67d615f660866ac04e6",
                 "shasum": ""
             },
             "require": {
@@ -3539,7 +3539,7 @@
                 }
             ],
             "description": "An API service provider for Laravel",
-            "time": "2016-05-24 17:37:01"
+            "time": "2016-06-21 16:21:21"
         },
         {
             "name": "tokenly/laravel-blocking-beanstalkd",
