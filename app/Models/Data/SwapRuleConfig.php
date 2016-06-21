@@ -65,7 +65,17 @@ class SwapRuleConfig extends ArrayObject implements APISerializeable {
     // ---------------------------------------------------------------
 
     protected function serializeForAPI_bulkDiscount($out) {
-        $out['discounts'] = isset($this['discounts']) ? $this['discounts'] : [];
+        $raw_discounts = isset($this['discounts']) ? $this['discounts'] : [];
+        foreach($raw_discounts as $raw_discount) {
+            $moq = isset($raw_discount['moq']) ? floatval($raw_discount['moq']) : null;
+            if ($moq === null) { continue; }
+            $pct = isset($raw_discount['pct']) ? floatval($raw_discount['pct']) : null;
+            if ($pct === null) { continue; }
+
+            $discounts[] = ['moq' => $moq, 'pct' => $pct];
+        }
+
+        $out['discounts'] = $discounts;
         return $out;
     }
 
