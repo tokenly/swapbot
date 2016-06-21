@@ -42,7 +42,16 @@ class SwapConfig extends ArrayObject implements APISerializeable {
         return $strategy->serializeSwap($this);
     }
 
-    public function serializeForAPI() { return $this->serialize(); }
+    public function serializeForAPI() {
+        return $this->serialize();
+    }
+
+    public function serializeForAPIWithSwapRules($all_swap_rules) {
+        $out = $this->serializeForAPI();
+        $out['swapRules'] = $this->buildAppliedSwapRules($all_swap_rules);
+        unset($out['swap_rule_ids']);
+        return $out;
+    }
 
     public function buildIndexEntries() { return $this->getStrategy()->buildIndexEntries($this); }
 

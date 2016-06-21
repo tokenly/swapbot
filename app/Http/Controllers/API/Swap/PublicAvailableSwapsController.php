@@ -45,7 +45,7 @@ class PublicAvailableSwapsController extends APIController {
             $swap_config = $available_swap['swap'];
             $swap_details_for_api = $swap_strategy_factory->getStrategy($swap_config['strategy'])->buildSwapDetailsForAPI($swap_config, $request->input('inToken'));
 
-            $swap_details_for_api['config'] = $swap_config->serialize();
+            $swap_details_for_api['config'] = $swap_config->serializeForAPIWithSwapRules($available_swap['bot']['swap_rules']);
 
             $available_swap_output = [
                 'swap' => $swap_details_for_api,
