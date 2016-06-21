@@ -9,7 +9,7 @@ eventEmitter = null
 currentAlertData = null
 
 addAlertData = (newAlertData)->
-    console.log "newAlertData: ", newAlertData
+    # console.log "newAlertData: ", newAlertData
     currentAlertData = newAlertData
     emitChange()
     return

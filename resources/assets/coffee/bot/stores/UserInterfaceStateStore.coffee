@@ -81,7 +81,7 @@ globalAlertDataStoreChanged = ()->
     oldAlertData = uiState.globalAlert
     if alertDataChanged(oldAlertData, newAlertData)
         uiState.globalAlert = newAlertData
-        console.log "alertDataChanged: NEW: ", uiState.globalAlert
+        # console.log "alertDataChanged: NEW: ", uiState.globalAlert
         emitChange()
     return
 
