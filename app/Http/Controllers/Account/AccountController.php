@@ -18,6 +18,11 @@ use Tokenly\LaravelEventLog\Facade\EventLog;
 class AccountController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('tls');
+    }
+
     public function login() {
         $user = Auth::user();
         if ($user) {

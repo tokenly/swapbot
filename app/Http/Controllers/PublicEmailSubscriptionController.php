@@ -18,6 +18,8 @@ class PublicEmailSubscriptionController extends Controller {
 
     function __construct(CustomerRepository $customer_repository) {
         $this->customer_repository = $customer_repository;
+
+        $this->middleware('tls');
     }
 
     /**

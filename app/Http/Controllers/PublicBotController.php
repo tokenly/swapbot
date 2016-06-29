@@ -18,6 +18,8 @@ class PublicBotController extends Controller {
     function __construct(UserRepository $user_repository, BotRepository $bot_repository) {
         $this->user_repository = $user_repository;
         $this->bot_repository  = $bot_repository;
+
+        $this->middleware('tls');
     }
 
     /**

@@ -7,9 +7,12 @@ use Swapbot\Http\Requests;
 
 class AdminController extends Controller {
 
+    public function __construct()
+    {
+        $this->middleware('tls');
+    }
+
 	/**
-     * Show the application welcome screen to the user.
-     *
      * @return Response
      */
     public function index()

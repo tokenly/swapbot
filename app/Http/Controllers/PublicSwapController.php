@@ -13,6 +13,8 @@ class PublicSwapController extends Controller {
     function __construct(UserRepository $user_repository, SwapRepository $swap_repository) {
         $this->user_repository = $user_repository;
         $this->swap_repository  = $swap_repository;
+
+        $this->middleware('tls');
     }
 
     /**

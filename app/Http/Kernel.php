@@ -34,6 +34,7 @@ class Kernel extends HttpKernel {
 		'auth.basic' => 'Illuminate\Auth\Middleware\AuthenticateWithBasicAuth',
 		'guest'      => 'Swapbot\Http\Middleware\RedirectIfAuthenticated',
 		'cors'       => 'Swapbot\Http\Middleware\CORS',
+		'tls'        => \Swapbot\Http\Middleware\RequireTLS::class,
 	];
 
 }
