@@ -236,6 +236,48 @@ class SwapIndexRepositoryTest extends TestCase {
 
     }
 
+
+    public function testLimitAndPageBots()
+    {
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        $index = app('Swapbot\Repositories\SwapIndexRepository');
+        $helper = app('BotHelper');
+        $test_helper = app('APITestHelper');
+        $bot_1 = $this->buildBot($this->swaps4(), 'bot 1');
+        $bot_2 = $this->buildBot($this->swaps4(), 'bot 2');
+        $bot_3 = $this->buildBot($this->swaps4(), 'bot 3');
+        $bot_4 = $this->buildBot($this->swaps4(), 'bot 4');
+        $bot_5 = $this->buildBot($this->swaps4(), 'bot 5');
+
+        $bot_6 = $this->buildBot($this->swaps4(), 'bot 6');
+        $bot_7 = $this->buildBot($this->swaps4(), 'bot 7');
+        $bot_8 = $this->buildBot($this->swaps4(), 'bot 8');
+        $bot_9 = $this->buildBot($this->swaps4(), 'bot 9');
+        $bot_10 = $this->buildBot($this->swaps4(), 'bot 10');
+
+        $bot_11 = $this->buildBot($this->swaps4(), 'bot 11');
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // IN
+
+        $found_swaps = $this->runSwapIndexSearch(['limit' => '5', ]);
+        PHPUnit::assertCount(5, $found_swaps);
+        PHPUnit::assertEquals($bot_1['id'], $found_swaps[0]['bot']['id']);
+
+        $found_swaps = $this->runSwapIndexSearch(['limit' => '5', 'pg' => 1 ]);
+        PHPUnit::assertCount(5, $found_swaps);
+        PHPUnit::assertEquals($bot_6['id'], $found_swaps[0]['bot']['id']);
+
+        $found_swaps = $this->runSwapIndexSearch(['limit' => '5', 'pg' => 2 ]);
+        PHPUnit::assertCount(1, $found_swaps);
+        PHPUnit::assertEquals($bot_11['id'], $found_swaps[0]['bot']['id']);
+
+        $found_swaps = $this->runSwapIndexSearch(['limit' => '5', 'pg' => 3 ]);
+        PHPUnit::assertCount(0, $found_swaps);
+    }
+
     // ------------------------------------------------------------------------
 
     protected function buildBot($swaps=null, $name_or_vars=null) {
