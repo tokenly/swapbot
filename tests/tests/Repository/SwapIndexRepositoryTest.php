@@ -207,6 +207,11 @@ class SwapIndexRepositoryTest extends TestCase {
         PHPUnit::assertCount(1, $found_bots);
         PHPUnit::assertEquals($bot_1['uuid'], $found_bots[0]['uuid']);
 
+        // check that the index no longer has swaps from the inactive bot
+        //   only 4 swaps from swaps1()
+        // echo "\swap_index: ".json_encode(DB::table('swap_index')->newQuery()->from('swap_index')->get(), 192)."\n";
+        PHPUnit::assertCount(4, $index->findAll());
+
     }
 
     // ------------------------------------------------------------------------

@@ -33,12 +33,14 @@ class BotIndexHandler {
             ]);
 
             // add swaps
+            $bot_is_active = $bot->isActive();
             $this->swap_index_repository->clearIndex($bot);
             $swap_index_rows = [];
             foreach ($bot['swaps'] as $swap_offset => $swap_config) {
                 foreach ($swap_config->buildIndexEntries() as $swap_index_row) {
                     if ($swap_index_row) {
                         $swap_index_row['swap_offset'] = $swap_offset;
+                        $swap_index_row['active'] = $bot_is_active;
                         $swap_index_rows[] = $swap_index_row;
                     }
                 }

@@ -35,6 +35,7 @@ class SwapIndexRepository
             if (!isset($row['out'])) { throw new Exception("Missing out", 1); }
             if (!isset($row['cost'])) { throw new Exception("Missing cost", 1); }
             if (!isset($row['swap_offset'])) { throw new Exception("Missing swap_offset", 1); }
+            if (!isset($row['active'])) { throw new Exception("Missing active", 1); }
 
             $create_rows[] = [
                 'bot_id'      => $bot_id,
@@ -42,6 +43,7 @@ class SwapIndexRepository
                 'in'          => $row['in'],
                 'out'         => $row['out'],
                 'cost'        => $row['cost'] * self::SATOSHI,
+                'active'      => $row['active'],
             ];
         }
 
@@ -111,16 +113,13 @@ class SwapIndexRepository
     }
 
     public function findAll(RequestFilter $filter=null) {
-        if ($filter === null) {
-            return $this->prototype_model->all();
-        }
-
         $query = DB::table($this->table)->newQuery()->from($this->table);
-
+        
         if ($filter !== null) {
             $filter->apply($query);
         }
 
+        $query = $this->activeOnly($query);
         return $this->buildResponse($query);
     }
 
@@ -141,7 +140,15 @@ class SwapIndexRepository
     protected function findByToken($token, $direction) {
         $query = DB::table($this->table)
             ->where($direction, $token);
+
+        $query = $this->activeOnly($query);
+
         return $this->buildResponse($query);
+    }
+
+    protected function activeOnly($query) {
+        $query->where('active', 1);
+        return $query;
     }
 
     protected function buildResponse(Builder $query) {
