@@ -209,8 +209,30 @@ class SwapIndexRepositoryTest extends TestCase {
 
         // check that the index no longer has swaps from the inactive bot
         //   only 4 swaps from swaps1()
-        // echo "\swap_index: ".json_encode(DB::table('swap_index')->newQuery()->from('swap_index')->get(), 192)."\n";
         PHPUnit::assertCount(4, $index->findAll());
+
+    }
+
+    public function testLimitAndFilterInactiveBots()
+    {
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        $index = app('Swapbot\Repositories\SwapIndexRepository');
+        $helper = app('BotHelper');
+        $test_helper = app('APITestHelper');
+        $bot_0 = $this->buildBot($this->swaps2(), 'bot zero');
+        $bot_1 = $this->buildBot($this->swaps1(), 'bot one');
+        $bot_2 = $this->buildBot($this->swaps3(), ['name' => 'bot two', ]);
+
+        // update the bot state
+        app('Swapbot\Repositories\BotRepository')->update($bot_0, ['state' => BotState::BRAND_NEW]);
+        app('Swapbot\Repositories\BotRepository')->update($bot_2, ['state' => BotState::BRAND_NEW]);
+
+        ////////////////////////////////////////////////////////////////////////
+        // IN
+
+        $found_swaps = $this->runSwapIndexSearch(['limit' => '4', ]);
+        PHPUnit::assertCount(4, $found_swaps);
 
     }
 
@@ -354,6 +376,14 @@ class SwapIndexRepositoryTest extends TestCase {
         $request = $test_helper->createAPIRequest('GET', '/something', $attributes);
         $filter = IndexRequestFilter::createFromRequest($request, $bot_repo->buildFindAllFilterDefinition());
         return $bot_repo->findAll($filter);
+    }
+
+    protected function runSwapIndexSearch($attributes) {
+        $swap_index = app('Swapbot\Repositories\SwapIndexRepository');
+        $test_helper = app('APITestHelper');
+        $request = $test_helper->createAPIRequest('GET', '/something', $attributes);
+        $filter = IndexRequestFilter::createFromRequest($request, $swap_index->buildFindAllFilterDefinition());
+        return $swap_index->findAll($filter);
     }
 
 
