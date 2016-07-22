@@ -98,10 +98,12 @@ class SwapIndexRepository
                 'inToken' => [
                     'field'     => 'in',
                     'sortField' => 'in',
+                    'allow_multiple' => true,
                 ],
                 'outToken' => [
                     'field'     => 'out',
                     'sortField' => 'out',
+                    'allow_multiple' => true,
                 ],
                 'cost' => [
                     'sortField' => 'cost',
