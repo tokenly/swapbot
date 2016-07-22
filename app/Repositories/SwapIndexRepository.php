@@ -91,8 +91,9 @@ class SwapIndexRepository
         return [
             'fields' => [
                 'botId' => [
-                    'field'     => 'bot_id',
-                    'transformFn' => [$this, 'transformBotUUIDToBotId'],
+                    'field'          => 'bot_id',
+                    'transformFn'    => [$this, 'transformBotUUIDToBotId'],
+                    'allow_multiple' => true,
                 ],
                 'inToken' => [
                     'field'     => 'in',
