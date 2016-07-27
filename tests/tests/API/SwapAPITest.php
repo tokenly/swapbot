@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Swapbot\Models\User;
 use \PHPUnit_Framework_Assert as PHPUnit;
@@ -98,6 +99,44 @@ class SwapAPITest extends TestCase {
         PHPUnit::assertCount(2, $loaded_swaps);
         PHPUnit::assertEquals($new_swap_2['uuid'], $loaded_swaps[0]['id']);
         PHPUnit::assertEquals($new_swap_3['uuid'], $loaded_swaps[1]['id']);
+
+    }
+
+    public function testGetPublicSwapsWithFilters() {
+        $user_1 = app('UserHelper')->newRandomUser();
+        $bot_1 = app('BotHelper')->newSampleBotWithUniqueSlug($user_1);
+
+
+        // create a sample bot with the standard user
+
+        $hours = [];
+        for ($i=0; $i < 5; $i++) { $hours[$i] = Carbon::now()->subHour($i); }
+        
+        $new_swap_1 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'brandnew', 'created_at' => $hours[0], 'updated_at' => $hours[0],]);
+        $new_swap_2 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'complete', 'created_at' => $hours[1], 'updated_at' => $hours[1],]);
+        $new_swap_3 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'complete', 'created_at' => $hours[2], 'updated_at' => $hours[2],]);
+        $new_swap_4 = app('SwapHelper')->newSampleSwap($bot_1, null, ['state' => 'error'   , 'created_at' => $hours[3], 'updated_at' => $hours[3],]);
+
+        // now call the method as the other user
+        $tester = $this->setupAPITester();
+        // $tester->be($admin_user);
+
+        // brand new only
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/public/swaps/'.$bot_1['uuid'], ['state' => 'brandnew']);
+        PHPUnit::assertCount(1, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swaps[0]['id']);
+
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/public/swaps/'.$bot_1['uuid'], ['state' => 'brandnew,complete']);
+        PHPUnit::assertCount(3, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swaps[0]['id']);
+        PHPUnit::assertEquals($new_swap_2['uuid'], $loaded_swaps[1]['id']);
+        PHPUnit::assertEquals($new_swap_3['uuid'], $loaded_swaps[2]['id']);
+
+        $loaded_swaps = $tester->callAPIAndValidateResponse('GET', '/api/v1/public/swaps/'.$bot_1['uuid'], ['state' => 'brandnew,complete', 'sort' => 'updatedAt asc']);
+        PHPUnit::assertCount(3, $loaded_swaps);
+        PHPUnit::assertEquals($new_swap_1['uuid'], $loaded_swaps[2]['id']);
+        PHPUnit::assertEquals($new_swap_2['uuid'], $loaded_swaps[1]['id']);
+        PHPUnit::assertEquals($new_swap_3['uuid'], $loaded_swaps[0]['id']);
 
     }
 

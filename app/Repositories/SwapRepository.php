@@ -25,8 +25,16 @@ class SwapRepository extends APIRepository
         return $this->findByBotId($bot['id']);
     }
 
-    public function findByBotId($bot_id) {
-        return $this->prototype_model->where('bot_id', $bot_id)->orderBy('id')->get();
+    public function findByBotId($bot_id, IndexRequestFilter $filter=null) {
+        $query = $this->prototype_model->where('bot_id', $bot_id);
+
+        if ($filter !== null) {
+            $filter->apply($query);
+        } else {
+            $query->orderBy('id');
+        }
+
+        return $query->get();
     }
 
     public function findByBotIDTransactionIDAndName($bot_id, $transaction_id, $swap_name) {
@@ -122,5 +130,27 @@ class SwapRepository extends APIRepository
     }
 
 
+    public function buildFilterDefinition() {
+        return [
+            'fields' => [
+                'state' => [
+                    'field'     => 'state',
+                    'sortField' => 'state',
+                    'allow_multiple' => true,
+                ],
+                'updatedAt' => [
+                    'sortField' => 'updated_at',
+                    'defaultSortDirection' => 'desc',
+                ],
+                'createdAt' => [
+                    'sortField' => 'created_at',
+                    'defaultSortDirection' => 'desc',
+                ],
+            ],
+
+            'defaults' => ['sort' => ['updatedAt','createdAt']],
+            'limit' => ['max' => 100],
+        ];
+    }
 
 }
