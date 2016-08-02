@@ -17,9 +17,6 @@ class PublicBotController extends APIController {
 
     public function addMiddleware() {
         parent::addMiddleware();
-
-        // allow cors
-        $this->middleware('cors');
     }
 
     /**

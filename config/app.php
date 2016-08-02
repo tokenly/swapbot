@@ -174,6 +174,7 @@ return [
 		'Codesleeve\LaravelStapler\Providers\L5ServiceProvider',
 		Fideloper\Proxy\TrustedProxyServiceProvider::class,
 		Tokenly\TokenpassClient\Provider\TokenpassServiceProvider::class,
+		Barryvdh\Cors\ServiceProvider::class,
 
 	],
 

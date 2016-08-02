@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Routing\Router;
+
 
 ////////////////////////////////////////////////////////////////////////
 // Website Routes
@@ -43,36 +45,39 @@ $router->post('/account/emails', 'Account\AccountEmailPrefsController@postEmailN
 ////////////////////////////////////////////////////////////////////////
 // Public API
 
-// Bot API
-$router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
+$router->group(['middleware' => 'cors'], function(Router $router) {
 
-// Bots API
-$router->get('api/v1/public/bots', 'API\Bot\PublicBotController@showBots');
+    // Bot API
+    $router->get('api/v1/public/bot/{id}', 'API\Bot\PublicBotController@show');
 
-// Bot Events API
-$router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
+    // Bots API
+    $router->get('api/v1/public/bots', 'API\Bot\PublicBotController@showBots');
 
-// Bot Event Stream API
-$router->get('api/v1/public/boteventstream/{botuuid}', 'API\BotEvents\PublicBotEventsController@botEventStreamIndex');
+    // Bot Events API
+    $router->get('api/v1/public/botevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@index');
 
-// Swap Event Stream API
-$router->get('api/v1/public/swapevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@swapsEventStreamIndex');
+    // Bot Event Stream API
+    $router->get('api/v1/public/boteventstream/{botuuid}', 'API\BotEvents\PublicBotEventsController@botEventStreamIndex');
 
-// Swaps API
-$router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');
+    // Swap Event Stream API
+    $router->get('api/v1/public/swapevents/{botuuid}', 'API\BotEvents\PublicBotEventsController@swapsEventStreamIndex');
 
-// Available Swaps API
-$router->get('api/v1/public/availableswaps', 'API\Swap\PublicAvailableSwapsController@index');
+    // Swaps API
+    $router->get('api/v1/public/swaps/{botuuid}', 'API\Swap\PublicSwapController@index');
 
-// Customer API
-$router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@store');
+    // Available Swaps API
+    $router->get('api/v1/public/availableswaps', 'API\Swap\PublicAvailableSwapsController@index');
 
-// Version API
-$router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVersion');
+    // Customer API
+    $router->post('api/v1/public/customers', 'API\Customer\PublicCustomerController@store');
 
-// Global Alert API
-$router->resource('api/v1/globalalert', 'API\Settings\PublicGlobalAlertController@getGlobalAlert');
+    // Version API
+    $router->get('api/v1/public/version', 'API\Version\PublicVersionController@getVersion');
 
+    // Global Alert API
+    $router->resource('api/v1/globalalert', 'API\Settings\PublicGlobalAlertController@getGlobalAlert');
+
+});
 
 
 
