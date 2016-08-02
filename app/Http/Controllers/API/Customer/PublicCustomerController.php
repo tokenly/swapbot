@@ -24,6 +24,13 @@ class PublicCustomerController extends APIController {
 
     protected $protected = false;
 
+    public function addMiddleware() {
+        parent::addMiddleware();
+
+        // allow cors
+        $this->middleware('cors');
+    }
+
     /**
      * Display a listing of the resource.
      *
