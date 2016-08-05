@@ -10,6 +10,7 @@ use Swapbot\Commands\ProcessPendingSwapsForBot;
 use Swapbot\Commands\ReconcileBotPaymentState;
 use Swapbot\Commands\ReconcileBotState;
 use Swapbot\Commands\ReconcileBotSwapStates;
+use Swapbot\Models\Data\BotState;
 use Swapbot\Repositories\BlockRepository;
 use Swapbot\Repositories\BotRepository;
 use Tokenly\LaravelEventLog\Facade\EventLog;
@@ -40,6 +41,11 @@ class BlockEventProcessor {
         // bring all bots up to date
         foreach ($this->bot_repository->findAll() as $bot) {
             try {
+                // ignore SHUTDOWN bots
+                if (in_array($bot['state'], [BotState::SHUTDOWN])) {
+                    continue;
+                }
+
                 // make sure the bot is in good standing
                 $this->dispatch(new ReconcileBotState($bot));
 
