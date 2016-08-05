@@ -44,9 +44,6 @@ class ProcessIncomeForwardingForAllBotsHandler {
             $was_forwarded = $this->bot_repository->executeWithLockedBot($bot, function($bot) {
                 $was_forwarded = false;
 
-                // sync the bot's balance
-                $this->balance_updater->syncBalances($bot);
-
                 // check balance
                 foreach ($bot['income_rules'] as $income_rule_config) {
                     $bot_balance = $bot->getBalance($income_rule_config['asset']);
