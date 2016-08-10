@@ -36,6 +36,7 @@ class SwapIndexRepository
             if (!isset($row['cost'])) { throw new Exception("Missing cost", 1); }
             if (!isset($row['swap_offset'])) { throw new Exception("Missing swap_offset", 1); }
             if (!isset($row['active'])) { throw new Exception("Missing active", 1); }
+            if (!isset($row['whitelisted'])) { throw new Exception("Missing whitelisted", 1); }
 
             $create_rows[] = [
                 'bot_id'      => $bot_id,
@@ -43,7 +44,8 @@ class SwapIndexRepository
                 'in'          => $row['in'],
                 'out'         => $row['out'],
                 'cost'        => $row['cost'] * self::SATOSHI,
-                'active'      => $row['active'],
+                'active'      => ($row['active']  ? 1 : 0),
+                'whitelisted' => ($row['whitelisted'] ? 1 : 0),
             ];
         }
 
@@ -96,14 +98,19 @@ class SwapIndexRepository
                     'allow_multiple' => true,
                 ],
                 'inToken' => [
-                    'field'     => 'in',
-                    'sortField' => 'in',
+                    'field'          => 'in',
+                    'sortField'      => 'in',
                     'allow_multiple' => true,
                 ],
                 'outToken' => [
-                    'field'     => 'out',
-                    'sortField' => 'out',
+                    'field'          => 'out',
+                    'sortField'      => 'out',
                     'allow_multiple' => true,
+                ],
+                'whitelisted' => [
+                    'field'       => 'whitelisted',
+                    'sortField'   => 'whitelisted',
+                    'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'],
                 ],
                 'cost' => [
                     'sortField' => 'cost',

@@ -278,6 +278,38 @@ class SwapIndexRepositoryTest extends TestCase {
         PHPUnit::assertCount(0, $found_swaps);
     }
 
+    public function testFilterWhitelistedBots()
+    {
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        $index = app('Swapbot\Repositories\SwapIndexRepository');
+        $helper = app('BotHelper');
+        $test_helper = app('APITestHelper');
+        $bot_1 = $this->buildBot($this->swaps1(), 'bot one');
+        $bot_2 = $this->buildBot($this->swaps3(), ['name' => 'bot two', ]);
+
+        // find all six swaps
+        $found_swaps = $this->runSwapIndexSearch(['whitelisted' => 'false', ]);
+        PHPUnit::assertCount(6, $found_swaps);
+
+        // make bot 2 whitelisted
+        app('Swapbot\Repositories\BotRepository')->update($bot_2, ['whitelist_uuid' => 'foo']);
+
+        // find only the non-whitelisted swaps
+        $found_swaps = $this->runSwapIndexSearch(['whitelisted' => 0, ]);
+        PHPUnit::assertCount(4, $found_swaps);
+
+        // find only the whitelisted swaps
+        $found_swaps = $this->runSwapIndexSearch(['whitelisted' => true, ]);
+        PHPUnit::assertCount(2, $found_swaps);
+
+        // find all
+        $found_swaps = $this->runSwapIndexSearch([]);
+        PHPUnit::assertCount(6, $found_swaps);
+
+    }
+
+
     // ------------------------------------------------------------------------
 
     protected function buildBot($swaps=null, $name_or_vars=null) {

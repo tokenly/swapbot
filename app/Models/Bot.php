@@ -446,6 +446,15 @@ class Bot extends APIModel {
 
     // ------------------------------------------------------------------------
     
+    public function hasWhitelist() {
+        if ($this['whitelist_addresses']) { return true; }
+        if (isset($this['whitelist_uuid']) AND $this['whitelist_uuid']) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function allWhitelistedAddresses() {
         $allowed_whitelist_addresses = $this['whitelist_addresses'];
         if (!is_array($allowed_whitelist_addresses)) { $allowed_whitelist_addresses = []; }
