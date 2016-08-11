@@ -310,9 +310,44 @@ class SwapIndexRepositoryTest extends TestCase {
     }
 
 
+    public function testFilterByUsername()
+    {
+        app('Tokenly\QuotebotClient\Mock\MockBuilder')->installQuotebotMockClient();
+
+        $index = app('Swapbot\Repositories\SwapIndexRepository');
+        $helper = app('BotHelper');
+        $test_helper = app('APITestHelper');
+        $user_1 = app('UserHelper')->newSampleUser();
+        $bot_1 = $this->buildBot($this->swaps1(), 'bot one', $user_1);
+        $user_2 = app('UserHelper')->newSampleUser([
+            'email'    => 'sample2@tokenly.co',
+            'username' => 'sample2',
+            'apitoken' => 'TESTAPITOKEN2',
+        ]);
+        $bot_2 = $this->buildBot($this->swaps3(), ['name' => 'bot two', ], $user_2);
+
+        // find all six swaps
+        $found_swaps = $this->runSwapIndexSearch([]);
+        PHPUnit::assertCount(6, $found_swaps);
+
+        // find user 1
+        $found_swaps = $this->runSwapIndexSearch(['username' => 'leroyjenkins', ]);
+        PHPUnit::assertCount(4, $found_swaps);
+
+        // find only the whitelisted swaps
+        $found_swaps = $this->runSwapIndexSearch(['username' => 'sample2', ]);
+        PHPUnit::assertCount(2, $found_swaps);
+
+        // find only the whitelisted swaps
+        $found_swaps = $this->runSwapIndexSearch(['username' => 'sample2,leroyjenkins', ]);
+        PHPUnit::assertCount(6, $found_swaps);
+
+    }
+
+
     // ------------------------------------------------------------------------
 
-    protected function buildBot($swaps=null, $name_or_vars=null) {
+    protected function buildBot($swaps=null, $name_or_vars=null, $user=null) {
         if ($swaps === null) { $swaps = $this->swaps1(); }
         $bot_vars = [
             'swaps' => $swaps,
@@ -330,7 +365,7 @@ class SwapIndexRepositoryTest extends TestCase {
         if (!isset($bot_vars['state'])) { $bot_vars['state'] = 'active'; }
 
         $helper = app('BotHelper');
-        return $helper->newSampleBot(null, $bot_vars);
+        return $helper->newSampleBot($user, $bot_vars);
 
     }
 

@@ -31,12 +31,13 @@ class SwapIndexRepository
 
         $create_rows = [];
         foreach($rows as $row) {
-            if (!isset($row['in'])) { throw new Exception("Missing in", 1); }
-            if (!isset($row['out'])) { throw new Exception("Missing out", 1); }
-            if (!isset($row['cost'])) { throw new Exception("Missing cost", 1); }
+            if (!isset($row['in']))          { throw new Exception("Missing in", 1); }
+            if (!isset($row['out']))         { throw new Exception("Missing out", 1); }
+            if (!isset($row['cost']))        { throw new Exception("Missing cost", 1); }
             if (!isset($row['swap_offset'])) { throw new Exception("Missing swap_offset", 1); }
-            if (!isset($row['active'])) { throw new Exception("Missing active", 1); }
+            if (!isset($row['active']))      { throw new Exception("Missing active", 1); }
             if (!isset($row['whitelisted'])) { throw new Exception("Missing whitelisted", 1); }
+            if (!isset($row['username']))    { throw new Exception("Missing username", 1); }
 
             $create_rows[] = [
                 'bot_id'      => $bot_id,
@@ -46,6 +47,7 @@ class SwapIndexRepository
                 'cost'        => $row['cost'] * self::SATOSHI,
                 'active'      => ($row['active']  ? 1 : 0),
                 'whitelisted' => ($row['whitelisted'] ? 1 : 0),
+                'username'    => $row['username'],
             ];
         }
 
@@ -105,6 +107,11 @@ class SwapIndexRepository
                 'outToken' => [
                     'field'          => 'out',
                     'sortField'      => 'out',
+                    'allow_multiple' => true,
+                ],
+                'username' => [
+                    'field'          => 'username',
+                    'sortField'      => 'username',
                     'allow_multiple' => true,
                 ],
                 'whitelisted' => [

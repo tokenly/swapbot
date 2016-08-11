@@ -35,6 +35,7 @@ class BotIndexHandler {
             // add swaps
             $bot_is_active = $bot->isActive();
             $bot_has_whitelist = $bot->hasWhitelist();
+            $bot_username = $bot['username'];
             $this->swap_index_repository->clearIndex($bot);
             $swap_index_rows = [];
             foreach ($bot['swaps'] as $swap_offset => $swap_config) {
@@ -43,6 +44,7 @@ class BotIndexHandler {
                         $swap_index_row['swap_offset'] = $swap_offset;
                         $swap_index_row['active']      = $bot_is_active;
                         $swap_index_row['whitelisted'] = $bot_has_whitelist;
+                        $swap_index_row['username']    = $bot_username;
 
                         $swap_index_rows[] = $swap_index_row;
                     }
