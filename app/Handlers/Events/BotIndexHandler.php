@@ -33,7 +33,7 @@ class BotIndexHandler {
             ]);
 
             // add swaps
-            $bot_is_active = $bot->isActive();
+            $bot_is_active = ($bot->isActive() AND !$bot->isShuttingDown());
             $bot_has_whitelist = $bot->hasWhitelist();
             $bot_username = $bot['username'];
             $this->swap_index_repository->clearIndex($bot);
