@@ -65,12 +65,14 @@ class AccountHandler {
 
         $all_succeeded = true;
         $balances_desired = $this->buildOutputBalancesNeeded($swap);
+        Log::debug("\$balances_desired:".json_encode($balances_desired, 192));
         foreach($balances_desired as $asset => $desired_quantity) {
             $actual_quantity = isset($actual_balances[$asset]) ? $actual_balances[$asset] : 0;
             $needed_quantity = $desired_quantity - $actual_quantity;
             if ($needed_quantity > 0) {
                 $default_quantity = isset($default_balances[$asset]) ? $default_balances[$asset] : 0;
                 if ($default_quantity < $needed_quantity) {
+                    Log::debug("$default_quantity (default) < $needed_quantity (needed) for $asset");
                     // swapbot is reporting that it does not have enough stock
                     $transferred_successfully = false;
                 } else {
@@ -91,6 +93,7 @@ class AccountHandler {
                 }
 
 
+                Log::debug("\$transferred_successfully=".json_encode($transferred_successfully, 192));
                 if ($transferred_successfully == true) {
                     if ($asset == 'BTC') {
                         if ($transfer_results['btc_transferred'] === null) { $transfer_results['btc_transferred'] = true; }
