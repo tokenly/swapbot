@@ -177,7 +177,7 @@ ctrl.allswaps.view = ()->
 
         m("div", {class: "spacer2"}),
 
-        m("a[href='#csvExport']", {class: "btn btn-success", onclick: vm.exportAsCSV }, "Download as CSV"),
+        m("a", {class: "btn btn-success", onclick: vm.exportAsCSV }, "Download as CSV"),
 
         m("div", {class: "spacer1"}),
     ])
