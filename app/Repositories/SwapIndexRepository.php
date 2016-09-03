@@ -125,7 +125,7 @@ class SwapIndexRepository
             ],
 
             'defaults' => ['sort' => ['inToken','outToken']],
-            'limit' => ['max' => 100],
+            'limit' => ['max' => 200],
         ];
     }
 
