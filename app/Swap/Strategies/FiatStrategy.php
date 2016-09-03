@@ -94,7 +94,7 @@ class FiatStrategy implements Strategy {
 
             // change is only calculated for BTC
             if ($swap_config['in'] == 'BTC' AND $unrounded_quantity_out > $quantity_out) {
-                $needed_quantity_in = round($quantity_out * $cost / $conversion_rate, 8);
+                $needed_quantity_in = ($conversion_rate > 0 ) ? round($quantity_out * $cost / $conversion_rate, 8) : 0;
                 $change_quantity_out = round($quantity_in - $needed_quantity_in, 8);
             }
         }
@@ -225,7 +225,7 @@ class FiatStrategy implements Strategy {
                 'in'   => $swap_config['in'],
                 'out'  => $swap_config['out'],
                 // 'rate' => ($conversion_rate / $swap_config['cost']),
-                'cost' => ($swap_config['cost'] / $conversion_rate),
+                'cost' => ($conversion_rate > 0) ? ($swap_config['cost'] / $conversion_rate) : 0,
             ],
         ];
     }
@@ -250,7 +250,7 @@ class FiatStrategy implements Strategy {
             'in'        => $swap_config['in'],
             'out'       => $swap_config['out'],
             'rate'      => ($conversion_rate / $swap_config['cost']),
-            'cost'      => ($swap_config['cost'] / $conversion_rate),
+            'cost'      => ($conversion_rate > 0) ? ($swap_config['cost'] / $conversion_rate) : 0,
 
             'divisible' => $swap_config['divisible'],
             'min'       => $swap_config['min_out'],
@@ -269,7 +269,8 @@ class FiatStrategy implements Strategy {
 
         $asset_to_btc_rate = $this->getLowestAssetToBTCRate($asset);
         if (!$asset_to_btc_rate) {
-            throw new Exception("Unable to convert asset $asset to fiat", 1);
+            return 0;
+            // throw new Exception("Unable to convert asset $asset to fiat", 1);
         }
 
         return $asset_to_btc_rate * $btc_conversion_rate;
@@ -292,10 +293,17 @@ class FiatStrategy implements Strategy {
         try {
             $quote_entry = $this->quotebot_client->loadQuote($asset_quote_source, ['BTC', $asset]);
         } catch (Exception $e) {
-            EventLog::logError('loadquote.failed', $e);
+            EventLog::logError('loadquote.failed', $e, ['asset' => $asset]);
 
-            // fallback to last cache
-            $quote_entry = $this->quotebot_client->getQuote($asset_quote_source, ['BTC', $asset]);       
+            try {
+                // fallback to last cache
+                $quote_entry = $this->quotebot_client->getQuote($asset_quote_source, ['BTC', $asset]);       
+            } catch (Exception $e) {
+                EventLog::logError('getquote.failed', $e, ['asset' => $asset]);
+
+                // return an asset value of zero
+                return 0;
+            }
         }
 
         $value = min($quote_entry['last'], $quote_entry['lastAvg']);
