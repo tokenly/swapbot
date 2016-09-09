@@ -150,7 +150,7 @@ class BotController extends APIController {
 
     public function shutdown($id, Request $request, Guard $auth, BotRepository $repository, APIControllerHelper $api_helper) {
         $user = $auth->getUser();
-        $resource = $api_helper->requireResourceOwnedByUser($id, $user, $repository);
+        $resource = $api_helper->requireResourceOwnedByUserOrWithPermssion($id, $user, $repository, 'editBots');
 
         // get the update attributes
         $attributes = $request->all();
