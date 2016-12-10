@@ -131,7 +131,7 @@ $receipt_type = isset($receipt['type']) ? $receipt['type'] : null;
 </script>
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 @if ($env == 'production')
-<script src="https://fb.me/react-0.13.3.min.js"></script>
+<script src="/static/js/react-0.13.3.min.js"></script>
 @else
 <script src="https://fb.me/react-0.13.3.js"></script>
 @endif
