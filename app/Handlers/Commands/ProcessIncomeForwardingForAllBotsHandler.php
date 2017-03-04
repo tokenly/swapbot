@@ -42,6 +42,11 @@ class ProcessIncomeForwardingForAllBotsHandler {
 
         foreach ($this->bot_repository->findAll() as $bot) {
             $was_forwarded = $this->bot_repository->executeWithLockedBot($bot, function($bot) {
+                // do not attempt to forward income for a bot that is shutting down
+                if ($bot->isShuttingDown()) {
+                    return false;
+                }
+
                 $was_forwarded = false;
 
                 // check balance
