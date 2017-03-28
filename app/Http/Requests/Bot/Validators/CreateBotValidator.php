@@ -13,7 +13,7 @@ class CreateBotValidator extends BotValidator {
         'url_slug'                    => 'required|unique:bots|min:8|max:80',
         'description'                 => 'required',
         'user_id'                     => 'numeric',
-        'return_fee'                  => 'required|numeric|min:0.00001|max:0.001',
+        'return_fee'                  => 'required|numeric|min:0.0001|max:0.005',
         'payment_plan'                => 'required',
         'confirmations_required'      => 'required|integer|min:2|max:6',
         'background_image_id'         => '',

@@ -30,7 +30,7 @@ class BotAPITest extends TestCase {
         $tester->testShow();
 
         // test update
-        $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description', 'returnFee' => 0.0000123]);
+        $tester->testUpdate(['name' => 'Updated Name', 'description' => 'Updated description', 'returnFee' => 0.000123]);
 
         // test delete
         $tester->testDelete();

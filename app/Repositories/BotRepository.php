@@ -25,6 +25,7 @@ class BotRepository extends APIRepository
 
     protected $model_type = 'Swapbot\Models\Bot';
 
+    const DEFAULT_RETURN_FEE = 10000;
 
 
     public function findByUser(User $user) {
@@ -120,6 +121,9 @@ class BotRepository extends APIRepository
 
         // set last_changed_at to now
         if (!isset($attributes['last_changed_at'])) { $attributes['last_changed_at'] = DateProvider::now(); }
+
+        // default return fee
+        if (!isset($attributes['return_fee'])) { $attributes['return_fee'] = self::DEFAULT_RETURN_FEE; }
 
         return $attributes;
     }

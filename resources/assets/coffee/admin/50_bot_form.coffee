@@ -215,7 +215,7 @@ vm = ctrl.botForm.vm = do ()->
         vm.description = m.prop('')
         vm.hash = m.prop('')
         vm.paymentPlan = m.prop('monthly001')
-        vm.returnFee = m.prop(0.0001)
+        vm.returnFee = m.prop(0.0005)
         vm.confirmationsRequired = m.prop(2)
         vm.refundAfterBlocks = m.prop(3)
         vm.sellSwaps = m.prop([sbAdmin.swaputils.newSwapProp({direction: constants.DIRECTION_SELL})])
@@ -248,7 +248,7 @@ vm = ctrl.botForm.vm = do ()->
                     vm.urlSlug(botData.urlSlug)
                     vm.hash(botData.hash)
                     vm.paymentPlan(botData.paymentPlan)
-                    vm.returnFee(botData.returnFee or "0.0001")
+                    vm.returnFee(botData.returnFee or "0.0005")
                     vm.confirmationsRequired(botData.confirmationsRequired or "2")
                     vm.refundAfterBlocks(botData.refundConfig?.refundAfterBlocks or "3")
 
@@ -475,7 +475,7 @@ ctrl.botForm.view = ()->
                             sbAdmin.form.mFormField("Confirmations", {id: 'confirmations_required', 'placeholder': "2", type: "number", step: "1", min: "2", max: "6", required: true, }, vm.confirmationsRequired),
                         ]),
                         m("div", {class: "col-md-4"}, [
-                            sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0001", type: "number", step: "0.00001", min: "0.00001", max: "0.001", required: true, postfix: 'BTC' }, vm.returnFee),
+                            sbAdmin.form.mFormField("Return Transaction Fee", {id: 'return_fee', 'placeholder': "0.0005", type: "number", step: "0.0001", min: "0.0001", max: "0.005", required: true, postfix: 'BTC' }, vm.returnFee),
                         ]),
                         m("div", {class: "col-md-4"}, [
                             sbAdmin.form.mFormField("Refund Out of Stock Swaps After", {id: 'refund_after_blocks', 'placeholder': "3", type: "number", step: "1", min: "3", max: "72", required: true, postfix: 'blocks' }, vm.refundAfterBlocks),

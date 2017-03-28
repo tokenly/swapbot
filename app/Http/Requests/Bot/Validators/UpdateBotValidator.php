@@ -15,7 +15,7 @@ class UpdateBotValidator extends BotValidator {
         'name'                        => 'sometimes|required',
         'url_slug'                    => 'sometimes|required|min:8|max:60',
         'description'                 => 'sometimes|required',
-        'return_fee'                  => 'sometimes|numeric|min:0.00001|max:0.001',
+        'return_fee'                  => 'sometimes|numeric|min:0.0001|max:0.005',
         'confirmations_required'      => 'sometimes|integer|min:2|max:6',
         'background_image_id'         => 'sometimes',
         'logo_image_id'               => 'sometimes',

@@ -80,7 +80,7 @@ class BotPaymentStateReconiliationTest extends TestCase {
         // add lease that expires in 1 week
         $lease_repo = app('Swapbot\Repositories\BotLeaseEntryRepository');
         $now = Carbon::now();
-        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->addDays(1)->subMonths(1), 1);
+        $lease_repo->addNewLease($bot, $this->sampleEvent($bot), $now->copy()->subMonths(1)->addHours(1), 1);
 
 
         $this->dispatch(new ReconcileBotPaymentState($bot));

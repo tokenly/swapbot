@@ -42,11 +42,11 @@ class BotValidatorTest extends TestCase {
             ],
             [
                 'vars' => array_merge($sample_vars, ['return_fee' => 0]),
-                'error' => 'The return fee must be at least 0.00001.',
+                'error' => 'The return fee must be at least 0.0001.',
             ],
             [
-                'vars' => array_merge($sample_vars, ['return_fee' => 0.002]),
-                'error' => 'The return fee may not be greater than 0.001.',
+                'vars' => array_merge($sample_vars, ['return_fee' => 0.009]),
+                'error' => 'The return fee may not be greater than 0.005.',
             ],
             [
                 'vars' => array_replace_recursive($sample_vars, ['swaps' => [0 => ['in' => '',]]]),
@@ -525,11 +525,11 @@ class BotValidatorTest extends TestCase {
             ],
             [
                 'vars' => ['return_fee' => 0],
-                'error' => 'The return fee must be at least 0.00001.',
+                'error' => 'The return fee must be at least 0.0001.',
             ],
             [
-                'vars' => ['return_fee' => 0.003],
-                'error' => 'The return fee may not be greater than 0.001.',
+                'vars' => ['return_fee' => 0.009],
+                'error' => 'The return fee may not be greater than 0.005.',
             ],
             [
                 'vars' => ['swaps' => []],
