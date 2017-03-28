@@ -69,30 +69,44 @@ class UpdateBotBalancesCommand extends Command {
         $sync_with_daemon = $this->input->getOption('daemon');
 
         $bot_repository = $this->laravel->make('Swapbot\Repositories\BotRepository');
-        $bot = $bot_repository->findByUuid($bot_id);
-        if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
-        if (!$bot) { throw new Exception("Unable to find bot", 1); }
 
-        if ($sync_with_daemon) {
-            $this->info("Doing server-based sync for bot ".$bot['name']." ({$bot['uuid']})");
-            try {
-                $this->dispatch(new UpdateBotBalances($bot));
-            } catch (Exception $e) {
-                // log any failure
-                EventLog::logError('balanceupdate.failed', $e);
-                $this->error("Failed: ".$e->getMessage());
+        if (strtolower($bot_id) == 'all') {
+            $bots = [];
+            foreach ($bot_repository->findAll() as $bot) {
+                if (!$bot->isActive()) { continue; }
+                $bots[] = $bot;
             }
-
         } else {
-            $this->info("Updating account balances for bot ".$bot['name']." ({$bot['uuid']})");
-            
-            try {
-                app('Swapbot\Swap\Processor\Util\BalanceUpdater')->syncBalances($bot);
+            $bot = $bot_repository->findByUuid($bot_id);
+            if (!$bot) { $bot = $bot_repository->findByID($bot_id); }
+            if (!$bot) { throw new Exception("Unable to find bot", 1); }
+            $bots = [$bot];
+        }
 
-            } catch (Exception $e) {
-                // log any failure
-                EventLog::logError('accountupdate.failed', $e);
-                $this->error("Failed: ".$e->getMessage());
+
+
+        foreach($bots as $bot) {
+            if ($sync_with_daemon) {
+                $this->info("Doing server-based sync for bot ".$bot['name']." ({$bot['uuid']})");
+                try {
+                    $this->dispatch(new UpdateBotBalances($bot));
+                } catch (Exception $e) {
+                    // log any failure
+                    EventLog::logError('balanceupdate.failed', $e);
+                    $this->error("Failed: ".$e->getMessage());
+                }
+
+            } else {
+                $this->info("Updating account balances for bot ".$bot['name']." ({$bot['uuid']})");
+                
+                try {
+                    app('Swapbot\Swap\Processor\Util\BalanceUpdater')->syncBalances($bot);
+
+                } catch (Exception $e) {
+                    // log any failure
+                    EventLog::logError('accountupdate.failed', $e);
+                    $this->error("Failed: ".$e->getMessage());
+                }
             }
         }
 
