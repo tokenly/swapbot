@@ -52,9 +52,10 @@ stateutils.buildStateDetails = (stateValue, planDetails, paymentAddress, botAddr
                     m('div', "This is a new swapbot and needs to be paid to be activated.  Please use the payment module at the bottom of this page to activate your Bot."),
                     m('br'),
                     "To load your bot with bitcoin fuel or token inventory please add your addresses to the Address Blacklist below.  ",
+                    m('br'),
                     m('div', {}, [
                         m('strong', "Do not send directly from an exchange to your bot under any circumstances."),
-                        "Instead, send from the exchange to your Blacklisted Address, then to your bot at #{botAddress}",
+                        " Instead, send from the exchange to your Blacklisted Address, then to your bot at #{botAddress}",
                     ]),
                     m('div', {class: 'note'}, "Note: If you've just added fuel or paid to set up this Swapbot, you can ignore this message.")
                 ])
@@ -65,9 +66,10 @@ stateutils.buildStateDetails = (stateValue, planDetails, paymentAddress, botAddr
             details.label = stateutils.buildStateLabel(stateValue)
             details.subtitle = m('div', {}, [
                     "This swapbot is low on BTC fuel.  To load your bot with bitcoin fuel or token inventory please add your addresses to the Address Blacklist below.  ",
+                    m('br'),
                     m('div', {}, [
                         m('strong', "Do not send directly from an exchange to your bot under any circumstances."),
-                        "Instead, send from the exchange to your Blacklisted Address, then to your bot at #{botAddress}",
+                        " Instead, send from the exchange to your Blacklisted Address, then to your bot at #{botAddress}",
                     ]),
                     m('br'),
                     m('div', {class: 'note'}, "Note: If you've just added fuel or paid to set up this Swapbot, you can ignore this message.")
