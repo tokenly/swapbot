@@ -55,6 +55,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                     if ($bot_balance >= $income_rule_config['minThreshold']) {
                         try {
                             $should_send = true;
+                            $failure_cache_key = $bot['uuid'].','.$income_rule_config['asset'].',faildata';
 
                             // send the transaction
                             $asset = $income_rule_config['asset'];
@@ -75,6 +76,17 @@ class ProcessIncomeForwardingForAllBotsHandler {
                                     $err_msg = "Unable to forward income because there was not enough BTC fuel.";
                                     EventLog::logError('income.forward.insufficientFuel', $err_msg, ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, 'btcBalance' => $btc_balance]);
                                     $should_send = false;
+                                }
+                            }
+
+                            // check failure cache
+                            $cached_failure_data = Cache::get($failure_cache_key);
+                            if ($cached_failure_data) {
+                                $time_until_next_attempt = $cached_failure_data['ttl'] - time();
+                                if ($time_until_next_attempt > 0) {
+                                    Cache::put($failure_cache_key, $cached_failure_data, 180);
+                                    $should_send = false;
+                                    EventLog::info('income.forward.delayFailure', ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, 'attempts' => $cached_failure_data['attempts'], 'remaining' => $time_until_next_attempt]);
                                 }
                             }
 
@@ -104,6 +116,19 @@ class ProcessIncomeForwardingForAllBotsHandler {
                             // log failure
                             $this->bot_event_logger->logIncomeForwardingFailed($bot, $e);
                             EventLog::logError('income.forward.failed', $e, ['id' => $bot['id']]);
+
+                            $cached_failure_data = Cache::get($failure_cache_key);
+                            if (!$cached_failure_data) {
+                                $cached_failure_data = [
+                                    'attempts' => 0,
+                                ];
+                            }
+                            ++$cached_failure_data['attempts'];
+                            $backoff_count = $cached_failure_data['attempts'] + ($cached_failure_data['attempts']-1 * 2); // 1, 3, 5, etc.
+                            $delay = $backoff_count * 600; // 10 minutes
+                            $delay = min($delay, 240); // max 4 hours
+                            $cached_failure_data['ttl'] = time() + $delay;
+                            Cache::put($failure_cache_key, $cached_failure_data, 180);
                         }
                     }
                 }
