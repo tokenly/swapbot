@@ -124,9 +124,9 @@ class ProcessIncomeForwardingForAllBotsHandler {
                                 ];
                             }
                             ++$cached_failure_data['attempts'];
-                            $backoff_count = $cached_failure_data['attempts'] + ($cached_failure_data['attempts']-1 * 2); // 1, 3, 5, etc.
-                            $delay = $backoff_count * 600; // 10 minutes
-                            $delay = min($delay, 240); // max 4 hours
+                            $backoff_count = 1 + pow($cached_failure_data['attempts']-1, 1.08);
+                            $delay = $backoff_count * 600; // backoff 10 minutes
+                            $delay = min($delay, 28800); // max delay of 8 hours
                             $cached_failure_data['ttl'] = time() + $delay;
                             Cache::put($failure_cache_key, $cached_failure_data, 180);
                         }
