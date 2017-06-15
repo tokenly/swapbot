@@ -66,11 +66,11 @@ SwapbotConfirmWallet = React.createClass
 
                 <div>
                     <p className="description">
-                        <span style={fontWeight: 'bold', color: "#e74c3c"}>Important:</span> DO NOT PURCHASE using Coinbase, a currency exchange or other wallets where you do not control the address.  If sending bitcoin, you <strong>MUST</strong> send from a Counterparty compatible wallet.
+                        <span style={fontWeight: 'bold', color: "#e74c3c"}>Important:</span> DO NOT PURCHASE using Coinbase, a currency exchange or other wallets where you do not control the address.  You <strong>MUST</strong> send from a <strong>Counterparty compatible wallet</strong>.  If you do not send from a Counterparty compatible wallet, your coins may be lost.
                     </p>
                     <div style={height: "16px"}></div>
 
-                    <strong>Are you using a Counterparty compatible bitcoin wallet?</strong>
+                    <div>Are you sending from a <strong>Counterparty compatible</strong> bitcoin wallet?</div>
                     <div style={height: "26px"}></div>
                     <a href="#yes" onClick={this.confirmWalletOnClick} className="btn-action bckg-green"><span className="keyboard-shortcut">Y</span>ES</a>
                     <a href="http://pockets.tokenly.com" target="_blank" className="btn-action bckg-red">NO</a>
