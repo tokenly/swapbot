@@ -112,7 +112,7 @@ class ProcessIncomeForwardingForAllBotsHandler {
                                         $send_result = $this->xchain_client->sendFromAccount($bot['public_address_id'], $destination, $quantity, $asset, $_account='default', $_unconfirmed=false, $_fee=null, $_dust_size=null, $request_id, $_custom_inputs=false, $fee_rate);
                                         break;
                                     } catch (Exception $e) {
-                                        EventLog::logError('income.forward.attemptFailed', $e, ['attempt' => $attempt, 'id' => $bot['id']]);
+                                        EventLog::logError('income.forward.attemptFailed', $e, ['attempt' => $attempt, 'id' => $bot['id'], 'quantity' => $quantity,]);
                                         if ($attempt >= $max_attempts - 1) {
                                             throw $e;
                                         }
