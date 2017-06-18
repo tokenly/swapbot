@@ -100,8 +100,32 @@ class ProcessIncomeForwardingForAllBotsHandler {
                                 }
 
                                 $request_id = RequestIDGenerator::generateSendHash('incomeforward'.','.$bot['uuid'].','.$send_uuid, $destination, $quantity, $asset);
+                                
                                 EventLog::log('bot.income.process', array_merge(['name' => $bot['name'], 'id' => $bot['id']], compact('destination', 'quantity', 'asset')));
-                                $send_result = $this->xchain_client->sendConfirmed($bot['public_address_id'], $destination, $quantity, $asset, $fee, null, $request_id);
+
+                                $attempt = 0;
+                                $max_attempts = 5;
+                                for ($attempt=0; $attempt < $max_attempts; $attempt++) { 
+                                    try {
+                                        // $send_result = $this->xchain_client->sendConfirmed($bot['public_address_id'], $destination, $quantity, $asset, $fee, null, $request_id);
+                                        $fee_rate = 'medium';
+                                        $send_result = $this->xchain_client->sendFromAccount($bot['public_address_id'], $destination, $quantity, $asset, $_account='default', $_unconfirmed=false, $_fee=null, $_dust_size=null, $request_id, $_custom_inputs=false, $fee_rate);
+                                        break;
+                                    } catch (Exception $e) {
+                                        EventLog::logError('income.forward.attemptFailed', $e, ['attempt' => $attempt, 'id' => $bot['id']]);
+                                        if ($attempt >= $max_attempts - 1) {
+                                            throw $e;
+                                        }
+
+                                        // lower the quantity and try again
+                                        $quantity -= $fee;
+                                        if ($quantity <= 0) {
+                                            break;
+                                        }
+                                        usleep(500000);
+                                    }
+                                }
+                                
 
                                 // log the event
                                 $this->bot_event_logger->logIncomeForwardingResult($bot, $send_result, $destination, $quantity, $asset);

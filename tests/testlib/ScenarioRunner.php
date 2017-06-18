@@ -594,7 +594,7 @@ class ScenarioRunner
 
         ///////////////////
         // NOT REQUIRED
-        $optional_fields = ['requestId','to','account','unconfirmed','custom_inputs',];
+        $optional_fields = ['requestId','to','account','unconfirmed','custom_inputs','utxo_override',];
         foreach ($optional_fields as $field) {
             if (isset($expected_xchain_call['data'][$field])) {
                 $actual = isset($actual_xchain_call['data'][$field]) ? $actual_xchain_call['data'][$field] : null;

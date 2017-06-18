@@ -33,8 +33,8 @@ class ActivateBotCommandTest extends TestCase {
         $loaded_bot = $repository->findById($bot['id']);
         PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-111111111111', $bot['public_address_id']);
         PHPUnit::assertEquals('1oLaf1CoYcVE3aH5n5XeCJcaKPPGTxnxW', $bot['address']);
-        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['public_receive_monitor_id']);
-        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-222222222222', $bot['public_send_monitor_id']);
+        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-2222223b9aa6', $bot['public_receive_monitor_id']);
+        PHPUnit::assertEquals('xxxxxxxx-xxxx-4xxx-yxxx-22222220de1c', $bot['public_send_monitor_id']);
         PHPUnit::assertTrue($bot['active']);
     }
 
