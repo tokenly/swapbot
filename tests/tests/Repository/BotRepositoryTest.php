@@ -67,7 +67,7 @@ class BotRepositoryTest extends TestCase {
         $model = $helper->testLoad();
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertEquals($model['hash'], $model->buildHash());
-        PHPUnit::assertEquals(DateProvider::now(), $model['last_changed_at']);
+        PHPUnit::assertEquals(DateProvider::now()->__toString(), $model['last_changed_at']->__toString());
 
         // update a hash
         $last_now = Carbon::now()->modify('+5 minutes');
@@ -77,7 +77,7 @@ class BotRepositoryTest extends TestCase {
         $result = $repo->update($model, ['description' => 'foo2']);
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertNotEquals($old_hash, $model['hash']);
-        PHPUnit::assertEquals(DateProvider::now(), $model['last_changed_at']);
+        PHPUnit::assertEquals(DateProvider::now()->__toString(), $model['last_changed_at']->__toString());
 
         // update a hash again
         DateProvider::setNow(Carbon::now()->modify('+5 minutes'));
@@ -86,7 +86,7 @@ class BotRepositoryTest extends TestCase {
         $result = $repo->update($model, ['description' => 'foo2']);
         PHPUnit::assertNotEmpty($model['hash']);
         PHPUnit::assertEquals($old_hash, $model['hash']);
-        PHPUnit::assertEquals($last_now, $model['last_changed_at']);
+        PHPUnit::assertEquals($last_now->__toString(), $model['last_changed_at']->__toString());
     }
 
     public function testBotIncomeForwardingAddresses() {

@@ -48,6 +48,8 @@ class UserHelper
 
             'apitoken'     => 'TESTAPITOKEN',
             'apisecretkey' => 'TESTAPISECRET',
+
+            'privileges' => ['createNewBot' => true],
         ], $override_vars);
     }
 

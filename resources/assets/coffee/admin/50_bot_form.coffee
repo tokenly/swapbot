@@ -377,6 +377,11 @@ ctrl.botForm.controller = ()->
     return
 
 ctrl.botForm.view = ()->
+    user = sbAdmin.auth.getUser()
+    console.log "user", user
+    if not user.privileges?.createNewBot
+        return unauthorizedView()
+
     duplicateSwapsOffsetsMap = buildDuplicateSwapOffsetsMap(vm.buySwaps, vm.sellSwaps)
 
     mEl = m("div", [
@@ -525,6 +530,27 @@ ctrl.botForm.view = ()->
 
 
     ])
+    return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
+
+unauthorizedView = ()->
+    mEl = m("div", [
+        m("div", { class: "row"}, [
+            m("div", {class: "col-md-12"}, [
+                m("div", { class: "row"}, [
+                    m("div", {class: "col-md-10"}, [
+                        m("h2", "Please Contact Us"),
+                        m("div", {class: "spacer1"}),
+                        m("div", {}, [
+                            "To continue setting up this SwapBot, please contact us at "
+                            m("a[href='mailto:early@tokenly.com']", {}, "early@tokenly.com"),
+                            ".  Thanks."
+                        ])
+                    ]),
+                ]),
+            ]),
+        ])
+    ])
+
     return [sbAdmin.nav.buildNav(), GlobalAlertPanel.build(), sbAdmin.nav.buildInContainer(mEl)]
 
 

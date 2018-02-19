@@ -43,6 +43,8 @@ class ListAllBotsCommand extends Command {
     {
 
         return [
+            ['user', 'u', InputOption::VALUE_NONE, 'Include User Information'],
+            ['active', 'a', InputOption::VALUE_NONE, 'Active Only'],
             ['id', 'i', InputOption::VALUE_OPTIONAL, 'Filter by ID'],
             ['full', 'f', InputOption::VALUE_NONE, 'Show Full Bot Details'],
         ];
@@ -70,18 +72,37 @@ class ListAllBotsCommand extends Command {
         }
 
         $show_full = !!$this->input->getOption('full');
+        $active_only = !!$this->input->getOption('active');
+        $with_user = !!$this->input->getOption('user');
 
         foreach($bots as $bot) {
+            if ($active_only) {
+                if (!$bot->isActive() OR $bot->isShuttingDown()) {
+                    continue;
+                }
+            }
             if ($show_full) {
-                $output = json_encode($bot, 192);
+                $output_data = json_decode(json_encode($bot, 192), true);
             } else {
                 $fields = ['id', 'uuid', 'name', 'username', 'address', 'state'];
                 $short_bot = [];
                 foreach($fields as $field) {
                     $short_bot[$field] = $bot[$field];
                 }
-                $output = json_encode($short_bot, 192);
+                $output_data = json_decode(json_encode($short_bot, 192), true);
             }
+
+            $output_data['publicUrl'] = $bot->getPublicBotURL();
+
+            if ($with_user) {
+                $user = $bot->user;
+                $output_data['user'] = [
+                    'name'  => $user['name'],
+                    'email' => $user['email'],
+                ];
+            }
+
+            $output = json_encode($output_data, 192);
             $this->line($output);
         }
     }

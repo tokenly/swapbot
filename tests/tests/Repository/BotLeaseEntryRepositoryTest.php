@@ -30,8 +30,8 @@ class BotLeaseEntryRepositoryTest extends TestCase {
 
         $loaded_models = array_values(iterator_to_array($repo->findByBot($bot)));
         PHPUnit::assertCount(1, $loaded_models);
-        PHPUnit::assertEquals($now, $loaded_models[0]['start_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[0]['end_date']);
+        PHPUnit::assertEquals($now->__toString(), $loaded_models[0]['start_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->__toString(), $loaded_models[0]['end_date']->__toString());
     }
 
     public function testAddLease() {
@@ -48,10 +48,10 @@ class BotLeaseEntryRepositoryTest extends TestCase {
 
         $loaded_models = array_values(iterator_to_array($repo->findByBot($bot)));
         PHPUnit::assertCount(2, $loaded_models);
-        PHPUnit::assertEquals($now, $loaded_models[0]['start_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[0]['end_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_models[1]['start_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_models[1]['end_date']);
+        PHPUnit::assertEquals($now->__toString(), $loaded_models[0]['start_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->__toString(), $loaded_models[0]['end_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->__toString(), $loaded_models[1]['start_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1)->__toString(), $loaded_models[1]['end_date']->__toString());
     }
 
     public function testGetLastLeaseEntryForBot() {
@@ -68,8 +68,8 @@ class BotLeaseEntryRepositoryTest extends TestCase {
 
         $loaded_model = $repo->getLastEntryForBot($bot);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_model['start_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_model['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->__toString(), $loaded_model['start_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1)->__toString(), $loaded_model['end_date']->__toString());
     }
 
 
@@ -87,8 +87,8 @@ class BotLeaseEntryRepositoryTest extends TestCase {
 
         $loaded_model = $repo->getLastEntryForBot($bot);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1), $loaded_model['start_date']);
-        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1)->addMonthNoOverflow(1), $loaded_model['end_date']);
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->__toString(), $loaded_model['start_date']->__toString());
+        PHPUnit::assertEquals($now->copy()->addMonthNoOverflow(1)->addMonthNoOverflow(1)->addMonthNoOverflow(1)->__toString(), $loaded_model['end_date']->__toString());
     }
 
     public function testExtendLeaseAfterExtendedExpiration() {
@@ -107,8 +107,8 @@ class BotLeaseEntryRepositoryTest extends TestCase {
 
         $loaded_model = $repo->getLastEntryForBot($bot);
         PHPUnit::assertNotEmpty($loaded_model);
-        PHPUnit::assertEquals(DateProvider::now(), $loaded_model['start_date']);
-        PHPUnit::assertEquals(DateProvider::now()->addMonthNoOverflow()->addMonthNoOverflow(), $loaded_model['end_date']);
+        PHPUnit::assertEquals(DateProvider::now()->__toString(), $loaded_model['start_date']->__toString());
+        PHPUnit::assertEquals(DateProvider::now()->addMonthNoOverflow()->addMonthNoOverflow()->__toString(), $loaded_model['end_date']->__toString());
     }
 
 

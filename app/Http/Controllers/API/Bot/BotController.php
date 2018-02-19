@@ -68,6 +68,11 @@ class BotController extends APIController {
         $attributes = $request->all();
         $user = $auth->getUser();
 
+        // make sure a user can create a bot
+        if (!$user->hasPermission('createNewBot')) {
+            throw new HttpResponseException($api_helper->newJsonResponseWithErrors("Create bot permission not found", 403));
+        }
+
         // create a UUID
         $uuid = Uuid::uuid4()->toString();
         $attributes['uuid'] = $uuid;

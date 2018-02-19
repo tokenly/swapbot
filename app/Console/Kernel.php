@@ -56,6 +56,8 @@ class Kernel extends ConsoleKernel {
 
 		'Swapbot\Console\Commands\Stats\AggregateStatsCommand',
 
+		'Swapbot\Console\Commands\User\EnableUserCommand',
+
 		// vendor commands
 		'Tokenly\ConsulHealthDaemon\Console\ConsulHealthMonitorCommand',
 		'Tokenly\QuotebotClient\Console\PopulateQuotesCommand',
