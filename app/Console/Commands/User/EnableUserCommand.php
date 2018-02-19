@@ -39,6 +39,7 @@ class EnableUserCommand extends Command {
 
         $this
             ->addArgument('user-id-or-email', InputArgument::REQUIRED, 'User ID or Email or all')
+            ->addOption('disable', 'd', InputOption::VALUE_NONE, 'Disable user instead of enabling')
             ->setHelp(<<<EOF
 Enables a user to create new bots
 EOF
@@ -53,6 +54,7 @@ EOF
     public function fire()
     {
         $user_id_or_email = $this->input->getArgument('user-id-or-email');
+        $disable = !!$this->input->getOption('disable');
 
         $user_repository = $this->laravel->make('Swapbot\Repositories\UserRepository');
         if ($user_id_or_email == 'all') {
@@ -67,14 +69,18 @@ EOF
         }
 
         foreach($users as $user) {
-            $this->info("Enabling user ".$user['name']." ({$user['uuid']})");
+            $this->info(($disable ? "Disabling" : "Enabling ")." user ".$user['name']." ({$user['uuid']})");
 
             try {
                 $privileges = $user['privileges'];
                 if (!$privileges) {
                     $privileges = [];
                 }
-                $privileges['createNewBot'] = true;
+                if ($disable) {
+                    unset($privileges['createNewBot']);
+                } else {
+                    $privileges['createNewBot'] = true;
+                }
 
                 $user_repository->update($user, ['privileges' => $privileges]);
             } catch (Exception $e) {
