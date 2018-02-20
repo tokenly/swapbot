@@ -6,18 +6,11 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Foundation\Bus\DispatchesCommands;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
-use LinusU\Bitcoin\AddressValidator;
-use Swapbot\Commands\ForwardPayment;
 use Swapbot\Commands\ProcessIncomeForwardingForAllBots;
-use Swapbot\Handlers\Commands\ForwardPaymentHandler;
-use Swapbot\Models\Data\BotState;
-use Swapbot\Repositories\CustomerRepository;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ProcessIncomeForwardingForAllBotsCommand extends Command {
+class ProcessIncomeForwardingForAllBotsCommand extends Command
+{
 
     use ConfirmableTrait;
     use DispatchesCommands;
@@ -35,7 +28,6 @@ class ProcessIncomeForwardingForAllBotsCommand extends Command {
      * @var string
      */
     protected $description = 'Processes income forwarding for all bots';
-
 
     /**
      * Get the console command arguments.
@@ -58,9 +50,9 @@ class ProcessIncomeForwardingForAllBotsCommand extends Command {
 
         return [
             ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
+            ['bot-uuid', 'b', InputOption::VALUE_OPTIONAL, 'Limit processing only to this Bot'],
         ];
     }
-
 
     /**
      * Execute the console command.
@@ -70,10 +62,22 @@ class ProcessIncomeForwardingForAllBotsCommand extends Command {
     public function fire()
     {
         // require confirmation
-        if (!$this->confirmToProceed()) { return; }
+        if (!$this->confirmToProceed()) {return;}
+
+        $limit_to_bot_id = null;
+
+        $bot_uuid = $this->input->getOption('bot-uuid');
+        if ($bot_uuid) {
+            $bot_repository = $this->laravel->make('Swapbot\Repositories\BotRepository');
+            $bot = $bot_repository->findByUuid($bot_uuid);
+            if ($bot) {
+                $limit_to_bot_id = $bot['id'];
+                $this->comment('limiting to bot ' . $bot['name']);
+            }
+        }
 
         try {
-            $this->dispatch(new ProcessIncomeForwardingForAllBots());
+            $this->dispatch(new ProcessIncomeForwardingForAllBots($_override_delay = true, $limit_to_bot_id));
 
         } catch (Exception $e) {
             $this->error($e->getMessage());

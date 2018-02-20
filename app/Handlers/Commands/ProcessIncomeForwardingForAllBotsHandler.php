@@ -41,7 +41,13 @@ class ProcessIncomeForwardingForAllBotsHandler {
         $bots_forwarded = [];
 
         foreach ($this->bot_repository->findAll() as $bot) {
-            $was_forwarded = $this->bot_repository->executeWithLockedBot($bot, function($bot) {
+            // skip bots if configured
+            if ($command->limit_to_bot_id AND $bot['id'] != $command->limit_to_bot_id) {
+                continue;
+            }
+
+            $override_delay = $command->override_delay;
+            $was_forwarded = $this->bot_repository->executeWithLockedBot($bot, function($bot) use ($override_delay) {
                 // do not attempt to forward income for a bot that is shutting down
                 if ($bot->isShuttingDown()) {
                     return false;
@@ -85,8 +91,10 @@ class ProcessIncomeForwardingForAllBotsHandler {
                                 $time_until_next_attempt = $cached_failure_data['ttl'] - time();
                                 if ($time_until_next_attempt > 0) {
                                     Cache::put($failure_cache_key, $cached_failure_data, 180);
-                                    $should_send = false;
-                                    EventLog::info('income.forward.delayFailure', ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, 'attempts' => $cached_failure_data['attempts'], 'remaining' => $time_until_next_attempt]);
+                                    if (!$override_delay) {
+                                        $should_send = false;
+                                        EventLog::info('income.forward.delayFailure', ['id' => $bot['id'], 'quantity' => $quantity, 'asset' => $asset, 'attempts' => $cached_failure_data['attempts'], 'remaining' => $time_until_next_attempt]);
+                                    }
                                 }
                             }
 
