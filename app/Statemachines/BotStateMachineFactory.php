@@ -76,6 +76,9 @@ class BotStateMachineFactory extends StateMachineFactory {
 
 
 
+        // BotState::BRAND_NEW => BotState::SHUTTING_DOWN
+        $this->addTransitionToStates($states, BotState::BRAND_NEW,     BotState::SHUTTING_DOWN, BotStateEvent::START_SHUTDOWN,         new StartShutdown());
+
         // BotState::ACTIVE => BotState::SHUTTING_DOWN
         $this->addTransitionToStates($states, BotState::ACTIVE,        BotState::SHUTTING_DOWN, BotStateEvent::START_SHUTDOWN,         new StartShutdown());
 
