@@ -164,7 +164,11 @@ class ListAllBotsCommand extends Command {
 
                 $formatted_row = [];
                 foreach($row as $row_key => $row_val) {
-                    if (is_array($row_val)) {
+                    if ($row_key == 'user') {
+                        $user = isset($row_val['name']) ? $row_val['name'] : 'Anonymous';
+                        $user = trim($user . (isset($row_val['email']) ? ' <'.$row_val['email'].'>' : ''));
+                        $row_val = $user;
+                    } else if (is_array($row_val)) {
                         $row_val = json_encode($row_val);
                     }
 
@@ -182,7 +186,15 @@ class ListAllBotsCommand extends Command {
     }
 
     protected function formatBalances($balances) {
-        return json_encode($balances, 192);
+        $out = [];
+        foreach($balances as $token => $balance) {
+            if ($balance == 0) {
+                continue;
+            }
+            $out[] = "{$balance} {$token}";
+        }
+
+        return implode("\n", $out);
     }
 
 }
